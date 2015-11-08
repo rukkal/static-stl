@@ -1,43 +1,33 @@
-Embedded Template Library (ETL)
+Static Standard Template Library (SSTL)
 -------------------------
-
-**Motivation**
-
-C++ is a great language to use for embedded applications and templates are a powerful aspect. The standard library can offer a great deal of well tested functionality,  but there are some parts of the standard library that do not fit well with deterministic behaviour and limited resource requirements. These limitations usually preclude the use of dynamically allocated memory and containers with open ended sizes.  
-
-What is needed is a template library where the user can declare the size, or maximum size of any object upfront. Most embedded compilers do not currently support the standard beyond C++ 03, therefore excluding the programmer from using the enhanced features of the later library.
-
-This is what the ETL attempts to achieve.
 
 **Summary**
 
-The ETL is not designed to completely replace the STL, but complement it.  
-Its design objective covers three areas.
+The SSTL is a partial reimplementation of then C++ STL components.
 
-- Create a set of containers where the size or maximum size is determined at compile time. These containers are direct equivalents of those supplied in the STL.
-- Be compatible with C++ 03 but implement as many of the C++ 11 additions as possible.
-- Add other useful components that are not present in the standard library.
+The SSTL's main design goal is to strictly avoid the use of dynamic memory allocation.
 
-The embedded template library has been designed for lower resource embedded applications.
-It contains a set of containers, algorithms and utilities, some of which emulate parts of the STL.
-There is no dynamic memory allocation. The library makes no use of the heap. All of the containers have a fixed capacity allowing all memory allocation to be determined at compile time.
-The library is intended for any compiler that supports C++ 03.
+The SSTL exploits/supports modern C++ features.
 
-**Main features:**
+**Motivation**
 
- - Cross platform. This library is not specific to any processor type.
- - No dynamic memory allocation. (No heap required)
- - Very little use of virtual functions. (Keeps the vtable sizes low)
- - A set of fixed capacity containers. (array, bitset, deque, forward_list, list, queue,  stack, vector)
- - Cache friendlly containers, as the storage for each of the container types is allocated as a contiguous block
- - Templated compile time constants.
- - Templated design pattern base classes (Visitor, Observer)
- - Reverse engineered C++ 0x11 features (type traits, algorithms, containers etc.)
- - Smart enumerations
- - 8, 16, 32 & 64 bit CRC calculations
- - Checksums & hash functions
- - Many utilities for template support.
- - Variants (a type that can store many types in a type-safe interface)
- - Choice of exceptions or error handler.
+Although very handy, dynamic memory allocation is for many developers just an unaffordable luxury. In fact, the use of dynamic memory allocation might imply drawbacks such as:
+- indeterministic behaviour
+- synchronization costs in a multithreaded environmnent
+- heap fragmentation
+- additional memory requirements
 
-See (http://www.etlcpp.com) for up-to-date information.
+There are applications in which such additional costs cannot be accepted. An example is the embedded world, where systems are often constrained to run under very thight memory constraints. Other examples are the fields of finance, gaming, etc. where the introduced indeterminism/latencies might just be too high.
+
+**Features** 
+
+Statically-allocated versions of:
+- Most of the STL containers
+- std::function
+
+**Notes:**
+
+This project was originally forked from the Embedded Template Library (http://www.etlcpp.com). The SSTL is just a subset of the ETL. However, the SSTL exploits/supports modern C++ features, whereas the ETL is strictly developed with C++03 in order to remain compatible with the "slow" vendors.
+
+The fork just happened recently. So the SSTL doesn't exploit/support modern C++ features yet. I also haven't added std::function yet (the implementation is ready though). However, such goodies should be coming soon.
+
