@@ -293,7 +293,7 @@ namespace etl
       {
         if (i == std::find(begin1, i, *i))
         {
-          std::iterator_traits<TIterator2>::difference_type n = std::count(begin2, end2, *i);
+          typename std::iterator_traits<TIterator2>::difference_type n = std::count(begin2, end2, *i);
 
           if (n == 0 || std::count(i, end1, *i) != n)
           {
@@ -320,7 +320,7 @@ namespace etl
       {
         if (i == std::find(begin1, i, *i))
         {
-          std::iterator_traits<TIterator2>::difference_type n = std::count(begin2, end2, *i);
+          typename std::iterator_traits<TIterator2>::difference_type n = std::count(begin2, end2, *i);
 
           if (n == 0 || std::count(i, end1, *i) != n)
           {
@@ -351,7 +351,7 @@ namespace etl
       {
         if (i == std::find_if(begin1, i, std::bind1st(predicate, *i)))
         {
-          std::iterator_traits<TIterator2>::difference_type n = std::count(begin2, end2, *i);
+          typename std::iterator_traits<TIterator2>::difference_type n = std::count(begin2, end2, *i);
 
           if (n == 0 || std::count(i, end1, *i) != n)
           {
@@ -378,7 +378,7 @@ namespace etl
       {
         if (i == std::find_if(begin1, i, std::bind1st(predicate, *i)))
         {
-          std::iterator_traits<TIterator2>::difference_type n = std::count(begin2, end2, *i);
+          typename std::iterator_traits<TIterator2>::difference_type n = std::count(begin2, end2, *i);
 
           if (n == 0 || std::count(i, end1, *i) != n)
           {

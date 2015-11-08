@@ -81,7 +81,7 @@ namespace etl
   struct max_value_for_nbits<0>
   {
       typedef etl::smallest_uint_for_bits<0>::type value_type;
-      static const value_type value = 0;
+      enum { value = 0 };
   };
 
   template <const size_t NBITS>

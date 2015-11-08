@@ -48,7 +48,7 @@ namespace etl
   //*************************************************************************
   /// A templated multiset implementation that uses a fixed size buffer.
   //*************************************************************************
-  template <typename T, const size_t MAX_SIZE_, typename TCompare = std::less<TKey>>
+  template <typename T, const size_t MAX_SIZE_, typename TCompare = std::less<T>>
   class multiset : public imultiset<T, TCompare>
   {
   public:

@@ -27,7 +27,7 @@ SOFTWARE.
 
 #include <UnitTest++/UnitTest++.h>
 
-#include "murmurhash3.h" // The 'C' reference implementation.
+#include "../murmurhash3.h" // The 'C' reference implementation.
 
 #include <iterator>
 #include <string>

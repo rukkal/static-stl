@@ -630,7 +630,8 @@ namespace
 
       std::vector<ItemNDCNode>::iterator i_item = std::find(compare_data.begin(), compare_data.end(), ItemNDCNode("7"));
       compare_data.erase(i_item);
-      data0.remove(ItemNDCNode("7"));
+      ItemNDCNode node_to_remove("7");
+      data0.remove(node_to_remove);
 
       are_equal = std::equal(data0.begin(), data0.end(), compare_data.begin());
 

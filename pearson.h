@@ -56,15 +56,15 @@ namespace etl
 
   //***************************************************************************
   /// Calculates a Pearson hash
-  ///\tparam HASH_LENGTH The number of elements in the hash.
+  ///\tparam HASH_SIZE The number of elements in the hash.
   /// \ingroup pearson
   //***************************************************************************
-  template <const size_t HASH_LENGTH>
+  template <const size_t HASH_SIZE>
   class pearson
   {
   public:
 
-    typedef etl::array<uint8_t, HASH_LENGTH> value_type;
+    typedef etl::array<uint8_t, HASH_SIZE> value_type;
 
     //*************************************************************************
     /// Default constructor.

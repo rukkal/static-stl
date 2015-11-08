@@ -842,7 +842,7 @@ namespace
         CHECK_EQUAL(2305843009213693951, etl::max_value_for_nbits<61>::value);
         CHECK_EQUAL(4611686018427387903, etl::max_value_for_nbits<62>::value);
         CHECK_EQUAL(9223372036854775807, etl::max_value_for_nbits<63>::value);
-        CHECK_EQUAL(18446744073709551615, etl::max_value_for_nbits<64>::value);
+        CHECK_EQUAL(static_cast<uint64_t>(18446744073709551615), etl::max_value_for_nbits<64>::value);
 
         // Check that the value types are correct. 
         CHECK((std::is_same<uint8_t,  etl::max_value_for_nbits<0>::value_type>::value));
