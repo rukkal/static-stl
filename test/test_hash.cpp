@@ -32,7 +32,7 @@ SOFTWARE.
 #include <vector>
 #include <stdint.h>
 
-#include "../hash.h"
+#include <etl/hash.h>
 
 namespace
 {

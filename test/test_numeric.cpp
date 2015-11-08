@@ -27,7 +27,7 @@ SOFTWARE.
 
 #include <UnitTest++/UnitTest++.h>
 
-#include "../numeric.h"
+#include <etl/numeric.h>
 
 #include <algorithm>
 #include <numeric>

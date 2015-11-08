@@ -35,7 +35,7 @@ SOFTWARE.
 #include <string>
 #include <vector>
 
-#include "../map.h"
+#include <etl/map.h>
 
 static const size_t SIZE = 10;
 

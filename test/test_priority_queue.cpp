@@ -29,7 +29,7 @@ SOFTWARE.
 
 #include <queue>
 
-#include "../priority_queue.h"
+#include <etl/priority_queue.h>
 
 namespace
 {		

@@ -27,8 +27,8 @@ SOFTWARE.
 
 #include <UnitTest++/UnitTest++.h>
 
-#include "../error_handler.h"
-#include "../exception.h"
+#include <etl/error_handler.h>
+#include <etl/exception.h>
 
 bool error_received;
 

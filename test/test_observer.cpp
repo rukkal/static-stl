@@ -27,7 +27,7 @@ SOFTWARE.
 
 #include <UnitTest++/UnitTest++.h>
 
-#include "../observer.h"
+#include <etl/observer.h>
 
 //*****************************************************************************
 // Notification1

@@ -28,7 +28,7 @@ SOFTWARE.
 #include <UnitTest++/UnitTest++.h>
 #include <string>
 
-#include "../endian.h"
+#include <etl/endian.h>
 
 namespace 
 {		

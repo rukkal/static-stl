@@ -28,7 +28,7 @@ SOFTWARE.
 #include <UnitTest++/UnitTest++.h>
 #include "ExtraCheckMacros.h"
 
-#include "../deque.h"
+#include <etl/deque.h>
 
 #include "data.h"
 

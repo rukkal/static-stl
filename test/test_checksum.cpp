@@ -32,8 +32,8 @@ SOFTWARE.
 #include <vector>
 #include <stdint.h>
 
-#include "../checksum.h"
-#include "../endian.h"
+#include <etl/checksum.h>
+#include <etl/endian.h>
 
 namespace
 {		

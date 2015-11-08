@@ -28,7 +28,7 @@ SOFTWARE.
 #include <UnitTest++/UnitTest++.h>
 #include <string>
 
-#include "../exception.h"
+#include <etl/exception.h>
 
 namespace 
 {		

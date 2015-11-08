@@ -28,7 +28,7 @@ SOFTWARE.
 #include <UnitTest++/UnitTest++.h>
 #include <string>
 
-#include "../enum_type.h"
+#include <etl/enum_type.h>
 
 struct enum_test
 {

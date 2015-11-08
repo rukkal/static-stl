@@ -27,7 +27,7 @@ SOFTWARE.
 
 #include <UnitTest++/UnitTest++.h>
 
-#include "../smallest.h"
+#include <etl/smallest.h>
 
 #include <type_traits>
 

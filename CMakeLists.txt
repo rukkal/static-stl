@@ -9,9 +9,10 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GCC_CXX_FLAGS}")
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
+include_directories("include")
 include_directories("unittest-cpp")
 
-file(GLOB etl_srcs "*.cpp")
+file(GLOB etl_srcs "include/etl/*.cpp")
 add_library(etl ${etl_srcs})
 
 file(GLOB unittestcpp_srcs "unittest-cpp/UnitTest++/*.cpp" "unittest-cpp/UnitTest++/Posix/*.cpp")

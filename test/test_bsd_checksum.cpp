@@ -32,8 +32,8 @@ SOFTWARE.
 #include <vector>
 #include <stdint.h>
 
-#include "../bsd_checksum.h"
-#include "../endian.h"
+#include <etl/bsd_checksum.h>
+#include <etl/endian.h>
 
 template <typename TSum, typename TIterator>
 TSum reference_checksum(TIterator begin, TIterator end)

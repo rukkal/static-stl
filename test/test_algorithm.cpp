@@ -27,8 +27,8 @@ SOFTWARE.
 
 #include <UnitTest++/UnitTest++.h>
 
-#include "../algorithm.h"
-#include "../container.h"
+#include <etl/algorithm.h>
+#include <etl/container.h>
 
 #include <vector>
 #include <algorithm>

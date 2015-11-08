@@ -27,7 +27,7 @@ SOFTWARE.
 
 #include <UnitTest++/UnitTest++.h>
 
-#include "../io_port.h"
+#include <etl/io_port.h>
 
 #include <stdint.h>
 

@@ -33,7 +33,7 @@ SOFTWARE.
 
 #define ETL_IN_UNIT_TEST
 
-#include "../bitset.h"
+#include <etl/bitset.h>
 
 #undef min
 #undef max
