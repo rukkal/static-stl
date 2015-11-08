@@ -3,9 +3,9 @@ Static Standard Template Library (SSTL)
 
 **Summary**
 
-The SSTL is a partial reimplementation of then C++ STL components.
+The SSTL is a partial reimplementation of the C++ STL components.
 
-The SSTL's main design goal is to strictly avoid the use of dynamic memory allocation.
+The main design goal is to strictly avoid the use of dynamic memory allocation.
 
 The SSTL exploits/supports modern C++ features.
 
@@ -25,9 +25,9 @@ Statically-allocated versions of:
 - Most of the STL containers
 - std::function
 
-**Notes:**
+**Notes**
 
-This project was originally forked from the Embedded Template Library (http://www.etlcpp.com). The SSTL is just a subset of the ETL. However, the SSTL exploits/supports modern C++ features, whereas the ETL is strictly developed with C++03 in order to remain compatible with the "slow" vendors.
+This project is a fork of the Embedded Template Library (http://www.etlcpp.com). The SSTL provides only a subset of the ETL components. However, the SSTL exploits/supports modern C++ features, whereas the ETL is strictly developed with C++03 in order to remain compatible with the "slow" vendors.
 
-The fork just happened recently. So the SSTL doesn't exploit/support modern C++ features yet. I also haven't added std::function yet (the implementation is ready though). However, such goodies should be coming soon.
+The fork just happened recently. So the SSTL doesn't exploit/support modern C++ features yet. I also haven't added std::function yet (the implementation is ready though). I haven't fully reorganized the structure of the repository, etc. However, such goodies should be coming soon.
 
