@@ -33,9 +33,6 @@ SOFTWARE.
 #include <etl/bloom_filter.h>
 
 #include <etl/fnv_1.h>
-#include <etl/crc16.h>
-#include <etl/crc16_ccitt.h>
-#include <etl/crc32.h>
 
 struct hash1_t
 {
@@ -53,7 +50,7 @@ struct hash2_t
 
   size_t operator ()(argument_type text) const
   {
-    return etl::crc32(text, text + strlen(text));
+     return etl::fnv_1a_32(text, text + strlen(text)) + 100;
   }
 };
 
@@ -63,7 +60,7 @@ struct hash3_t
 
   size_t operator ()(argument_type text) const
   {
-    return etl::crc16(text, text + strlen(text)) | (etl::crc16_ccitt(text, text + strlen(text)) << 16);
+     return etl::fnv_1a_32(text, text + strlen(text)) + 1000;
   }
 };
 
