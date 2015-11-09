@@ -1166,31 +1166,6 @@ namespace etl
     }
 
     //*************************************************************************
-    /// Adds one to the front of the deque and returns a reference to the new element.
-    /// If ETL_THROW_EXCEPTIONS is defined, throws an etl::deque_full is the deque is already full.
-    ///\return A reference to the item to assign to.
-    //*************************************************************************
-    reference push_back()
-    {
-      reference r = *last;
-
-      if (!full())
-      {
-        create_element_back();
-      }
-      else
-      {
-#ifdef ETL_THROW_EXCEPTIONS
-        throw deque_full();
-#else
-        error_handler::error(deque_full());
-#endif
-      }
-
-      return *last;
-    }
-
-    //*************************************************************************
     /// Removes the oldest item from the deque.
     //*************************************************************************
     void pop_back()
