@@ -351,6 +351,17 @@ namespace
     }
 
     //*************************************************************************
+    TEST(test_iterator_comparison_empty)
+    {
+       auto data = DataNDC{};
+
+       CHECK(data.begin() == data.end());
+       CHECK(data.cbegin() == data.cend());
+       CHECK(data.rbegin() == data.rend());
+       CHECK(data.crbegin() == data.crend());
+    }
+
+    //*************************************************************************
     TEST(test_iterator_comparison)
     {
       DataNDC data(SIZE, N0);
