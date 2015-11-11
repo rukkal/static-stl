@@ -22,20 +22,25 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 include_directories("include")
 include_directories("unittest-cpp")
 
-file(GLOB etl_srcs "include/etl/*.cpp")
+file(GLOB etl_srcs "include/etl/*.cpp" "include/etl/*.h")
 add_library(etl ${etl_srcs})
 
 if (${UNIX})
-    file(GLOB unittestcpp_srcs "unittest-cpp/UnitTest++/*.cpp" "unittest-cpp/UnitTest++/Posix/*.cpp")
+    file(GLOB unittestcpp_srcs   "unittest-cpp/UnitTest++/*.cpp"
+                                 "unittest-cpp/UnitTest++/*.h"
+                                 "unittest-cpp/UnitTest++/Posix/*.cpp"
+                                 "unittest-cpp/UnitTest++/Posix/*.h")
 elseif (${WIN32})
-    file(GLOB unittestcpp_srcs "unittest-cpp/UnitTest++/*.cpp" "unittest-cpp/UnitTest++/Win32/*.cpp")
+    file(GLOB unittestcpp_srcs   "unittest-cpp/UnitTest++/*.cpp"
+                                 "unittest-cpp/UnitTest++/*.h"
+                                 "unittest-cpp/UnitTest++/Win32/*.cpp"
+                                 "unittest-cpp/UnitTest++/Win32/*.h")
 else (${UNIX})
     message(FATAL_ERROR "not supported OS" )
 endif()
 add_library(unittestcpp ${unittestcpp_srcs})
 
-file(GLOB etltest_srcs "test/*.cpp")
-file(GLOB unittestcpp_srcs )
+file(GLOB etltest_srcs "test/*.cpp" "test/*.h")
 add_executable(etltest ${etltest_srcs})
 
 target_link_libraries(etltest etl unittestcpp)
