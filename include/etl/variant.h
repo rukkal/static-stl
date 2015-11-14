@@ -32,7 +32,6 @@ SOFTWARE.
 
 #include <stdint.h>
 
-#include "array.h"
 #include "largest.h"
 #include "exception.h"
 #include "type_traits.h"
@@ -65,7 +64,7 @@ namespace etl
     //*************************************************************************
     template <const size_t ID>
     struct no_type
-    { 
+    {
     };
   }
 
@@ -230,7 +229,7 @@ namespace etl
                                                        is_same<T, T6>::value ||
                                                        is_same<T, T7>::value ||
                                                        is_same<T, T8>::value>
-    { 
+    {
     };
 
   public:
@@ -505,7 +504,7 @@ namespace etl
             throw variant_invalid_type_id_exception();
 #else
             error_handler::error(variant_invalid_type_id_exception());
-#endif      
+#endif
             return reinterpret_cast<TBase&>(*p_data);
 				  	break;
         }
@@ -819,7 +818,7 @@ namespace etl
     /// Default constructor.
     /// Sets the state of the instance to containing no valid data.
     //***************************************************************************
-    variant() 
+    variant()
       : type_id(UNSUPPORTED_TYPE_ID)
     {
     }
@@ -891,7 +890,7 @@ namespace etl
         case 5: is_same_type = type_id == Type_Id_Lookup<U6>::type_id; break;
         case 6: is_same_type = type_id == Type_Id_Lookup<U7>::type_id; break;
         case 7: is_same_type = type_id == Type_Id_Lookup<U8>::type_id; break;
-        default: 
+        default:
 #ifdef ETL_THROW_EXCEPTIONS
           throw variant_invalid_type_id_exception();
 #else
@@ -902,7 +901,7 @@ namespace etl
 
       return is_same_type;
     }
-   
+
     //***************************************************************************
     /// Calls the supplied reader instance.
     /// The 'read' function appropriate to the current type is called with the stored value.
@@ -919,7 +918,7 @@ namespace etl
         case 5: reader.read(static_cast<T6&>(data)); break;
         case 6: reader.read(static_cast<T7&>(data)); break;
         case 7: reader.read(static_cast<T8&>(data)); break;
-        default: 
+        default:
 #ifdef ETL_THROW_EXCEPTIONS
           throw variant_invalid_type_id_exception();
 #else
@@ -1022,7 +1021,7 @@ namespace etl
 
     //***************************************************************************
     /// Conversion operators for each type.
-    //***************************************************************************   
+    //***************************************************************************
     operator T1&() { return get<T1>(); }
     operator T2&() { return get<T2>(); }
     operator T3&() { return get<T3>(); }

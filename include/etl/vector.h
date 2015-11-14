@@ -37,7 +37,6 @@ SOFTWARE.
 #include "ivector.h"
 #include "container.h"
 #include "alignment.h"
-#include "array.h"
 
 //*****************************************************************************
 ///\defgroup vector vector

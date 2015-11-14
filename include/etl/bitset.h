@@ -32,13 +32,13 @@ SOFTWARE.
 
 #include <algorithm>
 #include <iterator>
+#include <array>
 #include <string.h>
 #include <stdint.h>
 #include <stddef.h>
 
 #include "integral_limits.h"
 #include "smallest.h"
-#include "array.h"
 #include "nullptr.h"
 #include "log.h"
 #include "ibitset.h"
@@ -49,7 +49,7 @@ SOFTWARE.
 #endif
 
 #if defined(COMPILER_KEIL)
-#pragma diag_suppress 1300 
+#pragma diag_suppress 1300
 #endif
 
 //*****************************************************************************
@@ -73,8 +73,6 @@ namespace etl
     // The type used for each element in the array.
     typedef typename smallest_uint_for_bits<N>::type element_t;
 
-    static const element_t ALL_SET          = etl::integral_limits<element_t>::max;
-    static const element_t ALL_CLEAR        = 0;
     static const size_t    BITS_PER_ELEMENT = etl::integral_limits<element_t>::bits;
     static const size_t    ARRAY_SIZE       = (N % BITS_PER_ELEMENT == 0) ? N / BITS_PER_ELEMENT : N / BITS_PER_ELEMENT + 1;
 
@@ -85,7 +83,9 @@ namespace etl
   private:
 
     static const size_t    TOP_MASK_SHIFT   = ((BITS_PER_ELEMENT - (TOTAL_BITS - N)) % BITS_PER_ELEMENT);
-    static const element_t TOP_MASK         = element_t(TOP_MASK_SHIFT == 0 ? ALL_SET : ~(ALL_SET << TOP_MASK_SHIFT));
+    static const element_t TOP_MASK         = element_t( TOP_MASK_SHIFT == 0
+                                                         ? etl::integral_limits<element_t>::max
+                                                         : ~(etl::integral_limits<element_t>::max << TOP_MASK_SHIFT));
 
   public:
 
@@ -597,7 +597,7 @@ namespace etl
 
         while ((value != 0) && (i < ARRAY_SIZE))
         {
-          data[i++] = value & ALL_SET;
+          data[i++] = value & all_bits_set();
           value = value >> SHIFT;
         }
       }
@@ -625,7 +625,7 @@ namespace etl
     //*************************************************************************
     bitset<N>& set()
     {
-      data.fill(ALL_SET);
+      data.fill(all_bits_set());
       data.back() &= TOP_MASK;
 
       return *this;
@@ -635,7 +635,7 @@ namespace etl
     /// Set the bit at the position.
     //*************************************************************************
     bitset<N>& set(size_t position, bool value = true)
-    {     
+    {
       if (position < N)
       {
         size_t    index;
@@ -687,7 +687,7 @@ namespace etl
     //*************************************************************************
     bitset<N>& reset()
     {
-      data.fill(ALL_CLEAR);
+      data.fill(all_bits_clear());
       return *this;
     }
 
@@ -814,14 +814,14 @@ namespace etl
       // All but the last.
       for (size_t i = 0; i < (ARRAY_SIZE - 1); ++i)
       {
-        if (data[i] != ALL_SET)
+        if (data[i] != all_bits_set())
         {
           return false;
         }
       }
 
       // The last.
-      if (data[ARRAY_SIZE - 1] != (ALL_SET & TOP_MASK))
+      if (data[ARRAY_SIZE - 1] != (all_bits_set() & TOP_MASK))
       {
         return false;
       }
@@ -917,8 +917,8 @@ namespace etl
         element_t value = data[index];
 
         // Needs checking?
-        if (( state && (value != ALL_CLEAR)) ||
-            (!state && (value != ALL_SET)))
+        if (( state && (value != all_bits_clear())) ||
+            (!state && (value != all_bits_set())))
         {
           // For each bit in the element...
           while ((bit < BITS_PER_ELEMENT) && (position < N))
@@ -1184,8 +1184,12 @@ namespace etl
     }
 
   private:
-       
-    etl::array<element_t, ARRAY_SIZE> data;
+    element_t all_bits_set() const {  return etl::integral_limits<element_t>::max; }
+    element_t all_bits_clear() const { return 0; }
+
+  private:
+
+    std::array<element_t, ARRAY_SIZE> data;
   };
 
   //***************************************************************************

@@ -31,16 +31,16 @@ SOFTWARE.
 #define __ETL_PEARSON__
 
 #include <stdint.h>
+#include <array>
 
 #include "static_assert.h"
 #include "type_traits.h"
 #include "endian.h"
 #include "ihash.h"
-#include "array.h"
 #include "container.h"
 
 #if defined(COMPILER_KEIL)
-#pragma diag_suppress 1300 
+#pragma diag_suppress 1300
 #endif
 
 ///\defgroup pearson Pearson hash calculation
@@ -64,7 +64,7 @@ namespace etl
   {
   public:
 
-    typedef etl::array<uint8_t, HASH_SIZE> value_type;
+    typedef std::array<uint8_t, HASH_SIZE> value_type;
 
     //*************************************************************************
     /// Default constructor.

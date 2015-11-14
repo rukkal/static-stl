@@ -37,11 +37,12 @@ SOFTWARE.
 #include <iterator>
 #include <algorithm>
 #include <functional>
+#include <array>
 #include <stddef.h>
 
 #include "nullptr.h"
 #include "type_traits.h"
-#include "array.h"
+#include "exception.h"
 
 namespace etl
 {
@@ -144,7 +145,7 @@ namespace etl
 
   private:
 
-    etl::array<__private_intrusive_forward_list__::intrusive_forward_list_node_base*, SIZE> next;
+    std::array<__private_intrusive_forward_list__::intrusive_forward_list_node_base*, SIZE> next;
   };
 
   //***************************************************************************
@@ -518,7 +519,7 @@ namespace etl
       {
         return;
       }
-      
+
       node_t* p_last    = &start_node;
       node_t* p_current = p_last->get_next(index);
       node_t* p_next    = p_current->get_next(index);

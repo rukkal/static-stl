@@ -37,7 +37,6 @@ SOFTWARE.
 #include "istack.h"
 #include "container.h"
 #include "alignment.h"
-#include "array.h"
 
 //*****************************************************************************
 ///\defgroup stack stack

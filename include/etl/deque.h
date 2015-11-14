@@ -38,7 +38,6 @@ SOFTWARE.
 #include "ideque.h"
 #include "container.h"
 #include "alignment.h"
-#include "array.h"
 
 //*****************************************************************************
 ///\defgroup deque deque

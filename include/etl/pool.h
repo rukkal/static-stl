@@ -31,7 +31,6 @@ SOFTWARE.
 #define __ETL_POOL__
 
 #include "alignment.h"
-#include "array.h"
 #include "bitset.h"
 #include "ipool.h"
 
