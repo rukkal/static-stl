@@ -36,7 +36,6 @@ SOFTWARE.
 #include <functional>
 #include <stddef.h>
 
-#include "algorithm.h"
 #include "vector_base.h"
 #include "type_traits.h"
 #include "parameter_type.h"
@@ -531,7 +530,7 @@ namespace etl
           // Copy old.
           from = insert_index;
           to   = from + n_insert;
-          etl::copy_n(&p_buffer[from], n_copy_old, &p_buffer[to]);
+          std::copy_n(&p_buffer[from], n_copy_old, &p_buffer[to]);
 
           // Copy new.
           to = insert_index;
@@ -598,11 +597,11 @@ namespace etl
           // Copy old.
           from = insert_index;
           to   = from + n_insert;
-          etl::copy_n(&p_buffer[from], n_copy_old, &p_buffer[to]);
+          std::copy_n(&p_buffer[from], n_copy_old, &p_buffer[to]);
 
           // Copy new.
           to = insert_index;
-          etl::copy_n(first, n_copy_new, &p_buffer[to]);
+          std::copy_n(first, n_copy_new, &p_buffer[to]);
           first += n_copy_new;
 
           // Create new.

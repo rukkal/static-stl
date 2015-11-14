@@ -33,8 +33,8 @@ SOFTWARE.
 
 #include <stddef.h>
 #include <iterator>
+#include <algorithm>
 
-#include "algorithm.h"
 #include "type_traits.h"
 #include "deque_base.h"
 #include "parameter_type.h"
@@ -273,7 +273,7 @@ namespace etl
       //***************************************************
       const_iterator()
         : index(0),
-          p_deque(0),        
+          p_deque(0),
           p_buffer(0)
       {
       }
@@ -496,7 +496,7 @@ namespace etl
     {
       if (n > MAX_SIZE)
       {
-#ifdef ETL_THROW_EXCEPTIONS 
+#ifdef ETL_THROW_EXCEPTIONS
         throw deque_full();
 #else
         error_handler::error(deque_full());
@@ -530,7 +530,7 @@ namespace etl
         error_handler::error((deque_out_of_bounds()));
 #endif
       }
-      
+
       iterator result(_begin);
       result += index;
 
@@ -558,7 +558,7 @@ namespace etl
 
       return *result;
     }
-    
+
     //*************************************************************************
     /// Gets a reference to the item at the index.
     ///\return A reference to the item at the index.
@@ -634,7 +634,7 @@ namespace etl
     {
       return _begin;
     }
-    
+
     //*************************************************************************
     /// Gets a const iterator to the beginning of the deque.
     //*************************************************************************
@@ -714,7 +714,7 @@ namespace etl
     {
       return const_reverse_iterator(cbegin());
     }
-   
+
     //*************************************************************************
     /// Clears the deque.
     //*************************************************************************
@@ -763,7 +763,7 @@ namespace etl
           {
             // Construct the last.
             create_element_back(*(_end-1));
-            
+
             // Move the values.
             std::copy_backward(position, _end-2, _end-1);
 
@@ -803,7 +803,7 @@ namespace etl
           {
             create_element_front(value);
           }
-          
+
           position = _begin;
         }
         else if (insert_position == end())
@@ -850,7 +850,7 @@ namespace etl
             // Copy old.
             from = position - n_copy_old;
             to   = _begin + n_create_copy;
-            etl::copy_n(from, n_copy_old, to);
+            std::copy_n(from, n_copy_old, to);
 
             // Copy new.
             to = position - n_create_copy;
@@ -892,7 +892,7 @@ namespace etl
       }
       else
       {
-#ifdef ETL_THROW_EXCEPTIONS 
+#ifdef ETL_THROW_EXCEPTIONS
         throw deque_full();
 #else
         error_handler::error(deque_full());
@@ -963,12 +963,12 @@ namespace etl
             // Copy old.
             from = position - n_copy_old;
             to   = _begin + n_create_copy;
-            etl::copy_n(from, n_copy_old, to);
+            std::copy_n(from, n_copy_old, to);
 
             // Copy new.
             to = position - n_create_copy;
             range_begin += n_create_new;
-            etl::copy_n(range_begin, n_copy_new, to);
+            std::copy_n(range_begin, n_copy_new, to);
 
             position = _begin + n_move;
           }
@@ -1002,13 +1002,13 @@ namespace etl
 
             // Copy new.
             item = range_begin;
-            etl::copy_n(item, n_copy_new, position);
+            std::copy_n(item, n_copy_new, position);
           }
         }
       }
       else
       {
-#ifdef ETL_THROW_EXCEPTIONS 
+#ifdef ETL_THROW_EXCEPTIONS
         throw deque_full();
 #else
         error_handler::error(deque_full());
@@ -1104,14 +1104,14 @@ namespace etl
           position = end();
         }
         else
-        {         
+        {
           // Copy the smallest number of items.
           // Are we closer to the front?
           if (distance(_begin, position) < difference_type(current_size / 2))
           {
             // Move the items.
             std::copy_backward(_begin, position, position + length);
-            
+
             for (size_t i = 0; i < length; ++i)
             {
               destroy_element_front();
@@ -1124,7 +1124,7 @@ namespace etl
           {
             // Move the items.
             std::copy(position + length, _end, position);
-            
+
             for (size_t i = 0; i < length; ++i)
             {
               destroy_element_back();
@@ -1154,7 +1154,7 @@ namespace etl
       if (!full())
       {
         create_element_back(item);
-      } 
+      }
       else
       {
 #ifdef ETL_THROW_EXCEPTIONS
@@ -1458,7 +1458,7 @@ namespace etl
         return index - reference_index;
       }
     }
-   
+
   private:
     iterator _begin;    ///Iterator to the first item in the deque.
     iterator _end;     ///Iterator to the last-past-one item in the deque.
