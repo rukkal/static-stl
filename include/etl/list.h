@@ -34,7 +34,7 @@ SOFTWARE.
 
 #include "ilist.h"
 #include "container.h"
-#include "pool.h"
+#include "bitmap_allocator.h"
 
 //*****************************************************************************
 ///\defgroup list list
@@ -125,7 +125,7 @@ namespace etl
   private:
 
     /// The pool of nodes used in the list.
-    etl::pool<typename ilist<T>::Data_Node, MAX_SIZE> node_pool;
+    etl::bitmap_allocator<typename ilist<T>::Data_Node, MAX_SIZE> node_pool;
   };
 }
 

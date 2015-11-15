@@ -40,7 +40,7 @@ SOFTWARE.
 #include "list_base.h"
 #include "type_traits.h"
 #include "parameter_type.h"
-#include "pool.h"
+#include "bitmap_allocator.h"
 
 #if WIN32
 #undef min
@@ -75,15 +75,6 @@ namespace etl
     struct Node
     {
       //***********************************************************************
-      /// Constructor
-      //***********************************************************************
-      Node()
-        : previous(nullptr),
-          next(nullptr)
-      {
-      }
-
-      //***********************************************************************
       /// Reverses the previous & next pointers.
       //***********************************************************************
       void reverse()
@@ -91,8 +82,8 @@ namespace etl
         std::swap(previous, next);
       }
 
-      Node* previous;
-      Node* next;
+      Node* previous = nullptr;
+      Node* next = nullptr;
     };
 
     //*************************************************************************
@@ -114,7 +105,7 @@ namespace etl
   private:
 
     /// The pool of data nodes used in the list.
-    etl::ipool<Data_Node>* p_node_pool;
+    etl::__bitmap_allocator_base<Data_Node>* p_node_pool;
 
     //*************************************************************************
     /// Downcast a Node* to a Data_Node*
@@ -492,7 +483,7 @@ namespace etl
       }
 #endif
 
-      initialise();
+      clear();
 
       // Add all of the elements.
       while (first != last)
@@ -521,7 +512,7 @@ namespace etl
     //*************************************************************************
     void assign(size_t n, parameter_t value)
     {
-      initialise();
+      clear();
 
       // Add all of the elements.
       while (current_size < n)
@@ -801,7 +792,16 @@ namespace etl
     //*************************************************************************
     void clear()
     {
-      initialise();
+        auto node = &get_head();
+        while(node && node != &terminal_node)
+        {
+            auto next = node->next;
+            destroy_data_node(static_cast<Data_Node&>(*node));
+            node = next;
+        }
+
+        current_size = 0;
+        join(terminal_node, terminal_node);
     }
 
     //*************************************************************************
@@ -1033,11 +1033,11 @@ namespace etl
     //*************************************************************************
     /// Constructor.
     //*************************************************************************
-    ilist(etl::ipool<Data_Node>& node_pool, size_t max_size_)
+    ilist(etl::__bitmap_allocator_base<Data_Node>& node_pool, size_t max_size_)
       : list_base(max_size_),
         p_node_pool(&node_pool)
     {
-      initialise();
+      clear();
     }
 
   private:
@@ -1133,7 +1133,9 @@ namespace etl
     //*************************************************************************
     Data_Node& allocate_data_node(parameter_t value) const
     {
-      return *(p_node_pool->allocate(Data_Node(value)));
+        auto p = p_node_pool->allocate();
+        new(p) Data_Node(value);
+        return *p;
     }
 
     //*************************************************************************
@@ -1141,21 +1143,8 @@ namespace etl
     //*************************************************************************
     void destroy_data_node(Data_Node& node) const
     {
-      p_node_pool->release(&node);
-    }
-
-    //*************************************************************************
-    /// Initialise the list.
-    //*************************************************************************
-    void initialise()
-    {
-      if (!empty())
-      {
-        p_node_pool->release_all();
-      }
-
-      current_size = 0;
-      join(terminal_node, terminal_node);
+        node.~Data_Node();
+        p_node_pool->deallocate(&node);
     }
   };
 }

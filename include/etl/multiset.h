@@ -36,7 +36,7 @@ SOFTWARE.
 
 #include "imultiset.h"
 #include "container.h"
-#include "pool.h"
+#include "bitmap_allocator.h"
 
 //*****************************************************************************
 /// A multiset with the capacity defined at compile time.
@@ -102,7 +102,7 @@ namespace etl
   private:
 
     /// The pool of data nodes used for the multiset.
-    pool<typename imultiset<T, TCompare>::Data_Node, MAX_SIZE> node_pool;
+    bitmap_allocator<typename imultiset<T, TCompare>::Data_Node, MAX_SIZE> node_pool;
   };
 
 }

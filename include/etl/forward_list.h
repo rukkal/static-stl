@@ -32,7 +32,7 @@ SOFTWARE.
 
 #include <stddef.h>
 
-#include "pool.h"
+#include "bitmap_allocator.h"
 #include "iforward_list.h"
 #include "container.h"
 
@@ -116,7 +116,7 @@ namespace etl
   private:
 
     /// The pool of nodes used in the list.
-    etl::pool<typename iforward_list<T>::Data_Node, MAX_SIZE> node_pool;
+    etl::bitmap_allocator<typename iforward_list<T>::Data_Node, MAX_SIZE> node_pool;
   };
 }
 

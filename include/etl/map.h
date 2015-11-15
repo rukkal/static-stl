@@ -36,7 +36,7 @@ SOFTWARE.
 
 #include "imap.h"
 #include "container.h"
-#include "pool.h"
+#include "bitmap_allocator.h"
 
 //*****************************************************************************
 ///\defgroup map map
@@ -103,7 +103,7 @@ namespace etl
   private:
 
     /// The pool of data nodes used for the map.
-    pool<typename imap<TKey, TValue, TCompare>::Data_Node, MAX_SIZE> node_pool;
+    bitmap_allocator<typename imap<TKey, TValue, TCompare>::Data_Node, MAX_SIZE> node_pool;
   };
 
 }

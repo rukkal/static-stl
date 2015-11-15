@@ -40,7 +40,7 @@ SOFTWARE.
 #include "map_base.h"
 #include "type_traits.h"
 #include "parameter_type.h"
-#include "pool.h"
+#include "bitmap_allocator.h"
 
 #if WIN32
 #undef min
@@ -161,7 +161,7 @@ namespace etl
   private:
 
     /// The pool of data nodes used in the multimap.
-    ipool<Data_Node>* p_node_pool;
+    __bitmap_allocator_base<Data_Node>* p_node_pool;
 
     /// The node that acts as the multimap root.
     Node* root_node;
@@ -541,7 +541,7 @@ namespace etl
     template <typename TIterator>
     void assign(TIterator first, TIterator last)
     {
-      initialise();
+      clear();
       insert(first, last);
     }
 
@@ -550,7 +550,12 @@ namespace etl
     //*************************************************************************
     void clear()
     {
-      initialise();
+        if (!empty())
+        {
+            erase(begin(), end());
+        }
+        current_size = 0;
+        root_node = nullptr;
     }
 
     //*********************************************************************
@@ -806,12 +811,12 @@ namespace etl
     //*************************************************************************
     /// Constructor.
     //*************************************************************************
-    imultimap(ipool<Data_Node>& node_pool, size_t max_size_)
+    imultimap(__bitmap_allocator_base<Data_Node>& node_pool, size_t max_size_)
       : map_base(max_size_)
       , p_node_pool(&node_pool)
       , root_node(nullptr)
     {
-      initialise();
+      clear();
     }
 
   private:
@@ -821,7 +826,9 @@ namespace etl
     //*************************************************************************
     Data_Node& allocate_data_node(value_type value) const
     {
-      return *(p_node_pool->allocate(Data_Node(value)));
+        auto p = p_node_pool->allocate();
+        new(p) Data_Node(value);
+        return *p;
     }
 
     //*************************************************************************
@@ -829,21 +836,8 @@ namespace etl
     //*************************************************************************
     void destroy_data_node(Data_Node& node) const
     {
-      p_node_pool->release(&node);
-    }
-
-    //*************************************************************************
-    /// Initialise the multimap.
-    //*************************************************************************
-    void initialise()
-    {
-      if (!empty())
-      {
-        p_node_pool->release_all();
-      }
-
-      current_size = 0;
-      root_node = nullptr;
+        node.~Data_Node();
+        p_node_pool->deallocate(&node);
     }
 
     //*************************************************************************

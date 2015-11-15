@@ -40,7 +40,7 @@ SOFTWARE.
 #include <functional>
 #include <stddef.h>
 
-#include "pool.h"
+#include "bitmap_allocator.h"
 #include "nullptr.h"
 #include "forward_list_base.h"
 #include "type_traits.h"
@@ -349,7 +349,16 @@ namespace etl
     //*************************************************************************
     void clear()
     {
-      initialise();
+        auto node = &get_head();
+        while(node)
+        {
+            auto next = node->next;
+            destroy_data_node(static_cast<Data_Node&>(*node));
+            node = next;
+        }
+
+        current_size = 0;
+        start_node.next = nullptr;
     }
 
     //*************************************************************************
@@ -388,7 +397,7 @@ namespace etl
       }
 #endif
 
-      initialise();
+      clear();
 
       Node* p_last_node = &start_node;
 
@@ -421,7 +430,7 @@ namespace etl
     //*************************************************************************
     void assign(size_t n, parameter_t value)
     {
-      initialise();
+      clear();
 
       Node* p_last_node = &start_node;
 
@@ -569,7 +578,7 @@ namespace etl
       {
         return;
       }
-      
+
       Node* p_last    = &start_node;
       Node* p_current = p_last->next;
       Node* p_next    = p_current->next;
@@ -601,7 +610,7 @@ namespace etl
         return iterator(data_node);
       }
       else
-#ifdef ETL_THROW_EXCEPTIONS    
+#ifdef ETL_THROW_EXCEPTIONS
       {
         throw forward_list_full();
         return end();
@@ -934,11 +943,11 @@ namespace etl
     //*************************************************************************
     /// Constructor.
     //*************************************************************************
-    iforward_list(etl::ipool<Data_Node>& node_pool, size_t max_size_)
+    iforward_list(etl::__bitmap_allocator_base<Data_Node>& node_pool, size_t max_size_)
       : forward_list_base(max_size_),
         p_node_pool(&node_pool)
     {
-      initialise();
+      clear();
     }
 
     Node start_node; ///< The node that acts as the forward_list start.
@@ -946,7 +955,7 @@ namespace etl
   private:
 
     /// The pool of data nodes used in the list.
-    etl::ipool<Data_Node>* p_node_pool;
+    etl::__bitmap_allocator_base<Data_Node>* p_node_pool;
 
     //*************************************************************************
     /// Downcast a Node* to a Data_Node*
@@ -1056,25 +1065,13 @@ namespace etl
     }
 
     //*************************************************************************
-    /// Initialise the forward_list.
-    //*************************************************************************
-    void initialise()
-    {
-      if (!empty())
-      {
-        p_node_pool->release_all();
-      }
-
-      current_size = 0;
-      start_node.next = nullptr;
-    }
-
-    //*************************************************************************
     /// Allocate a Data_Node.
     //*************************************************************************
     Data_Node& allocate_data_node(parameter_t value) const
     {
-      return *(p_node_pool->allocate(Data_Node(value)));
+        auto p = p_node_pool->allocate();
+        new(p) Data_Node(value);
+        return *p;
     }
 
     //*************************************************************************
@@ -1082,7 +1079,8 @@ namespace etl
     //*************************************************************************
     void destroy_data_node(Data_Node& node) const
     {
-      p_node_pool->release(node);
+        node.~Data_Node();
+        p_node_pool->deallocate(&node);
     }
   };
 }

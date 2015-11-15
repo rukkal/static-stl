@@ -36,7 +36,7 @@ SOFTWARE.
 
 #include "iset.h"
 #include "container.h"
-#include "pool.h"
+#include "bitmap_allocator.h"
 
 //*****************************************************************************
 ///\defgroup set set
@@ -103,7 +103,7 @@ namespace etl
   private:
 
     /// The pool of data nodes used for the set.
-    pool<typename iset<T, TCompare>::Data_Node, MAX_SIZE> node_pool;
+    bitmap_allocator<typename iset<T, TCompare>::Data_Node, MAX_SIZE> node_pool;
   };
 
 }
