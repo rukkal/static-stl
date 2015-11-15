@@ -146,7 +146,7 @@ namespace etl
     template <typename TIterator>
     void assign(TIterator first, TIterator last)
     {
-#ifdef _DEBUG
+#ifndef NDEBUG
       difference_type count = std::distance(first, last);
 
       if (count < 0)

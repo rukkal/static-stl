@@ -213,7 +213,7 @@ namespace etl
     //***************************************************************************
     T* operator ->()
     {
-#ifdef _DEBUG
+#ifndef NDEBUG
       if (!valid)
       {
 #ifdef ETL_THROW_EXCEPTIONS
@@ -232,7 +232,7 @@ namespace etl
     //***************************************************************************
     const T* operator ->() const
     {
-#ifdef _DEBUG
+#ifndef NDEBUG
       if (!valid)
       {
 #ifdef ETL_THROW_EXCEPTIONS
@@ -251,7 +251,7 @@ namespace etl
     //***************************************************************************
     T& operator *()
     {
-#ifdef _DEBUG
+#ifndef NDEBUG
       if (!valid)
       {
 #ifdef ETL_THROW_EXCEPTIONS
@@ -270,7 +270,7 @@ namespace etl
     //***************************************************************************
     const T& operator *() const
     {
-#ifdef _DEBUG
+#ifndef NDEBUG
       if (!valid)
       {
 #ifdef ETL_THROW_EXCEPTIONS
@@ -297,7 +297,7 @@ namespace etl
     //***************************************************************************
     T& value()
     {
-#ifdef _DEBUG
+#ifndef NDEBUG
       if (!valid)
       {
 #ifdef ETL_THROW_EXCEPTIONS
@@ -316,7 +316,7 @@ namespace etl
     //***************************************************************************
     const T& value() const
     {
-#ifdef _DEBUG
+#ifndef NDEBUG
       if (!valid)
       {
 #ifdef ETL_THROW_EXCEPTIONS

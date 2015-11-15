@@ -197,7 +197,7 @@ namespace etl
     template <typename TIterator>
     void assign(TIterator first, TIterator last)
     {
-#ifdef _DEBUG
+#ifndef NDEBUG
       difference_type count = std::distance(first, last);
 
       if (count < 0)
@@ -228,7 +228,7 @@ namespace etl
 		  ETL_ERROR(flat_set_full());
 		  return result;
 	  }
-	  
+
 	  iterator i_element = std::lower_bound(begin(), end(), value, TKeyCompare());
 
 	  if (i_element == end())
@@ -374,7 +374,7 @@ namespace etl
     {
       return std::lower_bound(cbegin(), cend(), key, TKeyCompare());
     }
-    
+
     //*********************************************************************
     /// Finds the upper bound of a key
     ///\param key The key to search for.

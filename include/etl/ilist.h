@@ -65,7 +65,7 @@ namespace etl
     typedef size_t   size_type;
 
   protected:
-    
+
     typedef typename parameter_type<T, is_fundamental<T>::value || is_pointer<T>::value>::type parameter_t;
 
 
@@ -109,7 +109,7 @@ namespace etl
     };
 
     /// The node that acts as the list start and end.
-    Node terminal_node;  
+    Node terminal_node;
 
   private:
 
@@ -475,12 +475,11 @@ namespace etl
     //*************************************************************************
     /// Assigns a range of values to the list.
 		/// If ETL_THROW_EXCEPTIONS is defined throws etl::list_full if the list does not have enough free space.
-    /// If ETL_THROW_EXCEPTIONS & _DEBUG are defined throws list_iterator if the iterators are reversed.
     //*************************************************************************
     template <typename TIterator>
     void assign(TIterator first, TIterator last)
-    {      
-#ifdef _DEBUG
+    {
+#ifndef NDEBUG
       difference_type count = std::distance(first, last);
 
       if (count < 0)
@@ -536,7 +535,7 @@ namespace etl
         }
         else
         {
-#ifdef ETL_THROW_EXCEPTIONS        
+#ifdef ETL_THROW_EXCEPTIONS
           throw list_full();
 #else
           error_handler::error(list_full());
@@ -557,7 +556,7 @@ namespace etl
       }
       else
       {
-#ifdef ETL_THROW_EXCEPTIONS        
+#ifdef ETL_THROW_EXCEPTIONS
         throw list_full();
 #else
         error_handler::error(list_full());
@@ -577,7 +576,7 @@ namespace etl
       }
       else
       {
-#ifdef ETL_THROW_EXCEPTIONS        
+#ifdef ETL_THROW_EXCEPTIONS
         throw list_full();
 #else
         error_handler::error(list_full());
@@ -609,7 +608,7 @@ namespace etl
       }
       else
       {
-#ifdef ETL_THROW_EXCEPTIONS        
+#ifdef ETL_THROW_EXCEPTIONS
         throw list_full();
 #else
         error_handler::error(list_full());
@@ -629,7 +628,7 @@ namespace etl
       }
       else
       {
-#ifdef ETL_THROW_EXCEPTIONS        
+#ifdef ETL_THROW_EXCEPTIONS
         throw list_full();
 #else
         error_handler::error(list_full());
@@ -663,7 +662,7 @@ namespace etl
       }
       else
       {
-#ifdef ETL_THROW_EXCEPTIONS        
+#ifdef ETL_THROW_EXCEPTIONS
         throw list_full();
 #else
         error_handler::error(list_full());
@@ -687,7 +686,7 @@ namespace etl
         }
         else
         {
-#ifdef ETL_THROW_EXCEPTIONS        
+#ifdef ETL_THROW_EXCEPTIONS
           throw list_full();
 #else
           error_handler::error(list_full());
@@ -712,7 +711,7 @@ namespace etl
         }
         else
         {
-#ifdef ETL_THROW_EXCEPTIONS        
+#ifdef ETL_THROW_EXCEPTIONS
           throw list_full();
 #else
           error_handler::error(list_full());
@@ -730,7 +729,7 @@ namespace etl
       ++next;
 
       remove_node(*position.p_node);
-      
+
       return next;
     }
 
@@ -775,7 +774,7 @@ namespace etl
     {
       if (n > MAX_SIZE)
       {
-#ifdef ETL_THROW_EXCEPTIONS        
+#ifdef ETL_THROW_EXCEPTIONS
         throw list_full();
 #else
         error_handler::error(list_full());

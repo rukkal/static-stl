@@ -43,6 +43,7 @@ SOFTWARE.
 #include "nullptr.h"
 #include "type_traits.h"
 #include "exception.h"
+#include "error_handler.h"
 
 namespace etl
 {
@@ -123,7 +124,7 @@ namespace etl
 
     __private_intrusive_forward_list__::intrusive_forward_list_node_base* get_next(size_t index) const
     {
-#ifdef _DEBUG
+#ifndef NDEBUG
       if (index >= SIZE)
       {
         ETL_ERROR(intrusive_forward_list_index_exception());
@@ -134,7 +135,7 @@ namespace etl
 
     void set_next(size_t index, __private_intrusive_forward_list__::intrusive_forward_list_node_base* pnext)
     {
-#ifdef _DEBUG
+#ifndef NDEBUG
       if (index >= SIZE)
       {
         ETL_ERROR(intrusive_forward_list_index_exception());
@@ -462,12 +463,11 @@ namespace etl
 
     //*************************************************************************
     /// Assigns a range of values to the intrusive_forward_list.
-    /// If ETL_THROW_EXCEPTIONS & _DEBUG are defined throws forward_list_iterator if the iterators are reversed.
     //*************************************************************************
     template <typename TIterator>
     void assign(TIterator first, TIterator last)
     {
-#ifdef _DEBUG
+#ifndef NDEBUG
       difference_type count = std::distance(first, last);
 
       if (count < 0)

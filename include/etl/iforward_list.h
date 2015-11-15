@@ -371,12 +371,11 @@ namespace etl
     //*************************************************************************
     /// Assigns a range of values to the forward_list.
 		/// If ETL_THROW_EXCEPTIONS is defined throws etl::forward_list_full if the forward_list does not have enough free space.
-    /// If ETL_THROW_EXCEPTIONS & _DEBUG are defined throws forward_list_iterator if the iterators are reversed.
     //*************************************************************************
     template <typename TIterator>
     void assign(TIterator first, TIterator last)
     {
-#ifdef _DEBUG
+#ifndef NDEBUG
       difference_type count = std::distance(first, last);
 
       if (count < 0)
