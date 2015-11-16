@@ -28,10 +28,10 @@ SOFTWARE.
 #include <UnitTest++/UnitTest++.h>
 
 #include <cstdint>
+#include <limits>
 #include <type_traits>
 
 #include <etl/binary.h>
-#include <etl/bitset.h>
 #include <etl/fnv_1.h>
 #include <etl/integral_limits.h>
 
@@ -622,8 +622,8 @@ namespace
       {
         CHECK_EQUAL(test_count(i), etl::count_bits(i));
       }
-    } 
-    
+    }
+
     //*************************************************************************
     TEST(test_count_bits_32)
     {
@@ -844,7 +844,7 @@ namespace
         CHECK_EQUAL(9223372036854775807, etl::max_value_for_nbits<63>::value);
         CHECK_EQUAL(static_cast<uint64_t>(18446744073709551615), etl::max_value_for_nbits<64>::value);
 
-        // Check that the value types are correct. 
+        // Check that the value types are correct.
         CHECK((std::is_same<uint8_t,  etl::max_value_for_nbits<0>::value_type>::value));
         CHECK((std::is_same<uint8_t,  etl::max_value_for_nbits<1>::value_type>::value));
         CHECK((std::is_same<uint8_t,  etl::max_value_for_nbits<2>::value_type>::value));
