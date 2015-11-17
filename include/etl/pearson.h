@@ -37,7 +37,6 @@ SOFTWARE.
 #include "type_traits.h"
 #include "endian.h"
 #include "ihash.h"
-#include "container.h"
 
 #if defined(COMPILER_KEIL)
 #pragma diag_suppress 1300

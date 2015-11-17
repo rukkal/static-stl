@@ -35,7 +35,6 @@ SOFTWARE.
 #include <iterator>
 
 #include "ivector.h"
-#include "container.h"
 #include "alignment.h"
 
 //*****************************************************************************

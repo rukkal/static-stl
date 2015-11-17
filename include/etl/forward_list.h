@@ -34,7 +34,6 @@ SOFTWARE.
 
 #include "bitmap_allocator.h"
 #include "iforward_list.h"
-#include "container.h"
 
 //*****************************************************************************
 ///\defgroup forward_list forward_list

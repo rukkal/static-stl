@@ -34,7 +34,6 @@ SOFTWARE.
 #include <functional>
 
 #include "ipriority_queue.h"
-#include "container.h"
 #include "vector.h"
 
 //*****************************************************************************

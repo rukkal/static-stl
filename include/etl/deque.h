@@ -36,7 +36,6 @@ SOFTWARE.
 #include <algorithm>
 
 #include "ideque.h"
-#include "container.h"
 #include "alignment.h"
 
 //*****************************************************************************

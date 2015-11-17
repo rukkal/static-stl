@@ -34,7 +34,6 @@ SOFTWARE.
 #include <stdint.h>
 
 #include "iqueue.h"
-#include "container.h"
 #include "alignment.h"
 
 //*****************************************************************************

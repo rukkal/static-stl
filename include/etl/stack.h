@@ -35,7 +35,6 @@ SOFTWARE.
 #include <algorithm>
 
 #include "istack.h"
-#include "container.h"
 #include "alignment.h"
 
 //*****************************************************************************

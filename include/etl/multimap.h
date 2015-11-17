@@ -35,7 +35,6 @@ SOFTWARE.
 #include <functional>
 
 #include "imultimap.h"
-#include "container.h"
 #include "bitmap_allocator.h"
 
 //*****************************************************************************

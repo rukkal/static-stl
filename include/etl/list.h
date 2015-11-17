@@ -33,7 +33,6 @@ SOFTWARE.
 #include <stddef.h>
 
 #include "ilist.h"
-#include "container.h"
 #include "bitmap_allocator.h"
 
 //*****************************************************************************
