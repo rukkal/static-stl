@@ -32,11 +32,11 @@ SOFTWARE.
 
 #include <stddef.h>
 #include <stdint.h>
+#include <type_traits>
 #include <iterator>
 #include <algorithm>
 
 #include "ideque.h"
-#include "alignment.h"
 
 //*****************************************************************************
 ///\defgroup deque deque
@@ -126,7 +126,7 @@ namespace etl
   private:
 
     /// The unititialised buffer of T used in the deque.
-    typename etl::aligned_storage<sizeof(T), etl::alignment_of<T>::value>::type buffer[BUFFER_SIZE];
+    std::array<typename std::aligned_storage<sizeof(T), alignof(T)>::type, BUFFER_SIZE> buffer;
   };
 }
 

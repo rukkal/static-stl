@@ -32,9 +32,10 @@ SOFTWARE.
 
 #include <stddef.h>
 #include <stdint.h>
+#include <type_traits>
+#include <array>
 
 #include "iqueue.h"
-#include "alignment.h"
 
 //*****************************************************************************
 ///\defgroup queue queue
@@ -98,7 +99,7 @@ namespace etl
   private:
 
     /// The uninitialised buffer of T used in the stack.
-    typename etl::aligned_storage<sizeof(T), etl::alignment_of<T>::value>::type buffer[SIZE];
+    std::array<typename std::aligned_storage<sizeof(T), alignof(T)>::type, SIZE> buffer;
   };
 }
 

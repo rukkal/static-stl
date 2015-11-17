@@ -32,10 +32,11 @@ SOFTWARE.
 
 #include <stddef.h>
 #include <stdint.h>
+#include <type_traits>
+#include <array>
 #include <algorithm>
 
 #include "istack.h"
-#include "alignment.h"
 
 //*****************************************************************************
 ///\defgroup stack stack
@@ -99,7 +100,7 @@ namespace etl
   private:
 
     /// The unititialised buffer of T used in the stack.
-    typename etl::aligned_storage<sizeof(T), etl::alignment_of<T>::value>::type buffer[SIZE];
+    std::array<typename std::aligned_storage<sizeof(T), alignof(T)>::type, SIZE> buffer;
   };
 }
 

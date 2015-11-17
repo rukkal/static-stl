@@ -30,7 +30,7 @@ SOFTWARE.
 #ifndef __ETL_OPTIONAL__
 #define __ETL_OPTIONAL__
 
-#include "alignment.h"
+#include <type_traits>
 #include "type_traits.h"
 #include "exception.h"
 
@@ -126,7 +126,7 @@ namespace etl
     {
       if (valid)
       {
-        new (storage.template get_address<T>()) T(other.value());
+        new (&get_reference()) T(other.value());
       }
     }
 
@@ -135,7 +135,7 @@ namespace etl
     //***************************************************************************
     optional(const T& value)
     {
-      new (storage.template get_address<T>()) T(value);
+      new (&get_reference()) T(value);
       valid = true;
     }
 
@@ -146,7 +146,7 @@ namespace etl
     {
       if (valid)
       {
-        storage.template get_reference<T>().~T();
+        get_reference().~T();
       }
     }
 
@@ -157,7 +157,7 @@ namespace etl
     {
       if (valid)
       {
-        storage.template get_reference<T>().~T();
+        get_reference().~T();
         valid = false;
       }
 
@@ -171,18 +171,18 @@ namespace etl
     {
       if (valid && !bool(other))
       {
-        storage.template get_reference<T>().~T();
+        get_reference().~T();
         valid = false;
       }
       else if (bool(other))
       {
         if (valid)
         {
-          storage.template get_reference<T>() = other.value();
+          get_reference() = other.value();
         }
         else
         {
-          new (storage.template get_address<T>()) T(other.value());
+          new (&get_reference()) T(other.value());
           valid = true;
         }
       }
@@ -197,11 +197,11 @@ namespace etl
     {
       if (valid)
       {
-        storage.template get_reference<T>() = value;
+        get_reference() = value;
       }
       else
       {
-        new (storage.template get_address<T>()) T(value);
+        new (&get_reference()) T(value);
         valid = true;
       }
 
@@ -224,7 +224,7 @@ namespace etl
       }
 #endif
 
-      return storage.template get_address<T>();
+      return &get_reference();
     }
 
     //***************************************************************************
@@ -243,7 +243,7 @@ namespace etl
       }
 #endif
 
-      return storage.template get_address<T>();
+      return &get_reference();
     }
 
     //***************************************************************************
@@ -262,7 +262,7 @@ namespace etl
       }
 #endif
 
-      return storage.template get_reference<T>();
+      return get_reference();
     }
 
     //***************************************************************************
@@ -281,7 +281,7 @@ namespace etl
       }
 #endif
 
-      return storage.template get_reference<T>();
+      return get_reference();
     }
 
     //***************************************************************************
@@ -308,7 +308,7 @@ namespace etl
       }
 #endif
 
-      return storage.template get_reference<T>();
+      return get_reference();
     }
 
     //***************************************************************************
@@ -327,7 +327,7 @@ namespace etl
       }
 #endif
 
-      return storage.template get_reference<T>();
+      return get_reference();
     }
 
     //***************************************************************************
@@ -349,8 +349,17 @@ namespace etl
     }
 
   private:
+    T& get_reference()
+    {
+      return reinterpret_cast<T&>(storage);
+    }
+    const T& get_reference() const
+    {
+      return reinterpret_cast<const T&>(storage);
+    }
 
-    typename etl::aligned_storage_as<sizeof(T), T>::type storage;
+  private:
+    typename std::aligned_storage<sizeof(T), alignof(T)>::type storage;
     bool valid;
   };
 }

@@ -32,10 +32,10 @@ SOFTWARE.
 
 #include <stddef.h>
 #include <stdint.h>
+#include <type_traits>
 #include <iterator>
 
 #include "ivector.h"
-#include "alignment.h"
 
 //*****************************************************************************
 ///\defgroup vector vector
@@ -114,8 +114,7 @@ namespace etl
     }
 
   private:
-
-    typename etl::aligned_storage<sizeof(T) * MAX_SIZE, etl::alignment_of<T>::value>::type buffer;
+    typename std::aligned_storage<sizeof(T) * MAX_SIZE, alignof(T)>::type buffer;
   };
 }
 
