@@ -40,7 +40,6 @@ SOFTWARE.
 #include <array>
 #include <stddef.h>
 
-#include "nullptr.h"
 #include "type_traits.h"
 #include "exception.h"
 #include "error_handler.h"

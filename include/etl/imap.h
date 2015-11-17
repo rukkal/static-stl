@@ -36,7 +36,6 @@ SOFTWARE.
 #include <functional>
 #include <stddef.h>
 
-#include "nullptr.h"
 #include "map_base.h"
 #include "type_traits.h"
 #include "parameter_type.h"

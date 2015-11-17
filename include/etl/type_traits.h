@@ -32,8 +32,6 @@ SOFTWARE.
 
 #include <stddef.h>
 
-#include "nullptr.h"
-
 ///\defgroup type_traits type_traits
 /// A set of type traits definitions for compilers that do not support the standard header.
 /// \ingroup utilities
@@ -242,10 +240,10 @@ namespace etl
   template <typename T> struct make_signed { typedef  T type; };
   template <> struct make_signed<char> { typedef  signed char type; };
   template <> struct make_signed<unsigned char> { typedef  signed char type; };
-  template <> struct make_signed<wchar_t> 
+  template <> struct make_signed<wchar_t>
   {
 	  typedef etl::conditional<sizeof(wchar_t) == sizeof(short), short,
-		      etl::conditional<sizeof(wchar_t) == sizeof(int),   int, 
+		      etl::conditional<sizeof(wchar_t) == sizeof(int),   int,
 		      etl::conditional<sizeof(wchar_t) == sizeof(long),  long, void>::type>::type>::type type;
   };
   template <> struct make_signed<unsigned short> { typedef  short type; };
