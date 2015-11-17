@@ -34,7 +34,6 @@ SOFTWARE.
 #include <stdint.h>
 
 #include <etl/pearson.h>
-#include <etl/endian.h>
 
 const size_t HASH_SIZE = 8;
 typedef etl::pearson<HASH_SIZE>::value_type hash_t;
@@ -86,7 +85,7 @@ std::ostream& operator <<(std::ostream& os, const hash_t& hash)
 }
 
 namespace
-{		
+{
   SUITE(test_pearson)
   {
     //*************************************************************************

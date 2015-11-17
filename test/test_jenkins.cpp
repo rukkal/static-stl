@@ -35,7 +35,6 @@ SOFTWARE.
 #include <stdint.h>
 
 #include <etl/jenkins.h>
-#include <etl/endian.h>
 
 template <typename TIterator>
 uint32_t jenkins32(TIterator begin, TIterator end)
@@ -76,7 +75,7 @@ uint64_t jenkins64(TIterator begin, TIterator end)
 }
 
 namespace
-{		
+{
   SUITE(test_jenkins)
   {
     //*************************************************************************

@@ -35,10 +35,9 @@ SOFTWARE.
 #include <stdint.h>
 
 #include <etl/murmur3.h>
-#include <etl/endian.h>
 
 namespace
-{		
+{
   SUITE(test_murmur3)
   {
     //*************************************************************************
