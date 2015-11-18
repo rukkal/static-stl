@@ -36,7 +36,6 @@ SOFTWARE.
 
 #include "type_traits.h"
 #include "integral_limits.h"
-#include "static_assert.h"
 #include "log.h"
 #include "power.h"
 #include "smallest.h"
@@ -67,7 +66,7 @@ namespace etl
     template <const size_t NBITS>
     const typename max_value_for_nbits_helper<NBITS>::value_type max_value_for_nbits_helper<NBITS>::value;
   }
-    
+
   /// Definition for non-zero NBITS.
   template <const size_t NBITS>
   struct max_value_for_nbits
@@ -93,7 +92,7 @@ namespace etl
   template <typename T>
   T rotate_left(T value)
   {
-    STATIC_ASSERT(etl::is_integral<T>::value, "Not an integral type");
+    static_assert(etl::is_integral<T>::value, "Not an integral type");
 
     const size_t SHIFT = etl::integral_limits<typename etl::make_unsigned<T>::type>::bits - 1;
 
@@ -106,7 +105,7 @@ namespace etl
   template <typename T>
   T rotate_left(T value, size_t distance)
   {
-    STATIC_ASSERT(etl::is_integral<T>::value, "Not an integral type");
+    static_assert(etl::is_integral<T>::value, "Not an integral type");
 
     const size_t BITS = etl::integral_limits<typename etl::make_unsigned<T>::type>::bits;
     distance %= BITS;
@@ -121,7 +120,7 @@ namespace etl
   template <typename T>
   T rotate_right(T value)
   {
-    STATIC_ASSERT(etl::is_integral<T>::value, "Not an integral type");
+    static_assert(etl::is_integral<T>::value, "Not an integral type");
 
     const size_t SHIFT = etl::integral_limits<typename etl::make_unsigned<T>::type>::bits - 1;
 
@@ -134,7 +133,7 @@ namespace etl
   template <typename T>
   T rotate_right(T value, size_t distance)
   {
-    STATIC_ASSERT(etl::is_integral<T>::value, "Not an integral type");
+    static_assert(etl::is_integral<T>::value, "Not an integral type");
 
     const size_t BITS = etl::integral_limits<typename etl::make_unsigned<T>::type>::bits;
     distance %= BITS;
@@ -150,7 +149,7 @@ namespace etl
   template <typename T>
   T rotate(T value, typename etl::make_signed<size_t>::type distance)
   {
-    STATIC_ASSERT(etl::is_integral<T>::value, "Not an integral type");
+    static_assert(etl::is_integral<T>::value, "Not an integral type");
 
     if (distance > 0)
     {
@@ -269,7 +268,7 @@ namespace etl
   template <typename T>
   T binary_to_gray(T value)
   {
-    STATIC_ASSERT(etl::is_integral<T>::value, "Not an integral type");
+    static_assert(etl::is_integral<T>::value, "Not an integral type");
 
     return (value >> 1) ^ value;
   }
@@ -474,7 +473,7 @@ namespace etl
   template <typename TReturn, const size_t NBITS, typename TValue>
   TReturn fold_bits(TValue value)
   {
-    STATIC_ASSERT(integral_limits<TReturn>::bits >= NBITS, "Return type too small to hold result");
+    static_assert(integral_limits<TReturn>::bits >= NBITS, "Return type too small to hold result");
 
     const TValue mask  = etl::power<2, NBITS>::value - 1;
     const size_t shift = NBITS;

@@ -33,7 +33,6 @@ SOFTWARE.
 #include <stdint.h>
 #include <array>
 
-#include "static_assert.h"
 #include "type_traits.h"
 #include "endian.h"
 #include "ihash.h"
@@ -83,7 +82,7 @@ namespace etl
     pearson(TIterator begin, const TIterator end)
       : first(true)
     {
-      STATIC_ASSERT(sizeof(typename std::iterator_traits<TIterator>::value_type) == 1, "Type not supported");
+      static_assert(sizeof(typename std::iterator_traits<TIterator>::value_type) == 1, "Type not supported");
 
       reset();
       add(begin, end);
@@ -105,7 +104,7 @@ namespace etl
     template<typename TIterator>
     void add(TIterator begin, const TIterator end)
     {
-      STATIC_ASSERT(sizeof(typename std::iterator_traits<TIterator>::value_type) == 1, "Type not supported");
+      static_assert(sizeof(typename std::iterator_traits<TIterator>::value_type) == 1, "Type not supported");
 
       while (begin != end)
       {

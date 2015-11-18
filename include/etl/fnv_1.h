@@ -32,12 +32,11 @@ SOFTWARE.
 
 #include <stdint.h>
 
-#include "static_assert.h"
 #include "type_traits.h"
 #include "ihash.h"
 
 #if defined(COMPILER_KEIL)
-#pragma diag_suppress 1300 
+#pragma diag_suppress 1300
 #endif
 
 ///\defgroup fnv_1 FNV-1 & FNV-1a 32 & 64 bit hash calculations
@@ -71,7 +70,7 @@ namespace etl
     template<typename TIterator>
     fnv_1_64(TIterator begin, const TIterator end)
     {
-      STATIC_ASSERT(sizeof(typename std::iterator_traits<TIterator>::value_type) == 1, "Type not supported");
+      static_assert(sizeof(typename std::iterator_traits<TIterator>::value_type) == 1, "Type not supported");
 
       reset();
       while (begin != end)
@@ -97,7 +96,7 @@ namespace etl
     template<typename TIterator>
     void add(TIterator begin, const TIterator end)
     {
-      STATIC_ASSERT(sizeof(typename std::iterator_traits<TIterator>::value_type) == 1, "Type not supported");
+      static_assert(sizeof(typename std::iterator_traits<TIterator>::value_type) == 1, "Type not supported");
 
       while (begin != end)
       {
@@ -165,7 +164,7 @@ namespace etl
     template<typename TIterator>
     fnv_1a_64(TIterator begin, const TIterator end)
     {
-      STATIC_ASSERT(sizeof(typename std::iterator_traits<TIterator>::value_type) == 1, "Type not supported");
+      static_assert(sizeof(typename std::iterator_traits<TIterator>::value_type) == 1, "Type not supported");
 
       reset();
       while (begin != end)
@@ -191,8 +190,8 @@ namespace etl
     template<typename TIterator>
     void add(TIterator begin, const TIterator end)
     {
-      STATIC_ASSERT(sizeof(typename std::iterator_traits<TIterator>::value_type) == 1, "Type not supported");
-      
+      static_assert(sizeof(typename std::iterator_traits<TIterator>::value_type) == 1, "Type not supported");
+
       while (begin != end)
       {
         hash ^= *begin++;
@@ -259,7 +258,7 @@ namespace etl
     template<typename TIterator>
     fnv_1_32(TIterator begin, const TIterator end)
     {
-      STATIC_ASSERT(sizeof(typename std::iterator_traits<TIterator>::value_type) == 1, "Type not supported");
+      static_assert(sizeof(typename std::iterator_traits<TIterator>::value_type) == 1, "Type not supported");
 
       reset();
       while (begin != end)
@@ -285,7 +284,7 @@ namespace etl
     template<typename TIterator>
     void add(TIterator begin, const TIterator end)
     {
-      STATIC_ASSERT(sizeof(typename std::iterator_traits<TIterator>::value_type) == 1, "Type not supported");
+      static_assert(sizeof(typename std::iterator_traits<TIterator>::value_type) == 1, "Type not supported");
 
       while (begin != end)
       {
@@ -353,7 +352,7 @@ namespace etl
     template<typename TIterator>
     fnv_1a_32(TIterator begin, const TIterator end)
     {
-      STATIC_ASSERT(sizeof(typename std::iterator_traits<TIterator>::value_type) == 1, "Type not supported");
+      static_assert(sizeof(typename std::iterator_traits<TIterator>::value_type) == 1, "Type not supported");
 
       reset();
       while (begin != end)
@@ -379,7 +378,7 @@ namespace etl
     template<typename TIterator>
     void add(TIterator begin, const TIterator end)
     {
-      STATIC_ASSERT(sizeof(typename std::iterator_traits<TIterator>::value_type) == 1, "Type not supported");
+      static_assert(sizeof(typename std::iterator_traits<TIterator>::value_type) == 1, "Type not supported");
 
       while (begin != end)
       {

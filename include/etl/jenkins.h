@@ -33,13 +33,12 @@ SOFTWARE.
 #include <stdint.h>
 #include <iterator>
 
-#include "static_assert.h"
 #include "type_traits.h"
 #include "error_handler.h"
 #include "ihash.h"
 
 #if defined(COMPILER_KEIL)
-#pragma diag_suppress 1300 
+#pragma diag_suppress 1300
 #endif
 
 ///\defgroup jenkins Jenkins 32 & 64 bit hash calculations
@@ -56,7 +55,7 @@ namespace etl
   {
   public:
 
-    STATIC_ASSERT((etl::is_same<THash, uint32_t>::value || etl::is_same<THash, uint64_t>::value), "Only 32 & 64 bit types supported");
+    static_assert((etl::is_same<THash, uint32_t>::value || etl::is_same<THash, uint64_t>::value), "Only 32 & 64 bit types supported");
 
     typedef THash value_type;
 
@@ -76,7 +75,7 @@ namespace etl
     template<typename TIterator>
     jenkins(TIterator begin, const TIterator end)
     {
-      STATIC_ASSERT(sizeof(typename std::iterator_traits<TIterator>::value_type) == 1, "Incompatible type");
+      static_assert(sizeof(typename std::iterator_traits<TIterator>::value_type) == 1, "Incompatible type");
 
       reset();
 
@@ -105,7 +104,7 @@ namespace etl
     template<typename TIterator>
     void add(TIterator begin, const TIterator end)
     {
-      STATIC_ASSERT(sizeof(typename std::iterator_traits<TIterator>::value_type) == 1, "Incompatible type");
+      static_assert(sizeof(typename std::iterator_traits<TIterator>::value_type) == 1, "Incompatible type");
 
       if (is_finalised)
       {
