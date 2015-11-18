@@ -8,7 +8,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include <UnitTest++/UnitTest++.h>
 #include <bitset>
 #include <array>
-#include <etl/__internal/__bitset_span.h>
+#include <etl/__internal/bitset_span.h>
 
 namespace test_etl
 {
