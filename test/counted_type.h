@@ -22,6 +22,11 @@ namespace test_etl
       {
          ++constructions;
       }
+      counted_type(const counted_type& rhs) : member(rhs.member)
+      {
+         ++constructions;
+         ++copy_constructions;
+      }
       counted_type(counted_type&& rhs) : member(rhs.member)
       {
          ++constructions;
@@ -34,13 +39,15 @@ namespace test_etl
       static void reset_counts()
       {
          constructions = 0;
+         copy_constructions = 0;
          move_constructions = 0;
          destructions = 0;
       }
 
-      size_t member { -1 };
+      size_t member { static_cast<size_t>(-1) };
 
       static size_t constructions;
+      static size_t copy_constructions;
       static size_t move_constructions;
       static size_t destructions;
    };

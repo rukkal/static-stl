@@ -1,106 +1,22 @@
-///\file
+/*
+Copyright © 2015 Kean Mariotti <kean.mariotti@gmail.com>
+This work is free. You can redistribute it and/or modify it under the
+terms of the Do What The Fuck You Want To Public License, Version 2,
+as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
+*/
 
-/******************************************************************************
-The MIT License(MIT)
+#ifndef __SSTL_QUEUE__
+#define __SSTL_QUEUE__
 
-Embedded Template Library.
-https://github.com/ETLCPP/etl
-
-Copyright(c) 2014 jwellbelove
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files(the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions :
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-******************************************************************************/
-
-#ifndef __ETL_QUEUE__
-#define __ETL_QUEUE__
-
-#include <stddef.h>
-#include <stdint.h>
-#include <type_traits>
-#include <array>
-
-#include "iqueue.h"
-
-//*****************************************************************************
-///\defgroup queue queue
-/// A First-in / first-out queue with the capacity defined at compile time,
-/// written in the STL style.
-///\ingroup containers
-//*****************************************************************************
+#include <queue>
+#include "deque.h"
 
 namespace etl
 {
-  //***************************************************************************
-  ///\ingroup queue
-  /// A fixed capacity queue.
-  /// This queue does not support concurrent access by different threads.
-  /// \tparam T    The type this queue should support.
-  /// \tparam SIZE The maximum capacity of the queue.
-  //***************************************************************************
-  template <typename T, const size_t SIZE>
-  class queue : public iqueue<T>
-  {
-  public:
-
-    //*************************************************************************
-    /// Default constructor.
-    //*************************************************************************
-    queue()
-      : iqueue<T>(reinterpret_cast<T*>(&buffer[0]), SIZE)
-    {
-    }
-
-    //*************************************************************************
-    /// Copy constructor
-    //*************************************************************************
-    queue(const queue& rhs)
-      : iqueue<T>(reinterpret_cast<T*>(&buffer[0]), SIZE)
-    {
-      iqueue<T>::clone(rhs);
-    }
-
-    //*************************************************************************
-    /// Destructor.
-    //*************************************************************************
-    ~queue()
-    {
-      iqueue<T>::clear();
-    }
-
-    //*************************************************************************
-    /// Assignment operator.
-    //*************************************************************************
-    queue& operator = (const queue& rhs)
-    {
-      if (&rhs != this)
-      {
-        iqueue<T>::clone(rhs);
-      }
-
-      return *this;
-    }
-
-  private:
-
-    /// The uninitialised buffer of T used in the stack.
-    std::array<typename std::aligned_storage<sizeof(T), alignof(T)>::type, SIZE> buffer;
-  };
+   // alias template to provide an etl::queue type that has consistent
+   // interface with the rest of the library's containers
+   template<class T, size_t CAPACITY, class Container=etl::deque<T, CAPACITY>>
+   using queue = std::queue<T, Container>;
 }
 
 #endif

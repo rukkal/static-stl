@@ -31,9 +31,11 @@ SOFTWARE.
 #define __ETL_IDEQUE__
 #define __ETL_IN_IDEQUE_H__
 
-#include <stddef.h>
+#include <cassert>
+#include <cstddef>
 #include <iterator>
 #include <algorithm>
+#include <utility>
 
 #include "__internal/type_traits.h"
 #include "deque_base.h"
@@ -921,7 +923,7 @@ namespace etl
       {
         if (insert_position == begin())
         {
-          create_element_front(n, range_begin);
+          copy_range_front(n, range_begin);
 
           position = _begin;
         }
@@ -955,10 +957,10 @@ namespace etl
             iterator to;
 
             // Create new.
-            create_element_front(n_create_new, range_begin);
+            copy_range_front(n_create_new, range_begin);
 
             // Create copy.
-            create_element_front(n_create_copy, _begin + n_create_new);
+            copy_range_front(n_create_copy, _begin + n_create_new);
 
             // Copy old.
             from = position - n_copy_old;
@@ -1166,6 +1168,16 @@ namespace etl
     }
 
     //*************************************************************************
+    /// Emplaces an item to the back of the deque.
+    //*************************************************************************
+    template<class... Args>
+    void emplace_back(Args&&... args)
+    {
+      assert(!full());
+      create_element_back(std::forward<Args>(args)...);
+    }
+
+    //*************************************************************************
     /// Removes the oldest item from the deque.
     //*************************************************************************
     void pop_back()
@@ -1195,6 +1207,16 @@ namespace etl
         error_handler::error(deque_full());
 #endif
       }
+    }
+
+    //*************************************************************************
+    /// Emplaces an item to the front of the deque.
+    //*************************************************************************
+    template<class... Args>
+    void emplace_front(Args&&... args)
+    {
+      assert(!full());
+      create_element_front(std::forward<Args>(args)...);
     }
 
     //*************************************************************************
@@ -1335,7 +1357,7 @@ namespace etl
     /// Create a new elements from a range at the front.
     //*********************************************************************
     template <typename TIterator>
-    void create_element_front(size_t n, TIterator from)
+    void copy_range_front(size_t n, TIterator from)
     {
       if (n == 0)
       {
@@ -1374,21 +1396,23 @@ namespace etl
     }
 
     //*********************************************************************
-    /// Create a new element with a default value at the front.
+    /// Create a new element at the front.
     //*********************************************************************
-    void create_element_front(parameter_t value)
+    template<class... Args>
+    void create_element_front(Args&&... args)
     {
       --_begin;
-      new(&(*_begin)) T(value);
+      new(&(*_begin)) T(std::forward<Args>(args)...);
       ++current_size;
     }
 
     //*********************************************************************
-    /// Create a new element with a value at the back
+    /// Create a new element at the back
     //*********************************************************************
-    void create_element_back(parameter_t value)
+    template<class... Args>
+    void create_element_back(Args&&... args)
     {
-      new(&(*_end)) T(value);
+      new(&(*_end)) T(std::forward<Args>(args)...);
       ++_end;
       ++current_size;
     }
