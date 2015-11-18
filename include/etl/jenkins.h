@@ -33,7 +33,7 @@ SOFTWARE.
 #include <stdint.h>
 #include <iterator>
 
-#include "type_traits.h"
+#include "__internal/type_traits.h"
 #include "error_handler.h"
 #include "ihash.h"
 

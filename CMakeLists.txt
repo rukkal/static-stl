@@ -22,7 +22,7 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 include_directories("include")
 include_directories("unittest-cpp")
 
-file(GLOB etl_srcs "include/etl/*.cpp" "include/etl/*.h")
+file(GLOB etl_srcs "include/etl/*.cpp" "include/etl/*.h" "include/etl/__internal/*.h")
 add_library(etl ${etl_srcs})
 
 if (${UNIX})

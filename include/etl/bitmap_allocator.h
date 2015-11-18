@@ -12,7 +12,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include <array>
 #include <type_traits>
 
-#include "__bitset_span.h"
+#include "__internal/__bitset_span.h"
 
 namespace etl
 {

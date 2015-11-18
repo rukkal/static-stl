@@ -32,7 +32,7 @@ SOFTWARE.
 
 #include <stdint.h>
 
-#include "type_traits.h"
+#include "__internal/type_traits.h"
 #include "ihash.h"
 
 #if defined(COMPILER_KEIL)

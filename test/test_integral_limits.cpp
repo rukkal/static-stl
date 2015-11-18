@@ -31,7 +31,7 @@ SOFTWARE.
 #include <type_traits>
 #include <bitset>
 
-#include <etl/integral_limits.h>
+#include <etl/__internal/integral_limits.h>
 
 #undef min
 #undef max

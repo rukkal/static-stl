@@ -27,12 +27,12 @@ SOFTWARE.
 
 #include <UnitTest++/UnitTest++.h>
 
-#include <etl/smallest.h>
+#include <etl/__internal/smallest.h>
 
 #include <type_traits>
 
 namespace
-{		
+{
   SUITE(test_smallst)
   {
     //*************************************************************************

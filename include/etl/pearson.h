@@ -33,7 +33,7 @@ SOFTWARE.
 #include <stdint.h>
 #include <array>
 
-#include "type_traits.h"
+#include "__internal/type_traits.h"
 #include "endian.h"
 #include "ihash.h"
 

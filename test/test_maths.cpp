@@ -27,11 +27,11 @@ SOFTWARE.
 
 #include <UnitTest++/UnitTest++.h>
 
-#include <etl/log.h>
-#include <etl/power.h>
+#include <etl/__internal/log.h>
+#include <etl/__internal/power.h>
 
 namespace
-{		
+{
   SUITE(test_maths)
   {
     //*************************************************************************
@@ -180,7 +180,7 @@ namespace
     {
       int actual;
 
-      // 
+      //
       actual = etl::power_of_2_round_up<0>::value;
       CHECK_EQUAL(2, actual);
 

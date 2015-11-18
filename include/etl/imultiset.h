@@ -37,8 +37,8 @@ SOFTWARE.
 #include <stddef.h>
 
 #include "set_base.h"
-#include "type_traits.h"
-#include "parameter_type.h"
+#include "__internal/type_traits.h"
+#include "__internal/parameter_type.h"
 #include "bitmap_allocator.h"
 
 #if WIN32

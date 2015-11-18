@@ -34,8 +34,8 @@ SOFTWARE.
 #include <stddef.h>
 
 #include "stack_base.h"
-#include "type_traits.h"
-#include "parameter_type.h"
+#include "__internal/type_traits.h"
+#include "__internal/parameter_type.h"
 
 #ifndef ETL_THROW_EXCEPTIONS
 #include "error_handler.h"
@@ -94,7 +94,7 @@ namespace etl
         new(&p_buffer[top_index]) T(value);
       }
       else
-#ifdef ETL_THROW_EXCEPTIONS     
+#ifdef ETL_THROW_EXCEPTIONS
       {
         throw stack_full();
       }
@@ -120,7 +120,7 @@ namespace etl
         new(&p_buffer[top_index]) T();
       }
       else
-#ifdef ETL_THROW_EXCEPTIONS     
+#ifdef ETL_THROW_EXCEPTIONS
       {
         throw stack_full();
       }

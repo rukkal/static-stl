@@ -38,8 +38,8 @@ SOFTWARE.
 #include <stddef.h>
 
 #include "flat_map_base.h"
-#include "type_traits.h"
-#include "parameter_type.h"
+#include "__internal/type_traits.h"
+#include "__internal/parameter_type.h"
 #include "ivector.h"
 
 #ifndef ETL_THROW_EXCEPTIONS

@@ -33,7 +33,7 @@ SOFTWARE.
 #include <stdint.h>
 
 #include "ihash.h"
-#include "binary.h"
+#include "__internal/binary.h"
 #include "error_handler.h"
 
 #if defined(COMPILER_KEIL)

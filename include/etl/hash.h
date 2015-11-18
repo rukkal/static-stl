@@ -35,7 +35,7 @@ SOFTWARE.
 // The default hash calculation.
 #include "fnv_1.h"
 
-#include "type_traits.h"
+#include "__internal/type_traits.h"
 
 ///\defgroup hash Standard hash calculations
 ///\ingroup maths
@@ -75,7 +75,7 @@ namespace etl
   /// Specialisation for bool.
   ///\ingroup hash
   //***************************************************************************
-  template <> 
+  template <>
   struct hash <bool>
   {
     size_t operator ()(bool v) const
@@ -88,7 +88,7 @@ namespace etl
   /// Specialisation for char.
   ///\ingroup hash
   //***************************************************************************
-  template <> 
+  template <>
   struct hash<char>
   {
     size_t operator ()(char v) const
@@ -140,7 +140,7 @@ namespace etl
   /// Specialisation for short.
   ///\ingroup hash
   //***************************************************************************
-  template<> 
+  template<>
   struct hash<short>
   {
     size_t operator ()(short v) const
@@ -179,7 +179,7 @@ namespace etl
   /// Specialisation for unsigned int.
   ///\ingroup hash
   //***************************************************************************
-  template<> 
+  template<>
   struct hash<unsigned int>
   {
     size_t operator ()(unsigned int v) const
@@ -302,7 +302,7 @@ namespace etl
   /// Specialisation for double.
   ///\ingroup hash
   //***************************************************************************
-  template<> 
+  template<>
   struct hash<double>
   {
     size_t operator ()(double v) const
@@ -324,7 +324,7 @@ namespace etl
   /// Specialisation for long double.
   ///\ingroup hash
   //***************************************************************************
-  template<> 
+  template<>
   struct hash<long double>
   {
     size_t operator ()(long double v) const
@@ -346,7 +346,7 @@ namespace etl
   /// Specialisation for pointers.
   ///\ingroup hash
   //***************************************************************************
-  template <typename T> 
+  template <typename T>
   struct hash<T*>
   {
     size_t operator ()(T* v) const

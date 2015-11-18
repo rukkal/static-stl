@@ -37,7 +37,7 @@ namespace std
 }
 #endif
 
-#include <etl/type_traits.h>
+#include <etl/__internal/type_traits.h>
 #include <type_traits>
 
 // A class to test non-fundamental types.

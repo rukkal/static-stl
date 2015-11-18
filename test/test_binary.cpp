@@ -31,9 +31,9 @@ SOFTWARE.
 #include <limits>
 #include <type_traits>
 
-#include <etl/binary.h>
+#include <etl/__internal/binary.h>
 #include <etl/fnv_1.h>
-#include <etl/integral_limits.h>
+#include <etl/__internal/integral_limits.h>
 
 #undef max
 

@@ -34,8 +34,8 @@ SOFTWARE.
 #include <stddef.h>
 
 #include "queue_base.h"
-#include "type_traits.h"
-#include "parameter_type.h"
+#include "__internal/type_traits.h"
+#include "__internal/parameter_type.h"
 
 #ifndef ETL_THROW_EXCEPTIONS
 #include "error_handler.h"

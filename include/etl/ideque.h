@@ -35,9 +35,9 @@ SOFTWARE.
 #include <iterator>
 #include <algorithm>
 
-#include "type_traits.h"
+#include "__internal/type_traits.h"
 #include "deque_base.h"
-#include "parameter_type.h"
+#include "__internal/parameter_type.h"
 
 #ifndef ETL_THROW_EXCEPTIONS
 #include "error_handler.h"
