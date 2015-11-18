@@ -30,11 +30,13 @@ SOFTWARE.
 #include <vector>
 #include <array>
 #include <algorithm>
+#include <utility>
 
 #include <etl/vector.h>
+#include "counted_type.h"
 
-namespace
-{		
+namespace test_etl
+{
   SUITE(test_vector)
   {
     static const size_t SIZE = 10;
@@ -471,6 +473,29 @@ namespace
     }
 
     //*************************************************************************
+    TEST(emplace_back)
+    {
+      counted_type::reset_counts();
+      auto vector = etl::vector<counted_type, 5>{};
+      CHECK(counted_type::constructions == 0);
+      CHECK(counted_type::destructions == 0);
+
+      counted_type::reset_counts();
+      vector.emplace_back(3);
+      CHECK(vector.back().member == 3);
+      CHECK(counted_type::constructions == 1);
+      CHECK(counted_type::destructions == 0);
+
+      auto c = counted_type{5};
+      counted_type::reset_counts();
+      vector.emplace_back(std::move(c));
+      CHECK(vector.back().member == 5);
+      CHECK(counted_type::constructions == 1);
+      CHECK(counted_type::move_constructions == 1);
+      CHECK(counted_type::destructions == 0);
+    }
+
+    //*************************************************************************
     TEST_FIXTURE(SetupFixture, test_pop_back)
     {
       Compare_Data compare_data(initial_data.begin(), initial_data.end());
@@ -542,7 +567,7 @@ namespace
       const size_t INITIAL_SIZE     = 5;
       const size_t INSERT_SIZE      = 3;
       const int INITIAL_VALUE       = 11;
-      
+
       for (size_t offset = 0; offset <= INITIAL_SIZE; ++offset)
       {
         Compare_Data compare_data;
@@ -630,7 +655,7 @@ namespace
       offset = 4;
 
       CHECK_THROW(data.insert(data.begin() + offset, initial_data.begin(), initial_data.end()), etl::vector_full);
-      
+
       offset = data.size();
 
       CHECK_THROW(data.insert(data.begin() + offset, initial_data.begin(), initial_data.end()), etl::vector_full);
@@ -670,7 +695,7 @@ namespace
 
       CHECK(is_equal);
     }
-    
+
     //*************************************************************************
     TEST_FIXTURE(SetupFixture, test_clear)
     {

@@ -31,6 +31,7 @@ SOFTWARE.
 #define __ETL_IVECTOR__
 #define __ETL_IN_IVECTOR_H__
 
+#include <cassert>
 #include <iterator>
 #include <algorithm>
 #include <functional>
@@ -447,6 +448,13 @@ namespace etl
       }
     }
 
+    template<class... Args>
+    void emplace_back(Args&&... args)
+    {
+      assert(current_size < MAX_SIZE);
+      create_element(std::forward<Args>(args)...);
+    }
+
     //*************************************************************************
     /// Removes an element from the end of the vector.
     /// Does nothing if the vector is empty.
@@ -678,19 +686,13 @@ namespace etl
     }
 
     //*********************************************************************
-    /// Create a new element with a default value at the back.
+    /// Create a new element with with the given arguments (forwarded)
+    /// at the back
     //*********************************************************************
-    void create_element()
+    template<class... Args>
+    void create_element(Args&&... args)
     {
-      new(&p_buffer[current_size++]) T();
-    }
-
-    //*********************************************************************
-    /// Create a new element with a value at the back
-    //*********************************************************************
-    void create_element(parameter_t value)
-    {
-      new(&p_buffer[current_size++]) T(value);
+      new(&p_buffer[current_size++]) T(std::forward<Args>(args)...);
     }
 
     //*********************************************************************
