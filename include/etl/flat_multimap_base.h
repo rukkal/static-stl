@@ -36,71 +36,10 @@ SOFTWARE.
 
 #include <stddef.h>
 
-#include "exception.h"
 #include "ivector.h"
-
-#ifndef ETL_THROW_EXCEPTIONS
-#include "error_handler.h"
-#endif
 
 namespace etl
 {
-  //***************************************************************************
-  ///\ingroup flat_multimap
-  /// Exception base for flat_multimaps
-  //***************************************************************************
-  class flat_multimap_exception : public exception
-  {
-  public:
-
-    flat_multimap_exception(const char* what)
-      : exception(what)
-    {
-    }
-  };
-
-  //***************************************************************************
-  ///\ingroup flat_multimap
-  /// Vector full exception.
-  //***************************************************************************
-  class flat_multimap_full : public flat_multimap_exception
-  {
-  public:
-
-    flat_multimap_full()
-      : flat_multimap_exception("flat_multimap: full")
-    {
-    }
-  };
-
-  //***************************************************************************
-  ///\ingroup flat_multimap
-  /// Vector out of bounds exception.
-  //***************************************************************************
-  class flat_multimap_out_of_bounds : public flat_multimap_exception
-  {
-  public:
-
-    flat_multimap_out_of_bounds()
-      : flat_multimap_exception("flat_multimap: out of bounds")
-    {
-    }
-  };
-
-  //***************************************************************************
-  ///\ingroup flat_multimap
-  /// Vector iterator exception.
-  //***************************************************************************
-  class flat_multimap_iterator : public flat_multimap_exception
-  {
-  public:
-
-    flat_multimap_iterator()
-      : flat_multimap_exception("flat_multimap: iterator error")
-    {
-    }
-  };
-
   //***************************************************************************
   ///\ingroup flat_multimap
   /// The base class for all templated flat_multimap types.

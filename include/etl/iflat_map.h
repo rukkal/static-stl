@@ -37,14 +37,11 @@ SOFTWARE.
 #include <utility>
 #include <stddef.h>
 
+#include "sstl_assert.h"
+#include "ivector.h"
 #include "flat_map_base.h"
 #include "__internal/type_traits.h"
 #include "__internal/parameter_type.h"
-#include "ivector.h"
-
-#ifndef ETL_THROW_EXCEPTIONS
-#include "error_handler.h"
-#endif
 
 namespace etl
 {
@@ -235,63 +232,38 @@ namespace etl
 
     //*********************************************************************
     /// Returns a reference to the value at index 'key'
-    /// If ETL_THROW_EXCEPTIONS is defined, emits an etl::flat_map_out_of_bounds if the key is not in the range.
     ///\param i The index.
     ///\return A reference to the value at index 'key'
     //*********************************************************************
     mapped_type& at(key_value_parameter_t key)
     {
       iterator i_element = lower_bound(key);
-
-      if (i_element == end())
-      {
-        // Doesn't exist.
-		ETL_ERROR(flat_map_out_of_bounds());
-      }
-
+      sstl_assert(i_element != end());
       return i_element->second;
     }
 
     //*********************************************************************
     /// Returns a const reference to the value at index 'key'
-    /// If ETL_THROW_EXCEPTIONS is defined, emits an etl::flat_map_out_of_bounds if the key is not in the range.
     ///\param i The index.
     ///\return A const reference to the value at index 'key'
     //*********************************************************************
     const mapped_type& at(key_value_parameter_t key) const
     {
       typename buffer_t::const_iterator i_element = lower_bound(key);
-
-      if (i_element == end())
-      {
-        // Doesn't exist.
-		ETL_ERROR(flat_map_out_of_bounds());
-      }
-
+      sstl_assert(i_element != end());
       return i_element->second;
     }
 
     //*********************************************************************
     /// Assigns values to the flat_map.
-    /// If ETL_THROW_EXCEPTIONS is defined, emits flat_map_full if the flat_map does not have enough free space.
-    /// If ETL_THROW_EXCEPTIONS is defined, emits flat_map_iterator if the iterators are reversed.
     ///\param first The iterator to the first element.
     ///\param last  The iterator to the last element + 1.
     //*********************************************************************
     template <typename TIterator>
     void assign(TIterator first, TIterator last)
     {
-#ifndef NDEBUG
-      difference_type count = std::distance(first, last);
-
-      if (count < 0)
-      {
-		ETL_ERROR(flat_map_iterator());
-      }
-#endif
-
+      sstl_assert(std::distance(first, last) >= 0);
       clear();
-
       while (first != last)
       {
         insert(*first++);
@@ -300,53 +272,38 @@ namespace etl
 
     //*********************************************************************
     /// Inserts a value to the flat_map.
-    /// If ETL_THROW_EXCEPTIONS is defined, emits flat_map_full if the flat_map is already full.
     ///\param value    The value to insert.
     //*********************************************************************
     std::pair<iterator, bool> insert(const value_type& value)
     {
       std::pair<iterator, bool> result(end(), false);
-
       iterator i_element = lower_bound(value.first);
 
+      // At the end
       if (i_element == end())
       {
-        // At the end.
-        if (buffer.full())
-        {
-		  ETL_ERROR(flat_map_full());
-        }
-        else
-        {
-          buffer.push_back(value);
-          result.first  = end() - 1;
-          result.second = true;
-        }
+         sstl_assert(!buffer.full());
+         buffer.push_back(value);
+         result.first  = end() - 1;
+         result.second = true;
       }
+      // Not at the end
       else
       {
-        // Not at the end.
-        // Existing element?
+        // Existing element
         if (value.first == i_element->first)
         {
-          // Yes.
           i_element->second = value.second;
           result.first  = i_element;
           result.second = false;
         }
+        // A new element
         else
         {
-          // A new one.
-          if (buffer.full())
-          {
-			ETL_ERROR(flat_map_full());
-          }
-          else
-          {
+            sstl_assert(!buffer.full());
             buffer.insert(i_element, value);
             result.first  = i_element;
             result.second = true;
-          }
         }
       }
 
@@ -355,7 +312,6 @@ namespace etl
 
     //*********************************************************************
     /// Inserts a value to the flat_map.
-    /// If ETL_THROW_EXCEPTIONS is defined, emits flat_map_full if the flat_map is already full.
     ///\param position The position to insert at.
     ///\param value    The value to insert.
     //*********************************************************************
@@ -366,7 +322,6 @@ namespace etl
 
     //*********************************************************************
     /// Inserts a range of values to the flat_map.
-    /// If ETL_THROW_EXCEPTIONS is defined, emits flat_map_full if the flat_map does not have enough free space.
     ///\param position The position to insert at.
     ///\param first    The first element to add.
     ///\param last     The last + 1 element to add.

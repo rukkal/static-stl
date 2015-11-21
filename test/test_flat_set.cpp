@@ -247,14 +247,6 @@ namespace
     }
 
     //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_insert_value_excess)
-    {
-      DataNDC data(initial_data.begin(), initial_data.end());
-
-      CHECK_THROW(data.insert(N10), etl::flat_set_full);
-    }
-
-    //*************************************************************************
     TEST_FIXTURE(SetupFixture, test_insert_range)
     {
       Compare_DataNDC compare_data;
@@ -268,14 +260,6 @@ namespace
                                  compare_data.begin());
 
       CHECK(isEqual);
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_insert_range_excess)
-    {
-      DataNDC data;
-
-      CHECK_THROW(data.insert(excess_data.begin(), excess_data.end()), etl::flat_set_full);
     }
 
     //*************************************************************************

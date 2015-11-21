@@ -33,9 +33,8 @@ SOFTWARE.
 #include <stdint.h>
 #include <iterator>
 
+#include "sstl_assert.h"
 #include "__internal/type_traits.h"
-#include "error_handler.h"
-#include "ihash.h"
 
 #if defined(COMPILER_KEIL)
 #pragma diag_suppress 1300
@@ -104,20 +103,14 @@ namespace etl
     template<typename TIterator>
     void add(TIterator begin, const TIterator end)
     {
+      sstl_assert(!is_finalised);
       static_assert(sizeof(typename std::iterator_traits<TIterator>::value_type) == 1, "Incompatible type");
 
-      if (is_finalised)
+      while (begin != end)
       {
-        ETL_ERROR(hash_finalised());
-      }
-      else
-      {
-        while (begin != end)
-        {
-          hash += *begin++;
-          hash += (hash << 10);
-          hash ^= (hash >> 6);
-        }
+         hash += *begin++;
+         hash += (hash << 10);
+         hash ^= (hash >> 6);
       }
     }
 
@@ -126,16 +119,10 @@ namespace etl
     //*************************************************************************
     void add(uint8_t value)
     {
-      if (is_finalised)
-      {
-        ETL_ERROR(hash_finalised());
-      }
-      else
-      {
-        hash += value;
-        hash += (hash << 10);
-        hash ^= (hash >> 6);
-      }
+      sstl_assert(!is_finalised);
+      hash += value;
+      hash += (hash << 10);
+      hash ^= (hash >> 6);
     }
 
     //*************************************************************************

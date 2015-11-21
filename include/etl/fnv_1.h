@@ -33,7 +33,6 @@ SOFTWARE.
 #include <stdint.h>
 
 #include "__internal/type_traits.h"
-#include "ihash.h"
 
 #if defined(COMPILER_KEIL)
 #pragma diag_suppress 1300

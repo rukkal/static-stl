@@ -40,8 +40,9 @@ SOFTWARE.
 #include <functional>
 #include <stddef.h>
 
-#include "bitmap_allocator.h"
+#include "sstl_assert.h"
 #include "forward_list_base.h"
+#include "bitmap_allocator.h"
 #include "__internal/type_traits.h"
 #include "__internal/parameter_type.h"
 
@@ -378,49 +379,24 @@ namespace etl
 
     //*************************************************************************
     /// Assigns a range of values to the forward_list.
-		/// If ETL_THROW_EXCEPTIONS is defined throws etl::forward_list_full if the forward_list does not have enough free space.
     //*************************************************************************
     template <typename TIterator>
     void assign(TIterator first, TIterator last)
     {
-#ifndef NDEBUG
-      difference_type count = std::distance(first, last);
-
-      if (count < 0)
-      {
-#ifdef ETL_THROW_EXCEPTIONS
-        throw forward_list_iterator();
-#else
-        error_handler::error(forward_list_iterator());
-#endif
-      }
-#endif
-
+      sstl_assert(std::distance(first, last) >= 0);
       clear();
-
       Node* p_last_node = &start_node;
 
       // Add all of the elements.
       while (first != last)
       {
-        if (!full())
-        {
-          Data_Node& data_node = allocate_data_node(*first++);
-          join(p_last_node, &data_node);
-          data_node.next = nullptr;
-          p_last_node = &data_node;
-          ++current_size;
-        }
-        else
-#ifdef ETL_THROW_EXCEPTIONS
-        {
-          throw forward_list_full();
-        }
-#else
-        {
-          error_handler::error(forward_list_full());
-        }
-#endif
+         sstl_assert(!full());
+
+         Data_Node& data_node = allocate_data_node(*first++);
+         join(p_last_node, &data_node);
+         data_node.next = nullptr;
+         p_last_node = &data_node;
+         ++current_size;
       }
     }
 
@@ -436,24 +412,12 @@ namespace etl
       // Add all of the elements.
       while (current_size < n)
       {
-        if (!full())
-        {
-          Data_Node& data_node = allocate_data_node(value);
-          join(p_last_node, &data_node);
-          data_node.next = nullptr;
-          p_last_node = &data_node;
-          ++current_size;
-        }
-        else
-#ifdef ETL_THROW_EXCEPTIONS
-        {
-          throw forward_list_full();
-        }
-#else
-        {
-          error_handler::error(forward_list_full());
-        }
-#endif
+         sstl_assert(!full());
+         Data_Node& data_node = allocate_data_node(value);
+         join(p_last_node, &data_node);
+         data_node.next = nullptr;
+         p_last_node = &data_node;
+         ++current_size;
       }
     }
 
@@ -462,21 +426,9 @@ namespace etl
     //*************************************************************************
     void push_front()
     {
-      if (!full())
-      {
-        Data_Node& data_node = allocate_data_node(T());
-        insert_node_after(start_node, data_node);
-      }
-      else
-#ifdef ETL_THROW_EXCEPTIONS
-      {
-        throw forward_list_full();
-      }
-#else
-      {
-        error_handler::error(forward_list_full());
-      }
-#endif
+      sstl_assert(!full());
+      Data_Node& data_node = allocate_data_node(T());
+      insert_node_after(start_node, data_node);
     }
 
     //*************************************************************************
@@ -484,21 +436,9 @@ namespace etl
     //*************************************************************************
     void push_front(parameter_t value)
     {
-      if (!full())
-      {
-        Data_Node& data_node = allocate_data_node(value);
-        insert_node_after(start_node, data_node);
-      }
-      else
-#ifdef ETL_THROW_EXCEPTIONS
-      {
-        throw forward_list_full();
-      }
-#else
-      {
-        error_handler::error(forward_list_full());
-      }
-#endif
+      sstl_assert(!full());
+      Data_Node& data_node = allocate_data_node(value);
+      insert_node_after(start_node, data_node);
     }
 
     //*************************************************************************
@@ -506,10 +446,8 @@ namespace etl
     //*************************************************************************
     void pop_front()
     {
-      if (!empty())
-      {
-        remove_node_after(start_node);
-      }
+      sstl_assert(!empty());
+      remove_node_after(start_node);
     }
 
     //*************************************************************************
@@ -522,50 +460,37 @@ namespace etl
 
     //*************************************************************************
     /// Resizes the forward_list.
-    /// If ETL_THROW_EXCEPTIONS is defined, will throw an etl::forward_list_full
     /// if <b>n</b> is larger than the maximum size.
     //*************************************************************************
     void resize(size_t n, T value)
     {
-      if (n <= MAX_SIZE)
+      sstl_assert(n <= MAX_SIZE);
+      size_t i = 0;
+      iterator i_node = begin();
+      iterator i_last_node;
+
+      // Find where we're currently at.
+      while ((i < n) && (i_node != end()))
       {
-        size_t i = 0;
-        iterator i_node = begin();
-        iterator i_last_node;
+         ++i;
+         i_last_node = i_node;
+         ++i_node;
+      }
 
-        // Find where we're currently at.
-        while ((i < n) && (i_node != end()))
-        {
-          ++i;
-          i_last_node = i_node;
-          ++i_node;
-        }
-
-        if (i_node != end())
-        {
-          // Reduce.
-          erase_after(i_node, end());
-        }
-        else if (i_node == end())
-        {
-          // Increase.
-          while (i < n)
-          {
+      if (i_node != end())
+      {
+         // Reduce.
+         erase_after(i_node, end());
+      }
+      else if (i_node == end())
+      {
+         // Increase.
+         while (i < n)
+         {
             i_last_node = insert_after(i_last_node, value);
             ++i;
-          }
-        }
+         }
       }
-      else
-#ifdef ETL_THROW_EXCEPTIONS
-      {
-        throw forward_list_full();
-      }
-#else
-      {
-        error_handler::error(forward_list_full());
-      }
-#endif
     }
 
     //*************************************************************************
@@ -601,25 +526,10 @@ namespace etl
     //*************************************************************************
     iterator insert_after(iterator position, parameter_t value)
     {
-      if (!full())
-      {
-        Data_Node& data_node = allocate_data_node(value);
-        insert_node_after(*position.p_node, data_node);
-
-        return iterator(data_node);
-      }
-      else
-#ifdef ETL_THROW_EXCEPTIONS
-      {
-        throw forward_list_full();
-        return end();
-      }
-#else
-      {
-        error_handler::error(forward_list_full());
-        return end();
-      }
-#endif
+      sstl_assert(!full());
+      Data_Node& data_node = allocate_data_node(value);
+      insert_node_after(*position.p_node, data_node);
+      return iterator(data_node);
     }
 
     //*************************************************************************
@@ -627,25 +537,13 @@ namespace etl
     //*************************************************************************
     void insert_after(iterator position, size_t n, parameter_t value)
     {
-      if (!full())
+      sstl_assert(!full());
+      for (size_t i = 0; !full() && (i < n); ++i)
       {
-        for (size_t i = 0; !full() && (i < n); ++i)
-        {
-          // Set up the next free node.
-          Data_Node& data_node = allocate_data_node(value);
-          insert_node(*position.p_node, data_node);
-        }
+         // Set up the next free node.
+         Data_Node& data_node = allocate_data_node(value);
+         insert_node(*position.p_node, data_node);
       }
-      else
-#ifdef ETL_THROW_EXCEPTIONS
-      {
-        throw forward_list_full();
-      }
-#else
-      {
-        error_handler::error(forward_list_full());
-      }
-#endif
     }
 
     //*************************************************************************
@@ -656,23 +554,11 @@ namespace etl
     {
       while (first != last)
       {
-        if (!full())
-        {
-          // Set up the next free node.
-          Data_Node& data_node = allocate_data_node(*first++);
-          insert_node_after(*position.p_node, data_node);
-          ++position;
-        }
-        else
-#ifdef ETL_THROW_EXCEPTIONS
-        {
-          throw forward_list_full();
-        }
-#else
-        {
-          error_handler::error(forward_list_full());
-        }
-#endif
+         sstl_assert(!full());
+         // Set up the next free node.
+         Data_Node& data_node = allocate_data_node(*first++);
+         insert_node_after(*position.p_node, data_node);
+         ++position;
       }
     }
 
@@ -684,9 +570,7 @@ namespace etl
       iterator next(position);
       ++next;
       ++next;
-
       remove_node_after(*position.p_node);
-
       return next;
     }
 

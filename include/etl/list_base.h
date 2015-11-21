@@ -35,52 +35,9 @@ SOFTWARE.
 #define __ETL_LIST_BASE__
 
 #include <stddef.h>
-#include "exception.h"
 
 namespace etl
 {
-  //***************************************************************************
-  /// Exception for the list.
-  ///\ingroup list
-  //***************************************************************************
-  class list_exception : public exception
-  {
-  public:
-
-    list_exception(const char* what)
-      : exception(what)
-    {
-    }
-  };
-
-  //***************************************************************************
-  /// Full exception for the list.
-  ///\ingroup list
-  //***************************************************************************
-  class list_full : public list_exception
-  {
-  public:
-
-    list_full()
-      : list_exception("list: full")
-    {
-    }
-  };
-
-  //***************************************************************************
-  /// Iterator exception for the list.
-  ///\ingroup list
-  //***************************************************************************
-  class list_iterator : public list_exception
-  {
-  public:
-
-    list_iterator()
-      : list_exception("list: iterator problem")
-    {
-    }
-  };
-
   //***************************************************************************
   /// The base class for all lists.
   ///\ingroup list

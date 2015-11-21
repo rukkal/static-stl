@@ -26,7 +26,6 @@ SOFTWARE.
 ******************************************************************************/
 
 #include <UnitTest++/UnitTest++.h>
-#include "ExtraCheckMacros.h"
 
 #include <etl/list.h>
 
@@ -37,8 +36,8 @@ SOFTWARE.
 #include <list>
 #include <vector>
 
-namespace 
-{		
+namespace
+{
   SUITE(test_list)
   {
     typedef TestDataDC<std::string>  ItemDC;
@@ -92,12 +91,6 @@ namespace
     }
 
     //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_constructor_size_excess)
-    {
-      CHECK_THROW(DataDC data(SIZE + 1), etl::list_full);
-    }
-
-    //*************************************************************************
     TEST_FIXTURE(SetupFixture, test_constructor_size_value)
     {
       const size_t INITIAL_SIZE = 4;
@@ -113,12 +106,6 @@ namespace
       are_equal = std::equal(data.begin(), data.end(), compare_data.begin());
 
       CHECK(are_equal);
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_constructor_size_value_excess)
-    {
-      CHECK_THROW(DataNDC data(SIZE + 1, ItemNDC("1")), etl::list_full);
     }
 
     //*************************************************************************
@@ -225,17 +212,6 @@ namespace
     }
 
     //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_resize_excess)
-    {
-      const size_t INITIAL_SIZE = 4;
-      const ItemNDC VALUE = ItemNDC("1");
-
-      DataNDC data(INITIAL_SIZE, VALUE);
-
-      CHECK_THROW(data.resize(data.max_size() + 1, VALUE), etl::list_full);
-    }
-
-    //*************************************************************************
     TEST_FIXTURE(SetupFixture, test_resize_down)
     {
       const size_t INITIAL_SIZE = 4;
@@ -292,16 +268,6 @@ namespace
       are_equal = std::equal(data.begin(), data.end(), compare_data.begin());
 
       CHECK(are_equal);
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_assign_size_value_excess)
-    {
-      const ItemNDC VALUE = ItemNDC("1");
-
-      DataNDC data;
-
-      CHECK_THROW(data.assign(data.max_size() + 1, VALUE), etl::list_full);
     }
 
     //*************************************************************************
@@ -410,36 +376,25 @@ namespace
       compare_data.push_front(ItemNDC("4"));
       compare_data.push_front(ItemNDC("5"));
       compare_data.push_front(ItemNDC("6"));
+      compare_data.push_front(ItemNDC("7"));
+      compare_data.push_front(ItemNDC("8"));
+      compare_data.push_front(ItemNDC("9"));
+      compare_data.push_front(ItemNDC("10"));
 
-      CHECK_NO_THROW(data.push_front(ItemNDC("1")));
-      CHECK_NO_THROW(data.push_front(ItemNDC("2")));
-      CHECK_NO_THROW(data.push_front(ItemNDC("3")));
-      CHECK_NO_THROW(data.push_front(ItemNDC("4")));
-      CHECK_NO_THROW(data.push_front(ItemNDC("5")));
-      CHECK_NO_THROW(data.push_front(ItemNDC("6")));
+      data.push_front(ItemNDC("1"));
+      data.push_front(ItemNDC("2"));
+      data.push_front(ItemNDC("3"));
+      data.push_front(ItemNDC("4"));
+      data.push_front(ItemNDC("5"));
+      data.push_front(ItemNDC("6"));
+      data.push_front(ItemNDC("7"));
+      data.push_front(ItemNDC("8"));
+      data.push_front(ItemNDC("9"));
+      data.push_front(ItemNDC("10"));
 
       are_equal = std::equal(data.begin(), data.end(), compare_data.begin());
 
       CHECK(are_equal);
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_push_front_excess)
-    {  
-      DataNDC data;
-
-      CHECK_NO_THROW(data.push_front(ItemNDC("1")));
-      CHECK_NO_THROW(data.push_front(ItemNDC("2")));
-      CHECK_NO_THROW(data.push_front(ItemNDC("3")));
-      CHECK_NO_THROW(data.push_front(ItemNDC("4")));
-      CHECK_NO_THROW(data.push_front(ItemNDC("5")));
-      CHECK_NO_THROW(data.push_front(ItemNDC("6")));
-      CHECK_NO_THROW(data.push_front(ItemNDC("7")));
-      CHECK_NO_THROW(data.push_front(ItemNDC("8")));
-      CHECK_NO_THROW(data.push_front(ItemNDC("9")));
-      CHECK_NO_THROW(data.push_front(ItemNDC("10")));
-
-      CHECK_THROW(data.push_front(ItemNDC("11")) , etl::list_full);
     }
 
     //*************************************************************************
@@ -449,10 +404,10 @@ namespace
 
       for (size_t i = 0; i < 2 * data.max_size(); ++i)
       {
-        CHECK_NO_THROW(data.push_front(ItemNDC("1")));
+        data.push_front(ItemNDC("1"));
         data.pop_front();
       }
-      
+
       CHECK(data.empty());
     }
 
@@ -463,7 +418,7 @@ namespace
 
       for (size_t i = 0; i < 2 * data.max_size(); ++i)
       {
-        CHECK_NO_THROW(data.push_front(ItemNDC("1")));
+        data.push_front(ItemNDC("1"));
         data.pop_back();
       }
 
@@ -477,10 +432,10 @@ namespace
 
       for (size_t i = 0; i < 2 * data.max_size(); ++i)
       {
-        CHECK_NO_THROW(data.push_front(ItemNDC("1")));
+        data.push_front(ItemNDC("1"));
         data.pop_front();
       }
-      
+
       CHECK(data.empty());
     }
 
@@ -491,10 +446,10 @@ namespace
 
       for (size_t i = 0; i < 2 * data.max_size(); ++i)
       {
-        CHECK_NO_THROW(data.push_front(ItemNDC("1")));
+        data.push_front(ItemNDC("1"));
         data.pop_back();
       }
-      
+
       CHECK(data.empty());
     }
 
@@ -511,35 +466,16 @@ namespace
       compare_data.push_back(ItemNDC("5"));
       compare_data.push_back(ItemNDC("6"));
 
-      CHECK_NO_THROW(data.push_back(ItemNDC("1")));
-      CHECK_NO_THROW(data.push_back(ItemNDC("2")));
-      CHECK_NO_THROW(data.push_back(ItemNDC("3")));
-      CHECK_NO_THROW(data.push_back(ItemNDC("4")));
-      CHECK_NO_THROW(data.push_back(ItemNDC("5")));
-      CHECK_NO_THROW(data.push_back(ItemNDC("6")));
-
-      are_equal = std::equal(data.begin(), data.end(), compare_data.begin());
-
-      CHECK(are_equal);
-    }
-    
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_push_back_excess)
-    {
-      DataNDC data;
-
       data.push_back(ItemNDC("1"));
       data.push_back(ItemNDC("2"));
       data.push_back(ItemNDC("3"));
       data.push_back(ItemNDC("4"));
       data.push_back(ItemNDC("5"));
       data.push_back(ItemNDC("6"));
-      data.push_back(ItemNDC("7"));
-      data.push_back(ItemNDC("8"));
-      data.push_back(ItemNDC("9"));
-      data.push_back(ItemNDC("10"));
 
-      CHECK_THROW(data.push_back(ItemNDC("11")), etl::list_full);
+      are_equal = std::equal(data.begin(), data.end(), compare_data.begin());
+
+      CHECK(are_equal);
     }
 
     //*************************************************************************

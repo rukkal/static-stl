@@ -41,7 +41,7 @@ SOFTWARE.
 ///\defgroup flat_multimap flat_multimap
 /// A flat_multimapmap with the capacity defined at compile time.
 /// Has insertion of O(N) and find of O(logN)
-/// Duplicate entries and not allowed.
+/// Duplicate entries are not allowed.
 ///\ingroup containers
 //*****************************************************************************
 

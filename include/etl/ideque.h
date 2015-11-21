@@ -31,19 +31,15 @@ SOFTWARE.
 #define __ETL_IDEQUE__
 #define __ETL_IN_IDEQUE_H__
 
-#include <cassert>
 #include <cstddef>
 #include <iterator>
 #include <algorithm>
 #include <utility>
 
-#include "__internal/type_traits.h"
+#include "sstl_assert.h"
 #include "deque_base.h"
+#include "__internal/type_traits.h"
 #include "__internal/parameter_type.h"
-
-#ifndef ETL_THROW_EXCEPTIONS
-#include "error_handler.h"
-#endif
 
 namespace etl
 {
@@ -490,21 +486,12 @@ namespace etl
 
     //*************************************************************************
     /// Assigns 'n' copies of a value to the deque.
-    /// If ETL_THROW_EXCEPTIONS is defined, throws an etl::deque_full is 'n' is too large.
     ///\param n     The number of copies to assign.
-    ///\param value The value to add.<
+    ///\param value The value to add.
     //*************************************************************************
     void assign(size_type n, const value_type& value)
     {
-      if (n > MAX_SIZE)
-      {
-#ifdef ETL_THROW_EXCEPTIONS
-        throw deque_full();
-#else
-        error_handler::error(deque_full());
-#endif
-      }
-
+      sstl_assert(n <= MAX_SIZE);
       initialise();
 
       _begin.index = 0;
@@ -519,45 +506,25 @@ namespace etl
 
     //*************************************************************************
     /// Gets a reference to the item at the index.
-    /// If ETL_THROW_EXCEPTIONS is defined, throws an etl::deque_out_of_bounds if the index is out of range.
     ///\return A reference to the item at the index.
     //*************************************************************************
     reference at(size_t index)
     {
-      if (index >= current_size)
-      {
-#ifdef ETL_THROW_EXCEPTIONS
-        throw deque_out_of_bounds();
-#else
-        error_handler::error((deque_out_of_bounds()));
-#endif
-      }
-
+      sstl_assert(index < current_size);
       iterator result(_begin);
       result += index;
-
       return *result;
     }
 
     //*************************************************************************
     /// Gets a const reference to the item at the index.
-    /// If ETL_THROW_EXCEPTIONS is defined, throws an etl::deque_out_of_bounds if the index is out of range.
     ///\return A const reference to the item at the index.
     //*************************************************************************
     const_reference at(size_t index) const
     {
-      if (index >= current_size)
-      {
-#ifdef ETL_THROW_EXCEPTIONS
-        throw deque_out_of_bounds();
-#else
-        error_handler::error((deque_out_of_bounds()));
-#endif
-      }
-
+      sstl_assert(index < current_size);
       iterator result(_begin);
       result += index;
-
       return *result;
     }
 
@@ -567,9 +534,9 @@ namespace etl
     //*************************************************************************
     reference operator [](size_t index)
     {
+      sstl_assert(index < current_size);
       iterator result(_begin);
       result += index;
-
       return *result;
     }
 
@@ -581,7 +548,6 @@ namespace etl
     {
       iterator result(_begin);
       result += index;
-
       return *result;
     }
 
@@ -727,186 +693,146 @@ namespace etl
 
     //*************************************************************************
     /// Inserts data into the deque.
-    /// If ETL_THROW_EXCEPTIONS is defined, throws an etl::deque_full if the deque is full.
     ///\param insert_position>The insert position.
     ///\param value>The value to insert.
     //*************************************************************************
     iterator insert(const_iterator insert_position, const value_type& value)
     {
+      sstl_assert(!full());
+
       iterator position(insert_position.index, *this, p_buffer);
 
-      if (!full())
+      if (insert_position == begin())
       {
-        if (insert_position == begin())
-        {
-          create_element_front(value);
-          position = _begin;
-        }
-        else if (insert_position == end())
-        {
-          create_element_back(value);
-          position = _end-1;
-        }
-        else
-        {
-          // Are we closer to the front?
-          if (std::distance(_begin, position) < std::distance(position, _end-1))
-          {
-            // Construct the first.
-            create_element_front(*_begin);
-
-            // Move the values.
-            std::copy(_begin + 1, position, _begin);
-
-            // Write the new value.
-            *--position = value;
-          }
-          else
-          {
-            // Construct the last.
-            create_element_back(*(_end-1));
-
-            // Move the values.
-            std::copy_backward(position, _end-2, _end-1);
-
-            // Write the new value.
-            *position = value;
-          }
-        }
+        create_element_front(value);
+        position = _begin;
+      }
+      else if (insert_position == end())
+      {
+        create_element_back(value);
+        position = _end-1;
       }
       else
       {
-#ifdef ETL_THROW_EXCEPTIONS
-        throw deque_full();
-#else
-        error_handler::error(deque_full());
-#endif
+       // Are we closer to the front?
+       if (std::distance(_begin, position) < std::distance(position, _end-1))
+       {
+         // Construct the first.
+         create_element_front(*_begin);
+         // Move the values.
+         std::copy(_begin + 1, position, _begin);
+         // Write the new value.
+         *--position = value;
+       }
+       else
+       {
+         // Construct the last.
+         create_element_back(*(_end-1));
+         // Move the values.
+         std::copy_backward(position, _end-2, _end-1);
+         // Write the new value.
+         *position = value;
+       }
       }
-
       return position;
     }
 
     //*************************************************************************
     /// Inserts 'n' copies of a value into the deque.
-    /// If ETL_THROW_EXCEPTIONS is defined, throws an etl::deque_full if the deque is full.
     ///\param insert_position The insert position.
     ///\param n               The number of values to insert.
     ///\param value           The value to insert.
     //*************************************************************************
     iterator insert(const_iterator insert_position, size_type n, const value_type& value)
     {
+      sstl_assert(current_size+n <= MAX_SIZE);
       iterator position;
 
-      if ((current_size + n) <= MAX_SIZE)
+      if (insert_position == begin())
       {
-        if (insert_position == begin())
-        {
-          for (size_t i = 0; i < n; ++i)
-          {
-            create_element_front(value);
-          }
-
-          position = _begin;
-        }
-        else if (insert_position == end())
-        {
-          for (size_t i = 0; i < n; ++i)
-          {
-            create_element_back(value);
-          }
-
-          position = _end - n;
-        }
-        else
-        {
-          // Non-const insert iterator.
-          position = iterator(insert_position.index, *this, p_buffer);
-
-          // Are we closer to the front?
-          if (distance(_begin, insert_position) <= difference_type(current_size / 2))
-          {
-            size_t insert_index  = std::distance(begin(), position);
-            size_t n_insert      = n;
-            size_t n_move        = std::distance(begin(), position);
-            size_t n_create_copy = std::min(n_insert, n_move);
-            size_t n_create_new  = (n_insert > n_create_copy) ? n_insert - n_create_copy : 0;
-            size_t n_copy_new    = (n_insert > n_create_new) ? n_insert - n_create_new : 0;
-            size_t n_copy_old    = n_move - n_create_copy;
-
-            // Remember the original start.
-            iterator from = _begin + n_create_copy - 1;
-            iterator to;
-
-            // Create new.
-            for (size_t i = 0; i < n_create_new; ++i)
-            {
-              create_element_front(value);
-            }
-
-            // Create copy.
-            for (size_t i = 0; i < n_create_copy; ++i)
-            {
-              create_element_front(*from--);
-            }
-
-            // Copy old.
-            from = position - n_copy_old;
-            to   = _begin + n_create_copy;
-            std::copy_n(from, n_copy_old, to);
-
-            // Copy new.
-            to = position - n_create_copy;
-            std::fill_n(to, n_copy_new, value);
-
-            position = _begin + n_move;
-          }
-          else
-          {
-            size_t insert_index  = std::distance(begin(), position);
-            size_t n_insert      = n;
-            size_t n_move        = std::distance(position, end());
-            size_t n_create_copy = std::min(n_insert, n_move);
-            size_t n_create_new  = (n_insert > n_create_copy) ? n_insert - n_create_copy : 0;
-            size_t n_copy_new    = (n_insert > n_create_new) ? n_insert - n_create_new : 0;
-            size_t n_copy_old    = n_move - n_create_copy;
-
-            // Create new.
-            for (size_t i = 0; i < n_create_new; ++i)
-            {
-              create_element_back(value);
-            }
-
-            // Create copy.
-            const_iterator from = position + n_copy_old;
-
-            for (size_t i = 0; i < n_create_copy; ++i)
-            {
-              create_element_back(*from++);
-            }
-
-            // Copy old.
-            std::copy_backward(position, position + n_copy_old, position + n_insert + n_copy_old);
-
-            // Copy new.
-            std::fill_n(position, n_copy_new, value);
-          }
-        }
+       for (size_t i = 0; i < n; ++i)
+       {
+         create_element_front(value);
+       }
+       position = _begin;
+      }
+      else if (insert_position == end())
+      {
+       for (size_t i = 0; i < n; ++i)
+       {
+         create_element_back(value);
+       }
+       position = _end - n;
       }
       else
       {
-#ifdef ETL_THROW_EXCEPTIONS
-        throw deque_full();
-#else
-        error_handler::error(deque_full());
-#endif
-      }
+       // Non-const insert iterator.
+       position = iterator(insert_position.index, *this, p_buffer);
+       // Are we closer to the front?
+       if (distance(_begin, insert_position) <= difference_type(current_size / 2))
+       {
+         size_t insert_index  = std::distance(begin(), position);
+         size_t n_insert      = n;
+         size_t n_move        = std::distance(begin(), position);
+         size_t n_create_copy = std::min(n_insert, n_move);
+         size_t n_create_new  = (n_insert > n_create_copy) ? n_insert - n_create_copy : 0;
+         size_t n_copy_new    = (n_insert > n_create_new) ? n_insert - n_create_new : 0;
+         size_t n_copy_old    = n_move - n_create_copy;
+         // Remember the original start.
+         iterator from = _begin + n_create_copy - 1;
+         iterator to;
+         // Create new.
+         for (size_t i = 0; i < n_create_new; ++i)
+         {
+           create_element_front(value);
+         }
+         // Create copy.
+         for (size_t i = 0; i < n_create_copy; ++i)
+         {
+           create_element_front(*from--);
+         }
+         // Copy old.
+         from = position - n_copy_old;
+         to   = _begin + n_create_copy;
+         std::copy_n(from, n_copy_old, to);
+         // Copy new.
+         to = position - n_create_copy;
+         std::fill_n(to, n_copy_new, value);
 
+         position = _begin + n_move;
+       }
+       else
+       {
+         size_t insert_index  = std::distance(begin(), position);
+         size_t n_insert      = n;
+         size_t n_move        = std::distance(position, end());
+         size_t n_create_copy = std::min(n_insert, n_move);
+         size_t n_create_new  = (n_insert > n_create_copy) ? n_insert - n_create_copy : 0;
+         size_t n_copy_new    = (n_insert > n_create_new) ? n_insert - n_create_new : 0;
+         size_t n_copy_old    = n_move - n_create_copy;
+         // Create new.
+         for (size_t i = 0; i < n_create_new; ++i)
+         {
+           create_element_back(value);
+         }
+         // Create copy.
+         const_iterator from = position + n_copy_old;
+
+         for (size_t i = 0; i < n_create_copy; ++i)
+         {
+           create_element_back(*from++);
+         }
+         // Copy old.
+         std::copy_backward(position, position + n_copy_old, position + n_insert + n_copy_old);
+         // Copy new.
+         std::fill_n(position, n_copy_new, value);
+       }
+      }
       return position;
     }
 
     //*************************************************************************
     /// Inserts a range into the deque.
-    /// If ETL_THROW_EXCEPTIONS is defined, throws an etl::deque_empty if the deque is full.
     ///\param insert_position>The insert position.
     ///\param range_begin The beginning of the range to insert.
     ///\param range_end   The end of the range to insert.
@@ -915,106 +841,85 @@ namespace etl
     typename enable_if<is_iterator<TIterator>::value, iterator>::type
     insert(const_iterator insert_position, TIterator range_begin, TIterator range_end)
     {
+      difference_type n = std::distance(range_begin, range_end);
+      sstl_assert(current_size+n <= MAX_SIZE);
+
       iterator position;
 
-      difference_type n = std::distance(range_begin, range_end);
-
-      if ((current_size + n) <= MAX_SIZE)
+      if (insert_position == begin())
       {
-        if (insert_position == begin())
-        {
-          copy_range_front(n, range_begin);
+       copy_range_front(n, range_begin);
+       position = _begin;
+      }
+      else if (insert_position == end())
+      {
+       for (difference_type i = 0; i < n; ++i)
+       {
+         create_element_back(*range_begin++);
+       }
 
-          position = _begin;
-        }
-        else if (insert_position == end())
-        {
-          for (difference_type i = 0; i < n; ++i)
-          {
-            create_element_back(*range_begin++);
-          }
-
-          position = _end - n;
-        }
-        else
-        {
-          // Non-const insert iterator.
-          position = iterator(insert_position.index, *this, p_buffer);
-
-          // Are we closer to the front?
-          if (distance(_begin, insert_position) < difference_type(current_size / 2))
-          {
-            size_t insert_index  = std::distance(begin(), position);
-            size_t n_insert      = n;
-            size_t n_move        = std::distance(begin(), position);
-            size_t n_create_copy = std::min(n_insert, n_move);
-            size_t n_create_new  = (n_insert > n_create_copy) ? n_insert - n_create_copy : 0;
-            size_t n_copy_new    = (n_insert > n_create_new) ? n_insert - n_create_new : 0;
-            size_t n_copy_old    = n_move - n_create_copy;
-
-            // Remember the original start.
-            iterator from;
-            iterator to;
-
-            // Create new.
-            copy_range_front(n_create_new, range_begin);
-
-            // Create copy.
-            copy_range_front(n_create_copy, _begin + n_create_new);
-
-            // Copy old.
-            from = position - n_copy_old;
-            to   = _begin + n_create_copy;
-            std::copy_n(from, n_copy_old, to);
-
-            // Copy new.
-            to = position - n_create_copy;
-            range_begin += n_create_new;
-            std::copy_n(range_begin, n_copy_new, to);
-
-            position = _begin + n_move;
-          }
-          else
-          {
-            size_t insert_index  = std::distance(begin(), position);
-            size_t n_insert      = n;
-            size_t n_move        = std::distance(position, end());
-            size_t n_create_copy = std::min(n_insert, n_move);
-            size_t n_create_new  = (n_insert > n_create_copy) ? n_insert - n_create_copy : 0;
-            size_t n_copy_new    = (n_insert > n_create_new) ? n_insert - n_create_new : 0;
-            size_t n_copy_old    = n_move - n_create_copy;
-
-            // Create new.
-            TIterator item = range_begin + (n - n_create_new);
-            for (size_t i = 0; i < n_create_new; ++i)
-            {
-              create_element_back(*item++);
-            }
-
-            // Create copy.
-            const_iterator from = position + n_copy_old;
-
-            for (size_t i = 0; i < n_create_copy; ++i)
-            {
-              create_element_back(*from++);
-            }
-
-            // Copy old.
-            std::copy_backward(position, position + n_copy_old, position + n_insert + n_copy_old);
-
-            // Copy new.
-            item = range_begin;
-            std::copy_n(item, n_copy_new, position);
-          }
-        }
+       position = _end - n;
       }
       else
       {
-#ifdef ETL_THROW_EXCEPTIONS
-        throw deque_full();
-#else
-        error_handler::error(deque_full());
-#endif
+       // Non-const insert iterator.
+       position = iterator(insert_position.index, *this, p_buffer);
+       // Are we closer to the front?
+       if (distance(_begin, insert_position) < difference_type(current_size / 2))
+       {
+         size_t insert_index  = std::distance(begin(), position);
+         size_t n_insert      = n;
+         size_t n_move        = std::distance(begin(), position);
+         size_t n_create_copy = std::min(n_insert, n_move);
+         size_t n_create_new  = (n_insert > n_create_copy) ? n_insert - n_create_copy : 0;
+         size_t n_copy_new    = (n_insert > n_create_new) ? n_insert - n_create_new : 0;
+         size_t n_copy_old    = n_move - n_create_copy;
+         // Remember the original start.
+         iterator from;
+         iterator to;
+         // Create new.
+         copy_range_front(n_create_new, range_begin);
+         // Create copy.
+         copy_range_front(n_create_copy, _begin + n_create_new);
+         // Copy old.
+         from = position - n_copy_old;
+         to   = _begin + n_create_copy;
+         std::copy_n(from, n_copy_old, to);
+         // Copy new.
+         to = position - n_create_copy;
+         range_begin += n_create_new;
+         std::copy_n(range_begin, n_copy_new, to);
+
+         position = _begin + n_move;
+       }
+       else
+       {
+         size_t insert_index  = std::distance(begin(), position);
+         size_t n_insert      = n;
+         size_t n_move        = std::distance(position, end());
+         size_t n_create_copy = std::min(n_insert, n_move);
+         size_t n_create_new  = (n_insert > n_create_copy) ? n_insert - n_create_copy : 0;
+         size_t n_copy_new    = (n_insert > n_create_new) ? n_insert - n_create_new : 0;
+         size_t n_copy_old    = n_move - n_create_copy;
+         // Create new.
+         TIterator item = range_begin + (n - n_create_new);
+         for (size_t i = 0; i < n_create_new; ++i)
+         {
+           create_element_back(*item++);
+         }
+         // Create copy.
+         const_iterator from = position + n_copy_old;
+
+         for (size_t i = 0; i < n_create_copy; ++i)
+         {
+           create_element_back(*from++);
+         }
+         // Copy old.
+         std::copy_backward(position, position + n_copy_old, position + n_insert + n_copy_old);
+         // Copy new.
+         item = range_begin;
+         std::copy_n(item, n_copy_new, position);
+       }
       }
 
       return position;
@@ -1022,149 +927,111 @@ namespace etl
 
     //*************************************************************************
     /// Erase an item.
-    /// If ETL_THROW_EXCEPTIONS is defined, throws an etl::deque_out_of_bounds if the position is out of range.
     ///\param erase_position The position to erase.
     //*************************************************************************
     iterator erase(const_iterator erase_position)
     {
       iterator position(erase_position.index, *this, p_buffer);
+      sstl_assert(distance(position) <= difference_type(current_size));
 
-      if (distance(position) <= difference_type(current_size))
+      if (position == _begin)
       {
-        if (position == _begin)
-        {
-          destroy_element_front();
-          position = begin();
-        }
-        else if (position == _end-1)
-        {
-          destroy_element_back();
-          position = end();
-        }
-        else
-        {
-          // Are we closer to the front?
-          if (distance(_begin, position) < difference_type(current_size / 2))
-          {
-            std::copy_backward(_begin, position, position + 1);
-            destroy_element_front();
-            ++position;
-          }
-          else
-          {
-            std::copy(position + 1, _end, position);
-            destroy_element_back();
-          }
-        }
+         destroy_element_front();
+         position = begin();
+      }
+      else if (position == _end-1)
+      {
+         destroy_element_back();
+         position = end();
       }
       else
       {
-#ifdef ETL_THROW_EXCEPTIONS
-        throw deque_out_of_bounds();
-#else
-        error_handler::error(deque_out_of_bounds());
-#endif
+         // Are we closer to the front?
+         if (distance(_begin, position) < difference_type(current_size / 2))
+         {
+            std::copy_backward(_begin, position, position + 1);
+            destroy_element_front();
+            ++position;
+         }
+         else
+         {
+            std::copy(position + 1, _end, position);
+            destroy_element_back();
+         }
       }
-
       return position;
     }
 
     //*************************************************************************
     /// erase a range.
-    /// If ETL_THROW_EXCEPTIONS is defined, throws an etl::deque_out_of_bounds if the iterators are out of range.
     ///\param range_begin The beginning of the range to erase.
     ///\param range_end   The end of the range to erase.
     //*************************************************************************
     iterator erase(const_iterator range_begin, const_iterator range_end)
     {
+      sstl_assert((distance(range_begin) <= difference_type(current_size)) &&
+                  (distance(range_end) <= difference_type(current_size)));
+
       iterator position(range_begin.index, *this, p_buffer);
 
-      if ((distance(range_begin) <= difference_type(current_size)) &&
-          (distance(range_end) <= difference_type(current_size)))
+      // How many to erase?
+      size_t length = std::distance(range_begin, range_end);
+      // At the beginning?
+      if (position == _begin)
       {
-        // How many to erase?
-        size_t length = std::distance(range_begin, range_end);
-
-        // At the beginning?
-        if (position == _begin)
-        {
-          for (size_t i = 0; i < length; ++i)
-          {
+         for (size_t i = 0; i < length; ++i)
+         {
             destroy_element_front();
-          }
-
-          position = begin();
-        }
-        // At the end?
-        else if (position == _end - length)
-        {
-          for (size_t i = 0; i < length; ++i)
-          {
+         }
+         position = begin();
+      }
+      // At the end?
+      else if (position == _end - length)
+      {
+         for (size_t i = 0; i < length; ++i)
+         {
             destroy_element_back();
-          }
-
-          position = end();
-        }
-        else
-        {
-          // Copy the smallest number of items.
-          // Are we closer to the front?
-          if (distance(_begin, position) < difference_type(current_size / 2))
-          {
+         }
+         position = end();
+      }
+      else
+      {
+         // Copy the smallest number of items.
+         // Are we closer to the front?
+         if (distance(_begin, position) < difference_type(current_size / 2))
+         {
             // Move the items.
             std::copy_backward(_begin, position, position + length);
 
             for (size_t i = 0; i < length; ++i)
             {
-              destroy_element_front();
+               destroy_element_front();
             }
-
             position += length;
-          }
-          else
-          // Must be closer to the back.
-          {
+         }
+         // Must be closer to the back.
+         else
+         {
             // Move the items.
             std::copy(position + length, _end, position);
 
             for (size_t i = 0; i < length; ++i)
             {
-              destroy_element_back();
+               destroy_element_back();
             }
-          }
-        }
+         }
       }
-      else
-      {
-#ifdef ETL_THROW_EXCEPTIONS
-        throw deque_out_of_bounds();
-#else
-        error_handler::error(deque_out_of_bounds());
-#endif
-      }
-
       return position;
     }
 
     //*************************************************************************
     /// Adds an item to the back of the deque.
-    /// If ETL_THROW_EXCEPTIONS is defined, throws an etl::deque_full is the deque is already full.
     ///\param item The item to push to the deque.
     //*************************************************************************
     void push_back(parameter_t item)
     {
-      if (!full())
-      {
-        create_element_back(item);
-      }
-      else
-      {
-#ifdef ETL_THROW_EXCEPTIONS
-        throw deque_full();
-#else
-        error_handler::error(deque_full());
-#endif
-      }
+      sstl_assert(!full());
+      create_element_back(item);
     }
 
     //*************************************************************************
@@ -1173,7 +1040,7 @@ namespace etl
     template<class... Args>
     void emplace_back(Args&&... args)
     {
-      assert(!full());
+      sstl_assert(!full());
       create_element_back(std::forward<Args>(args)...);
     }
 
@@ -1182,31 +1049,18 @@ namespace etl
     //*************************************************************************
     void pop_back()
     {
-      if (!empty())
-      {
-        destroy_element_back();
-      }
+      sstl_assert(!empty());
+      destroy_element_back();
     }
 
     //*************************************************************************
     /// Adds an item to the front of the deque.
-    /// If ETL_THROW_EXCEPTIONS is defined, throws an etl::deque_full is the deque is already full.
     ///\param item The item to push to the deque.
     //*************************************************************************
     void push_front(parameter_t item)
     {
-      if (!full())
-      {
-        create_element_front(item);
-      }
-      else
-      {
-#ifdef ETL_THROW_EXCEPTIONS
-        throw deque_full();
-#else
-        error_handler::error(deque_full());
-#endif
-      }
+      sstl_assert(!full());
+      create_element_front(item);
     }
 
     //*************************************************************************
@@ -1221,24 +1075,12 @@ namespace etl
 
     //*************************************************************************
     /// Adds one to the front of the deque and returns a reference to the new element.
-    /// If ETL_THROW_EXCEPTIONS is defined, throws an etl::deque_full is the deque is already full.
     ///\return A reference to the item to assign to.
     //*************************************************************************
     reference push_front()
     {
-      if (!full())
-      {
-        create_element_front();
-      }
-      else
-      {
-#ifdef ETL_THROW_EXCEPTIONS
-        throw deque_full();
-#else
-        error_handler::error(deque_full());
-#endif
-      }
-
+      sstl_assert(!full());
+      create_element_front();
       return *_begin;
     }
 
@@ -1255,41 +1097,28 @@ namespace etl
 
     //*************************************************************************
     /// Resizes the deque.
-    /// If ETL_THROW_EXCEPTIONS is defined, throws an etl::deque_full is 'new_size' is too large.
     ///\param new_size The new size of the deque.
     ///\param value   The value to assign if the new size is larger. Default = Default constructed value.
     //*************************************************************************
     void resize(size_t new_size, const value_type& value = value_type())
     {
-      if (new_size <= MAX_SIZE)
+      sstl_assert(new_size <= MAX_SIZE);
+      // Make it smaller?
+      if (new_size < current_size)
       {
-        // Make it smaller?
-        if (new_size < current_size)
-        {
-          while (current_size > new_size)
-          {
+         while (current_size > new_size)
+         {
             destroy_element_back();
-          }
-        }
-        // Make it larger?
-        else if (new_size > current_size)
-        {
-          size_t count = new_size - current_size;
-
-          for (size_t i = 0; i < count; ++i)
-          {
-            create_element_back(value);
-          }
-        }
+         }
       }
-
-      else
+      // Make it larger?
+      else if (new_size > current_size)
       {
-#ifdef ETL_THROW_EXCEPTIONS
-        throw deque_out_of_bounds();
-#else
-        error_handler::error(deque_out_of_bounds());
-#endif
+         size_t count = new_size - current_size;
+         for (size_t i = 0; i < count; ++i)
+         {
+            create_element_back(value);
+         }
       }
     }
 

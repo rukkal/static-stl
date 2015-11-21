@@ -36,10 +36,11 @@ SOFTWARE.
 #include <functional>
 #include <stddef.h>
 
+#include "sstl_assert.h"
 #include "list_base.h"
+#include "bitmap_allocator.h"
 #include "__internal/type_traits.h"
 #include "__internal/parameter_type.h"
-#include "bitmap_allocator.h"
 
 #if WIN32
 #undef min
@@ -464,45 +465,22 @@ namespace etl
 
     //*************************************************************************
     /// Assigns a range of values to the list.
-		/// If ETL_THROW_EXCEPTIONS is defined throws etl::list_full if the list does not have enough free space.
     //*************************************************************************
     template <typename TIterator>
     void assign(TIterator first, TIterator last)
     {
-#ifndef NDEBUG
-      difference_type count = std::distance(first, last);
-
-      if (count < 0)
-      {
-#ifdef ETL_THROW_EXCEPTIONS
-        throw list_iterator();
-#else
-        error_handler::error(list_iterator());
-#endif
-      }
-#endif
-
+      sstl_assert(std::distance(first, last) >= 0);
       clear();
 
       // Add all of the elements.
       while (first != last)
       {
-        if (!full())
-        {
-          Data_Node& data_node = allocate_data_node(*first);
-          join(get_tail(), data_node);
-          join(data_node, terminal_node);
-          ++first;
-          ++current_size;
-        }
-        else
-        {
-#ifdef ETL_THROW_EXCEPTIONS
-          throw list_full();
-#else
-          error_handler::error(list_full());
-#endif
-        }
+         sstl_assert(!full());
+         Data_Node& data_node = allocate_data_node(*first);
+         join(get_tail(), data_node);
+         join(data_node, terminal_node);
+         ++first;
+         ++current_size;
       }
     }
 
@@ -516,21 +494,11 @@ namespace etl
       // Add all of the elements.
       while (current_size < n)
       {
-        if (!full())
-        {
-          Data_Node& data_node = allocate_data_node(value);
-          join(*terminal_node.previous, data_node);
-          join(data_node, terminal_node);
-          ++current_size;
-        }
-        else
-        {
-#ifdef ETL_THROW_EXCEPTIONS
-          throw list_full();
-#else
-          error_handler::error(list_full());
-#endif
-        }
+         sstl_assert(!full());
+         Data_Node& data_node = allocate_data_node(value);
+         join(*terminal_node.previous, data_node);
+         join(data_node, terminal_node);
+         ++current_size;
       }
     }
 
@@ -539,19 +507,9 @@ namespace etl
     //*************************************************************************
     void push_front()
     {
-      if (!full())
-      {
-        Data_Node& data_node = allocate_data_node(T());
-        insert_node(get_head(), data_node);
-      }
-      else
-      {
-#ifdef ETL_THROW_EXCEPTIONS
-        throw list_full();
-#else
-        error_handler::error(list_full());
-#endif
-      }
+      sstl_assert(!full());
+      Data_Node& data_node = allocate_data_node(T());
+      insert_node(get_head(), data_node);
     }
 
     //*************************************************************************
@@ -559,19 +517,9 @@ namespace etl
     //*************************************************************************
     void push_front(parameter_t value)
     {
-      if (!full())
-      {
-        Node& data_node = allocate_data_node(value);
-        insert_node(get_head(), data_node);
-      }
-      else
-      {
-#ifdef ETL_THROW_EXCEPTIONS
-        throw list_full();
-#else
-        error_handler::error(list_full());
-#endif
-      }
+      sstl_assert(!full());
+      Node& data_node = allocate_data_node(value);
+      insert_node(get_head(), data_node);
     }
 
     //*************************************************************************
@@ -591,19 +539,9 @@ namespace etl
     //*************************************************************************
     void push_back()
     {
-      if (!full())
-      {
-        Data_Node& data_node = allocate_data_node(T());
-        insert_node(terminal_node, data_node);
-      }
-      else
-      {
-#ifdef ETL_THROW_EXCEPTIONS
-        throw list_full();
-#else
-        error_handler::error(list_full());
-#endif
-      }
+      sstl_assert(!full());
+      Data_Node& data_node = allocate_data_node(T());
+      insert_node(terminal_node, data_node);
     }
 
     //*************************************************************************
@@ -611,19 +549,9 @@ namespace etl
     //*************************************************************************
     void push_back(parameter_t value)
     {
-      if (!full())
-      {
-        Data_Node& data_node = allocate_data_node(value);
-        insert_node(terminal_node, data_node);
-      }
-      else
-      {
-#ifdef ETL_THROW_EXCEPTIONS
-        throw list_full();
-#else
-        error_handler::error(list_full());
-#endif
-      }
+      sstl_assert(!full());
+      Data_Node& data_node = allocate_data_node(value);
+      insert_node(terminal_node, data_node);
     }
 
     //*************************************************************************
@@ -631,11 +559,9 @@ namespace etl
     //*************************************************************************
     void pop_back()
     {
-      if (!empty())
-      {
-      	Node& node = get_tail();
-        remove_node(node);
-      }
+      sstl_assert(!empty());
+      Node& node = get_tail();
+      remove_node(node);
     }
 
     //*************************************************************************
@@ -643,22 +569,10 @@ namespace etl
     //*************************************************************************
     iterator insert(iterator position, const value_type& value)
     {
-      if (!full())
-      {
-        Data_Node& data_node = allocate_data_node(value);
-        insert_node(*position.p_node, data_node);
-
-        return iterator(data_node);
-      }
-      else
-      {
-#ifdef ETL_THROW_EXCEPTIONS
-        throw list_full();
-#else
-        error_handler::error(list_full());
-        return end();
-#endif
-      }
+      sstl_assert(!full());
+      Data_Node& data_node = allocate_data_node(value);
+      insert_node(*position.p_node, data_node);
+      return iterator(data_node);
     }
 
     //*************************************************************************
@@ -668,20 +582,10 @@ namespace etl
     {
       for (size_t i = 0; i < n; ++i)
       {
-        if (!full())
-        {
-          // Set up the next free node and insert.
-          Data_Node& data_node = allocate_data_node(value);
-          insert_node(*position.p_node, data_node);
-        }
-        else
-        {
-#ifdef ETL_THROW_EXCEPTIONS
-          throw list_full();
-#else
-          error_handler::error(list_full());
-#endif
-        }
+        sstl_assert(!full());
+        // Set up the next free node and insert.
+        Data_Node& data_node = allocate_data_node(value);
+        insert_node(*position.p_node, data_node);
       }
     }
 
@@ -693,20 +597,10 @@ namespace etl
     {
       while (first != last)
       {
-        if (!full())
-        {
-          // Set up the next free node and insert.
-          Data_Node& data_node = allocate_data_node(*first++);
-          insert_node(*position.p_node, data_node);
-        }
-        else
-        {
-#ifdef ETL_THROW_EXCEPTIONS
-          throw list_full();
-#else
-          error_handler::error(list_full());
-#endif
-        }
+        sstl_assert(!full());
+        // Set up the next free node and insert.
+        Data_Node& data_node = allocate_data_node(*first++);
+        insert_node(*position.p_node, data_node);
       }
     }
 
@@ -762,16 +656,7 @@ namespace etl
     //*************************************************************************
     void resize(size_t n, parameter_t value)
     {
-      if (n > MAX_SIZE)
-      {
-#ifdef ETL_THROW_EXCEPTIONS
-        throw list_full();
-#else
-        error_handler::error(list_full());
-        n = MAX_SIZE;
-#endif
-      }
-
+      sstl_assert(n <= MAX_SIZE);
       // Smaller?
       if (n < size())
       {

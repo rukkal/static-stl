@@ -37,10 +37,10 @@ SOFTWARE.
 #include <functional>
 #include <stddef.h>
 
+#include "sstl_assert.h"
 #include "vector_base.h"
 #include "__internal/type_traits.h"
 #include "__internal/parameter_type.h"
-#include "error_handler.h"
 
 namespace etl
 {
@@ -188,10 +188,7 @@ namespace etl
     //*********************************************************************
     void resize(size_t new_size)
     {
-      if (new_size > MAX_SIZE)
-      {
-        ETL_ERROR(vector_full());
-      }
+      sstl_assert(new_size <= MAX_SIZE);
 
       // Size up or size down?
       if (new_size > current_size)
@@ -222,10 +219,7 @@ namespace etl
     //*********************************************************************
     void resize(size_t new_size, T value)
     {
-      if (new_size > MAX_SIZE)
-      {
-        ETL_ERROR(vector_full());
-      }
+      sstl_assert(new_size <= MAX_SIZE);
 
       // Size up?
 	    if (new_size > current_size)
@@ -273,11 +267,7 @@ namespace etl
     //*********************************************************************
     reference at(size_t i)
     {
-      if (i >= current_size)
-      {
-        ETL_ERROR(vector_out_of_bounds());
-      }
-
+      sstl_assert(i < current_size);
       return p_buffer[i];
     }
 
@@ -289,11 +279,7 @@ namespace etl
     //*********************************************************************
     const_reference at(size_t i) const
     {
-      if (i >= current_size)
-      {
-        ETL_ERROR(vector_out_of_bounds());
-      }
-
+      sstl_assert(i < current_size);
       return p_buffer[i];
     }
 
@@ -361,19 +347,8 @@ namespace etl
     template <typename TIterator>
     void assign(TIterator first, TIterator last)
     {
-#ifndef NDEBUG
-      difference_type count = std::distance(first, last);
-
-      if (count < 0)
-      {
-        ETL_ERROR(vector_iterator());
-      }
-
-      if (static_cast<size_t>(count) > MAX_SIZE)
-      {
-         ETL_ERROR( vector_full());
-      }
-#endif
+      sstl_assert(std::distance(first, last) >= 0);
+      sstl_assert(std::distance(first, last) <= MAX_SIZE);
 
       initialise();
 
@@ -393,19 +368,13 @@ namespace etl
     //*********************************************************************
     void assign(size_t n, parameter_t value)
     {
-      initialise();
+      sstl_assert(n <= MAX_SIZE);
 
-      if (n > MAX_SIZE)
+      initialise();
+      while (n > 0)
       {
-         ETL_ERROR(vector_full());
-      }
-      else
-      {
-        while (n > 0)
-        {
-          create_element(value);
-          --n;
-        }
+         create_element(value);
+         --n;
       }
     }
 
@@ -423,11 +392,7 @@ namespace etl
     //*************************************************************************
     void push_back()
     {
-      if (current_size == MAX_SIZE)
-      {
-         ETL_ERROR(vector_full());
-      }
-
+      sstl_assert(current_size < MAX_SIZE);
       create_element();
     }
 
@@ -438,14 +403,8 @@ namespace etl
     //*********************************************************************
     void push_back(parameter_t value)
     {
-      if (current_size == MAX_SIZE)
-      {
-        ETL_ERROR(vector_full());
-      }
-      else
-      {
-        create_element(value);
-      }
+      sstl_assert(current_size < MAX_SIZE);
+      create_element(value);
     }
 
     template<class... Args>
@@ -475,21 +434,14 @@ namespace etl
     //*********************************************************************
     iterator insert(iterator position, parameter_t value)
     {
-      if ((current_size + 1) > MAX_SIZE)
-      {
-        ETL_ERROR(vector_full());
-      }
-      else
-      {
-        create_element(value);
+      sstl_assert(current_size < MAX_SIZE);
 
-        if (position != end())
-        {
-          std::copy_backward(position, end() - 1, end());
-          *position = value;
-        }
+      create_element(value);
+      if (position != end())
+      {
+         std::copy_backward(position, end() - 1, end());
+         *position = value;
       }
-
       return position;
     }
 
@@ -502,58 +454,53 @@ namespace etl
     //*********************************************************************
     void insert(iterator position, size_t n, parameter_t value)
     {
-      if ((current_size + n) > MAX_SIZE)
+      sstl_assert(current_size < MAX_SIZE);
+
+      if (position == end())
       {
-        ETL_ERROR(vector_full());
+         while (n > 0)
+         {
+         create_element(value);
+         --n;
+         }
       }
       else
       {
-        if (position == end())
-        {
-          while (n > 0)
-          {
-            create_element(value);
-            --n;
-          }
-        }
-        else
-        {
-          size_t insert_index  = std::distance(begin(), position);
-          size_t n_insert      = n;
-          size_t n_move        = std::distance(position, end());
-          size_t n_create_copy = std::min(n_insert, n_move);
-          size_t n_create_new  = (n_insert > n_create_copy) ? n_insert - n_create_copy : 0;
-          size_t n_copy_new    = (n_insert > n_create_new) ? n_insert - n_create_new : 0;
-          size_t n_copy_old    = (size() > n_insert) ? size() - n_insert : 0;
+         size_t insert_index  = std::distance(begin(), position);
+         size_t n_insert      = n;
+         size_t n_move        = std::distance(position, end());
+         size_t n_create_copy = std::min(n_insert, n_move);
+         size_t n_create_new  = (n_insert > n_create_copy) ? n_insert - n_create_copy : 0;
+         size_t n_copy_new    = (n_insert > n_create_new) ? n_insert - n_create_new : 0;
+         size_t n_copy_old    = (size() > n_insert) ? size() - n_insert : 0;
 
-          // Create copy (backwards).
-          size_t from = size() - 1;
-          size_t to   = from + n_insert;
+         // Create copy (backwards).
+         size_t from = size() - 1;
+         size_t to   = from + n_insert;
 
-          for (size_t i = 0; i < n_create_copy; ++i)
-          {
+         for (size_t i = 0; i < n_create_copy; ++i)
+         {
             create_element_at(to--, p_buffer[from--]);
-          }
+         }
 
-          // Copy old.
-          from = insert_index;
-          to   = from + n_insert;
-          std::copy_n(&p_buffer[from], n_copy_old, &p_buffer[to]);
+         // Copy old.
+         from = insert_index;
+         to   = from + n_insert;
+         std::copy_n(&p_buffer[from], n_copy_old, &p_buffer[to]);
 
-          // Copy new.
-          to = insert_index;
-          std::fill_n(&p_buffer[to], n_copy_new, value);
+         // Copy new.
+         to = insert_index;
+         std::fill_n(&p_buffer[to], n_copy_new, value);
 
-          // Create new.
-          to = size();
+         // Create new.
+         to = size();
 
-          for (size_t i = 0; i < n_create_new; ++i)
-          {
+         for (size_t i = 0; i < n_create_new; ++i)
+         {
             create_element_at(to++, value);
-          }
+         }
 
-          current_size += n_insert;
-        }
+         current_size += n_insert;
       }
     }
 
@@ -568,60 +515,54 @@ namespace etl
     void insert(iterator position, TIterator first, TIterator last)
     {
       size_t count = std::distance(first, last);
+      sstl_assert(current_size + count <= MAX_SIZE);
 
-      if ((current_size + count) > MAX_SIZE)
+      if (position == end())
       {
-        ETL_ERROR(vector_full());
+         while (first != last)
+         {
+            create_element(*first);
+            ++first;
+         }
       }
       else
       {
-        if (position == end())
-        {
-          while (first != last)
-          {
-            create_element(*first);
-            ++first;
-          }
-        }
-        else
-        {
-          size_t insert_index  = std::distance(begin(), position);
-          size_t n_insert      = count;
-          size_t n_move        = std::distance(position, end());
-          size_t n_create_copy = std::min(n_insert, n_move);
-          size_t n_create_new  = (n_insert > n_create_copy) ? n_insert - n_create_copy : 0;
-          size_t n_copy_new    = (n_insert > n_create_new) ? n_insert - n_create_new : 0;
-          size_t n_copy_old    = (size() > n_insert) ? size() - n_insert : 0;
+         size_t insert_index  = std::distance(begin(), position);
+         size_t n_insert      = count;
+         size_t n_move        = std::distance(position, end());
+         size_t n_create_copy = std::min(n_insert, n_move);
+         size_t n_create_new  = (n_insert > n_create_copy) ? n_insert - n_create_copy : 0;
+         size_t n_copy_new    = (n_insert > n_create_new) ? n_insert - n_create_new : 0;
+         size_t n_copy_old    = (size() > n_insert) ? size() - n_insert : 0;
 
-          // Create copy (backwards).
-          size_t from = size() - 1;
-          size_t to   = from + n_insert;
+         // Create copy (backwards).
+         size_t from = size() - 1;
+         size_t to   = from + n_insert;
 
-          for (size_t i = 0; i < n_create_copy; ++i)
-          {
+         for (size_t i = 0; i < n_create_copy; ++i)
+         {
             create_element_at(to--, p_buffer[from--]);
-          }
+         }
 
-          // Copy old.
-          from = insert_index;
-          to   = from + n_insert;
-          std::copy_n(&p_buffer[from], n_copy_old, &p_buffer[to]);
+         // Copy old.
+         from = insert_index;
+         to   = from + n_insert;
+         std::copy_n(&p_buffer[from], n_copy_old, &p_buffer[to]);
 
-          // Copy new.
-          to = insert_index;
-          std::copy_n(first, n_copy_new, &p_buffer[to]);
-          first += n_copy_new;
+         // Copy new.
+         to = insert_index;
+         std::copy_n(first, n_copy_new, &p_buffer[to]);
+         first += n_copy_new;
 
-          // Create new.
-          to = size();
-          for (size_t i = 0; i < n_create_new; ++i)
-          {
+         // Create new.
+         to = size();
+         for (size_t i = 0; i < n_create_new; ++i)
+         {
             create_element_at(to++, *first);
             ++first;
-          }
+         }
 
-          current_size += n_insert;
-        }
+         current_size += n_insert;
       }
     }
 

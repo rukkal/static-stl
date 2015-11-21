@@ -113,12 +113,6 @@ namespace test_etl
     }
 
     //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_constructor_size_excess)
-    {
-      CHECK_THROW(Data data(SIZE + 1), etl::vector_full);
-    }
-
-    //*************************************************************************
     TEST_FIXTURE(SetupFixture, test_constructor_range)
     {
       Compare_Data compare_data(initial_data.begin(), initial_data.end());
@@ -210,17 +204,6 @@ namespace test_etl
     }
 
     //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_resize_excess)
-    {
-      const size_t INITIAL_SIZE = 5;
-      const size_t NEW_SIZE = SIZE + 1;
-
-      Data data(INITIAL_SIZE);
-
-      CHECK_THROW(data.resize(NEW_SIZE), etl::vector_full);
-    }
-
-    //*************************************************************************
     TEST_FIXTURE(SetupFixture, test_resize_down)
     {
       const size_t INITIAL_SIZE = 5;
@@ -287,8 +270,6 @@ namespace test_etl
       {
         CHECK_EQUAL(data.at(i), compare_data.at(i));
       }
-
-      CHECK_THROW(data.at(data.size()), etl::vector_out_of_bounds);
     }
 
     //*************************************************************************
@@ -301,8 +282,6 @@ namespace test_etl
       {
         CHECK_EQUAL(data.at(i), compare_data.at(i));
       }
-
-      CHECK_THROW(data.at(data.size()), etl::vector_out_of_bounds);
     }
 
     //*************************************************************************
@@ -405,20 +384,6 @@ namespace test_etl
     }
 
     //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_assign_size_value_excess)
-    {
-      const size_t INITIAL_SIZE = SIZE;
-      const size_t EXCESS_SIZE = SIZE + 1;
-      const int INITIAL_VALUE = 1;
-      std::array<int, INITIAL_SIZE> compare_data;
-      compare_data.fill(INITIAL_VALUE);
-
-      Data data;
-
-      CHECK_THROW(data.assign(EXCESS_SIZE, INITIAL_VALUE), etl::vector_full);
-    }
-
-    //*************************************************************************
     TEST_FIXTURE(SetupFixture, test_push_back)
     {
       Compare_Data compare_data;
@@ -457,19 +422,6 @@ namespace test_etl
                                 compare_data.begin());
 
       CHECK(is_equal);
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_push_back_excess)
-    {
-      Data data;
-
-      for (size_t i = 0; i < SIZE; ++i)
-      {
-        data.push_back(i);
-      }
-
-      CHECK_THROW(data.push_back(SIZE), etl::vector_full);
     }
 
     //*************************************************************************
@@ -540,28 +492,6 @@ namespace test_etl
     }
 
     //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_insert_position_value_excess)
-    {
-      const size_t INITIAL_SIZE     = SIZE;
-      const int INITIAL_VALUE       = 1;
-      const int UNINITIALISED_VALUE = -1;
-
-      Data data(INITIAL_SIZE, INITIAL_VALUE);
-
-      size_t offset = 2;
-
-      CHECK_THROW(data.insert(data.begin() + offset, INITIAL_VALUE), etl::vector_full);
-
-      offset = 0;
-
-      CHECK_THROW(data.insert(data.begin() + offset, INITIAL_VALUE), etl::vector_full);
-
-      offset = data.size();
-
-      CHECK_THROW(data.insert(data.begin() + offset, INITIAL_VALUE), etl::vector_full);
-    }
-
-    //*************************************************************************
     TEST_FIXTURE(SetupFixture, test_insert_position_n_value)
     {
       const size_t INITIAL_SIZE     = 5;
@@ -587,32 +517,6 @@ namespace test_etl
     }
 
     //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_insert_position_n_value_excess)
-    {
-      const size_t INITIAL_SIZE = SIZE;
-      const size_t INSERT_SIZE  = 4;
-      const int INITIAL_VALUE   = 1;
-
-      Data data(INITIAL_SIZE, INITIAL_VALUE);
-
-      size_t offset = 0;
-
-      CHECK_THROW(data.insert(data.begin() + offset, INSERT_SIZE, INITIAL_VALUE), etl::vector_full);
-
-      offset = 2;
-
-      CHECK_THROW(data.insert(data.begin() + offset, INSERT_SIZE, INITIAL_VALUE), etl::vector_full);
-
-      offset = 4;
-
-      CHECK_THROW(data.insert(data.begin() + offset, INSERT_SIZE, INITIAL_VALUE), etl::vector_full);
-
-      offset = data.size();
-
-      CHECK_THROW(data.insert(data.begin() + offset, INSERT_SIZE, INITIAL_VALUE), etl::vector_full);
-    }
-
-    //*************************************************************************
     TEST_FIXTURE(SetupFixture, test_insert_position_range)
     {
       const size_t INITIAL_SIZE = 5;
@@ -634,31 +538,6 @@ namespace test_etl
 
         CHECK(is_equal);
       }
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_insert_position_range_excess)
-    {
-      const size_t INITIAL_SIZE = 5;
-      const int INITIAL_VALUE   = 1;
-
-      Data data(INITIAL_SIZE, INITIAL_VALUE);
-
-      size_t offset = 0;
-
-      CHECK_THROW(data.insert(data.begin() + offset, initial_data.begin(), initial_data.end()), etl::vector_full);
-
-      offset = 2;
-
-      CHECK_THROW(data.insert(data.begin() + offset, initial_data.begin(), initial_data.end()), etl::vector_full);
-
-      offset = 4;
-
-      CHECK_THROW(data.insert(data.begin() + offset, initial_data.begin(), initial_data.end()), etl::vector_full);
-
-      offset = data.size();
-
-      CHECK_THROW(data.insert(data.begin() + offset, initial_data.begin(), initial_data.end()), etl::vector_full);
     }
 
 

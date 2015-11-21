@@ -429,14 +429,6 @@ namespace
     }
 
     //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_insert_value_excess)
-    {
-      Data data(initial_data.begin(), initial_data.end());
-
-      CHECK_THROW(data.insert(std::make_pair(std::string("10"), 10)), etl::map_full);
-    }
-
-    //*************************************************************************
     TEST_FIXTURE(SetupFixture, test_insert_range)
     {
       Compare_Data compare_data;
@@ -466,14 +458,6 @@ namespace
         compare_data.begin());
 
       CHECK(isEqual);
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_insert_range_excess)
-    {
-      Data data;
-
-      CHECK_THROW(data.insert(excess_data.begin(), excess_data.end()), etl::map_full);
     }
 
     //*************************************************************************

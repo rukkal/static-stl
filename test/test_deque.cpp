@@ -26,7 +26,6 @@ SOFTWARE.
 ******************************************************************************/
 
 #include <UnitTest++/UnitTest++.h>
-#include "ExtraCheckMacros.h"
 
 #include <etl/deque.h>
 
@@ -101,12 +100,6 @@ namespace test_etl
     }
 
     //*************************************************************************
-    TEST(test_constructor_fill_excess)
-    {
-      CHECK_THROW(DataNDC(SIZE + 1, N999), etl::deque_full);
-    }
-
-    //*************************************************************************
     TEST(test_constructor_range)
     {
       Compare_Data compare_data(initial_data.begin(), initial_data.end());
@@ -114,12 +107,6 @@ namespace test_etl
 
       CHECK_EQUAL(compare_data.size(), data.size());
       CHECK(std::equal(compare_data.begin(), compare_data.end(), data.begin()));
-    }
-
-    //*************************************************************************
-    TEST(test_constructor_range_excess)
-    {
-      CHECK_THROW(DataNDC data(initial_data_excess.begin(), initial_data_excess.end()), etl::deque_full);
     }
 
     //*************************************************************************
@@ -161,18 +148,10 @@ namespace test_etl
     {
       DataNDC data;
 
-      CHECK_NO_THROW(data.assign(initial_data.begin(), initial_data.end()));
+      data.assign(initial_data.begin(), initial_data.end());
 
       CHECK_EQUAL(initial_data.size(), data.size());
       CHECK(std::equal(initial_data.begin(), initial_data.end(), data.begin()));
-    }
-
-    //*************************************************************************
-    TEST(test_assign_range_excess)
-    {
-      DataNDC data;
-
-      CHECK_THROW(data.assign(initial_data_excess.begin(), initial_data_excess.end()), etl::deque_full);
     }
 
     //*************************************************************************
@@ -183,18 +162,10 @@ namespace test_etl
 
       compare_data.assign(SIZE, N999);
 
-      CHECK_NO_THROW(data.assign(SIZE, N999));
+      data.assign(SIZE, N999);
 
       CHECK_EQUAL(compare_data.size(), data.size());
       CHECK(std::equal(compare_data.begin(), compare_data.end(), data.begin()));
-    }
-
-    //*************************************************************************
-    TEST(test_assign_fill_excess)
-    {
-      DataNDC data;
-
-      CHECK_THROW(data.assign(SIZE + 1, N999), etl::deque_full);
     }
 
     //*************************************************************************
@@ -681,18 +652,6 @@ namespace test_etl
     }
 
     //*************************************************************************
-    TEST(test_insert_n_value_excess)
-    {
-      DataNDC data(initial_data_under.begin(), initial_data_under.end());
-
-      size_t insert_size = SIZE - initial_data_under.size() + 1;
-
-      CHECK_THROW(data.insert(data.begin(),     insert_size, N14), etl::deque_full);
-      CHECK_THROW(data.insert(data.end(),       insert_size, N14), etl::deque_full);
-      CHECK_THROW(data.insert(data.begin() + 6, insert_size, N14), etl::deque_full);
-    }
-
-    //*************************************************************************
     TEST(test_insert_range)
     {
       size_t max_insert = SIZE - initial_data_small.size();
@@ -714,17 +673,6 @@ namespace test_etl
           CHECK(std::equal(compare_data.begin(), compare_data.end(), data.begin()));
         }
       }
-    }
-
-    //*************************************************************************
-    TEST(test_insert_range_excess)
-    {
-      Compare_Data range = { N12, N13, N14, N15 };
-      DataNDC data(initial_data_under.begin(), initial_data_under.end());
-
-      CHECK_THROW(data.insert(data.begin(),     range.begin(), range.end()), etl::deque_full);
-      CHECK_THROW(data.insert(data.end(),       range.begin(), range.end()), etl::deque_full);
-      CHECK_THROW(data.insert(data.begin() + 6, range.begin(), range.end()), etl::deque_full);
     }
 
     //*************************************************************************
@@ -1121,38 +1069,25 @@ namespace test_etl
       Compare_Data compare_data = { N1, N2, N3, N4, N5 };
       DataNDC data;
 
-      CHECK_NO_THROW(data.push_back(N1));
+      data.push_back(N1);
       CHECK_EQUAL(size_t(1), data.size());
       CHECK(std::equal(compare_data.begin(), compare_data.end() - 4, data.begin()));
 
-      CHECK_NO_THROW(data.push_back(N2));
+      data.push_back(N2);
       CHECK_EQUAL(size_t(2), data.size());
       CHECK(std::equal(compare_data.begin(), compare_data.end() - 3, data.begin()));
 
-      CHECK_NO_THROW(data.push_back(N3));
+      data.push_back(N3);
       CHECK_EQUAL(size_t(3), data.size());
       CHECK(std::equal(compare_data.begin(), compare_data.end() - 2, data.begin()));
 
-      CHECK_NO_THROW(data.push_back(N4));
+      data.push_back(N4);
       CHECK_EQUAL(size_t(4), data.size());
       CHECK(std::equal(compare_data.begin(), compare_data.end() - 1, data.begin()));
 
-      CHECK_NO_THROW(data.push_back(N5));
+      data.push_back(N5);
       CHECK_EQUAL(size_t(5), data.size());
       CHECK(std::equal(compare_data.begin(), compare_data.end(), data.begin()));
-    }
-
-    //*************************************************************************
-    TEST(test_push_back_excess)
-    {
-      DataNDC data;
-
-      for (size_t i = 0; i < SIZE; ++i)
-      {
-        CHECK_NO_THROW(data.push_back(N0));
-      }
-
-      CHECK_THROW(data.push_back(N999), etl::deque_full);
     }
 
     //*************************************************************************
@@ -1212,24 +1147,24 @@ namespace test_etl
       Compare_DataDC compare_data = { DC("5"), DC("4"), DC("3"), DC("2"), DC("1") };
       DataDC data;
 
-      CHECK_NO_THROW(data.push_front());
-      CHECK_NO_THROW(data.front() = DC("1"));
+      data.push_front();
+      data.front() = DC("1");
       CHECK_EQUAL(size_t(1), data.size());
 
-      CHECK_NO_THROW(data.push_front());
-      CHECK_NO_THROW(data.front() = DC("2"));
+      data.push_front();
+      data.front() = DC("2");
       CHECK_EQUAL(size_t(2), data.size());
 
-      CHECK_NO_THROW(data.push_front());
-      CHECK_NO_THROW(data.front() = DC("3"));
+      data.push_front();
+      data.front() = DC("3");
       CHECK_EQUAL(size_t(3), data.size());
 
-      CHECK_NO_THROW(data.push_front());
-      CHECK_NO_THROW(data.front() = DC("4"));
+      data.push_front();
+      data.front() = DC("4");
       CHECK_EQUAL(size_t(4), data.size());
 
-      CHECK_NO_THROW(data.push_front());
-      CHECK_NO_THROW(data.front() = DC("5"));
+      data.push_front();
+      data.front() = DC("5");
       CHECK_EQUAL(size_t(5), data.size());
 
       CHECK(std::equal(compare_data.begin(), compare_data.end(), data.begin()));
@@ -1241,23 +1176,23 @@ namespace test_etl
       Compare_Data compare_data = { N5, N4, N3, N2, N1 };
       DataNDC data;
 
-      CHECK_NO_THROW(data.push_front(N1));
+      data.push_front(N1);
       CHECK_EQUAL(size_t(1), data.size());
       CHECK(std::equal(compare_data.begin() + 4, compare_data.end(), data.begin()));
 
-      CHECK_NO_THROW(data.push_front(N2));
+      data.push_front(N2);
       CHECK_EQUAL(size_t(2), data.size());
       CHECK(std::equal(compare_data.begin() + 3, compare_data.end(), data.begin()));
 
-      CHECK_NO_THROW(data.push_front(N3));
+      data.push_front(N3);
       CHECK_EQUAL(size_t(3), data.size());
       CHECK(std::equal(compare_data.begin() + 2, compare_data.end(), data.begin()));
 
-      CHECK_NO_THROW(data.push_front(N4));
+      data.push_front(N4);
       CHECK_EQUAL(size_t(4), data.size());
       CHECK(std::equal(compare_data.begin() + 1, compare_data.end(), data.begin()));
 
-      CHECK_NO_THROW(data.push_front(N5));
+      data.push_front(N5);
       CHECK_EQUAL(size_t(5), data.size());
       CHECK(std::equal(compare_data.begin(), compare_data.end(), data.begin()));
     }
@@ -1269,10 +1204,8 @@ namespace test_etl
 
       for (size_t i = 0; i < SIZE; ++i)
       {
-        CHECK_NO_THROW(data.push_front(N1));
+        data.push_front(N1);
       }
-
-      CHECK_THROW(data.push_front(N999), etl::deque_full);
     }
 
     //*************************************************************************
@@ -1304,11 +1237,11 @@ namespace test_etl
       Compare_Data compare_data = { N1, N2, N3, N4, N5};
       DataNDC data;
 
-      CHECK_NO_THROW(data.push_back(N3));
-      CHECK_NO_THROW(data.push_front(N2));
-      CHECK_NO_THROW(data.push_back(N4));
-      CHECK_NO_THROW(data.push_front(N1));
-      CHECK_NO_THROW(data.push_back(N5));
+      data.push_back(N3);
+      data.push_front(N2);
+      data.push_back(N4);
+      data.push_front(N1);
+      data.push_back(N5);
 
       CHECK(std::equal(compare_data.begin(), compare_data.end(), data.begin()));
     }
@@ -1446,14 +1379,6 @@ namespace test_etl
 
       CHECK_EQUAL(size_t(SIZE), data.size());
       CHECK(std::equal(compare_data.begin(), compare_data.end(), data.begin()));
-    }
-
-    //*************************************************************************
-    TEST(test_resize_excess)
-    {
-      DataDC data;
-
-      CHECK_THROW(data.resize(SIZE + 1), etl::deque_out_of_bounds);
     }
 
     //*************************************************************************

@@ -35,52 +35,9 @@ SOFTWARE.
 #define __ETL_LIST_BASE__
 
 #include <stddef.h>
-#include "exception.h"
 
 namespace etl
 {
-  //***************************************************************************
-  /// Exception for the forward_list.
-  ///\ingroup forward_list
-  //***************************************************************************
-  class forward_list_exception : public exception
-  {
-  public:
-
-    forward_list_exception(const char* what)
-      : exception(what)
-    {
-    }
-  };
-
-  //***************************************************************************
-  /// Full exception for the forward_list.
-  ///\ingroup forward_list
-  //***************************************************************************
-  class forward_list_full : public forward_list_exception
-  {
-  public:
-
-    forward_list_full()
-      : forward_list_exception("forward list: full")
-    {
-    }
-  };
-
-  //***************************************************************************
-  /// Iterator exception for the forward_list.
-  ///\ingroup forward_list
-  //***************************************************************************
-  class forward_list_iterator : public forward_list_exception
-  {
-  public:
-
-    forward_list_iterator()
-      : forward_list_exception("forward_list: iterator problem")
-    {
-    }
-  };
-
   //***************************************************************************
   /// The base class for all forward_lists.
   ///\ingroup forward_list

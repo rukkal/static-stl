@@ -36,10 +36,11 @@ SOFTWARE.
 #include <functional>
 #include <stddef.h>
 
+#include "sstl_assert.h"
 #include "map_base.h"
+#include "bitmap_allocator.h"
 #include "__internal/type_traits.h"
 #include "__internal/parameter_type.h"
-#include "bitmap_allocator.h"
 
 #if WIN32
 #undef min
@@ -532,8 +533,6 @@ namespace etl
 
     //*********************************************************************
     /// Assigns values to the multimap.
-    /// If ETL_THROW_EXCEPTIONS is defined, emits map_full if the multimap does not have enough free space.
-    /// If ETL_THROW_EXCEPTIONS is defined, emits map_iterator if the iterators are reversed.
     ///\param first The iterator to the first element.
     ///\param last  The iterator to the last element + 1.
     //*********************************************************************
@@ -687,38 +686,23 @@ namespace etl
 
     //*********************************************************************
     /// Inserts a value to the multimap.
-    /// If ETL_THROW_EXCEPTIONS is defined, emits map_full if the multimap is already full.
     ///\param value    The value to insert.
     //*********************************************************************
     iterator insert(const value_type& value)
     {
+      sstl_assert(!full());
       // Default to no inserted node
       Node* inserted_node = nullptr;
-
-      if (!full())
-      {
-        // Get next available free node
-        Data_Node& node = allocate_data_node(value);
-
-        // Obtain the inserted node (might be nullptr if node was a duplicate)
-        inserted_node = insert_node(root_node, node);
-      }
-      else
-      {
-#ifdef ETL_THROW_EXCEPTIONS
-        throw map_full();
-#else
-        error_handler::error(map_full());
-#endif
-      }
-
+      // Get next available free node
+      Data_Node& node = allocate_data_node(value);
+      // Obtain the inserted node (might be nullptr if node was a duplicate)
+      inserted_node = insert_node(root_node, node);
       // Insert node into tree and return iterator to new node location in tree
       return iterator(*this, inserted_node);
     }
 
     //*********************************************************************
     /// Inserts a value to the multimap starting at the position recommended.
-    /// If ETL_THROW_EXCEPTIONS is defined, emits map_full if the multimap is already full.
     ///\param position The position that would precede the value to insert.
     ///\param value    The value to insert.
     //*********************************************************************
@@ -730,7 +714,6 @@ namespace etl
 
     //*********************************************************************
     /// Inserts a value to the multimap starting at the position recommended.
-    /// If ETL_THROW_EXCEPTIONS is defined, emits map_full if the multimap is already full.
     ///\param position The position that would precede the value to insert.
     ///\param value    The value to insert.
     //*********************************************************************
@@ -742,7 +725,6 @@ namespace etl
 
     //*********************************************************************
     /// Inserts a range of values to the multimap.
-    /// If ETL_THROW_EXCEPTIONS is defined, emits map_full if the multimap does not have enough free space.
     ///\param position The position to insert at.
     ///\param first    The first element to add.
     ///\param last     The last + 1 element to add.

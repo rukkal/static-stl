@@ -35,66 +35,9 @@ SOFTWARE.
 #define __ETL_SET_BASE__
 
 #include <stddef.h>
-#include "exception.h"
 
 namespace etl
 {
-  //***************************************************************************
-  /// Exception for the set.
-  ///\ingroup set
-  //***************************************************************************
-  class set_exception : public exception
-  {
-  public:
-
-    set_exception(const char* what)
-      : exception(what)
-    {
-    }
-  };
-
-  //***************************************************************************
-  /// Full exception for the set.
-  ///\ingroup set
-  //***************************************************************************
-  class set_full : public set_exception
-  {
-  public:
-
-    set_full()
-      : set_exception("set: full")
-    {
-    }
-  };
-
-  //***************************************************************************
-  /// Map out of bounds exception.
-  ///\ingroup set
-  //***************************************************************************
-  class set_out_of_bounds : public set_exception
-  {
-  public:
-
-    set_out_of_bounds()
-      : set_exception("set: out of bounds")
-    {
-    }
-  };
-
-  //***************************************************************************
-  /// Iterator exception for the set.
-  ///\ingroup set
-  //***************************************************************************
-  class set_iterator : public set_exception
-  {
-  public:
-
-    set_iterator()
-      : set_exception("set: iterator problem")
-    {
-    }
-  };
-
   //***************************************************************************
   /// The base class for all sets.
   ///\ingroup set

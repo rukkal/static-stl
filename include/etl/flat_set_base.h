@@ -36,71 +36,10 @@ SOFTWARE.
 
 #include <stddef.h>
 
-#include "exception.h"
 #include "ivector.h"
-
-#ifndef ETL_THROW_EXCEPTIONS
-#include "error_handler.h"
-#endif
 
 namespace etl
 {
-  //***************************************************************************
-  ///\ingroup flat_set
-  /// Exception base for flat_sets
-  //***************************************************************************
-  class flat_set_exception : public exception
-  {
-  public:
-
-    flat_set_exception(const char* what)
-      : exception(what)
-    {
-    }
-  };
-
-  //***************************************************************************
-  ///\ingroup flat_set
-  /// Vector full exception.
-  //***************************************************************************
-  class flat_set_full : public flat_set_exception
-  {
-  public:
-
-    flat_set_full()
-      : flat_set_exception("flat_set: full")
-    {
-    }
-  };
-
-  //***************************************************************************
-  ///\ingroup flat_set
-  /// Vector out of bounds exception.
-  //***************************************************************************
-  class flat_set_out_of_bounds : public flat_set_exception
-  {
-  public:
-
-    flat_set_out_of_bounds()
-      : flat_set_exception("flat_set: out of bounds")
-    {
-    }
-  };
-
-  //***************************************************************************
-  ///\ingroup flat_set
-  /// Vector iterator exception.
-  //***************************************************************************
-  class flat_set_iterator : public flat_set_exception
-  {
-  public:
-
-    flat_set_iterator()
-      : flat_set_exception("flat_set: iterator error")
-    {
-    }
-  };
-
   //***************************************************************************
   ///\ingroup flat_set
   /// The base class for all templated flat_set types.

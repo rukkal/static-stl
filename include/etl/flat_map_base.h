@@ -36,71 +36,10 @@ SOFTWARE.
 
 #include <stddef.h>
 
-#include "exception.h"
 #include "ivector.h"
-
-#ifndef ETL_THROW_EXCEPTIONS
-#include "error_handler.h"
-#endif
 
 namespace etl
 {
-  //***************************************************************************
-  ///\ingroup flat_map
-  /// Exception base for flat_maps
-  //***************************************************************************
-  class flat_map_exception : public exception
-  {
-  public:
-
-    flat_map_exception(const char* what)
-      : exception(what)
-    {
-    }
-  };
-
-  //***************************************************************************
-  ///\ingroup flat_map
-  /// Vector full exception.
-  //***************************************************************************
-  class flat_map_full : public flat_map_exception
-  {
-  public:
-
-    flat_map_full()
-      : flat_map_exception("flat_map: full")
-    {
-    }
-  };
-
-  //***************************************************************************
-  ///\ingroup flat_map
-  /// Vector out of bounds exception.
-  //***************************************************************************
-  class flat_map_out_of_bounds : public flat_map_exception
-  {
-  public:
-
-    flat_map_out_of_bounds()
-      : flat_map_exception("flat_map: out of bounds")
-    {
-    }
-  };
-
-  //***************************************************************************
-  ///\ingroup flat_map
-  /// Vector iterator exception.
-  //***************************************************************************
-  class flat_map_iterator : public flat_map_exception
-  {
-  public:
-
-    flat_map_iterator()
-      : flat_map_exception("flat_map: iterator error")
-    {
-    }
-  };
-
   //***************************************************************************
   ///\ingroup flat_map
   /// The base class for all templated flat_map types.

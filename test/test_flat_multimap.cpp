@@ -280,14 +280,6 @@ namespace
     }
 
     //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_insert_value_excess)
-    {
-      DataNDC data(initial_data.begin(), initial_data.end());
-
-      CHECK_THROW(data.insert(std::make_pair(10, N10)), etl::flat_multimap_full);
-    }
-
-    //*************************************************************************
     TEST_FIXTURE(SetupFixture, test_insert_range)
     {
       Compare_DataNDC compare_data;
@@ -301,14 +293,6 @@ namespace
                                  compare_data.begin());
 
       CHECK(isEqual);
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_insert_range_excess)
-    {
-      DataNDC data;
-
-      CHECK_THROW(data.insert(excess_data.begin(), excess_data.end()), etl::flat_multimap_full);
     }
 
     //*************************************************************************
@@ -544,7 +528,7 @@ namespace
 
 	    std::pair<Compare_DataNDC::iterator, Compare_DataNDC::iterator> compare_range;
 	    std::pair<DataNDC::iterator, DataNDC::iterator> test_range;
-		
+
 	    compare_range = compare_data.equal_range(0);
 	    test_range    = data.equal_range(0);
 	    CHECK_EQUAL(std::distance(compare_range.first, compare_range.second), std::distance(test_range.first, test_range.second));

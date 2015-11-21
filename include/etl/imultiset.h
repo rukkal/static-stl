@@ -36,10 +36,11 @@ SOFTWARE.
 #include <functional>
 #include <stddef.h>
 
+#include "sstl_assert.h"
 #include "set_base.h"
+#include "bitmap_allocator.h"
 #include "__internal/type_traits.h"
 #include "__internal/parameter_type.h"
-#include "bitmap_allocator.h"
 
 #if WIN32
 #undef min
@@ -515,8 +516,6 @@ namespace etl
 
     //*********************************************************************
     /// Assigns values to the multiset.
-    /// If ETL_THROW_EXCEPTIONS is defined, emits set_full if the multiset does not have enough free space.
-    /// If ETL_THROW_EXCEPTIONS is defined, emits set_iterator if the iterators are reversed.
     ///\param first The iterator to the first element.
     ///\param last  The iterator to the last element + 1.
     //*********************************************************************
@@ -670,38 +669,23 @@ namespace etl
 
     //*********************************************************************
     /// Inserts a value to the multiset.
-    /// If ETL_THROW_EXCEPTIONS is defined, emits set_full if the multiset is already full.
     ///\param value    The value to insert.
     //*********************************************************************
     iterator insert(const value_type& value)
     {
+      sstl_assert(!full());
       // Default to no inserted node
       Node* inserted_node = nullptr;
-
-      if (!full())
-      {
-        // Get next available free node
-        Data_Node& node = allocate_data_node(value);
-
-        // Obtain the inserted node (might be nullptr if node was a duplicate)
-        inserted_node = insert_node(root_node, node);
-      }
-      else
-      {
-#ifdef ETL_THROW_EXCEPTIONS
-        throw set_full();
-#else
-        error_handler::error(set_full());
-#endif
-      }
-
+      // Get next available free node
+      Data_Node& node = allocate_data_node(value);
+      // Obtain the inserted node (might be nullptr if node was a duplicate)
+      inserted_node = insert_node(root_node, node);
       // Insert node into tree and return iterator to new node location in tree
       return iterator(*this, inserted_node);
     }
 
     //*********************************************************************
     /// Inserts a value to the multiset starting at the position recommended.
-    /// If ETL_THROW_EXCEPTIONS is defined, emits set_full if the multiset is already full.
     ///\param position The position that would precede the value to insert.
     ///\param value    The value to insert.
     //*********************************************************************
@@ -713,7 +697,6 @@ namespace etl
 
     //*********************************************************************
     /// Inserts a value to the multiset starting at the position recommended.
-    /// If ETL_THROW_EXCEPTIONS is defined, emits set_full if the multiset is already full.
     ///\param position The position that would precede the value to insert.
     ///\param value    The value to insert.
     //*********************************************************************
@@ -725,7 +708,6 @@ namespace etl
 
     //*********************************************************************
     /// Inserts a range of values to the multiset.
-    /// If ETL_THROW_EXCEPTIONS is defined, emits set_full if the multiset does not have enough free space.
     ///\param position The position to insert at.
     ///\param first    The first element to add.
     ///\param last     The last + 1 element to add.

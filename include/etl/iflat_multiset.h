@@ -37,11 +37,11 @@ SOFTWARE.
 #include <utility>
 #include <stddef.h>
 
+#include "sstl_assert.h"
+#include "ivector.h"
 #include "flat_multiset_base.h"
 #include "__internal/type_traits.h"
 #include "__internal/parameter_type.h"
-#include "ivector.h"
-#include "error_handler.h"
 
 namespace etl
 {
@@ -189,25 +189,14 @@ namespace etl
 
     //*********************************************************************
     /// Assigns values to the flat_multiset.
-    /// If ETL_THROW_EXCEPTIONS is defined, emits flat_multiset_full if the flat_multiset does not have enough free space.
-    /// If ETL_THROW_EXCEPTIONS is defined, emits flat_multiset_iterator if the iterators are reversed.
     ///\param first The iterator to the first element.
     ///\param last  The iterator to the last element + 1.
     //*********************************************************************
     template <typename TIterator>
     void assign(TIterator first, TIterator last)
     {
-#ifndef NDEBUG
-      difference_type count = std::distance(first, last);
-
-      if (count < 0)
-      {
-        ETL_ERROR(flat_multiset_iterator());
-      }
-#endif
-
+      sstl_assert(std::distance(first, last) >= 0);
       clear();
-
       while (first != last)
       {
         insert(*first++);
@@ -216,22 +205,15 @@ namespace etl
 
     //*********************************************************************
     /// Inserts a value to the flat_multiset.
-    /// If ETL_THROW_EXCEPTIONS is defined, emits flat_multiset_full if the flat_multiset is already full.
     ///\param value    The value to insert.
     //*********************************************************************
     std::pair<iterator, bool> insert(parameter_t value)
     {
+      sstl_assert(!buffer.full());
       std::pair<iterator, bool> result(end(), false);
+	   iterator i_element = std::lower_bound(begin(), end(), value, TKeyCompare());
 
-      if (buffer.full())
-      {
-        ETL_ERROR(flat_multiset_full());
-        return result;
-	  }
-
-	  iterator i_element = std::lower_bound(begin(), end(), value, TKeyCompare());
-
-	  if (i_element == end())
+	   if (i_element == end())
       {
         // At the end.
         buffer.push_back(value);
@@ -251,7 +233,6 @@ namespace etl
 
     //*********************************************************************
     /// Inserts a value to the flat_multiset.
-    /// If ETL_THROW_EXCEPTIONS is defined, emits flat_multiset_full if the flat_multiset is already full.
     ///\param position The position to insert at.
     ///\param value    The value to insert.
     //*********************************************************************
@@ -262,7 +243,6 @@ namespace etl
 
     //*********************************************************************
     /// Inserts a range of values to the flat_multiset.
-    /// If ETL_THROW_EXCEPTIONS is defined, emits flat_multiset_full if the flat_multiset does not have enough free space.
     ///\param position The position to insert at.
     ///\param first    The first element to add.
     ///\param last     The last + 1 element to add.

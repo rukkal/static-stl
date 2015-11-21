@@ -35,66 +35,9 @@ SOFTWARE.
 #define __ETL_MAP_BASE__
 
 #include <stddef.h>
-#include "exception.h"
 
 namespace etl
 {
-  //***************************************************************************
-  /// Exception for the map.
-  ///\ingroup map
-  //***************************************************************************
-  class map_exception : public exception
-  {
-  public:
-
-    map_exception(const char* what)
-      : exception(what)
-    {
-    }
-  };
-
-  //***************************************************************************
-  /// Full exception for the map.
-  ///\ingroup map
-  //***************************************************************************
-  class map_full : public map_exception
-  {
-  public:
-
-    map_full()
-      : map_exception("map: full")
-    {
-    }
-  };
-
-  //***************************************************************************
-  /// Map out of bounds exception.
-  ///\ingroup map
-  //***************************************************************************
-  class map_out_of_bounds : public map_exception
-  {
-  public:
-
-    map_out_of_bounds()
-      : map_exception("map: out of bounds")
-    {
-    }
-  };
-
-  //***************************************************************************
-  /// Iterator exception for the map.
-  ///\ingroup map
-  //***************************************************************************
-  class map_iterator : public map_exception
-  {
-  public:
-
-    map_iterator()
-      : map_exception("map: iterator problem")
-    {
-    }
-  };
-
   //***************************************************************************
   /// The base class for all maps.
   ///\ingroup map

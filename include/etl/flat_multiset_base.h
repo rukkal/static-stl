@@ -36,68 +36,10 @@ SOFTWARE.
 
 #include <stddef.h>
 
-#include "exception.h"
 #include "ivector.h"
-#include "error_handler.h"
 
 namespace etl
 {
-  //***************************************************************************
-  ///\ingroup flat_multiset
-  /// Exception base for flat_multisets
-  //***************************************************************************
-  class flat_multiset_exception : public exception
-  {
-  public:
-
-    flat_multiset_exception(const char* what)
-      : exception(what)
-    {
-    }
-  };
-
-  //***************************************************************************
-  ///\ingroup flat_multiset
-  /// Flat multiset full exception.
-  //***************************************************************************
-  class flat_multiset_full : public flat_multiset_exception
-  {
-  public:
-
-    flat_multiset_full()
-      : flat_multiset_exception("flat_multiset: full")
-    {
-    }
-  };
-
-  //***************************************************************************
-  ///\ingroup flat_multiset
-  /// Flat multiset out of bounds exception.
-  //***************************************************************************
-  class flat_multiset_out_of_bounds : public flat_multiset_exception
-  {
-  public:
-
-    flat_multiset_out_of_bounds()
-      : flat_multiset_exception("flat_multiset: out of bounds")
-    {
-    }
-  };
-
-  //***************************************************************************
-  ///\ingroup flat_multiset
-  /// Vector iterator exception.
-  //***************************************************************************
-  class flat_multiset_iterator : public flat_multiset_exception
-  {
-  public:
-
-    flat_multiset_iterator()
-      : flat_multiset_exception("flat_multiset: iterator error")
-    {
-    }
-  };
-
   //***************************************************************************
   ///\ingroup flat_multiset
   /// The base class for all templated flat_multiset types.

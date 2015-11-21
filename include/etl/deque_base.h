@@ -36,65 +36,8 @@ SOFTWARE.
 
 #include <stddef.h>
 
-#include "exception.h"
-
 namespace etl
 {
-  //***************************************************************************
-  /// Exception base for deques
-  ///\ingroup deque
-  //***************************************************************************
-  class deque_exception : public exception
-  {
-  public:
-
-    deque_exception(const char* what)
-      : exception(what)
-    {
-    }
-  };
-
-  //***************************************************************************
-  /// Deque full exception.
-  ///\ingroup deque
-  //***************************************************************************
-  class deque_full : public deque_exception
-  {
-  public:
-
-    deque_full()
-      : deque_exception("deque: full")
-    {
-    }
-  };
-
-  //***************************************************************************
-  /// Deque empty exception.
-  ///\ingroup deque
-  //***************************************************************************
-  class deque_empty : public deque_exception
-  {
-  public:
-
-    deque_empty()
-      : deque_exception("deque: empty")
-    {
-    }
-  };
-
-  //***************************************************************************
-  /// Deque out of bounds exception.
-  ///\ingroup deque
-  //***************************************************************************
-  class deque_out_of_bounds : public deque_exception
-  {
-  public:
-
-    deque_out_of_bounds()
-      : deque_exception("deque: out of bounds")
-    {
-    }
-  };
 
   //***************************************************************************
   /// The base class for all templated deque types.

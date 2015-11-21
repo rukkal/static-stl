@@ -36,70 +36,8 @@ SOFTWARE.
 
 #include <stddef.h>
 
-#include "exception.h"
-
-#ifndef ETL_THROW_EXCEPTIONS
-#include "error_handler.h"
-#endif
-
 namespace etl
 {
-  //***************************************************************************
-  ///\ingroup vector
-  /// Exception base for vectors
-  //***************************************************************************
-  class vector_exception : public exception
-  {
-  public:
-
-    vector_exception(const char* what)
-      : exception(what)
-    {
-    }
-  };
-
-  //***************************************************************************
-  ///\ingroup vector
-  /// Vector full exception.
-  //***************************************************************************
-  class vector_full : public vector_exception
-  {
-  public:
-
-    vector_full()
-      : vector_exception("vector: full")
-    {
-    }
-  };
-
-  //***************************************************************************
-  ///\ingroup vector
-  /// Vector out of bounds exception.
-  //***************************************************************************
-  class vector_out_of_bounds : public vector_exception
-  {
-  public:
-
-    vector_out_of_bounds()
-      : vector_exception("vector: out of bounds")
-    {
-    }
-  };
-
-  //***************************************************************************
-  ///\ingroup vector
-  /// Vector iterator exception.
-  //***************************************************************************
-  class vector_iterator : public vector_exception
-  {
-  public:
-
-    vector_iterator()
-      : vector_exception("vector: iterator error")
-    {
-    }
-  };
-
   //***************************************************************************
   ///\ingroup vector
   /// The base class for all templated vector types.

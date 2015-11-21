@@ -8,10 +8,10 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #ifndef __SSTL_BITMAP_ALLOCATOR__
 #define __SSTL_BITMAP_ALLOCATOR__
 
-#include <cassert>
 #include <array>
 #include <type_traits>
 
+#include "sstl_assert.h"
 #include "__internal/bitset_span.h"
 
 namespace etl
@@ -38,7 +38,7 @@ public:
 
     T* allocate()
     {
-        assert(!bitmap.all());
+        sstl_assert(!bitmap.all());
         auto free_block_idx = get_next_free_block_idx();
         bitmap.set(free_block_idx);
         return &buffer[free_block_idx];
@@ -47,9 +47,9 @@ public:
     void deallocate(void* p)
     {
         T* block = static_cast<T*>(p);
-        assert(block>=buffer && block<buffer+bitmap.size());
+        sstl_assert(block>=buffer && block<buffer+bitmap.size());
         auto idx = block - buffer;
-        assert(bitmap.test(idx));
+        sstl_assert(bitmap.test(idx));
         bitmap.reset(idx);
         last_allocated_block_idx = idx-1;
     }

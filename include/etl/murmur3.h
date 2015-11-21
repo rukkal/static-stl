@@ -32,9 +32,8 @@ SOFTWARE.
 
 #include <stdint.h>
 
-#include "ihash.h"
+#include "sstl_assert.h"
 #include "__internal/binary.h"
-#include "error_handler.h"
 
 #if defined(COMPILER_KEIL)
 #pragma diag_suppress 1300
@@ -119,26 +118,18 @@ namespace etl
     void add(TIterator begin, const TIterator end)
     {
       static_assert(sizeof(typename std::iterator_traits<TIterator>::value_type) == 1, "Incompatible type");
+      sstl_assert(!is_finalised);
 
-      if (is_finalised)
+      while (begin != end)
       {
-        ETL_ERROR(hash_finalised());
-      }
-      else
-      {
-        while (begin != end)
-        {
-          block |= (*begin++) << (block_fill_count * 8);
-
-          if (++block_fill_count == FULL_BLOCK)
-          {
+         block |= (*begin++) << (block_fill_count * 8);
+         if (++block_fill_count == FULL_BLOCK)
+         {
             add_block();
             block_fill_count = 0;
             block = 0;
-          }
-
-          ++char_count;
-        }
+         }
+         ++char_count;
       }
     }
 
@@ -149,24 +140,16 @@ namespace etl
     //*************************************************************************
     void add(uint8_t value)
     {
-      // We can't add to a finalised hash!
-      if (is_finalised)
-      {
-        ETL_ERROR(hash_finalised());
-      }
-      else
-      {
-        block |= value << (block_fill_count * 8);
+      sstl_assert(!is_finalised);
 
-        if (++block_fill_count == FULL_BLOCK)
-        {
-          add_block();
-          block_fill_count = 0;
-          block = 0;
-        }
-
-        ++char_count;
+      block |= value << (block_fill_count * 8);
+      if (++block_fill_count == FULL_BLOCK)
+      {
+         add_block();
+         block_fill_count = 0;
+         block = 0;
       }
+      ++char_count;
     }
 
     //*************************************************************************
