@@ -47,33 +47,26 @@ typedef etl::multiset<int, SIZE, std::less<int> >  Data;
 typedef std::multiset<int, std::less<int> >        Compare_Data;
 #endif
 
-typedef Data::iterator Data_iterator;
-typedef Data::const_iterator Data_const_iterator;
-typedef Compare_Data::iterator Compare_Data_iterator;
-typedef Compare_Data::const_iterator Compare_Data_const_iterator;
-
-//*************************************************************************
-static std::ostream& operator << (std::ostream& os, const Data_iterator& it)
+namespace etl
 {
-  os << (*it);
+   typedef Data::iterator Data_iterator;
+   typedef Data::const_iterator Data_const_iterator;
 
-  return os;
-}
+   //*************************************************************************
+   static std::ostream& operator << (std::ostream& os, const Data_iterator& it)
+   {
+     os << (*it);
 
-//*************************************************************************
-static std::ostream& operator << (std::ostream& os, const Data_const_iterator& it)
-{
-  os << (*it);
+     return os;
+   }
 
-  return os;
-}
+   //*************************************************************************
+   static std::ostream& operator << (std::ostream& os, const Data_const_iterator& it)
+   {
+     os << (*it);
 
-//*************************************************************************
-static std::ostream& operator << (std::ostream& os, const Compare_Data_iterator& it)
-{
-  os << (*it);
-
-  return os;
+     return os;
+   }
 }
 
 namespace
@@ -679,14 +672,14 @@ namespace
 
       // Check that both return successful return results
       CHECK_EQUAL(data.end(), i_data);
-      CHECK_EQUAL(compare_data.end(), i_compare);
+      CHECK(compare_data.end() == i_compare);
 
       i_data = data.find(99);
       i_compare = compare_data.find(99);
 
       // Check that both return successful return results
       CHECK_EQUAL(data.end(), i_data);
-      CHECK_EQUAL(compare_data.end(), i_compare);
+      CHECK(compare_data.end() == i_compare);
     }
 
     //*************************************************************************
@@ -724,14 +717,14 @@ namespace
 
       // Check that both return successful return results
       CHECK_EQUAL(data.end(), i_data);
-      CHECK_EQUAL(compare_data.end(), i_compare);
+      CHECK(compare_data.end() == i_compare);
 
       i_data = data.find(99);
       i_compare = compare_data.find(99);
 
       // Check that both return successful return results
       CHECK_EQUAL(data.end(), i_data);
-      CHECK_EQUAL(compare_data.end(), i_compare);
+      CHECK(compare_data.end() == i_compare);
     }
 
     //*************************************************************************
@@ -772,7 +765,7 @@ namespace
 
 #ifdef TEST_GREATER_THAN
       i_compare = compare_data.lower_bound(-1);
-      CHECK_EQUAL(compare_data.end(), i_compare);
+      CHECK(compare_data.end() == i_compare);
 
       i_data = data.lower_bound(-1);
       CHECK_EQUAL(data.end(), i_data);
@@ -786,7 +779,7 @@ namespace
       CHECK_EQUAL(*i_compare, *i_data);
 
       i_compare = compare_data.lower_bound(99);
-      CHECK_EQUAL(compare_data.end(), i_compare);
+      CHECK(compare_data.end() == i_compare);
 
       i_data = data.lower_bound(99);
       CHECK_EQUAL(data.end(), i_data);
@@ -805,7 +798,7 @@ namespace
 
 #ifdef TEST_GREATER_THAN
       i_compare = compare_data.lower_bound(-1);
-      CHECK_EQUAL(compare_data.end(), i_compare);
+      CHECK(compare_data.end() == i_compare);
 
       i_data = data.lower_bound(-1);
       CHECK_EQUAL(data.end(), i_data);
@@ -819,7 +812,7 @@ namespace
       CHECK_EQUAL(*i_compare, *i_data);
 
       i_compare = compare_data.lower_bound(99);
-      CHECK_EQUAL(compare_data.end(), i_compare);
+      CHECK(compare_data.end() == i_compare);
 
       i_data = data.lower_bound(99);
       CHECK_EQUAL(data.end(), i_data);
@@ -838,7 +831,7 @@ namespace
 
 #ifdef TEST_GREATER_THAN
       i_compare = compare_data.upper_bound(-1);
-      CHECK_EQUAL(compare_data.end(), i_compare);
+      CHECK(compare_data.end() == i_compare);
 
       i_data = data.upper_bound(-1);
       CHECK_EQUAL(data.end(), i_data);
@@ -852,7 +845,7 @@ namespace
       CHECK_EQUAL(*i_compare, *i_data);
 
       i_compare = compare_data.upper_bound(99);
-      CHECK_EQUAL(compare_data.end(), i_compare);
+      CHECK(compare_data.end() == i_compare);
 
       i_data = data.upper_bound(99);
       CHECK_EQUAL(data.end(), i_data);
@@ -871,7 +864,7 @@ namespace
 
 #ifdef TEST_GREATER_THAN
       i_compare = compare_data.upper_bound(-1);
-      CHECK_EQUAL(compare_data.end(), i_compare);
+      CHECK(compare_data.end() == i_compare);
 
       i_data = data.upper_bound(-1);
       CHECK_EQUAL(data.end(), i_data);
@@ -885,7 +878,7 @@ namespace
       CHECK_EQUAL(*i_compare, *i_data);
 
       i_compare = compare_data.upper_bound(99);
-      CHECK_EQUAL(compare_data.end(), i_compare);
+      CHECK(compare_data.end() == i_compare);
 
       i_data = data.upper_bound(99);
       CHECK_EQUAL(data.end(), i_data);

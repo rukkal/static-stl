@@ -35,6 +35,7 @@ SOFTWARE.
 #include <type_traits>
 #include <iterator>
 #include <algorithm>
+#include <array>
 
 #include "ideque.h"
 

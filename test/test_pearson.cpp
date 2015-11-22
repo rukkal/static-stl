@@ -71,19 +71,6 @@ hash_t Pearson_Compare(const TContainer& data)
   return hash;
 }
 
-//***************************************************************************
-// Output stream for hash_t
-//***************************************************************************
-std::ostream& operator <<(std::ostream& os, const hash_t& hash)
-{
-  for (size_t i = 0; i < hash.size(); ++i)
-  {
-    os << int(hash[i]) << " ";
-  }
-
-  return os;
-}
-
 namespace
 {
   SUITE(test_pearson)
@@ -96,7 +83,7 @@ namespace
       hash_t compare = Pearson_Compare(data);
       hash_t hash    = etl::pearson<HASH_SIZE>(data.begin(), data.end());
 
-      CHECK_EQUAL(compare, hash);
+      CHECK(compare == hash);
     }
 
     //*************************************************************************
@@ -114,7 +101,7 @@ namespace
       hash_t compare = Pearson_Compare(data);
       hash_t hash    = pearson_calculator;
 
-      CHECK_EQUAL(compare, hash);
+      CHECK(compare == hash);
     }
 
     //*************************************************************************
@@ -129,7 +116,7 @@ namespace
       hash_t compare = Pearson_Compare(data);
       hash_t hash    = pearson_calculator.value();
 
-      CHECK_EQUAL(compare, hash);
+      CHECK(compare == hash);
     }
 
     //*************************************************************************
@@ -141,10 +128,10 @@ namespace
 
       hash_t hash1 = etl::pearson<HASH_SIZE>(data1.begin(), data1.end());
       hash_t hash2 = etl::pearson<HASH_SIZE>((uint8_t*)&data2[0], (uint8_t*)(&data2[0] + data2.size()));
-      CHECK_EQUAL(hash1, hash2);
+      CHECK(hash1 == hash2);
 
       hash_t hash3 = etl::pearson<HASH_SIZE>(data3.rbegin(), data3.rend());
-      CHECK_EQUAL(hash1, hash3);
+      CHECK(hash1 == hash3);
     }
   };
 }

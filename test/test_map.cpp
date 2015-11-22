@@ -48,44 +48,29 @@ typedef etl::map<std::string, int, SIZE, std::less<std::string> >  Data;
 typedef std::map<std::string, int, std::less<std::string> >        Compare_Data;
 #endif
 
-typedef Data::iterator Data_iterator;
-typedef Data::const_iterator Data_const_iterator;
-typedef Compare_Data::iterator Compare_Data_iterator;
-typedef Compare_Data::const_iterator Compare_Data_const_iterator;
-
-//*************************************************************************
-static std::ostream& operator << (std::ostream& os, const Data_iterator& it)
+namespace etl
 {
-  os << (*it).first << " " << (*it).second;
+   using Data_iterator = Data::iterator;
+   using Data_const_iterator = Data::const_iterator;
 
-  return os;
+   //*************************************************************************
+   static std::ostream& operator << (std::ostream& os, const Data_iterator& it)
+   {
+     os << (*it).first << " " << (*it).second;
+
+     return os;
+   }
+
+   //*************************************************************************
+   static std::ostream& operator << (std::ostream& os, const Data_const_iterator& it)
+   {
+     os << (*it).first << " " << (*it).second;
+
+     return os;
+   }
 }
 
-//*************************************************************************
-static std::ostream& operator << (std::ostream& os, const Data_const_iterator& it)
-{
-  os << (*it).first << " " << (*it).second;
-
-  return os;
-}
-
-//*************************************************************************
-static std::ostream& operator << (std::ostream& os, const Compare_Data_iterator& it)
-{
-  os << (*it).first << " " << (*it).second;
-
-  return os;
-}
-
-//*************************************************************************
-static std::ostream& operator << (std::ostream& os, const Compare_Data_const_iterator& it)
-{
-  os << (*it).first << " " << (*it).second;
-
-  return os;
-}
-
-namespace
+namespace test_etl
 {
   SUITE(test_map)
   {
@@ -767,7 +752,7 @@ namespace
 
 #ifdef TEST_GREATER_THAN
       i_compare = compare_data.lower_bound(".");
-      CHECK_EQUAL(compare_data.end(), i_compare);
+      CHECK(compare_data.end() == i_compare);
 
       i_data = data.lower_bound(".");
       CHECK_EQUAL(data.end(), i_data);
@@ -781,7 +766,7 @@ namespace
       CHECK_EQUAL(i_compare->second, i_data->second);
 
       i_compare = compare_data.lower_bound("A");
-      CHECK_EQUAL(compare_data.end(), i_compare);
+      CHECK(compare_data.end() == i_compare);
 
       i_data = data.lower_bound("A");
       CHECK_EQUAL(data.end(), i_data);
@@ -800,7 +785,7 @@ namespace
 
 #ifdef TEST_GREATER_THAN
       i_compare = compare_data.lower_bound(".");
-      CHECK_EQUAL(compare_data.end(), i_compare);
+      CHECK(compare_data.end() == i_compare);
 
       i_data = data.lower_bound(".");
       CHECK_EQUAL(data.end(), i_data);
@@ -814,7 +799,7 @@ namespace
       CHECK_EQUAL(i_compare->second, i_data->second);
 
       i_compare = compare_data.lower_bound("A");
-      CHECK_EQUAL(compare_data.end(), i_compare);
+      CHECK(compare_data.end() == i_compare);
 
       i_data = data.lower_bound("A");
       CHECK_EQUAL(data.end(), i_data);
@@ -833,7 +818,7 @@ namespace
 
 #ifdef TEST_GREATER_THAN
       i_compare = compare_data.upper_bound(".");
-      CHECK_EQUAL(compare_data.end(), i_compare);
+      CHECK(compare_data.end() == i_compare);
 
       i_data = data.upper_bound(".");
       CHECK_EQUAL(data.end(), i_data);
@@ -847,7 +832,7 @@ namespace
       CHECK_EQUAL(i_compare->second, i_data->second);
 
       i_compare = compare_data.upper_bound("A");
-      CHECK_EQUAL(compare_data.end(), i_compare);
+      CHECK(compare_data.end() == i_compare);
 
       i_data = data.upper_bound("A");
       CHECK_EQUAL(data.end(), i_data);
@@ -866,7 +851,7 @@ namespace
 
 #ifdef TEST_GREATER_THAN
       i_compare = compare_data.upper_bound(".");
-      CHECK_EQUAL(compare_data.end(), i_compare);
+      CHECK(compare_data.end() == i_compare);
 
       i_data = data.upper_bound(".");
       CHECK_EQUAL(data.end(), i_data);
@@ -880,7 +865,7 @@ namespace
       CHECK_EQUAL(i_compare->second, i_data->second);
 
       i_compare = compare_data.upper_bound("A");
-      CHECK_EQUAL(compare_data.end(), i_compare);
+      CHECK(compare_data.end() == i_compare);
 
       i_data = data.upper_bound("A");
       CHECK_EQUAL(data.end(), i_data);
