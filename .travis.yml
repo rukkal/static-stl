@@ -4,5 +4,15 @@ compiler:
   - gcc
   - clang
 
-script: ./run_unix_makefiles.sh
+install:
+  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+  - sudo apt-get update -qq
+  - if [ "$CXX" = "g++" ]; then sudo apt-get install -qq g++-4.8; fi
+  - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
+
+script:
+  - mkdir build
+  - mkdir build/unix_makefiles
+  - cd build/unix_makefiles
+  - cmake -G "Unix Makefiles" ../.. && make && ./test
 
