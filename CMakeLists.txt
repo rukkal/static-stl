@@ -40,8 +40,8 @@ else (${UNIX})
 endif()
 add_library(unittestcpp ${unittestcpp_srcs})
 
-file(GLOB etltest_srcs "test/*.cpp" "test/*.h")
-add_executable(etltest ${etltest_srcs})
+file(GLOB test_srcs "test/*.cpp" "test/*.h")
+add_executable(test ${test_srcs})
 
-target_link_libraries(etltest etl unittestcpp)
+target_link_libraries(test etl unittestcpp)
 

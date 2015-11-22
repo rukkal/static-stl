@@ -1,0 +1,8 @@
+language: cpp
+
+compiler:
+  - gcc
+  - clang
+
+script: ./run_unix_makefiles.sh
+

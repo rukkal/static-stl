@@ -5,5 +5,5 @@ cd build/unix_makefiles
 cmake -G "Unix Makefiles" ../..
 make
 if (($? == 0)); then
-   ./etltest
+   ./test
 fi
