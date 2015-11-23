@@ -144,7 +144,7 @@ namespace
       CHECK_EQUAL(compare2, hash2);
 
       uint64_t compare3 = jenkins32(data3.rbegin(), data3.rend());
-      CHECK_EQUAL(compare2, hash3);
+      CHECK_EQUAL(compare3, hash3);
     }
 
     //*************************************************************************
@@ -212,7 +212,7 @@ namespace
       CHECK_EQUAL(compare2, hash2);
 
       uint64_t compare3 = jenkins64(data3.rbegin(), data3.rend());
-      CHECK_EQUAL(compare2, hash3);
+      CHECK_EQUAL(compare3, hash3);
     }
   };
 }

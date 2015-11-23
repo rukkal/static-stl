@@ -520,7 +520,6 @@ namespace test_etl
     TEST_FIXTURE(SetupFixture, test_insert_position_range)
     {
       const size_t INITIAL_SIZE = 5;
-      const int INITIAL_VALUE   = 1;
 
       for (size_t offset = 0; offset <= INITIAL_SIZE; ++offset)
       {
@@ -760,11 +759,6 @@ namespace test_etl
       const size_t INITIAL_SIZE = 5;
 
       Data data(INITIAL_SIZE);
-
-      size_t a = sizeof(Data);
-      size_t b = SIZE * sizeof(int);
-      size_t c = sizeof(etl::vector_base);
-      size_t d = sizeof(etl::ivector<int>);
 
       size_t expected_size = (SIZE * sizeof(int)) + (2 * sizeof(size_t)) + sizeof(int*);
 

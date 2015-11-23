@@ -643,8 +643,6 @@ namespace test_etl
           compare_data.insert(compare_data.begin() + offset, insert_size, N14);
           data.insert(data.begin() + offset, insert_size, N14);
 
-          bool equal = std::equal(compare_data.begin(), compare_data.end(), data.begin());
-
           CHECK_EQUAL(compare_data.size(), data.size());
           CHECK(std::equal(compare_data.begin(), compare_data.end(), data.begin()));
         }
