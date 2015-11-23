@@ -33,7 +33,6 @@ SOFTWARE.
 
 #include <etl/__internal/binary.h>
 #include <etl/fnv_1.h>
-#include <etl/__internal/integral_limits.h>
 
 #undef max
 
@@ -43,7 +42,7 @@ size_t test_count(T value)
 {
   size_t count = 0;
 
-  for (size_t i = 0; i < etl::integral_limits<T>::bits; ++i)
+  for (size_t i = 0; i < std::numeric_limits<T>::digits; ++i)
   {
     if ((value & (T(1) << i)) != 0)
     {

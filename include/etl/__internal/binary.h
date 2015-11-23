@@ -34,8 +34,8 @@ SOFTWARE.
 /// Binary utilities
 ///\ingroup utilities
 
+#include <limits>
 #include <type_traits>
-#include "integral_limits.h"
 #include "log.h"
 #include "power.h"
 #include "smallest.h"
@@ -94,7 +94,7 @@ namespace etl
   {
     static_assert(std::is_integral<T>::value, "Not an integral type");
 
-    const size_t SHIFT = etl::integral_limits<typename std::make_unsigned<T>::type>::bits - 1;
+    const size_t SHIFT = std::numeric_limits<typename std::make_unsigned<T>::type>::digits - 1;
 
     return (value << 1) | (value >> SHIFT);
   }
@@ -107,7 +107,7 @@ namespace etl
   {
     static_assert(std::is_integral<T>::value, "Not an integral type");
 
-    const size_t BITS = etl::integral_limits<typename std::make_unsigned<T>::type>::bits;
+    const size_t BITS = std::numeric_limits<typename std::make_unsigned<T>::type>::digits;
     distance %= BITS;
     const size_t SHIFT = BITS - distance;
 
@@ -122,7 +122,7 @@ namespace etl
   {
     static_assert(std::is_integral<T>::value, "Not an integral type");
 
-    const size_t SHIFT = etl::integral_limits<typename std::make_unsigned<T>::type>::bits - 1;
+    const size_t SHIFT = std::numeric_limits<typename std::make_unsigned<T>::type>::digits - 1;
 
     return (value >> 1) | (value << SHIFT);
   }
@@ -135,7 +135,7 @@ namespace etl
   {
     static_assert(std::is_integral<T>::value, "Not an integral type");
 
-    const size_t BITS = etl::integral_limits<typename std::make_unsigned<T>::type>::bits;
+    const size_t BITS = std::numeric_limits<typename std::make_unsigned<T>::type>::digits;
     distance %= BITS;
     const size_t SHIFT = BITS - distance;
 
@@ -473,7 +473,7 @@ namespace etl
   template <typename TReturn, const size_t NBITS, typename TValue>
   TReturn fold_bits(TValue value)
   {
-    static_assert(integral_limits<TReturn>::bits >= NBITS, "Return type too small to hold result");
+    static_assert(std::numeric_limits<TReturn>::digits >= NBITS, "Return type too small to hold result");
 
     const TValue mask  = etl::power<2, NBITS>::value - 1;
     const size_t shift = NBITS;

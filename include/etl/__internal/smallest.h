@@ -30,9 +30,7 @@ SOFTWARE.
 #ifndef __ETL_SMALLEST__
 #define __ETL_SMALLEST__
 
-#include <stdint.h>
-
-#include "integral_limits.h"
+#include <cstdint>
 
 ///\defgroup smallest smallest
 ///\ingroup utilities
@@ -66,7 +64,7 @@ namespace etl
       typedef TrueType type;
     };
 
-    // Specialisation for 'false'. 
+    // Specialisation for 'false'.
     // Defines 'type' as 'FalseType'.
     template <typename TrueType, typename FalseType>
     struct choose_type<false, TrueType, FalseType>
@@ -76,7 +74,7 @@ namespace etl
 
   public:
 
-    // Define 'smallest_other' as 'smallest_type' with all but the first parameter. 
+    // Define 'smallest_other' as 'smallest_type' with all but the first parameter.
     typedef typename smallest_type<T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>::type smallest_other;
 
     // Set 'type' to be the smallest of the first parameter and any of the others.
@@ -109,7 +107,7 @@ namespace etl
       size = sizeof(type)
     };
   };
-  
+
   namespace __private_smallest__
   {
     //*************************************************************************
@@ -117,7 +115,7 @@ namespace etl
     //*************************************************************************
     template <const int index>
     struct best_fit_uint_type;
-    
+
     //*************************************************************************
     // Less than or equal to 8 bits.
     //*************************************************************************
@@ -156,7 +154,7 @@ namespace etl
   }
 
   //***************************************************************************
-  /// Template to determine the smallest unsigned int type that can contain a 
+  /// Template to determine the smallest unsigned int type that can contain a
   /// value with the specified number of bits.
   /// Defines 'type' which is the type of the smallest unsigned integer.
   ///\ingroup smallest
@@ -165,7 +163,7 @@ namespace etl
   struct smallest_uint_for_bits
   {
   private:
-    
+
     // Determines the index of the best unsigned type for the required number of bits.
     static const int TYPE_INDEX = ((N >  8) ? 1 : 0) + ((N > 16) ? 1 : 0) + ((N > 32) ? 1 : 0);
 
