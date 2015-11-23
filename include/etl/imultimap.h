@@ -39,7 +39,6 @@ SOFTWARE.
 #include "sstl_assert.h"
 #include "map_base.h"
 #include "bitmap_allocator.h"
-#include "__internal/type_traits.h"
 #include "__internal/parameter_type.h"
 
 #if WIN32

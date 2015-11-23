@@ -31,15 +31,15 @@ SOFTWARE.
 #define __ETL_ILIST__
 #define __ETL_IN_ILIST_H__
 
+#include <cstddef>
+#include <type_traits>
 #include <iterator>
 #include <algorithm>
 #include <functional>
-#include <stddef.h>
 
 #include "sstl_assert.h"
 #include "list_base.h"
 #include "bitmap_allocator.h"
-#include "__internal/type_traits.h"
 #include "__internal/parameter_type.h"
 
 #if WIN32
@@ -66,7 +66,7 @@ namespace etl
 
   protected:
 
-    typedef typename parameter_type<T, is_fundamental<T>::value || is_pointer<T>::value>::type parameter_t;
+    typedef typename parameter_type<T, std::is_fundamental<T>::value || std::is_pointer<T>::value>::type parameter_t;
 
 
     //*************************************************************************

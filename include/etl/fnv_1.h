@@ -30,9 +30,7 @@ SOFTWARE.
 #ifndef __ETL_FNV_1__
 #define __ETL_FNV_1__
 
-#include <stdint.h>
-
-#include "__internal/type_traits.h"
+#include <cstdint>
 
 #if defined(COMPILER_KEIL)
 #pragma diag_suppress 1300

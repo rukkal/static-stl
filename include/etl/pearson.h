@@ -33,7 +33,6 @@ SOFTWARE.
 #include <stdint.h>
 #include <array>
 
-#include "__internal/type_traits.h"
 #include "endian.h"
 
 #if defined(COMPILER_KEIL)

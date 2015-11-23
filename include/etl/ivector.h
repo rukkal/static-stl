@@ -39,7 +39,6 @@ SOFTWARE.
 
 #include "sstl_assert.h"
 #include "vector_base.h"
-#include "__internal/type_traits.h"
 #include "__internal/parameter_type.h"
 
 namespace etl

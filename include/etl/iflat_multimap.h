@@ -40,7 +40,6 @@ SOFTWARE.
 #include "sstl_assert.h"
 #include "ivector.h"
 #include "flat_multimap_base.h"
-#include "__internal/type_traits.h"
 #include "__internal/parameter_type.h"
 
 namespace etl

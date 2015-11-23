@@ -34,7 +34,6 @@ SOFTWARE.
 #include <iterator>
 
 #include "sstl_assert.h"
-#include "__internal/type_traits.h"
 
 #if defined(COMPILER_KEIL)
 #pragma diag_suppress 1300
@@ -54,7 +53,7 @@ namespace etl
   {
   public:
 
-    static_assert((etl::is_same<THash, uint32_t>::value || etl::is_same<THash, uint64_t>::value), "Only 32 & 64 bit types supported");
+    static_assert((std::is_same<THash, uint32_t>::value || std::is_same<THash, uint64_t>::value), "Only 32 & 64 bit types supported");
 
     typedef THash value_type;
 

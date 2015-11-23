@@ -32,13 +32,13 @@ SOFTWARE.
 #define __ETL_IN_IDEQUE_H__
 
 #include <cstddef>
+#include <type_traits>
 #include <iterator>
 #include <algorithm>
 #include <utility>
 
 #include "sstl_assert.h"
 #include "deque_base.h"
-#include "__internal/type_traits.h"
 #include "__internal/parameter_type.h"
 
 namespace etl
@@ -69,7 +69,7 @@ namespace etl
     /// Test for an iterator.
     //*************************************************************************
     template <typename TIterator>
-    struct is_iterator : public etl::integral_constant<bool, !etl::is_integral<TIterator>::value && !etl::is_floating_point<TIterator>::value>
+    struct is_iterator : public std::integral_constant<bool, !std::is_integral<TIterator>::value && !std::is_floating_point<TIterator>::value>
     {
     };
 
@@ -473,7 +473,7 @@ namespace etl
     /// Assigns a range to the deque.
     //*************************************************************************
     template<typename TIterator>
-    typename etl::enable_if<is_iterator<TIterator>::value, void>::type
+    typename std::enable_if<is_iterator<TIterator>::value, void>::type
       assign(TIterator range_begin, TIterator range_end)
     {
       initialise();
@@ -838,7 +838,7 @@ namespace etl
     ///\param range_end   The end of the range to insert.
     //*************************************************************************
     template<typename TIterator>
-    typename enable_if<is_iterator<TIterator>::value, iterator>::type
+    typename std::enable_if<is_iterator<TIterator>::value, iterator>::type
     insert(const_iterator insert_position, TIterator range_begin, TIterator range_end)
     {
       difference_type n = std::distance(range_begin, range_end);

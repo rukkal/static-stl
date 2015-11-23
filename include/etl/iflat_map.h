@@ -31,16 +31,15 @@ SOFTWARE.
 #define __ETL_IFLAT_MAP__
 #define __ETL_IN_IFLAT_MAP_H__
 
+#include <cstddef>
 #include <iterator>
 #include <algorithm>
 #include <functional>
 #include <utility>
-#include <stddef.h>
 
 #include "sstl_assert.h"
 #include "ivector.h"
 #include "flat_map_base.h"
-#include "__internal/type_traits.h"
 #include "__internal/parameter_type.h"
 
 namespace etl

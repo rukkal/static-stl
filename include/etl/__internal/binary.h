@@ -34,7 +34,7 @@ SOFTWARE.
 /// Binary utilities
 ///\ingroup utilities
 
-#include "type_traits.h"
+#include <type_traits>
 #include "integral_limits.h"
 #include "log.h"
 #include "power.h"
@@ -92,9 +92,9 @@ namespace etl
   template <typename T>
   T rotate_left(T value)
   {
-    static_assert(etl::is_integral<T>::value, "Not an integral type");
+    static_assert(std::is_integral<T>::value, "Not an integral type");
 
-    const size_t SHIFT = etl::integral_limits<typename etl::make_unsigned<T>::type>::bits - 1;
+    const size_t SHIFT = etl::integral_limits<typename std::make_unsigned<T>::type>::bits - 1;
 
     return (value << 1) | (value >> SHIFT);
   }
@@ -105,9 +105,9 @@ namespace etl
   template <typename T>
   T rotate_left(T value, size_t distance)
   {
-    static_assert(etl::is_integral<T>::value, "Not an integral type");
+    static_assert(std::is_integral<T>::value, "Not an integral type");
 
-    const size_t BITS = etl::integral_limits<typename etl::make_unsigned<T>::type>::bits;
+    const size_t BITS = etl::integral_limits<typename std::make_unsigned<T>::type>::bits;
     distance %= BITS;
     const size_t SHIFT = BITS - distance;
 
@@ -120,9 +120,9 @@ namespace etl
   template <typename T>
   T rotate_right(T value)
   {
-    static_assert(etl::is_integral<T>::value, "Not an integral type");
+    static_assert(std::is_integral<T>::value, "Not an integral type");
 
-    const size_t SHIFT = etl::integral_limits<typename etl::make_unsigned<T>::type>::bits - 1;
+    const size_t SHIFT = etl::integral_limits<typename std::make_unsigned<T>::type>::bits - 1;
 
     return (value >> 1) | (value << SHIFT);
   }
@@ -133,9 +133,9 @@ namespace etl
   template <typename T>
   T rotate_right(T value, size_t distance)
   {
-    static_assert(etl::is_integral<T>::value, "Not an integral type");
+    static_assert(std::is_integral<T>::value, "Not an integral type");
 
-    const size_t BITS = etl::integral_limits<typename etl::make_unsigned<T>::type>::bits;
+    const size_t BITS = etl::integral_limits<typename std::make_unsigned<T>::type>::bits;
     distance %= BITS;
     const size_t SHIFT = BITS - distance;
 
@@ -147,9 +147,9 @@ namespace etl
   /// Positive is left, negative is right.
   //***************************************************************************
   template <typename T>
-  T rotate(T value, typename etl::make_signed<size_t>::type distance)
+  T rotate(T value, typename std::make_signed<size_t>::type distance)
   {
-    static_assert(etl::is_integral<T>::value, "Not an integral type");
+    static_assert(std::is_integral<T>::value, "Not an integral type");
 
     if (distance > 0)
     {
@@ -165,7 +165,7 @@ namespace etl
   /// Reverse 8 bits.
   //***************************************************************************
   template <typename T>
-  typename etl::enable_if<etl::is_same<typename etl::make_unsigned<T>::type, uint8_t>::value, T>::type
+  typename std::enable_if<std::is_same<typename std::make_unsigned<T>::type, uint8_t>::value, T>::type
   reverse_bits(T value)
   {
     value = ((value & 0xAA) >> 1) | ((value & 0x55) << 1);
@@ -179,7 +179,7 @@ namespace etl
   /// Reverse 16 bits.
   //***************************************************************************
   template <typename T>
-  typename etl::enable_if<etl::is_same<typename etl::make_unsigned<T>::type, uint16_t>::value, T>::type
+  typename std::enable_if<std::is_same<typename std::make_unsigned<T>::type, uint16_t>::value, T>::type
   reverse_bits(T value)
   {
     value = ((value & 0xAAAA) >> 1) | ((value & 0x5555) << 1);
@@ -194,7 +194,7 @@ namespace etl
   /// Reverse 32 bits.
   //***************************************************************************
   template <typename T>
-  typename etl::enable_if<etl::is_same<typename etl::make_unsigned<T>::type, uint32_t>::value, T>::type
+  typename std::enable_if<std::is_same<typename std::make_unsigned<T>::type, uint32_t>::value, T>::type
   reverse_bits(T value)
   {
     value = ((value & 0xAAAAAAAA) >>  1) | ((value & 0x55555555) <<  1);
@@ -210,7 +210,7 @@ namespace etl
   /// Reverse 64 bits.
   //***************************************************************************
   template <typename T>
-  typename etl::enable_if<etl::is_same<typename etl::make_unsigned<T>::type, uint64_t>::value, T>::type
+  typename std::enable_if<std::is_same<typename std::make_unsigned<T>::type, uint64_t>::value, T>::type
   reverse_bits(T value)
   {
     value = ((value & 0xAAAAAAAAAAAAAAAA) >>  1) | ((value & 0x5555555555555555) <<  1);
@@ -227,7 +227,7 @@ namespace etl
   /// Reverse bytes 16 bit.
   //***************************************************************************
   template <typename T>
-  typename etl::enable_if<etl::is_same<typename etl::make_unsigned<T>::type, uint16_t>::value, T>::type
+  typename std::enable_if<std::is_same<typename std::make_unsigned<T>::type, uint16_t>::value, T>::type
   reverse_bytes(T value)
   {
     value = (value >> 8) | (value << 8);
@@ -239,7 +239,7 @@ namespace etl
   /// Reverse bytes 32 bit.
   //***************************************************************************
   template <typename T>
-  typename etl::enable_if<etl::is_same<typename etl::make_unsigned<T>::type, uint32_t>::value, T>::type
+  typename std::enable_if<std::is_same<typename std::make_unsigned<T>::type, uint32_t>::value, T>::type
   reverse_bytes(T value)
   {
     value = ((value & 0xFF00FF00) >> 8) | ((value & 0x00FF00FF) << 8);
@@ -252,7 +252,7 @@ namespace etl
   /// Reverse bytes 64 bit.
   //***************************************************************************
   template <typename T>
-  typename etl::enable_if<etl::is_same<typename etl::make_unsigned<T>::type, uint64_t>::value, T>::type
+  typename std::enable_if<std::is_same<typename std::make_unsigned<T>::type, uint64_t>::value, T>::type
   reverse_bytes(T value)
   {
     value = ((value & 0xFF00FF00FF00FF00) >> 8)  | ((value & 0x00FF00FF00FF00FF) << 8);
@@ -268,7 +268,7 @@ namespace etl
   template <typename T>
   T binary_to_gray(T value)
   {
-    static_assert(etl::is_integral<T>::value, "Not an integral type");
+    static_assert(std::is_integral<T>::value, "Not an integral type");
 
     return (value >> 1) ^ value;
   }
@@ -277,7 +277,7 @@ namespace etl
   /// Converts Gray code to binary.
   //***************************************************************************
   template <typename T>
-  typename etl::enable_if<etl::is_same<typename etl::make_unsigned<T>::type, uint8_t>::value, T>::type
+  typename std::enable_if<std::is_same<typename std::make_unsigned<T>::type, uint8_t>::value, T>::type
   gray_to_binary(T value)
   {
     value ^= (value >> 4);
@@ -291,7 +291,7 @@ namespace etl
   /// Converts Gray code to binary.
   //***************************************************************************
   template <typename T>
-  typename etl::enable_if<etl::is_same<typename etl::make_unsigned<T>::type, uint16_t>::value, T>::type
+  typename std::enable_if<std::is_same<typename std::make_unsigned<T>::type, uint16_t>::value, T>::type
   gray_to_binary(T value)
   {
     value ^= (value >> 8);
@@ -306,7 +306,7 @@ namespace etl
   /// Converts Gray code to binary.
   //***************************************************************************
   template <typename T>
-  typename etl::enable_if<etl::is_same<typename etl::make_unsigned<T>::type, uint32_t>::value, T>::type
+  typename std::enable_if<std::is_same<typename std::make_unsigned<T>::type, uint32_t>::value, T>::type
   gray_to_binary(T value)
   {
     value ^= (value >> 16);
@@ -322,7 +322,7 @@ namespace etl
   /// Converts Gray code to binary.
   //***************************************************************************
   template <typename T>
-  typename etl::enable_if<etl::is_same<typename etl::make_unsigned<T>::type, uint64_t>::value, T>::type
+  typename std::enable_if<std::is_same<typename std::make_unsigned<T>::type, uint64_t>::value, T>::type
   gray_to_binary(T value)
   {
     value ^= (value >> 32);
@@ -339,7 +339,7 @@ namespace etl
   /// Count set bits. 8 bits.
   //***************************************************************************
   template <typename T>
-  typename etl::enable_if<etl::is_same<typename etl::make_unsigned<T>::type, uint8_t>::value, size_t>::type
+  typename std::enable_if<std::is_same<typename std::make_unsigned<T>::type, uint8_t>::value, size_t>::type
   count_bits(T value)
   {
     uint32_t count;
@@ -357,7 +357,7 @@ namespace etl
   /// Count set bits. 16 bits.
   //***************************************************************************
   template <typename T>
-  typename etl::enable_if<etl::is_same<typename etl::make_unsigned<T>::type, uint16_t>::value, size_t>::type
+  typename std::enable_if<std::is_same<typename std::make_unsigned<T>::type, uint16_t>::value, size_t>::type
   count_bits(T value)
   {
     uint32_t count;
@@ -376,7 +376,7 @@ namespace etl
   /// Count set bits. 32 bits.
   //***************************************************************************
   template <typename T>
-  typename etl::enable_if<etl::is_same<typename etl::make_unsigned<T>::type, uint32_t>::value, size_t>::type
+  typename std::enable_if<std::is_same<typename std::make_unsigned<T>::type, uint32_t>::value, size_t>::type
   count_bits(T value)
   {
     uint32_t count;
@@ -396,7 +396,7 @@ namespace etl
   /// Count set bits. 64 bits.
   //***************************************************************************
   template <typename T>
-  typename etl::enable_if<etl::is_same<typename etl::make_unsigned<T>::type, uint64_t>::value, size_t>::type
+  typename std::enable_if<std::is_same<typename std::make_unsigned<T>::type, uint64_t>::value, size_t>::type
   count_bits(T value)
   {
     uint64_t count;
@@ -417,7 +417,7 @@ namespace etl
   /// Parity. 8bits. 0 = even, 1 = odd
   //***************************************************************************
   template <typename T>
-  typename etl::enable_if<etl::is_same<typename etl::make_unsigned<T>::type, uint8_t>::value, size_t>::type
+  typename std::enable_if<std::is_same<typename std::make_unsigned<T>::type, uint8_t>::value, size_t>::type
   parity(T value)
   {
     value ^= value >> 4;
@@ -429,7 +429,7 @@ namespace etl
   /// Parity. 16bits. 0 = even, 1 = odd
   //***************************************************************************
   template <typename T>
-  typename etl::enable_if<etl::is_same<typename etl::make_unsigned<T>::type, uint16_t>::value, size_t>::type
+  typename std::enable_if<std::is_same<typename std::make_unsigned<T>::type, uint16_t>::value, size_t>::type
   parity(T value)
   {
     value ^= value >> 8;
@@ -442,7 +442,7 @@ namespace etl
   /// Parity. 32bits. 0 = even, 1 = odd
   //***************************************************************************
   template <typename T>
-  typename etl::enable_if<etl::is_same<typename etl::make_unsigned<T>::type, uint32_t>::value, size_t>::type
+  typename std::enable_if<std::is_same<typename std::make_unsigned<T>::type, uint32_t>::value, size_t>::type
   parity(T value)
   {
     value ^= value >> 16;
@@ -456,7 +456,7 @@ namespace etl
   /// Parity. 64bits. 0 = even, 1 = odd
   //***************************************************************************
   template <typename T>
-  typename etl::enable_if<etl::is_same<typename etl::make_unsigned<T>::type, uint64_t>::value, size_t>::type
+  typename std::enable_if<std::is_same<typename std::make_unsigned<T>::type, uint64_t>::value, size_t>::type
   parity(T value)
   {
     value ^= value >> 32;

@@ -30,7 +30,8 @@ SOFTWARE.
 #ifndef __ETL_MURMUR3__
 #define __ETL_MURMUR3__
 
-#include <stdint.h>
+#include <cstdint>
+#include <type_traits>
 
 #include "sstl_assert.h"
 #include "__internal/binary.h"
@@ -55,7 +56,7 @@ namespace etl
   {
   public:
 
-    static_assert((etl::is_same<THash, uint32_t>::value || etl::is_same<THash, uint64_t>::value), "Only 32 & 64 bit types supported");
+    static_assert((std::is_same<THash, uint32_t>::value || std::is_same<THash, uint64_t>::value), "Only 32 & 64 bit types supported");
 
     typedef THash value_type;
 
