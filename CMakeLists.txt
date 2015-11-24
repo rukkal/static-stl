@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
-project("Static STL")
+project("StaticSTL")
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     set(compilation_flags "-std=c++11 -Wall -g")
@@ -18,8 +18,8 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 include_directories("include")
 include_directories("unittest-cpp")
 
-file(GLOB etl_srcs "include/etl/*.cpp" "include/etl/*.h" "include/etl/__internal/*.h")
-add_library(etl ${etl_srcs})
+file(GLOB sstl_srcs "include/sstl/*.cpp" "include/sstl/*.h" "include/sstl/__internal/*.h")
+add_library(sstl ${sstl_srcs})
 
 if (${UNIX})
     file(GLOB unittestcpp_srcs   "unittest-cpp/UnitTest++/*.cpp"
@@ -39,5 +39,5 @@ add_library(unittestcpp ${unittestcpp_srcs})
 file(GLOB test_srcs "test/*.cpp" "test/*.h")
 add_executable(test ${test_srcs})
 
-target_link_libraries(test etl unittestcpp)
+target_link_libraries(test sstl unittestcpp)
 

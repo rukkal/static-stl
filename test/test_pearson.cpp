@@ -33,7 +33,7 @@ SOFTWARE.
 #include <iomanip>
 #include <stdint.h>
 
-#include <etl/pearson.h>
+#include <sstl/pearson.h>
 
 const size_t HASH_SIZE = 8;
 typedef etl::pearson<HASH_SIZE>::value_type hash_t;

@@ -27,14 +27,14 @@ SOFTWARE.
 
 #include <UnitTest++/UnitTest++.h>
 
-#include <etl/murmurhash3.h> // The 'C' reference implementation.
+#include <sstl/murmurhash3.h> // The 'C' reference implementation.
 
 #include <iterator>
 #include <string>
 #include <vector>
 #include <stdint.h>
 
-#include <etl/murmur3.h>
+#include <sstl/murmur3.h>
 
 namespace
 {

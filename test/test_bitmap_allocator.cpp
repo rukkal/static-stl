@@ -9,7 +9,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include <vector>
 #include <UnitTest++/UnitTest++.h>
 
-#include <etl/bitmap_allocator.h>
+#include <sstl/bitmap_allocator.h>
 
 namespace etl_test
 {

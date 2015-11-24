@@ -6,8 +6,8 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 */
 
 #include <UnitTest++/UnitTest++.h>
-#include <etl/queue.h>
-#include <etl/deque.h>
+#include <sstl/queue.h>
+#include <sstl/deque.h>
 
 namespace test_etl
 {

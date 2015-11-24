@@ -27,8 +27,8 @@ SOFTWARE.
 
 #include <UnitTest++/UnitTest++.h>
 
-#include <etl/__internal/log.h>
-#include <etl/__internal/power.h>
+#include <sstl/__internal/log.h>
+#include <sstl/__internal/power.h>
 
 namespace
 {

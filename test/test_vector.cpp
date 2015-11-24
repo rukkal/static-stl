@@ -32,7 +32,7 @@ SOFTWARE.
 #include <algorithm>
 #include <utility>
 
-#include <etl/vector.h>
+#include <sstl/vector.h>
 #include "counted_type.h"
 
 namespace test_etl

@@ -6,7 +6,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 */
 
 #include <UnitTest++/UnitTest++.h>
-#include <etl/stack.h>
+#include <sstl/stack.h>
 
 namespace test_etl
 {

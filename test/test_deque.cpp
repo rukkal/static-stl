@@ -27,7 +27,7 @@ SOFTWARE.
 
 #include <UnitTest++/UnitTest++.h>
 
-#include <etl/deque.h>
+#include <sstl/deque.h>
 
 #include "data.h"
 #include "counted_type.h"

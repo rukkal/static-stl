@@ -7,8 +7,8 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 
 #include <UnitTest++/UnitTest++.h>
 #include <functional>
-#include <etl/priority_queue.h>
-#include <etl/vector.h>
+#include <sstl/priority_queue.h>
+#include <sstl/vector.h>
 
 namespace test_etl
 {

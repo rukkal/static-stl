@@ -27,14 +27,14 @@ SOFTWARE.
 
 #include <UnitTest++/UnitTest++.h>
 
-#include <etl/murmurhash3.h> // The 'C' reference implementation.
+#include <sstl/murmurhash3.h> // The 'C' reference implementation.
 
 #include <iterator>
 #include <string>
 #include <vector>
 #include <stdint.h>
 
-#include <etl/jenkins.h>
+#include <sstl/jenkins.h>
 
 template <typename TIterator>
 uint32_t jenkins32(TIterator begin, TIterator end)

@@ -32,10 +32,10 @@ SOFTWARE.
 #include <vector>
 #include <stdint.h>
 
-#include <etl/fnv_1.h>
+#include <sstl/fnv_1.h>
 
 namespace
-{		
+{
   SUITE(test_fnv1)
   {
     //*************************************************************************
@@ -171,7 +171,7 @@ namespace
       {
         fnv_1_64_calculator.add(data[i]);
       }
-      
+
       uint64_t hash = fnv_1_64_calculator;
 
       CHECK_EQUAL(0xA72FFC362BF916D6, hash);
