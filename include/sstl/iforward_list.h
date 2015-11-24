@@ -46,10 +46,10 @@ SOFTWARE.
 #include "bitmap_allocator.h"
 #include "__internal/parameter_type.h"
 
-namespace etl
+namespace sstl
 {
   //***************************************************************************
-  /// A templated base for all etl::forward_list types.
+  /// A templated base for all sstl::forward_list types.
   ///\ingroup forward_list
   //***************************************************************************
   template <typename T>
@@ -826,7 +826,7 @@ namespace etl
     //*************************************************************************
     /// Constructor.
     //*************************************************************************
-    iforward_list(etl::__bitmap_allocator_base<Data_Node>& node_pool, size_t max_size_)
+    iforward_list(sstl::__bitmap_allocator_base<Data_Node>& node_pool, size_t max_size_)
       : forward_list_base(max_size_),
         p_node_pool(&node_pool)
     {
@@ -838,7 +838,7 @@ namespace etl
   private:
 
     /// The pool of data nodes used in the list.
-    etl::__bitmap_allocator_base<Data_Node>* p_node_pool;
+    sstl::__bitmap_allocator_base<Data_Node>* p_node_pool;
 
     //*************************************************************************
     /// Downcast a Node* to a Data_Node*
@@ -975,7 +975,7 @@ namespace etl
 ///\return <b>true</b> if the arrays are equal, otherwise <b>false</b>.
 //*************************************************************************
 template <typename T>
-bool operator ==(const etl::iforward_list<T>& lhs, const etl::iforward_list<T>& rhs)
+bool operator ==(const sstl::iforward_list<T>& lhs, const sstl::iforward_list<T>& rhs)
 {
   return (lhs.size() == rhs.size()) &&
     std::equal(lhs.begin(), lhs.end(), rhs.begin());
@@ -988,7 +988,7 @@ bool operator ==(const etl::iforward_list<T>& lhs, const etl::iforward_list<T>& 
 ///\return <b>true</b> if the arrays are not equal, otherwise <b>false</b>.
 //*************************************************************************
 template <typename T>
-bool operator !=(const etl::iforward_list<T>& lhs, const etl::iforward_list<T>& rhs)
+bool operator !=(const sstl::iforward_list<T>& lhs, const sstl::iforward_list<T>& rhs)
 {
   return !(lhs == rhs);
 }
@@ -1001,7 +1001,7 @@ bool operator !=(const etl::iforward_list<T>& lhs, const etl::iforward_list<T>& 
 /// second, otherwise <b>false</b>.
 //*************************************************************************
 template <typename T>
-bool operator <(const etl::iforward_list<T>& lhs, const etl::iforward_list<T>& rhs)
+bool operator <(const sstl::iforward_list<T>& lhs, const sstl::iforward_list<T>& rhs)
 {
   return std::lexicographical_compare(lhs.begin(),
                                       lhs.end(),
@@ -1017,7 +1017,7 @@ bool operator <(const etl::iforward_list<T>& lhs, const etl::iforward_list<T>& r
 /// second, otherwise <b>false</b>.
 //*************************************************************************
 template <typename T>
-bool operator >(const etl::iforward_list<T>& lhs, const etl::iforward_list<T>& rhs)
+bool operator >(const sstl::iforward_list<T>& lhs, const sstl::iforward_list<T>& rhs)
 {
   return std::lexicographical_compare(lhs.begin(),
                                       lhs.end(),
@@ -1034,7 +1034,7 @@ bool operator >(const etl::iforward_list<T>& lhs, const etl::iforward_list<T>& r
 /// to the second, otherwise <b>false</b>.
 //*************************************************************************
 template <typename T>
-bool operator <=(const etl::iforward_list<T>& lhs, const etl::iforward_list<T>& rhs)
+bool operator <=(const sstl::iforward_list<T>& lhs, const sstl::iforward_list<T>& rhs)
 {
   return !operator >(lhs, rhs);
 }
@@ -1047,7 +1047,7 @@ bool operator <=(const etl::iforward_list<T>& lhs, const etl::iforward_list<T>& 
 /// equal to the second, otherwise <b>false</b>.
 //*************************************************************************
 template <typename T>
-bool operator >=(const etl::iforward_list<T>& lhs, const etl::iforward_list<T>& rhs)
+bool operator >=(const sstl::iforward_list<T>& lhs, const sstl::iforward_list<T>& rhs)
 {
   return !operator <(lhs, rhs);
 }

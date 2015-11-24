@@ -39,7 +39,9 @@ SOFTWARE.
 
 #include <sstl/flat_multimap.h>
 
-namespace
+namespace sstl
+{
+namespace test
 {
   SUITE(test_flat_multimap)
   {
@@ -51,8 +53,8 @@ namespace
     typedef std::pair<int, DC>  ElementDC;
     typedef std::pair<int, NDC> ElementNDC;
 
-    typedef etl::flat_multimap<int, DC, SIZE>  DataDC;
-    typedef etl::flat_multimap<int, NDC, SIZE> DataNDC;
+    typedef sstl::flat_multimap<int, DC, SIZE>  DataDC;
+    typedef sstl::flat_multimap<int, NDC, SIZE> DataNDC;
 
     typedef std::multimap<int, DC>  Compare_DataDC;
     typedef std::multimap<int, NDC> Compare_DataNDC;
@@ -565,4 +567,5 @@ namespace
       CHECK_EQUAL(compare_data.count(5), data.count(5));
     }
   };
+}
 }

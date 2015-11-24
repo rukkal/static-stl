@@ -42,7 +42,7 @@ SOFTWARE.
 ///\defgroup jenkins Jenkins 32 & 64 bit hash calculations
 ///\ingroup maths
 
-namespace etl
+namespace sstl
 {
   //***************************************************************************
   /// Calculates the jenkins hash.

@@ -45,10 +45,10 @@ SOFTWARE.
 #undef min
 #endif
 
-namespace etl
+namespace sstl
 {
   //***************************************************************************
-  /// A templated base for all etl::multiset types.
+  /// A templated base for all sstl::multiset types.
   ///\ingroup set
   //***************************************************************************
   template <typename T, typename TCompare>
@@ -1701,7 +1701,7 @@ namespace etl
 ///\ingroup lookup
 //***************************************************************************
 template <typename T, typename TCompare>
-bool operator ==(const etl::imultiset<T, TCompare>& lhs, const etl::imultiset<T, TCompare>& rhs)
+bool operator ==(const sstl::imultiset<T, TCompare>& lhs, const sstl::imultiset<T, TCompare>& rhs)
 {
   return (lhs.size() == rhs.size()) && std::equal(lhs.begin(), lhs.end(), rhs.begin());
 }
@@ -1714,7 +1714,7 @@ bool operator ==(const etl::imultiset<T, TCompare>& lhs, const etl::imultiset<T,
 ///\ingroup lookup
 //***************************************************************************
 template <typename T, typename TCompare>
-bool operator !=(const etl::imultiset<T, TCompare>& lhs, const etl::imultiset<T, TCompare>& rhs)
+bool operator !=(const sstl::imultiset<T, TCompare>& lhs, const sstl::imultiset<T, TCompare>& rhs)
 {
   return !(lhs == rhs);
 }
@@ -1727,7 +1727,7 @@ bool operator !=(const etl::imultiset<T, TCompare>& lhs, const etl::imultiset<T,
 /// second, otherwise <b>false</b>.
 //*************************************************************************
 template <typename T, typename TCompare>
-bool operator <(const etl::imultiset<T, TCompare>& lhs, const etl::imultiset<T, TCompare>& rhs)
+bool operator <(const sstl::imultiset<T, TCompare>& lhs, const sstl::imultiset<T, TCompare>& rhs)
 {
   return std::lexicographical_compare(lhs.begin(),
                                       lhs.end(),
@@ -1743,7 +1743,7 @@ bool operator <(const etl::imultiset<T, TCompare>& lhs, const etl::imultiset<T, 
 /// second, otherwise <b>false</b>.
 //*************************************************************************
 template <typename T, typename TCompare>
-bool operator >(const etl::imultiset<T, TCompare>& lhs, const etl::imultiset<T, TCompare>& rhs)
+bool operator >(const sstl::imultiset<T, TCompare>& lhs, const sstl::imultiset<T, TCompare>& rhs)
 {
   return std::lexicographical_compare(lhs.begin(),
                                       lhs.end(),
@@ -1760,7 +1760,7 @@ bool operator >(const etl::imultiset<T, TCompare>& lhs, const etl::imultiset<T, 
 /// to the second, otherwise <b>false</b>.
 //*************************************************************************
 template <typename T, typename TCompare>
-bool operator <=(const etl::imultiset<T, TCompare>& lhs, const etl::imultiset<T, TCompare>& rhs)
+bool operator <=(const sstl::imultiset<T, TCompare>& lhs, const sstl::imultiset<T, TCompare>& rhs)
 {
   return !operator >(lhs, rhs);
 }
@@ -1773,7 +1773,7 @@ bool operator <=(const etl::imultiset<T, TCompare>& lhs, const etl::imultiset<T,
 /// equal to the second, otherwise <b>false</b>.
 //*************************************************************************
 template <typename T, typename TCompare>
-bool operator >=(const etl::imultiset<T, TCompare>& lhs, const etl::imultiset<T, TCompare>& rhs)
+bool operator >=(const sstl::imultiset<T, TCompare>& lhs, const sstl::imultiset<T, TCompare>& rhs)
 {
   return !operator <(lhs, rhs);
 }

@@ -45,10 +45,10 @@ SOFTWARE.
 #undef min
 #endif
 
-namespace etl
+namespace sstl
 {
   //***************************************************************************
-  /// A templated base for all etl::multimap types.
+  /// A templated base for all sstl::multimap types.
   ///\ingroup map
   //***************************************************************************
   template <typename TKey, typename TMapped, typename TKeyCompare>
@@ -1718,7 +1718,7 @@ namespace etl
 ///\ingroup lookup
 //***************************************************************************
 template <typename TKey, typename TMapped, typename TKeyCompare>
-bool operator ==(const etl::imultimap<TKey, TMapped, TKeyCompare>& lhs, const etl::imultimap<TKey, TMapped, TKeyCompare>& rhs)
+bool operator ==(const sstl::imultimap<TKey, TMapped, TKeyCompare>& lhs, const sstl::imultimap<TKey, TMapped, TKeyCompare>& rhs)
 {
   return (lhs.size() == rhs.size()) && std::equal(lhs.begin(), lhs.end(), rhs.begin());
 }
@@ -1731,7 +1731,7 @@ bool operator ==(const etl::imultimap<TKey, TMapped, TKeyCompare>& lhs, const et
 ///\ingroup lookup
 //***************************************************************************
 template <typename TKey, typename TMapped, typename TKeyCompare>
-bool operator !=(const etl::imultimap<TKey, TMapped, TKeyCompare>& lhs, const etl::imultimap<TKey, TMapped, TKeyCompare>& rhs)
+bool operator !=(const sstl::imultimap<TKey, TMapped, TKeyCompare>& lhs, const sstl::imultimap<TKey, TMapped, TKeyCompare>& rhs)
 {
   return !(lhs == rhs);
 }
@@ -1744,7 +1744,7 @@ bool operator !=(const etl::imultimap<TKey, TMapped, TKeyCompare>& lhs, const et
 /// second, otherwise <b>false</b>.
 //*************************************************************************
 template <typename TKey, typename TMapped, typename TKeyCompare>
-bool operator <(const etl::imultimap<TKey, TMapped, TKeyCompare>& lhs, const etl::imultimap<TKey, TMapped, TKeyCompare>& rhs)
+bool operator <(const sstl::imultimap<TKey, TMapped, TKeyCompare>& lhs, const sstl::imultimap<TKey, TMapped, TKeyCompare>& rhs)
 {
   return std::lexicographical_compare(lhs.begin(),
                                       lhs.end(),
@@ -1760,7 +1760,7 @@ bool operator <(const etl::imultimap<TKey, TMapped, TKeyCompare>& lhs, const etl
 /// second, otherwise <b>false</b>.
 //*************************************************************************
 template <typename TKey, typename TMapped, typename TKeyCompare>
-bool operator >(const etl::imultimap<TKey, TMapped, TKeyCompare>& lhs, const etl::imultimap<TKey, TMapped, TKeyCompare>& rhs)
+bool operator >(const sstl::imultimap<TKey, TMapped, TKeyCompare>& lhs, const sstl::imultimap<TKey, TMapped, TKeyCompare>& rhs)
 {
   return std::lexicographical_compare(lhs.begin(),
                                       lhs.end(),
@@ -1777,7 +1777,7 @@ bool operator >(const etl::imultimap<TKey, TMapped, TKeyCompare>& lhs, const etl
 /// to the second, otherwise <b>false</b>.
 //*************************************************************************
 template <typename TKey, typename TMapped, typename TKeyCompare>
-bool operator <=(const etl::imultimap<TKey, TMapped, TKeyCompare>& lhs, const etl::imultimap<TKey, TMapped, TKeyCompare>& rhs)
+bool operator <=(const sstl::imultimap<TKey, TMapped, TKeyCompare>& lhs, const sstl::imultimap<TKey, TMapped, TKeyCompare>& rhs)
 {
   return !operator >(lhs, rhs);
 }
@@ -1790,7 +1790,7 @@ bool operator <=(const etl::imultimap<TKey, TMapped, TKeyCompare>& lhs, const et
 /// equal to the second, otherwise <b>false</b>.
 //*************************************************************************
 template <typename TKey, typename TMapped, typename TKeyCompare>
-bool operator >=(const etl::imultimap<TKey, TMapped, TKeyCompare>& lhs, const etl::imultimap<TKey, TMapped, TKeyCompare>& rhs)
+bool operator >=(const sstl::imultimap<TKey, TMapped, TKeyCompare>& lhs, const sstl::imultimap<TKey, TMapped, TKeyCompare>& rhs)
 {
   return !operator <(lhs, rhs);
 }

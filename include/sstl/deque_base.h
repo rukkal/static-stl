@@ -28,7 +28,7 @@ SOFTWARE.
 ******************************************************************************/
 
 #ifndef __ETL_IN_IDEQUE_H__
-#error This header is a private element of etl::deque & etl::ideque
+#error This header is a private element of sstl::deque & sstl::ideque
 #endif
 
 #ifndef __ETL_DEQUE_BASE__
@@ -36,7 +36,7 @@ SOFTWARE.
 
 #include <stddef.h>
 
-namespace etl
+namespace sstl
 {
 
   //***************************************************************************

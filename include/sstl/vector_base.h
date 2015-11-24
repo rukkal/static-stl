@@ -28,7 +28,7 @@ SOFTWARE.
 ******************************************************************************/
 
 #ifndef __ETL_IN_IVECTOR_H__
-#error This header is a private element of etl::vector & etl::ivector
+#error This header is a private element of sstl::vector & sstl::ivector
 #endif
 
 #ifndef __ETL_VECTOR_BASE__
@@ -36,7 +36,7 @@ SOFTWARE.
 
 #include <stddef.h>
 
-namespace etl
+namespace sstl
 {
   //***************************************************************************
   ///\ingroup vector

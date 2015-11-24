@@ -35,13 +35,15 @@ SOFTWARE.
 #include <sstl/vector.h>
 #include "counted_type.h"
 
-namespace test_etl
+namespace sstl
+{
+namespace test
 {
   SUITE(test_vector)
   {
     static const size_t SIZE = 10;
 
-    typedef etl::vector<int, SIZE>  Data;
+    typedef sstl::vector<int, SIZE>  Data;
     typedef std::vector<int>        Compare_Data;
 
     Compare_Data initial_data;
@@ -428,7 +430,7 @@ namespace test_etl
     TEST(emplace_back)
     {
       counted_type::reset_counts();
-      auto vector = etl::vector<counted_type, 5>{};
+      auto vector = sstl::vector<counted_type, 5>{};
       CHECK(counted_type::constructions == 0);
       CHECK(counted_type::destructions == 0);
 
@@ -765,4 +767,5 @@ namespace test_etl
       CHECK_EQUAL(expected_size, sizeof(Data));
     }
   };
+}
 }

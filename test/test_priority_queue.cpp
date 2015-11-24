@@ -10,27 +10,30 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include <sstl/priority_queue.h>
 #include <sstl/vector.h>
 
-namespace test_etl
+namespace sstl
 {
+namespace test
+{
+
 SUITE(test_priority_queue)
 {
     TEST(constructors_can_be_instantiated)
     {
         static const auto CAPACITY = 5;
         auto compare = std::less<int> {};
-        auto container = etl::vector<int, CAPACITY> {};
+        auto container = sstl::vector<int, CAPACITY> {};
 
-        etl::priority_queue<int, CAPACITY> {};
+        sstl::priority_queue<int, CAPACITY> {};
 
-        etl::priority_queue<int, CAPACITY>(compare, container);
+        sstl::priority_queue<int, CAPACITY>(compare, container);
 
-        auto other_priority_queue = etl::priority_queue<int, CAPACITY> {};
-        etl::priority_queue<int, CAPACITY> {other_priority_queue};
+        auto other_priority_queue = sstl::priority_queue<int, CAPACITY> {};
+        sstl::priority_queue<int, CAPACITY> {other_priority_queue};
     }
 
     TEST(member_functions_can_be_instantiated)
     {
-        auto priority_queue = etl::priority_queue<int, 5> {};
+        auto priority_queue = sstl::priority_queue<int, 5> {};
         auto priority_queue2 = priority_queue;
 
         priority_queue.push(3);
@@ -42,4 +45,5 @@ SUITE(test_priority_queue)
         priority_queue.swap(priority_queue2);
     }
 };
+}
 }

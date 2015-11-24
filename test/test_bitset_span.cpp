@@ -10,7 +10,9 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include <array>
 #include <sstl/__internal/bitset_span.h>
 
-namespace test_etl
+namespace sstl
+{
+namespace test
 {
 SUITE(test_bitset_span)
 {
@@ -29,7 +31,7 @@ SUITE(test_bitset_span)
    {
       auto expected = std::bitset<31> {};
       std::array<char, 5> actual_data;
-      auto actual = etl::bitset_span(actual_data.data(), 31);
+      auto actual = sstl::bitset_span(actual_data.data(), 31);
       check_equal(expected, actual);
    }
 
@@ -37,7 +39,7 @@ SUITE(test_bitset_span)
    {
       auto expected = std::bitset<31> {};
       std::array<char, 5> actual_data;
-      auto actual = etl::bitset_span(actual_data.data(), 31);
+      auto actual = sstl::bitset_span(actual_data.data(), 31);
 
       expected.set(0);
       actual.set(0);
@@ -68,7 +70,7 @@ SUITE(test_bitset_span)
    {
       auto expected = std::bitset<31> {};
       std::array<char, 5> actual_data;
-      auto actual = etl::bitset_span(actual_data.data(), 31);
+      auto actual = sstl::bitset_span(actual_data.data(), 31);
 
       expected.set();
       actual.set();
@@ -102,7 +104,7 @@ SUITE(test_bitset_span)
    TEST(test_all)
    {
       std::array<char, 5> actual_data;
-      auto actual = etl::bitset_span(actual_data.data(), 31);
+      auto actual = sstl::bitset_span(actual_data.data(), 31);
 
       CHECK_EQUAL(false, actual.all());
       actual.set();
@@ -117,4 +119,5 @@ SUITE(test_bitset_span)
       CHECK_EQUAL(true, actual.all());
    }
 };
+}
 }

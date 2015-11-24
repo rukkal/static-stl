@@ -28,7 +28,7 @@ SOFTWARE.
 ******************************************************************************/
 
 #if !defined(__ETL_IN_ISET_H__) && !defined(__ETL_IN_IMULTISET_H__)
-#error This header is a private element of etl::set, etl::multiset & etl::iset, etl::imultiset
+#error This header is a private element of sstl::set, sstl::multiset & sstl::iset, sstl::imultiset
 #endif
 
 #ifndef __ETL_SET_BASE__
@@ -36,7 +36,7 @@ SOFTWARE.
 
 #include <stddef.h>
 
-namespace etl
+namespace sstl
 {
   //***************************************************************************
   /// The base class for all sets.

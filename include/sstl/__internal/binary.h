@@ -40,7 +40,7 @@ SOFTWARE.
 #include "power.h"
 #include "smallest.h"
 
-namespace etl
+namespace sstl
 {
   //***************************************************************************
   /// Maximum value that can be contained in N bits.
@@ -51,7 +51,7 @@ namespace etl
     template <const size_t NBITS>
     struct max_value_for_nbits_helper
     {
-      typedef typename etl::smallest_uint_for_bits<NBITS>::type value_type;
+      typedef typename sstl::smallest_uint_for_bits<NBITS>::type value_type;
       static const value_type value = (uint64_t(1) << (NBITS - 1)) | max_value_for_nbits_helper<NBITS - 1>::value;
     };
 
@@ -59,7 +59,7 @@ namespace etl
     template <>
     struct max_value_for_nbits_helper<0>
     {
-      typedef etl::smallest_uint_for_bits<0>::type value_type;
+      typedef sstl::smallest_uint_for_bits<0>::type value_type;
       static const value_type value = 1;
     };
 
@@ -71,7 +71,7 @@ namespace etl
   template <const size_t NBITS>
   struct max_value_for_nbits
   {
-    typedef typename etl::smallest_uint_for_bits<NBITS>::type value_type;
+    typedef typename sstl::smallest_uint_for_bits<NBITS>::type value_type;
     static const value_type value = __private_binary__::max_value_for_nbits_helper<NBITS>::value;
   };
 
@@ -79,7 +79,7 @@ namespace etl
   template <>
   struct max_value_for_nbits<0>
   {
-      typedef etl::smallest_uint_for_bits<0>::type value_type;
+      typedef sstl::smallest_uint_for_bits<0>::type value_type;
       enum { value = 0 };
   };
 
@@ -475,14 +475,14 @@ namespace etl
   {
     static_assert(std::numeric_limits<TReturn>::digits >= NBITS, "Return type too small to hold result");
 
-    const TValue mask  = etl::power<2, NBITS>::value - 1;
+    const TValue mask  = sstl::power<2, NBITS>::value - 1;
     const size_t shift = NBITS;
 
     // Fold the value down to fit the width.
     TReturn folded_value = 0;
 
     // Keep shifting down and XORing the lower bits.
-    while (value >= etl::max_value_for_nbits<NBITS>::value)
+    while (value >= sstl::max_value_for_nbits<NBITS>::value)
     {
       folded_value ^= value & mask;
       value >>= shift;

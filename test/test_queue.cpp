@@ -9,26 +9,29 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include <sstl/queue.h>
 #include <sstl/deque.h>
 
-namespace test_etl
+namespace sstl
 {
+namespace test
+{
+
 SUITE(test_queue)
 {
     TEST(constructors_can_be_instantiated)
     {
         static const auto CAPACITY = 5;
-        auto container = etl::deque<int, CAPACITY> {};
+        auto container = sstl::deque<int, CAPACITY> {};
 
-        etl::queue<int, CAPACITY> {};
+        sstl::queue<int, CAPACITY> {};
 
-        etl::queue<int, CAPACITY> {container};
+        sstl::queue<int, CAPACITY> {container};
 
-        auto other_queue = etl::queue<int, CAPACITY> {};
-        etl::queue<int, CAPACITY> {other_queue};
+        auto other_queue = sstl::queue<int, CAPACITY> {};
+        sstl::queue<int, CAPACITY> {other_queue};
     }
 
     TEST(member_functions_can_be_instantiated)
     {
-        auto queue = etl::queue<int, 5> {};
+        auto queue = sstl::queue<int, 5> {};
         auto queue2 = queue;
 
         queue.push(3);
@@ -41,4 +44,5 @@ SUITE(test_queue)
         queue.swap(queue2);
     }
 };
+}
 }

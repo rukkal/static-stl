@@ -10,7 +10,9 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 
 #include <cstddef>
 
-namespace test_etl
+namespace sstl
+{
+namespace test
 {
    struct counted_type
    {
@@ -51,6 +53,7 @@ namespace test_etl
       static size_t move_constructions;
       static size_t destructions;
    };
+}
 }
 
 #endif

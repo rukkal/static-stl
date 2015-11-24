@@ -38,7 +38,7 @@ SOFTWARE.
 /// log10<N>     : Calculates logs to base 10, rounded down to the nearest integer.<br>
 ///\ingroup maths
 
-namespace etl 
+namespace sstl
 {
   //***************************************************************************
   ///\ingroup log

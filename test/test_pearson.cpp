@@ -36,13 +36,13 @@ SOFTWARE.
 #include <sstl/pearson.h>
 
 const size_t HASH_SIZE = 8;
-typedef etl::pearson<HASH_SIZE>::value_type hash_t;
+typedef sstl::pearson<HASH_SIZE>::value_type hash_t;
 
 //***************************************************************************
 /// Pearson lookup table
 /// \ingroup pearson
 //***************************************************************************
-namespace etl
+namespace sstl
 {
   extern const uint8_t PEARSON_LOOKUP[];
 }
@@ -58,11 +58,11 @@ hash_t Pearson_Compare(const TContainer& data)
 
   for (size_t j = 0; j < HASH_SIZE; ++j)
   {
-    uint8_t subhash = etl::PEARSON_LOOKUP[(data[0] + j) % 256];
+    uint8_t subhash = sstl::PEARSON_LOOKUP[(data[0] + j) % 256];
 
     for (size_t i = 1; i < data.size(); ++i)
     {
-      subhash = etl::PEARSON_LOOKUP[subhash ^ data[i]];
+      subhash = sstl::PEARSON_LOOKUP[subhash ^ data[i]];
     }
 
     hash[j] = subhash;
@@ -71,7 +71,9 @@ hash_t Pearson_Compare(const TContainer& data)
   return hash;
 }
 
-namespace
+namespace sstl
+{
+namespace test
 {
   SUITE(test_pearson)
   {
@@ -81,7 +83,7 @@ namespace
       std::string data("123456789");
 
       hash_t compare = Pearson_Compare(data);
-      hash_t hash    = etl::pearson<HASH_SIZE>(data.begin(), data.end());
+      hash_t hash    = sstl::pearson<HASH_SIZE>(data.begin(), data.end());
 
       CHECK(compare == hash);
     }
@@ -91,7 +93,7 @@ namespace
     {
       std::string data("123456789");
 
-      etl::pearson<HASH_SIZE> pearson_calculator;
+      sstl::pearson<HASH_SIZE> pearson_calculator;
 
       for (size_t i = 0; i < data.size(); ++i)
       {
@@ -109,7 +111,7 @@ namespace
     {
       std::string data("123456789");
 
-      etl::pearson<HASH_SIZE> pearson_calculator;
+      sstl::pearson<HASH_SIZE> pearson_calculator;
 
       pearson_calculator.add(data.begin(), data.end());
 
@@ -126,13 +128,13 @@ namespace
       std::vector<uint32_t> data2 = { 0x04030201, 0x08070605 };
       std::vector<uint8_t>  data3 = { 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01 };
 
-      hash_t hash1 = etl::pearson<HASH_SIZE>(data1.begin(), data1.end());
-      hash_t hash2 = etl::pearson<HASH_SIZE>((uint8_t*)&data2[0], (uint8_t*)(&data2[0] + data2.size()));
+      hash_t hash1 = sstl::pearson<HASH_SIZE>(data1.begin(), data1.end());
+      hash_t hash2 = sstl::pearson<HASH_SIZE>((uint8_t*)&data2[0], (uint8_t*)(&data2[0] + data2.size()));
       CHECK(hash1 == hash2);
 
-      hash_t hash3 = etl::pearson<HASH_SIZE>(data3.rbegin(), data3.rend());
+      hash_t hash3 = sstl::pearson<HASH_SIZE>(data3.rbegin(), data3.rend());
       CHECK(hash1 == hash3);
     }
   };
 }
-
+}

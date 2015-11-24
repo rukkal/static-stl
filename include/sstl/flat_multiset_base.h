@@ -28,7 +28,7 @@ SOFTWARE.
 ******************************************************************************/
 
 #ifndef __ETL_IN_IFLAT_MULTISET_H__
-#error This header is a private element of etl::flat_multiset & etl::iflat_multiset
+#error This header is a private element of sstl::flat_multiset & sstl::iflat_multiset
 #endif
 
 #ifndef __ETL_FLAT_MULTISET_BASE__
@@ -38,7 +38,7 @@ SOFTWARE.
 
 #include "ivector.h"
 
-namespace etl
+namespace sstl
 {
   //***************************************************************************
   ///\ingroup flat_multiset

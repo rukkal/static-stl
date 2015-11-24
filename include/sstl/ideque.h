@@ -41,10 +41,10 @@ SOFTWARE.
 #include "deque_base.h"
 #include "__internal/parameter_type.h"
 
-namespace etl
+namespace sstl
 {
   //***************************************************************************
-  /// The base class for all etl::deque classes.
+  /// The base class for all sstl::deque classes.
   ///\tparam T The type of values this deque should hold.
   ///\ingroup deque
   //***************************************************************************
@@ -1323,7 +1323,7 @@ namespace etl
 ///\ingroup deque
 //***************************************************************************
 template <typename T>
-bool operator ==(const etl::ideque<T>& lhs, const etl::ideque<T>& rhs)
+bool operator ==(const sstl::ideque<T>& lhs, const sstl::ideque<T>& rhs)
 {
   return (lhs.size() == rhs.size()) && std::equal(lhs.begin(), lhs.end(), rhs.begin());
 }
@@ -1336,7 +1336,7 @@ bool operator ==(const etl::ideque<T>& lhs, const etl::ideque<T>& rhs)
 ///\ingroup deque
 //***************************************************************************
 template <typename T>
-bool operator !=(const etl::ideque<T>& lhs, const etl::ideque<T>& rhs)
+bool operator !=(const sstl::ideque<T>& lhs, const sstl::ideque<T>& rhs)
 {
   return !(lhs == rhs);
 }
@@ -1349,7 +1349,7 @@ bool operator !=(const etl::ideque<T>& lhs, const etl::ideque<T>& rhs)
 ///\ingroup deque
 //***************************************************************************
 template <typename T>
-bool operator <(const etl::ideque<T>& lhs, const etl::ideque<T>& rhs)
+bool operator <(const sstl::ideque<T>& lhs, const sstl::ideque<T>& rhs)
 {
   return std::lexicographical_compare(lhs.begin(),
                                       lhs.end(),
@@ -1365,7 +1365,7 @@ bool operator <(const etl::ideque<T>& lhs, const etl::ideque<T>& rhs)
 ///\ingroup deque
 //***************************************************************************
 template <typename T>
-bool operator <=(const etl::ideque<T>& lhs, const etl::ideque<T>& rhs)
+bool operator <=(const sstl::ideque<T>& lhs, const sstl::ideque<T>& rhs)
 {
   return !operator >(lhs, rhs);
 }
@@ -1378,7 +1378,7 @@ bool operator <=(const etl::ideque<T>& lhs, const etl::ideque<T>& rhs)
 ///\ingroup deque
 //***************************************************************************
 template <typename T>
-bool operator >(const etl::ideque<T>& lhs, const etl::ideque<T>& rhs)
+bool operator >(const sstl::ideque<T>& lhs, const sstl::ideque<T>& rhs)
 {
   return std::lexicographical_compare(lhs.begin(),
                                       lhs.end(),
@@ -1395,7 +1395,7 @@ bool operator >(const etl::ideque<T>& lhs, const etl::ideque<T>& rhs)
 ///\ingroup deque
 //***************************************************************************
 template <typename T>
-bool operator >=(const etl::ideque<T>& lhs, const etl::ideque<T>& rhs)
+bool operator >=(const sstl::ideque<T>& lhs, const sstl::ideque<T>& rhs)
 {
   return !operator <(lhs, rhs);
 }

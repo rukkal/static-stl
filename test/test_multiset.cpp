@@ -40,14 +40,14 @@ static const size_t SIZE = 10;
 
 #define TEST_GREATER_THAN
 #ifdef TEST_GREATER_THAN
-typedef etl::multiset<int, SIZE, std::greater<int> >  Data;
+typedef sstl::multiset<int, SIZE, std::greater<int> >  Data;
 typedef std::multiset<int, std::greater<int> >        Compare_Data;
 #else
-typedef etl::multiset<int, SIZE, std::less<int> >  Data;
+typedef sstl::multiset<int, SIZE, std::less<int> >  Data;
 typedef std::multiset<int, std::less<int> >        Compare_Data;
 #endif
 
-namespace etl
+namespace sstl
 {
    typedef Data::iterator Data_iterator;
    typedef Data::const_iterator Data_const_iterator;
@@ -69,7 +69,9 @@ namespace etl
    }
 }
 
-namespace
+namespace sstl
+{
+namespace test
 {
   SUITE(test_multiset)
   {
@@ -886,4 +888,5 @@ namespace
     }
 
   };
+}
 }

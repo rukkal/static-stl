@@ -45,7 +45,7 @@ SOFTWARE.
 ///\ingroup containers
 //*****************************************************************************
 
-namespace etl
+namespace sstl
 {
   template <typename T, const size_t MAX_SIZE_, typename TCompare = std::less<T>>
   //***************************************************************************
@@ -107,7 +107,7 @@ namespace etl
 
   private:
 
-    etl::vector<T, MAX_SIZE> buffer; ///<The vector that stores the elements.
+    sstl::vector<T, MAX_SIZE> buffer; ///<The vector that stores the elements.
   };
 }
 

@@ -35,7 +35,9 @@ SOFTWARE.
 #include "data.h"
 #include <sstl/forward_list.h>
 
-namespace
+namespace sstl
+{
+namespace test
 {
   SUITE(test_forward_list)
   {
@@ -44,8 +46,8 @@ namespace
     typedef TestDataDC<std::string>  ItemDC;
     typedef TestDataNDC<std::string> ItemNDC;
 
-    typedef etl::forward_list<ItemDC, SIZE>  DataDC;
-    typedef etl::forward_list<ItemNDC, SIZE> DataNDC;
+    typedef sstl::forward_list<ItemDC, SIZE>  DataDC;
+    typedef sstl::forward_list<ItemNDC, SIZE> DataNDC;
 
     typedef std::forward_list<ItemNDC> CompareDataNDC;
     typedef std::vector<ItemNDC> InitialDataNDC;
@@ -533,4 +535,5 @@ namespace
       CHECK(are_equal);
     }
   };
+}
 }

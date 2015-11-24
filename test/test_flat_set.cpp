@@ -39,7 +39,9 @@ SOFTWARE.
 
 #include <sstl/flat_set.h>
 
-namespace
+namespace sstl
+{
+namespace test
 {
   SUITE(test_flat_set)
   {
@@ -48,8 +50,8 @@ namespace
     typedef TestDataDC<std::string>  DC;
     typedef TestDataNDC<std::string> NDC;
 
-    typedef etl::flat_set<DC, SIZE>     DataDC;
-    typedef etl::flat_set<NDC, SIZE>    DataNDC;
+    typedef sstl::flat_set<DC, SIZE>     DataDC;
+    typedef sstl::flat_set<NDC, SIZE>    DataNDC;
 
     typedef std::set<DC>  Compare_DataDC;
     typedef std::set<NDC> Compare_DataNDC;
@@ -484,4 +486,5 @@ namespace
       CHECK(initial1 != different);
     }
   };
+}
 }

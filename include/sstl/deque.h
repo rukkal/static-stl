@@ -46,7 +46,7 @@ SOFTWARE.
 ///\ingroup containers
 //*****************************************************************************
 
-namespace etl
+namespace sstl
 {
   //***************************************************************************
   /// A fixed capacity double ended queue.

@@ -41,14 +41,14 @@ static const size_t SIZE = 10;
 
 #define TEST_GREATER_THAN
 #ifdef TEST_GREATER_THAN
-typedef etl::set<int, SIZE, std::greater<int> >  Data;
+typedef sstl::set<int, SIZE, std::greater<int> >  Data;
 typedef std::set<int, std::greater<int> >        Compare_Data;
 #else
-typedef etl::set<int, SIZE, std::less<int> >  Data;
+typedef sstl::set<int, SIZE, std::less<int> >  Data;
 typedef std::set<int, std::less<int> >        Compare_Data;
 #endif
 
-namespace etl
+namespace sstl
 {
    typedef Data::iterator Data_iterator;
    typedef Data::const_iterator Data_const_iterator;
@@ -70,7 +70,9 @@ namespace etl
    }
 }
 
-namespace
+namespace sstl
+{
+namespace test
 {
   SUITE(test_set)
   {
@@ -817,4 +819,5 @@ namespace
     }
 
   };
+}
 }

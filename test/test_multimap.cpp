@@ -40,14 +40,14 @@ static const size_t SIZE = 10;
 
 #define TEST_GREATER_THAN
 #ifdef TEST_GREATER_THAN
-typedef etl::multimap<std::string, int, SIZE, std::greater<std::string> >  Data;
+typedef sstl::multimap<std::string, int, SIZE, std::greater<std::string> >  Data;
 typedef std::multimap<std::string, int, std::greater<std::string> >        Compare_Data;
 #else
-typedef etl::multimap<std::string, int, SIZE, std::less<std::string> >  Data;
+typedef sstl::multimap<std::string, int, SIZE, std::less<std::string> >  Data;
 typedef std::multimap<std::string, int, std::less<std::string> >        Compare_Data;
 #endif
 
-namespace etl
+namespace sstl
 {
    typedef Data::iterator Data_iterator;
    typedef Data::const_iterator Data_const_iterator;
@@ -69,7 +69,9 @@ namespace etl
    }
 }
 
-namespace
+namespace test
+{
+namespace sstl
 {
   SUITE(test_multimap)
   {
@@ -915,4 +917,5 @@ namespace
     }
 
   };
+}
 }

@@ -28,7 +28,7 @@ SOFTWARE.
 ******************************************************************************/
 
 #ifndef __ETL_IN_IFLAT_MAP_H__
-#error This header is a private element of etl::flat_map & etl::iflat_map
+#error This header is a private element of sstl::flat_map & sstl::iflat_map
 #endif
 
 #ifndef __ETL_FLAT_MAP_BASE__
@@ -38,7 +38,7 @@ SOFTWARE.
 
 #include "ivector.h"
 
-namespace etl
+namespace sstl
 {
   //***************************************************************************
   ///\ingroup flat_map

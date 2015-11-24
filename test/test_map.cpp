@@ -41,14 +41,14 @@ static const size_t SIZE = 10;
 
 #define TEST_GREATER_THAN
 #ifdef TEST_GREATER_THAN
-typedef etl::map<std::string, int, SIZE, std::greater<std::string> >  Data;
+typedef sstl::map<std::string, int, SIZE, std::greater<std::string> >  Data;
 typedef std::map<std::string, int, std::greater<std::string> >        Compare_Data;
 #else
-typedef etl::map<std::string, int, SIZE, std::less<std::string> >  Data;
+typedef sstl::map<std::string, int, SIZE, std::less<std::string> >  Data;
 typedef std::map<std::string, int, std::less<std::string> >        Compare_Data;
 #endif
 
-namespace etl
+namespace sstl
 {
    using Data_iterator = Data::iterator;
    using Data_const_iterator = Data::const_iterator;
@@ -70,7 +70,9 @@ namespace etl
    }
 }
 
-namespace test_etl
+namespace sstl
+{
+namespace test
 {
   SUITE(test_map)
   {
@@ -873,4 +875,5 @@ namespace test_etl
     }
 
   };
+}
 }

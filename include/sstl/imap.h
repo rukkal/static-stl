@@ -45,10 +45,10 @@ SOFTWARE.
 #undef min
 #endif
 
-namespace etl
+namespace sstl
 {
   //***************************************************************************
-  /// A templated base for all etl::map types.
+  /// A templated base for all sstl::map types.
   ///\ingroup map
   //***************************************************************************
   template <typename TKey, typename TMapped, typename TKeyCompare>
@@ -1804,7 +1804,7 @@ namespace etl
 ///\ingroup lookup
 //***************************************************************************
 template <typename TKey, typename TMapped, typename TKeyCompare>
-bool operator ==(const etl::imap<TKey, TMapped, TKeyCompare>& lhs, const etl::imap<TKey, TMapped, TKeyCompare>& rhs)
+bool operator ==(const sstl::imap<TKey, TMapped, TKeyCompare>& lhs, const sstl::imap<TKey, TMapped, TKeyCompare>& rhs)
 {
   return (lhs.size() == rhs.size()) && std::equal(lhs.begin(), lhs.end(), rhs.begin());
 }
@@ -1817,7 +1817,7 @@ bool operator ==(const etl::imap<TKey, TMapped, TKeyCompare>& lhs, const etl::im
 ///\ingroup lookup
 //***************************************************************************
 template <typename TKey, typename TMapped, typename TKeyCompare>
-bool operator !=(const etl::imap<TKey, TMapped, TKeyCompare>& lhs, const etl::imap<TKey, TMapped, TKeyCompare>& rhs)
+bool operator !=(const sstl::imap<TKey, TMapped, TKeyCompare>& lhs, const sstl::imap<TKey, TMapped, TKeyCompare>& rhs)
 {
   return !(lhs == rhs);
 }
@@ -1830,7 +1830,7 @@ bool operator !=(const etl::imap<TKey, TMapped, TKeyCompare>& lhs, const etl::im
 /// second, otherwise <b>false</b>.
 //*************************************************************************
 template <typename TKey, typename TMapped, typename TKeyCompare>
-bool operator <(const etl::imap<TKey, TMapped, TKeyCompare>& lhs, const etl::imap<TKey, TMapped, TKeyCompare>& rhs)
+bool operator <(const sstl::imap<TKey, TMapped, TKeyCompare>& lhs, const sstl::imap<TKey, TMapped, TKeyCompare>& rhs)
 {
   return std::lexicographical_compare(lhs.begin(),
                                       lhs.end(),
@@ -1846,7 +1846,7 @@ bool operator <(const etl::imap<TKey, TMapped, TKeyCompare>& lhs, const etl::ima
 /// second, otherwise <b>false</b>.
 //*************************************************************************
 template <typename TKey, typename TMapped, typename TKeyCompare>
-bool operator >(const etl::imap<TKey, TMapped, TKeyCompare>& lhs, const etl::imap<TKey, TMapped, TKeyCompare>& rhs)
+bool operator >(const sstl::imap<TKey, TMapped, TKeyCompare>& lhs, const sstl::imap<TKey, TMapped, TKeyCompare>& rhs)
 {
   return std::lexicographical_compare(lhs.begin(),
                                       lhs.end(),
@@ -1863,7 +1863,7 @@ bool operator >(const etl::imap<TKey, TMapped, TKeyCompare>& lhs, const etl::ima
 /// to the second, otherwise <b>false</b>.
 //*************************************************************************
 template <typename TKey, typename TMapped, typename TKeyCompare>
-bool operator <=(const etl::imap<TKey, TMapped, TKeyCompare>& lhs, const etl::imap<TKey, TMapped, TKeyCompare>& rhs)
+bool operator <=(const sstl::imap<TKey, TMapped, TKeyCompare>& lhs, const sstl::imap<TKey, TMapped, TKeyCompare>& rhs)
 {
   return !operator >(lhs, rhs);
 }
@@ -1876,7 +1876,7 @@ bool operator <=(const etl::imap<TKey, TMapped, TKeyCompare>& lhs, const etl::im
 /// equal to the second, otherwise <b>false</b>.
 //*************************************************************************
 template <typename TKey, typename TMapped, typename TKeyCompare>
-bool operator >=(const etl::imap<TKey, TMapped, TKeyCompare>& lhs, const etl::imap<TKey, TMapped, TKeyCompare>& rhs)
+bool operator >=(const sstl::imap<TKey, TMapped, TKeyCompare>& lhs, const sstl::imap<TKey, TMapped, TKeyCompare>& rhs)
 {
   return !operator <(lhs, rhs);
 }

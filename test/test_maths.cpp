@@ -30,7 +30,9 @@ SOFTWARE.
 #include <sstl/__internal/log.h>
 #include <sstl/__internal/power.h>
 
-namespace
+namespace sstl
+{
+namespace test
 {
   SUITE(test_maths)
   {
@@ -39,10 +41,10 @@ namespace
     {
       int actual;
 
-      actual = etl::log<0, 2>::value;
+      actual = sstl::log<0, 2>::value;
       CHECK_EQUAL(0, actual);
 
-      actual = etl::log<0, 10>::value;
+      actual = sstl::log<0, 10>::value;
       CHECK_EQUAL(0, actual);
     }
 
@@ -51,10 +53,10 @@ namespace
     {
       int actual;
 
-      actual = etl::log<1, 2>::value;
+      actual = sstl::log<1, 2>::value;
       CHECK_EQUAL(0, actual);
 
-      actual = etl::log<1, 10>::value;
+      actual = sstl::log<1, 10>::value;
       CHECK_EQUAL(0, actual);
     }
 
@@ -63,10 +65,10 @@ namespace
     {
       int actual;
 
-      actual = etl::log<10, 2>::value;
+      actual = sstl::log<10, 2>::value;
       CHECK_EQUAL(3, actual);
 
-      actual = etl::log<10, 10>::value;
+      actual = sstl::log<10, 10>::value;
       CHECK_EQUAL(1, actual);
     }
 
@@ -75,10 +77,10 @@ namespace
     {
       int actual;
 
-      actual = etl::log<100, 2>::value;
+      actual = sstl::log<100, 2>::value;
       CHECK_EQUAL(6, actual);
 
-      actual = etl::log<100, 10>::value;
+      actual = sstl::log<100, 10>::value;
       CHECK_EQUAL(2, actual);
     }
 
@@ -87,16 +89,16 @@ namespace
     {
       int actual;
 
-      actual = etl::log2<0>::value;
+      actual = sstl::log2<0>::value;
       CHECK_EQUAL(0, actual);
 
-      actual = etl::log2<1>::value;
+      actual = sstl::log2<1>::value;
       CHECK_EQUAL(0, actual);
 
-      actual = etl::log2<10>::value;
+      actual = sstl::log2<10>::value;
       CHECK_EQUAL(3, actual);
 
-      actual = etl::log2<100>::value;
+      actual = sstl::log2<100>::value;
       CHECK_EQUAL(6, actual);
     }
 
@@ -105,19 +107,19 @@ namespace
     {
       int actual;
 
-      actual = etl::log10<0>::value;
+      actual = sstl::log10<0>::value;
       CHECK_EQUAL(0, actual);
 
-      actual = etl::log10<1>::value;
+      actual = sstl::log10<1>::value;
       CHECK_EQUAL(0, actual);
 
-      actual = etl::log10<10>::value;
+      actual = sstl::log10<10>::value;
       CHECK_EQUAL(1, actual);
 
-      actual = etl::log10<100>::value;
+      actual = sstl::log10<100>::value;
       CHECK_EQUAL(2, actual);
 
-      actual = etl::log10<200>::value;
+      actual = sstl::log10<200>::value;
       CHECK_EQUAL(2, actual);
     }
 
@@ -127,51 +129,51 @@ namespace
       uint64_t actual;
 
       // 2^1
-      actual = etl::power<2, 1>::value;
+      actual = sstl::power<2, 1>::value;
       CHECK_EQUAL(2, actual);
 
       // 3^2
-      actual = etl::power<3, 2>::value;
+      actual = sstl::power<3, 2>::value;
       CHECK_EQUAL(9, actual);
 
       // 4^3
-      actual = etl::power<4, 3>::value;
+      actual = sstl::power<4, 3>::value;
       CHECK_EQUAL(64, actual);
 
       // 5^4
-      actual = etl::power<5, 4>::value;
+      actual = sstl::power<5, 4>::value;
       CHECK_EQUAL(625, actual);
 
       // 6^5
-      actual = etl::power<6, 5>::value;
+      actual = sstl::power<6, 5>::value;
       CHECK_EQUAL(7776, actual);
 
       // 7^6
-      actual = etl::power<7, 6>::value;
+      actual = sstl::power<7, 6>::value;
       CHECK_EQUAL(117649, actual);
 
       // 8^7
-      actual = etl::power<8, 7>::value;
+      actual = sstl::power<8, 7>::value;
       CHECK_EQUAL(2097152, actual);
 
       // 9^8
-      actual = etl::power<9, 8>::value;
+      actual = sstl::power<9, 8>::value;
       CHECK_EQUAL(43046721, actual);
 
       // 10^9
-      actual = etl::power<10, 9>::value;
+      actual = sstl::power<10, 9>::value;
       CHECK_EQUAL(1000000000, actual);
 
       // 2^16
-      actual = etl::power<2, 15>::value;
+      actual = sstl::power<2, 15>::value;
       CHECK_EQUAL(0x8000, actual);
 
       // 2^31
-      actual = etl::power<2, 31>::value;
+      actual = sstl::power<2, 31>::value;
       CHECK_EQUAL(0x80000000, actual);
 
       // 2^63
-      actual = etl::power<2, 63>::value;
+      actual = sstl::power<2, 63>::value;
       CHECK_EQUAL(0x8000000000000000, actual);
     }
 
@@ -181,31 +183,31 @@ namespace
       int actual;
 
       //
-      actual = etl::power_of_2_round_up<0>::value;
+      actual = sstl::power_of_2_round_up<0>::value;
       CHECK_EQUAL(2, actual);
 
-      actual = etl::power_of_2_round_up<1>::value;
+      actual = sstl::power_of_2_round_up<1>::value;
       CHECK_EQUAL(2, actual);
 
-      actual = etl::power_of_2_round_up<2>::value;
+      actual = sstl::power_of_2_round_up<2>::value;
       CHECK_EQUAL(2, actual);
 
-      actual = etl::power_of_2_round_up<3>::value;
+      actual = sstl::power_of_2_round_up<3>::value;
       CHECK_EQUAL(4, actual);
 
-      actual = etl::power_of_2_round_up<4>::value;
+      actual = sstl::power_of_2_round_up<4>::value;
       CHECK_EQUAL(4, actual);
 
-      actual = etl::power_of_2_round_up<5>::value;
+      actual = sstl::power_of_2_round_up<5>::value;
       CHECK_EQUAL(8, actual);
 
-      actual = etl::power_of_2_round_up<127>::value;
+      actual = sstl::power_of_2_round_up<127>::value;
       CHECK_EQUAL(128, actual);
 
-      actual = etl::power_of_2_round_up<128>::value;
+      actual = sstl::power_of_2_round_up<128>::value;
       CHECK_EQUAL(128, actual);
 
-      actual = etl::power_of_2_round_up<129>::value;
+      actual = sstl::power_of_2_round_up<129>::value;
       CHECK_EQUAL(256, actual);
     }
 
@@ -214,31 +216,31 @@ namespace
     {
       int actual;
 
-      actual = etl::power_of_2_round_down<0>::value;
+      actual = sstl::power_of_2_round_down<0>::value;
       CHECK_EQUAL(2, actual);
 
-      actual = etl::power_of_2_round_down<1>::value;
+      actual = sstl::power_of_2_round_down<1>::value;
       CHECK_EQUAL(2, actual);
 
-      actual = etl::power_of_2_round_down<2>::value;
+      actual = sstl::power_of_2_round_down<2>::value;
       CHECK_EQUAL(2, actual);
 
-      actual = etl::power_of_2_round_down<3>::value;
+      actual = sstl::power_of_2_round_down<3>::value;
       CHECK_EQUAL(2, actual);
 
-      actual = etl::power_of_2_round_down<4>::value;
+      actual = sstl::power_of_2_round_down<4>::value;
       CHECK_EQUAL(2, actual);
 
-      actual = etl::power_of_2_round_down<5>::value;
+      actual = sstl::power_of_2_round_down<5>::value;
       CHECK_EQUAL(4, actual);
 
-      actual = etl::power_of_2_round_down<127>::value;
+      actual = sstl::power_of_2_round_down<127>::value;
       CHECK_EQUAL(64, actual);
 
-      actual = etl::power_of_2_round_down<128>::value;
+      actual = sstl::power_of_2_round_down<128>::value;
       CHECK_EQUAL(64, actual);
 
-      actual = etl::power_of_2_round_down<129>::value;
+      actual = sstl::power_of_2_round_down<129>::value;
       CHECK_EQUAL(128, actual);
     }
 
@@ -247,32 +249,33 @@ namespace
     {
       bool actual;
 
-      actual = etl::is_power_of_2<0>::value;
+      actual = sstl::is_power_of_2<0>::value;
       CHECK_EQUAL(false, actual);
 
-      actual = etl::is_power_of_2<1>::value;
+      actual = sstl::is_power_of_2<1>::value;
       CHECK_EQUAL(false, actual);
 
-      actual = etl::is_power_of_2<2>::value;
+      actual = sstl::is_power_of_2<2>::value;
       CHECK_EQUAL(true, actual);
 
-      actual = etl::is_power_of_2<3>::value;
+      actual = sstl::is_power_of_2<3>::value;
       CHECK_EQUAL(false, actual);
 
-      actual = etl::is_power_of_2<4>::value;
+      actual = sstl::is_power_of_2<4>::value;
       CHECK_EQUAL(true, actual);
 
-      actual = etl::is_power_of_2<5>::value;
+      actual = sstl::is_power_of_2<5>::value;
       CHECK_EQUAL(false, actual);
 
-      actual = etl::is_power_of_2<127>::value;
+      actual = sstl::is_power_of_2<127>::value;
       CHECK_EQUAL(false, actual);
 
-      actual = etl::is_power_of_2<128>::value;
+      actual = sstl::is_power_of_2<128>::value;
       CHECK_EQUAL(true, actual);
 
-      actual = etl::is_power_of_2<129>::value;
+      actual = sstl::is_power_of_2<129>::value;
       CHECK_EQUAL(false, actual);
     }
   };
+}
 }

@@ -36,7 +36,9 @@ SOFTWARE.
 
 #include <sstl/murmur3.h>
 
-namespace
+namespace sstl
+{
+namespace test
 {
   SUITE(test_murmur3)
   {
@@ -45,7 +47,7 @@ namespace
     {
       std::string data("123456789");
 
-      uint32_t hash = etl::murmur3<uint32_t>(data.begin(), data.end());
+      uint32_t hash = sstl::murmur3<uint32_t>(data.begin(), data.end());
 
       uint32_t compare;
       MurmurHash3_x86_32(data.c_str(), data.size(), 0, &compare);
@@ -58,7 +60,7 @@ namespace
     {
       std::string data("123456789");
 
-      etl::murmur3<uint32_t> murmur3_32_calculator;
+      sstl::murmur3<uint32_t> murmur3_32_calculator;
 
       for (size_t i = 0; i < data.size(); ++i)
       {
@@ -78,7 +80,7 @@ namespace
     {
       std::string data("123456789");
 
-      etl::murmur3<uint32_t> murmur3_32_calculator;
+      sstl::murmur3<uint32_t> murmur3_32_calculator;
 
       murmur3_32_calculator.add(data.begin(), data.end());
 
@@ -96,8 +98,8 @@ namespace
       std::vector<uint8_t>  data1 = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08 };
       std::vector<uint32_t> data2 = { 0x04030201, 0x08070605 };
 
-      uint32_t hash1 = etl::murmur3<uint32_t>(data1.begin(), data1.end());
-      uint32_t hash2 = etl::murmur3<uint32_t>((uint8_t*)&data2[0], (uint8_t*)&data2[0] + (data2.size() * sizeof(uint32_t)));
+      uint32_t hash1 = sstl::murmur3<uint32_t>(data1.begin(), data1.end());
+      uint32_t hash2 = sstl::murmur3<uint32_t>((uint8_t*)&data2[0], (uint8_t*)&data2[0] + (data2.size() * sizeof(uint32_t)));
 
       CHECK_EQUAL(hash1, hash2);
 
@@ -111,4 +113,4 @@ namespace
     }
   };
 }
-
+}

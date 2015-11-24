@@ -8,26 +8,29 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include <UnitTest++/UnitTest++.h>
 #include <sstl/stack.h>
 
-namespace test_etl
+namespace sstl
 {
+namespace test
+{
+
 SUITE(test_stack)
 {
     TEST(constructors_can_be_instantiated)
     {
         static const auto CAPACITY = 5;
-        auto container = etl::vector<int, CAPACITY> {};
+        auto container = sstl::vector<int, CAPACITY> {};
 
-        etl::stack<int, CAPACITY> {};
+        sstl::stack<int, CAPACITY> {};
 
-        etl::stack<int, CAPACITY> {container};
+        sstl::stack<int, CAPACITY> {container};
 
-        auto other_stack = etl::stack<int, CAPACITY> {};
-        etl::stack<int, CAPACITY> {other_stack};
+        auto other_stack = sstl::stack<int, CAPACITY> {};
+        sstl::stack<int, CAPACITY> {other_stack};
     }
 
     TEST(member_functions_can_be_instantiated)
     {
-        auto stack = etl::stack<int, 5> {};
+        auto stack = sstl::stack<int, 5> {};
         auto stack2 = stack;
 
         stack.push(3);
@@ -39,4 +42,5 @@ SUITE(test_stack)
         stack.swap(stack2);
     }
 };
+}
 }

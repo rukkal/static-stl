@@ -7,10 +7,13 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 
 #include "counted_type.h"
 
-namespace test_etl
+namespace sstl
+{
+namespace test
 {
    size_t counted_type::constructions;
    size_t counted_type::copy_constructions;
    size_t counted_type::move_constructions;
    size_t counted_type::destructions;
+}
 }

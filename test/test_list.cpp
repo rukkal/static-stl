@@ -36,7 +36,9 @@ SOFTWARE.
 #include <list>
 #include <vector>
 
-namespace
+namespace sstl
+{
+namespace test
 {
   SUITE(test_list)
   {
@@ -45,8 +47,8 @@ namespace
 
     const size_t SIZE = 10;
 
-    typedef etl::list<ItemDC, SIZE>  DataDC;
-    typedef etl::list<ItemNDC, SIZE> DataNDC;
+    typedef sstl::list<ItemDC, SIZE>  DataDC;
+    typedef sstl::list<ItemNDC, SIZE> DataNDC;
 
     typedef std::list<ItemNDC>   CompareData;
     typedef std::vector<ItemNDC> InitialData;
@@ -721,4 +723,5 @@ namespace
       CHECK(are_equal);
     }
   };
+}
 }

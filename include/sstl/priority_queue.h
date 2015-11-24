@@ -11,11 +11,11 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include <queue>
 #include "vector.h"
 
-namespace etl
+namespace sstl
 {
-   // alias template to provide an etl::priority_queue type that has consistent
+   // alias template to provide an sstl::priority_queue type that has consistent
    // interface with the rest of the library's containers
-   template<class T, size_t CAPACITY, class Container=etl::vector<T, CAPACITY>>
+   template<class T, size_t CAPACITY, class Container=sstl::vector<T, CAPACITY>>
    using priority_queue = std::priority_queue<T, Container>;
 }
 

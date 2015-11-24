@@ -43,7 +43,7 @@ SOFTWARE.
 ///\ingroup containers
 //*****************************************************************************
 
-namespace etl
+namespace sstl
 {
   //*************************************************************************
   /// A templated map implementation that uses a fixed size buffer.

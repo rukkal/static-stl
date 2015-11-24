@@ -42,7 +42,7 @@ SOFTWARE.
 ///\defgroup pearson Pearson hash calculation
 ///\ingroup pearson
 
-namespace etl
+namespace sstl
 {
   //***************************************************************************
   /// Pearson lookup table

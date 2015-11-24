@@ -41,7 +41,7 @@ SOFTWARE.
 ///\ingroup containers
 //*****************************************************************************
 
-namespace etl
+namespace sstl
 {
   //*************************************************************************
   /// A templated forward_list implementation that uses a fixed size pool.
@@ -115,7 +115,7 @@ namespace etl
   private:
 
     /// The pool of nodes used in the list.
-    etl::bitmap_allocator<typename iforward_list<T>::Data_Node, MAX_SIZE> node_pool;
+    sstl::bitmap_allocator<typename iforward_list<T>::Data_Node, MAX_SIZE> node_pool;
   };
 }
 

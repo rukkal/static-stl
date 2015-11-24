@@ -32,7 +32,7 @@ SOFTWARE.
 
 #include <type_traits>
 
-namespace etl
+namespace sstl
 {
   //*************************************************************************
   /// Determine how to pass parameters.

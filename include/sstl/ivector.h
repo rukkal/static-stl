@@ -41,7 +41,7 @@ SOFTWARE.
 #include "vector_base.h"
 #include "__internal/parameter_type.h"
 
-namespace etl
+namespace sstl
 {
   //***************************************************************************
   /// The base class for specifically sized vectors.
@@ -260,7 +260,7 @@ namespace etl
 
     //*********************************************************************
     /// Returns a reference to the value at index 'i'
-    /// If ETL_THROW_EXCEPTIONS is defined, emits an etl::vector_out_of_bounds if the index is out of range.
+    /// If ETL_THROW_EXCEPTIONS is defined, emits an sstl::vector_out_of_bounds if the index is out of range.
     ///\param i The index.
     ///\return A reference to the value at index 'i'
     //*********************************************************************
@@ -272,7 +272,7 @@ namespace etl
 
     //*********************************************************************
     /// Returns a const reference to the value at index 'i'
-    /// If ETL_THROW_EXCEPTIONS is defined, emits an etl::vector_out_of_bounds if the index is out of range.
+    /// If ETL_THROW_EXCEPTIONS is defined, emits an sstl::vector_out_of_bounds if the index is out of range.
     ///\param i The index.
     ///\return A const reference to the value at index 'i'
     //*********************************************************************
@@ -662,7 +662,7 @@ namespace etl
   ///\ingroup vector
   //***************************************************************************
   template <typename T>
-  bool operator ==(const etl::ivector<T>& lhs, const etl::ivector<T>& rhs)
+  bool operator ==(const sstl::ivector<T>& lhs, const sstl::ivector<T>& rhs)
   {
     return (lhs.size() == rhs.size()) && std::equal(lhs.begin(), lhs.end(), rhs.begin());
   }
@@ -675,7 +675,7 @@ namespace etl
   ///\ingroup vector
   //***************************************************************************
   template <typename T>
-  bool operator !=(const etl::ivector<T>& lhs, const etl::ivector<T>& rhs)
+  bool operator !=(const sstl::ivector<T>& lhs, const sstl::ivector<T>& rhs)
   {
     return !(lhs == rhs);
   }
@@ -688,7 +688,7 @@ namespace etl
   ///\ingroup vector
   //***************************************************************************
   template <typename T>
-  bool operator <(const etl::ivector<T>& lhs, const etl::ivector<T>& rhs)
+  bool operator <(const sstl::ivector<T>& lhs, const sstl::ivector<T>& rhs)
   {
     return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
   }
@@ -701,7 +701,7 @@ namespace etl
   ///\ingroup vector
   //***************************************************************************
   template <typename T>
-  bool operator >(const etl::ivector<T>& lhs, const etl::ivector<T>& rhs)
+  bool operator >(const sstl::ivector<T>& lhs, const sstl::ivector<T>& rhs)
   {
     return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(), std::greater<T>());
   }
@@ -714,7 +714,7 @@ namespace etl
   ///\ingroup vector
   //***************************************************************************
   template <typename T>
-  bool operator <=(const etl::ivector<T>& lhs, const etl::ivector<T>& rhs)
+  bool operator <=(const sstl::ivector<T>& lhs, const sstl::ivector<T>& rhs)
   {
     return !operator >(lhs, rhs);
   }
@@ -727,7 +727,7 @@ namespace etl
   ///\ingroup vector
   //***************************************************************************
   template <typename T>
-  bool operator >=(const etl::ivector<T>& lhs, const etl::ivector<T>& rhs)
+  bool operator >=(const sstl::ivector<T>& lhs, const sstl::ivector<T>& rhs)
   {
     return !operator <(lhs, rhs);
   }

@@ -39,7 +39,7 @@ SOFTWARE.
 ///\defgroup fnv_1 FNV-1 & FNV-1a 32 & 64 bit hash calculations
 ///\ingroup maths
 
-namespace etl
+namespace sstl
 {
   //***************************************************************************
   /// Calculates the fnv_1_64 hash.

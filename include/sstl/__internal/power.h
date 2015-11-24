@@ -37,7 +37,7 @@ SOFTWARE.
 /// power<N, POWER> : Calculates N to the power POWER.
 ///\ingroup maths
 
-namespace etl 
+namespace sstl
 {
   //***************************************************************************
   ///\ingroup power
@@ -75,7 +75,7 @@ namespace etl
   {
     enum value_type
     {
-      value = 1 << (etl::log2<N - 1>::value + 1)
+      value = 1 << (sstl::log2<N - 1>::value + 1)
     };
   };
 
@@ -102,7 +102,7 @@ namespace etl
   {
     enum value_type
     {
-      value = 1 << (etl::log2<N - 1>::value)
+      value = 1 << (sstl::log2<N - 1>::value)
     };
   };
 

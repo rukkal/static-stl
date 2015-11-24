@@ -42,7 +42,7 @@ SOFTWARE.
 #include "flat_multiset_base.h"
 #include "__internal/parameter_type.h"
 
-namespace etl
+namespace sstl
 {
   //***************************************************************************
   /// The base class for specifically sized flat_multisets.
@@ -54,7 +54,7 @@ namespace etl
   {
   private:
 
-    typedef etl::ivector<T> buffer_t;
+    typedef sstl::ivector<T> buffer_t;
 
   public:
 
@@ -421,7 +421,7 @@ namespace etl
   ///\ingroup flat_multiset
   //***************************************************************************
   template <typename T, typename TKeyCompare>
-  bool operator ==(const etl::iflat_multiset<T, TKeyCompare>& lhs, const etl::iflat_multiset<T, TKeyCompare>& rhs)
+  bool operator ==(const sstl::iflat_multiset<T, TKeyCompare>& lhs, const sstl::iflat_multiset<T, TKeyCompare>& rhs)
   {
     return (lhs.size() == rhs.size()) && std::equal(lhs.begin(), lhs.end(), rhs.begin());
   }
@@ -434,7 +434,7 @@ namespace etl
   ///\ingroup flat_multiset
   //***************************************************************************
   template <typename T, typename TKeyCompare>
-  bool operator !=(const etl::iflat_multiset<T, TKeyCompare>& lhs, const etl::iflat_multiset<T, TKeyCompare>& rhs)
+  bool operator !=(const sstl::iflat_multiset<T, TKeyCompare>& lhs, const sstl::iflat_multiset<T, TKeyCompare>& rhs)
   {
     return !(lhs == rhs);
   }

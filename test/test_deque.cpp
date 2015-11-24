@@ -43,8 +43,8 @@ const size_t SIZE = 14;
 typedef TestDataDC<std::string>  DC;
 typedef TestDataNDC<std::string> NDC;
 
-typedef etl::deque<DC, SIZE>     DataDC;
-typedef etl::deque<NDC, SIZE>    DataNDC;
+typedef sstl::deque<DC, SIZE>     DataDC;
+typedef sstl::deque<NDC, SIZE>    DataNDC;
 
 typedef std::deque<NDC>          Compare_Data;
 typedef std::deque<DC>           Compare_DataDC;
@@ -77,7 +77,9 @@ std::vector<NDC> initial_data_small  = { N0, N1, N2, N3, N4, N5, N6, N7, N8, N9 
 std::vector<NDC> insert_data         = { N10, N11, N12, N13, N14 };
 std::vector<DC>  initial_data_dc     = { DC("0"), DC("1"), DC("2"), DC("3"), DC("4"), DC("5"), DC("6"), DC("7"), DC("8"), DC("9"), DC("10"), DC("11"), DC("12"), DC("13") };
 
-namespace test_etl
+namespace sstl
+{
+namespace test
 {
 	SUITE(test_deque)
 	{
@@ -1092,7 +1094,7 @@ namespace test_etl
     TEST(test_emplace_back)
     {
       counted_type::reset_counts();
-      auto deque = etl::deque<counted_type, 5>{};
+      auto deque = sstl::deque<counted_type, 5>{};
       CHECK(counted_type::constructions == 0);
       CHECK(counted_type::destructions == 0);
 
@@ -1210,7 +1212,7 @@ namespace test_etl
     TEST(test_emplace_front)
     {
       counted_type::reset_counts();
-      auto deque = etl::deque<counted_type, 5>{};
+      auto deque = sstl::deque<counted_type, 5>{};
       CHECK(counted_type::constructions == 0);
       CHECK(counted_type::destructions == 0);
 
@@ -1413,4 +1415,5 @@ namespace test_etl
       CHECK(deque1 != deque2);
     }
 	};
+}
 }

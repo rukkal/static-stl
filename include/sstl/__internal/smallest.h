@@ -35,7 +35,7 @@ SOFTWARE.
 ///\defgroup smallest smallest
 ///\ingroup utilities
 
-namespace etl
+namespace sstl
 {
   //***************************************************************************
   /// Template to determine the smallest type and size.

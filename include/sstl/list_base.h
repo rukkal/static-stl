@@ -28,7 +28,7 @@ SOFTWARE.
 ******************************************************************************/
 
 #ifndef __ETL_IN_ILIST_H__
-#error This header is a private element of etl::list & etl::ilist
+#error This header is a private element of sstl::list & sstl::ilist
 #endif
 
 #ifndef __ETL_LIST_BASE__
@@ -36,7 +36,7 @@ SOFTWARE.
 
 #include <stddef.h>
 
-namespace etl
+namespace sstl
 {
   //***************************************************************************
   /// The base class for all lists.

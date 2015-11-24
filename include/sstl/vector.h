@@ -43,7 +43,7 @@ SOFTWARE.
 ///\ingroup containers
 //*****************************************************************************
 
-namespace etl
+namespace sstl
 {
   template <typename T, const size_t MAX_SIZE_>
   //***************************************************************************

@@ -45,10 +45,10 @@ SOFTWARE.
 #undef min
 #endif
 
-namespace etl
+namespace sstl
 {
   //***************************************************************************
-  /// A templated base for all etl::set types.
+  /// A templated base for all sstl::set types.
   ///\ingroup set
   //***************************************************************************
   template <typename T, typename TCompare>
@@ -1751,7 +1751,7 @@ namespace etl
 ///\ingroup lookup
 //***************************************************************************
 template <typename T, typename TCompare>
-bool operator ==(const etl::iset<T, TCompare>& lhs, const etl::iset<T, TCompare>& rhs)
+bool operator ==(const sstl::iset<T, TCompare>& lhs, const sstl::iset<T, TCompare>& rhs)
 {
   return (lhs.size() == rhs.size()) && std::equal(lhs.begin(), lhs.end(), rhs.begin());
 }
@@ -1764,7 +1764,7 @@ bool operator ==(const etl::iset<T, TCompare>& lhs, const etl::iset<T, TCompare>
 ///\ingroup lookup
 //***************************************************************************
 template <typename T, typename TCompare>
-bool operator !=(const etl::iset<T, TCompare>& lhs, const etl::iset<T, TCompare>& rhs)
+bool operator !=(const sstl::iset<T, TCompare>& lhs, const sstl::iset<T, TCompare>& rhs)
 {
   return !(lhs == rhs);
 }
@@ -1777,7 +1777,7 @@ bool operator !=(const etl::iset<T, TCompare>& lhs, const etl::iset<T, TCompare>
 /// second, otherwise <b>false</b>.
 //*************************************************************************
 template <typename T, typename TCompare>
-bool operator <(const etl::iset<T, TCompare>& lhs, const etl::iset<T, TCompare>& rhs)
+bool operator <(const sstl::iset<T, TCompare>& lhs, const sstl::iset<T, TCompare>& rhs)
 {
   return std::lexicographical_compare(lhs.begin(),
                                       lhs.end(),
@@ -1793,7 +1793,7 @@ bool operator <(const etl::iset<T, TCompare>& lhs, const etl::iset<T, TCompare>&
 /// second, otherwise <b>false</b>.
 //*************************************************************************
 template <typename T, typename TCompare>
-bool operator >(const etl::iset<T, TCompare>& lhs, const etl::iset<T, TCompare>& rhs)
+bool operator >(const sstl::iset<T, TCompare>& lhs, const sstl::iset<T, TCompare>& rhs)
 {
   return std::lexicographical_compare(lhs.begin(),
                                       lhs.end(),
@@ -1810,7 +1810,7 @@ bool operator >(const etl::iset<T, TCompare>& lhs, const etl::iset<T, TCompare>&
 /// to the second, otherwise <b>false</b>.
 //*************************************************************************
 template <typename T, typename TCompare>
-bool operator <=(const etl::iset<T, TCompare>& lhs, const etl::iset<T, TCompare>& rhs)
+bool operator <=(const sstl::iset<T, TCompare>& lhs, const sstl::iset<T, TCompare>& rhs)
 {
   return !operator >(lhs, rhs);
 }
@@ -1823,7 +1823,7 @@ bool operator <=(const etl::iset<T, TCompare>& lhs, const etl::iset<T, TCompare>
 /// equal to the second, otherwise <b>false</b>.
 //*************************************************************************
 template <typename T, typename TCompare>
-bool operator >=(const etl::iset<T, TCompare>& lhs, const etl::iset<T, TCompare>& rhs)
+bool operator >=(const sstl::iset<T, TCompare>& lhs, const sstl::iset<T, TCompare>& rhs)
 {
   return !operator <(lhs, rhs);
 }

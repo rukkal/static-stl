@@ -41,7 +41,7 @@ SOFTWARE.
 ///\ingroup containers
 //*****************************************************************************
 
-namespace etl
+namespace sstl
 {
   //*************************************************************************
   /// A templated list implementation that uses a fixed size buffer.
@@ -124,7 +124,7 @@ namespace etl
   private:
 
     /// The pool of nodes used in the list.
-    etl::bitmap_allocator<typename ilist<T>::Data_Node, MAX_SIZE> node_pool;
+    sstl::bitmap_allocator<typename ilist<T>::Data_Node, MAX_SIZE> node_pool;
   };
 }
 

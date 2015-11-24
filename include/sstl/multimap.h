@@ -42,7 +42,7 @@ SOFTWARE.
 ///\ingroup containers
 //*****************************************************************************
 
-namespace etl
+namespace sstl
 {
   //*************************************************************************
   /// A templated multimap implementation that uses a fixed size buffer.

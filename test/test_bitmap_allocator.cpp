@@ -11,7 +11,9 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 
 #include <sstl/bitmap_allocator.h>
 
-namespace etl_test
+namespace sstl
+{
+namespace test
 {
 SUITE(test_bitmap_allocator)
 {
@@ -31,7 +33,7 @@ SUITE(test_bitmap_allocator)
    TEST(test_allocate_deallocate)
    {
       static const size_t capacity = 31;
-      auto allocator = etl::bitmap_allocator<int, capacity>{};
+      auto allocator = sstl::bitmap_allocator<int, capacity>{};
       auto allocated = std::vector<int*>{};
 
       // allocate all
@@ -55,7 +57,7 @@ SUITE(test_bitmap_allocator)
    void check_alignment()
    {
       static const size_t capacity = 31;
-      auto allocator = etl::bitmap_allocator<T, capacity>{};
+      auto allocator = sstl::bitmap_allocator<T, capacity>{};
       auto allocated = std::vector<T*>{};
       std::generate_n(std::back_inserter(allocated),
                      capacity,
@@ -89,4 +91,5 @@ SUITE(test_bitmap_allocator)
       check_alignment<type_align_64>();
    }
 };
+}
 }

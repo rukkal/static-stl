@@ -39,7 +39,9 @@ SOFTWARE.
 
 #include <sstl/flat_map.h>
 
-namespace
+namespace sstl
+{
+namespace test
 {
   SUITE(test_flat_map)
   {
@@ -51,8 +53,8 @@ namespace
     typedef std::pair<int, DC>  ElementDC;
     typedef std::pair<int, NDC> ElementNDC;
 
-    typedef etl::flat_map<int, DC, SIZE>  DataDC;
-    typedef etl::flat_map<int, NDC, SIZE> DataNDC;
+    typedef sstl::flat_map<int, DC, SIZE>  DataDC;
+    typedef sstl::flat_map<int, NDC, SIZE> DataNDC;
 
     typedef std::map<int, DC>  Compare_DataDC;
     typedef std::map<int, NDC> Compare_DataNDC;
@@ -564,4 +566,5 @@ namespace
       CHECK(initial1 != different);
     }
   };
+}
 }

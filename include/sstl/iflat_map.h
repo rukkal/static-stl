@@ -42,7 +42,7 @@ SOFTWARE.
 #include "flat_map_base.h"
 #include "__internal/parameter_type.h"
 
-namespace etl
+namespace sstl
 {
   //***************************************************************************
   /// The base class for specifically sized flat_maps.
@@ -58,7 +58,7 @@ namespace etl
 
   private:
 
-    typedef etl::ivector<value_type> buffer_t;
+    typedef sstl::ivector<value_type> buffer_t;
 
   public:
 
@@ -501,7 +501,7 @@ namespace etl
   ///\ingroup flat_map
   //***************************************************************************
   template <typename TKey, typename TMapped, typename TKeyCompare>
-  bool operator ==(const etl::iflat_map<TKey, TMapped, TKeyCompare>& lhs, const etl::iflat_map<TKey, TMapped, TKeyCompare>& rhs)
+  bool operator ==(const sstl::iflat_map<TKey, TMapped, TKeyCompare>& lhs, const sstl::iflat_map<TKey, TMapped, TKeyCompare>& rhs)
   {
     return (lhs.size() == rhs.size()) && std::equal(lhs.begin(), lhs.end(), rhs.begin());
   }
@@ -514,7 +514,7 @@ namespace etl
   ///\ingroup flat_map
   //***************************************************************************
   template <typename TKey, typename TMapped, typename TKeyCompare>
-  bool operator !=(const etl::iflat_map<TKey, TMapped, TKeyCompare>& lhs, const etl::iflat_map<TKey, TMapped, TKeyCompare>& rhs)
+  bool operator !=(const sstl::iflat_map<TKey, TMapped, TKeyCompare>& lhs, const sstl::iflat_map<TKey, TMapped, TKeyCompare>& rhs)
   {
     return !(lhs == rhs);
   }

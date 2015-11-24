@@ -15,7 +15,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include "__internal/bitset_span.h"
 #include "__internal/warnings.h"
 
-namespace etl
+namespace sstl
 {
 // Base class used to factor out capacity-indepented code
 // in order to reduce code bloat

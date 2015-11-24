@@ -34,7 +34,9 @@ SOFTWARE.
 
 #include <sstl/fnv_1.h>
 
-namespace
+namespace sstl
+{
+namespace test
 {
   SUITE(test_fnv1)
   {
@@ -43,7 +45,7 @@ namespace
     {
       std::string data("123456789");
 
-      uint32_t hash = etl::fnv_1_32(data.begin(), data.end());
+      uint32_t hash = sstl::fnv_1_32(data.begin(), data.end());
 
       CHECK_EQUAL(0x24148816, hash);
     }
@@ -53,7 +55,7 @@ namespace
     {
       std::string data("123456789");
 
-      etl::fnv_1_32 fnv_1_32_calculator;
+      sstl::fnv_1_32 fnv_1_32_calculator;
 
       for (size_t i = 0; i < data.size(); ++i)
       {
@@ -70,7 +72,7 @@ namespace
     {
       std::string data("123456789");
 
-      etl::fnv_1_32 fnv_1_32_calculator;
+      sstl::fnv_1_32 fnv_1_32_calculator;
 
       fnv_1_32_calculator.add(data.begin(), data.end());
 
@@ -86,11 +88,11 @@ namespace
       std::vector<uint32_t> data2 = { 0x04030201, 0x08070605 };
       std::vector<uint8_t>  data3 = { 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01 };
 
-      uint32_t hash1 = etl::fnv_1_32(data1.begin(), data1.end());
-      uint32_t hash2 = etl::fnv_1_32((uint8_t*)&data2[0], (uint8_t*)(&data2[0] + data2.size()));
+      uint32_t hash1 = sstl::fnv_1_32(data1.begin(), data1.end());
+      uint32_t hash2 = sstl::fnv_1_32((uint8_t*)&data2[0], (uint8_t*)(&data2[0] + data2.size()));
       CHECK_EQUAL(int(hash1), int(hash2));
 
-      uint32_t hash3 = etl::fnv_1_32(data3.rbegin(), data3.rend());
+      uint32_t hash3 = sstl::fnv_1_32(data3.rbegin(), data3.rend());
       CHECK_EQUAL(int(hash1), int(hash3));
     }
 
@@ -99,7 +101,7 @@ namespace
     {
       std::string data("123456789");
 
-      uint32_t hash = etl::fnv_1a_32(data.begin(), data.end());
+      uint32_t hash = sstl::fnv_1a_32(data.begin(), data.end());
 
       CHECK_EQUAL(0xBB86B11C, hash);
     }
@@ -109,7 +111,7 @@ namespace
     {
       std::string data("123456789");
 
-      etl::fnv_1a_32 fnv_1a_32_calculator;
+      sstl::fnv_1a_32 fnv_1a_32_calculator;
 
       for (size_t i = 0; i < data.size(); ++i)
       {
@@ -126,7 +128,7 @@ namespace
     {
       std::string data("123456789");
 
-      etl::fnv_1a_32 fnv_1a_32_calculator;
+      sstl::fnv_1a_32 fnv_1a_32_calculator;
 
       fnv_1a_32_calculator.add(data.begin(), data.end());
 
@@ -142,11 +144,11 @@ namespace
       std::vector<uint32_t> data2 = { 0x04030201, 0x08070605 };
       std::vector<uint8_t>  data3 = { 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01 };
 
-      uint32_t hash1 = etl::fnv_1a_32(data1.begin(), data1.end());
-      uint32_t hash2 = etl::fnv_1a_32((uint8_t*)&data2[0], (uint8_t*)(&data2[0] + data2.size()));
+      uint32_t hash1 = sstl::fnv_1a_32(data1.begin(), data1.end());
+      uint32_t hash2 = sstl::fnv_1a_32((uint8_t*)&data2[0], (uint8_t*)(&data2[0] + data2.size()));
       CHECK_EQUAL(int(hash1), int(hash2));
 
-      uint32_t hash3 = etl::fnv_1a_32(data3.rbegin(), data3.rend());
+      uint32_t hash3 = sstl::fnv_1a_32(data3.rbegin(), data3.rend());
       CHECK_EQUAL(int(hash1), int(hash3));
     }
 
@@ -155,7 +157,7 @@ namespace
     {
       std::string data("123456789");
 
-      uint64_t hash = etl::fnv_1_64(data.begin(), data.end());
+      uint64_t hash = sstl::fnv_1_64(data.begin(), data.end());
 
       CHECK_EQUAL(0xA72FFC362BF916D6, hash);
     }
@@ -165,7 +167,7 @@ namespace
     {
       std::string data("123456789");
 
-      etl::fnv_1_64 fnv_1_64_calculator;
+      sstl::fnv_1_64 fnv_1_64_calculator;
 
       for (size_t i = 0; i < data.size(); ++i)
       {
@@ -182,7 +184,7 @@ namespace
     {
       std::string data("123456789");
 
-      etl::fnv_1_64 fnv_1_64_calculator;
+      sstl::fnv_1_64 fnv_1_64_calculator;
 
       fnv_1_64_calculator.add(data.begin(), data.end());
 
@@ -198,11 +200,11 @@ namespace
       std::vector<uint32_t> data2 = { 0x04030201, 0x08070605 };
       std::vector<uint8_t>  data3 = { 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01 };
 
-      uint64_t hash1 = etl::fnv_1_64(data1.begin(), data1.end());
-      uint64_t hash2 = etl::fnv_1_64((uint8_t*)&data2[0], (uint8_t*)(&data2[0] + data2.size()));
+      uint64_t hash1 = sstl::fnv_1_64(data1.begin(), data1.end());
+      uint64_t hash2 = sstl::fnv_1_64((uint8_t*)&data2[0], (uint8_t*)(&data2[0] + data2.size()));
       CHECK_EQUAL(int(hash1), int(hash2));
 
-      uint64_t hash3 = etl::fnv_1_64(data3.rbegin(), data3.rend());
+      uint64_t hash3 = sstl::fnv_1_64(data3.rbegin(), data3.rend());
       CHECK_EQUAL(int(hash1), int(hash3));
     }
 
@@ -211,7 +213,7 @@ namespace
     {
       std::string data("123456789");
 
-      uint64_t hash = etl::fnv_1a_64(data.begin(), data.end());
+      uint64_t hash = sstl::fnv_1a_64(data.begin(), data.end());
 
       CHECK_EQUAL(0x06D5573923C6CDFC, hash);
     }
@@ -221,7 +223,7 @@ namespace
     {
       std::string data("123456789");
 
-      etl::fnv_1a_64 fnv_1a_64_calculator;
+      sstl::fnv_1a_64 fnv_1a_64_calculator;
 
       for (size_t i = 0; i < data.size(); ++i)
       {
@@ -238,7 +240,7 @@ namespace
     {
       std::string data("123456789");
 
-      etl::fnv_1a_64 fnv_1a_64_calculator;
+      sstl::fnv_1a_64 fnv_1a_64_calculator;
 
       fnv_1a_64_calculator.add(data.begin(), data.end());
 
@@ -254,13 +256,13 @@ namespace
       std::vector<uint32_t> data2 = { 0x04030201, 0x08070605 };
       std::vector<uint8_t>  data3 = { 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01 };
 
-      uint64_t hash1 = etl::fnv_1a_64(data1.begin(), data1.end());
-      uint64_t hash2 = etl::fnv_1a_64((uint8_t*)&data2[0], (uint8_t*)(&data2[0] + data2.size()));
+      uint64_t hash1 = sstl::fnv_1a_64(data1.begin(), data1.end());
+      uint64_t hash2 = sstl::fnv_1a_64((uint8_t*)&data2[0], (uint8_t*)(&data2[0] + data2.size()));
       CHECK_EQUAL(int(hash1), int(hash2));
 
-      uint64_t hash3 = etl::fnv_1a_64(data3.rbegin(), data3.rend());
+      uint64_t hash3 = sstl::fnv_1a_64(data3.rbegin(), data3.rend());
       CHECK_EQUAL(int(hash1), int(hash3));
     }
   };
 }
-
+}

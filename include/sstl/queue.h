@@ -11,11 +11,11 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include <queue>
 #include "deque.h"
 
-namespace etl
+namespace sstl
 {
-   // alias template to provide an etl::queue type that has consistent
+   // alias template to provide an sstl::queue type that has consistent
    // interface with the rest of the library's containers
-   template<class T, size_t CAPACITY, class Container=etl::deque<T, CAPACITY>>
+   template<class T, size_t CAPACITY, class Container=sstl::deque<T, CAPACITY>>
    using queue = std::queue<T, Container>;
 }
 

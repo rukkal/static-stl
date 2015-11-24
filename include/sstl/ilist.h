@@ -46,10 +46,10 @@ SOFTWARE.
 #undef min
 #endif
 
-namespace etl
+namespace sstl
 {
   //***************************************************************************
-  /// A templated base for all etl::list types.
+  /// A templated base for all sstl::list types.
   ///\ingroup list
   //***************************************************************************
   template <typename T>
@@ -105,7 +105,7 @@ namespace etl
   private:
 
     /// The pool of data nodes used in the list.
-    etl::__bitmap_allocator_base<Data_Node>* p_node_pool;
+    sstl::__bitmap_allocator_base<Data_Node>* p_node_pool;
 
     //*************************************************************************
     /// Downcast a Node* to a Data_Node*
@@ -917,7 +917,7 @@ namespace etl
     //*************************************************************************
     /// Constructor.
     //*************************************************************************
-    ilist(etl::__bitmap_allocator_base<Data_Node>& node_pool, size_t max_size_)
+    ilist(sstl::__bitmap_allocator_base<Data_Node>& node_pool, size_t max_size_)
       : list_base(max_size_),
         p_node_pool(&node_pool)
     {
@@ -1040,7 +1040,7 @@ namespace etl
 ///\return <b>true</b> if the arrays are equal, otherwise <b>false</b>.
 //*************************************************************************
 template <typename T>
-bool operator ==(const etl::ilist<T>& lhs, const etl::ilist<T>& rhs)
+bool operator ==(const sstl::ilist<T>& lhs, const sstl::ilist<T>& rhs)
 {
   return (lhs.size() == rhs.size()) && std::equal(lhs.begin(), lhs.end(), rhs.begin());
 }
@@ -1052,7 +1052,7 @@ bool operator ==(const etl::ilist<T>& lhs, const etl::ilist<T>& rhs)
 ///\return <b>true</b> if the arrays are not equal, otherwise <b>false</b>.
 //*************************************************************************
 template <typename T>
-bool operator !=(const etl::ilist<T>& lhs, const etl::ilist<T>& rhs)
+bool operator !=(const sstl::ilist<T>& lhs, const sstl::ilist<T>& rhs)
 {
   return !(lhs == rhs);
 }
@@ -1065,7 +1065,7 @@ bool operator !=(const etl::ilist<T>& lhs, const etl::ilist<T>& rhs)
 /// second, otherwise <b>false</b>.
 //*************************************************************************
 template <typename T>
-bool operator <(const etl::ilist<T>& lhs, const etl::ilist<T>& rhs)
+bool operator <(const sstl::ilist<T>& lhs, const sstl::ilist<T>& rhs)
 {
   return std::lexicographical_compare(lhs.begin(),
                                       lhs.end(),
@@ -1081,7 +1081,7 @@ bool operator <(const etl::ilist<T>& lhs, const etl::ilist<T>& rhs)
 /// second, otherwise <b>false</b>.
 //*************************************************************************
 template <typename T>
-bool operator >(const etl::ilist<T>& lhs, const etl::ilist<T>& rhs)
+bool operator >(const sstl::ilist<T>& lhs, const sstl::ilist<T>& rhs)
 {
   return std::lexicographical_compare(lhs.begin(),
                                       lhs.end(),
@@ -1098,7 +1098,7 @@ bool operator >(const etl::ilist<T>& lhs, const etl::ilist<T>& rhs)
 /// to the second, otherwise <b>false</b>.
 //*************************************************************************
 template <typename T>
-bool operator <=(const etl::ilist<T>& lhs, const etl::ilist<T>& rhs)
+bool operator <=(const sstl::ilist<T>& lhs, const sstl::ilist<T>& rhs)
 {
   return !operator >(lhs, rhs);
 }
@@ -1111,7 +1111,7 @@ bool operator <=(const etl::ilist<T>& lhs, const etl::ilist<T>& rhs)
 /// equal to the second, otherwise <b>false</b>.
 //*************************************************************************
 template <typename T>
-bool operator >=(const etl::ilist<T>& lhs, const etl::ilist<T>& rhs)
+bool operator >=(const sstl::ilist<T>& lhs, const sstl::ilist<T>& rhs)
 {
   return !operator <(lhs, rhs);
 }

@@ -39,7 +39,9 @@ SOFTWARE.
 
 #include <sstl/flat_multiset.h>
 
-namespace
+namespace sstl
+{
+namespace test
 {
   SUITE(test_flat_multiset)
   {
@@ -48,8 +50,8 @@ namespace
     typedef TestDataDC<std::string>  DC;
     typedef TestDataNDC<std::string> NDC;
 
-    typedef etl::flat_multiset<DC, SIZE>     DataDC;
-    typedef etl::flat_multiset<NDC, SIZE>    DataNDC;
+    typedef sstl::flat_multiset<DC, SIZE>     DataDC;
+    typedef sstl::flat_multiset<NDC, SIZE>    DataNDC;
 
     typedef std::multiset<DC>  Compare_DataDC;
     typedef std::multiset<NDC> Compare_DataNDC;
@@ -534,4 +536,5 @@ namespace
       CHECK_EQUAL(compare_data.count(N4), data.count(N4));
     }
   };
+}
 }

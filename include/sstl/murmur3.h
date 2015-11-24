@@ -43,7 +43,7 @@ SOFTWARE.
 ///\defgroup murmur3 Murmur3 hash calculations
 ///\ingroup maths
 
-namespace etl
+namespace sstl
 {
   //***************************************************************************
   /// Calculates the murmur3 hash.

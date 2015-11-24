@@ -28,7 +28,7 @@ SOFTWARE.
 ******************************************************************************/
 
 #ifndef __ETL_IN_IFLAT_MULTIMAP_H__
-#error This header is a private element of etl::flat_multimap & etl::iflat_multimap
+#error This header is a private element of sstl::flat_multimap & sstl::iflat_multimap
 #endif
 
 #ifndef __ETL_FLAT_MULTIMAP_BASE__
@@ -38,7 +38,7 @@ SOFTWARE.
 
 #include "ivector.h"
 
-namespace etl
+namespace sstl
 {
   //***************************************************************************
   ///\ingroup flat_multimap

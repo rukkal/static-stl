@@ -29,7 +29,7 @@ SOFTWARE.
 
 #include <stdint.h>
 
-namespace etl
+namespace sstl
 {
   //***************************************************************************
   /// Pearson lookup table

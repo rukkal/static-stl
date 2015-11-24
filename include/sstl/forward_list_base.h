@@ -28,7 +28,7 @@ SOFTWARE.
 ******************************************************************************/
 
 #ifndef __ETL_IN_IFORWARD_LIST_H__
-#error This header is a private element of etl::forward_list & etl::iforward_list
+#error This header is a private element of sstl::forward_list & sstl::iforward_list
 #endif
 
 #ifndef __ETL_LIST_BASE__
@@ -36,7 +36,7 @@ SOFTWARE.
 
 #include <stddef.h>
 
-namespace etl
+namespace sstl
 {
   //***************************************************************************
   /// The base class for all forward_lists.
