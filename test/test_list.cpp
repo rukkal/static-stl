@@ -96,7 +96,7 @@ namespace
       const size_t INITIAL_SIZE = 4;
       const ItemNDC INITIAL_VALUE = ItemNDC("1");
 
-      std::array<ItemNDC, INITIAL_SIZE> compare_data = { ItemNDC("1"), ItemNDC("1"), ItemNDC("1"), ItemNDC("1") };
+      auto compare_data = std::array<ItemNDC, INITIAL_SIZE>{{ ItemNDC{"1"}, ItemNDC{"1"}, ItemNDC{"1"}, ItemNDC{"1"} }};
 
       DataNDC data(INITIAL_SIZE, INITIAL_VALUE);
 

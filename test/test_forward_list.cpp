@@ -93,7 +93,7 @@ namespace
       const size_t INITIAL_SIZE = 4;
       const ItemNDC INITIAL_VALUE("1");
 
-      std::array<ItemNDC, INITIAL_SIZE> compare_data = { ItemNDC("1"), ItemNDC("1"), ItemNDC("1"), ItemNDC("1") };
+      auto compare_data = std::array<ItemNDC, INITIAL_SIZE>{{ ItemNDC("1"), ItemNDC("1"), ItemNDC("1"), ItemNDC("1") }};
 
       DataNDC data(INITIAL_SIZE, INITIAL_VALUE);
 
@@ -403,8 +403,6 @@ namespace
 
       CompareDataNDC::iterator i_compare_data = compare_data.begin();
       std::advance(i_compare_data, 4);
-
-      CompareDataNDC::iterator i_compare_result = compare_data.erase_after(i_compare_data, compare_data.end());
 
       DataNDC::iterator i_result = data.erase_after(i_data, data.end());
 

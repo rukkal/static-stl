@@ -348,9 +348,6 @@ namespace
       Compare_DataNDC compare_data(initial_data.begin(), initial_data.end());
       DataNDC data(initial_data.begin(), initial_data.end());
 
-      Compare_DataNDC::iterator i_compare = compare_data.begin();
-      DataNDC::iterator i_data = data.begin();
-
       size_t count_compare = compare_data.erase(5);
       size_t count         = data.erase(5);
 

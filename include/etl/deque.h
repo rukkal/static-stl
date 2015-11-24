@@ -38,6 +38,7 @@ SOFTWARE.
 #include <array>
 
 #include "ideque.h"
+#include "__internal/warnings.h"
 
 //*****************************************************************************
 ///\defgroup deque deque
@@ -58,15 +59,12 @@ namespace etl
   class deque : public ideque<T>
   {
   public:
-
     static const size_t MAX_SIZE = MAX_SIZE_;
 
   private:
-
     static const size_t BUFFER_SIZE = MAX_SIZE + 1;
 
   public:
-
     typedef T        value_type;
     typedef T*       pointer;
     typedef const T* const_pointer;
@@ -79,7 +77,9 @@ namespace etl
     /// Default constructor.
     //*************************************************************************
     deque()
+      warnings_clang_push_ignore("-Wuninitialized")
       : ideque<T>(reinterpret_cast<T*>(&buffer[0]), MAX_SIZE, BUFFER_SIZE)
+      warnings_clang_pop_ignore()
     {
     }
 
@@ -87,7 +87,9 @@ namespace etl
     /// Copy constructor.
     //*************************************************************************
     deque(const deque& other)
+      warnings_clang_push_ignore("-Wuninitialized")
       : ideque<T>(reinterpret_cast<T*>(&buffer[0]), MAX_SIZE, BUFFER_SIZE)
+      warnings_clang_pop_ignore()
     {
       ideque<T>::assign(other.begin(), other.end());
     }
@@ -97,7 +99,9 @@ namespace etl
     //*************************************************************************
     template <typename TIterator>
     deque(TIterator begin, TIterator end)
+      warnings_clang_push_ignore("-Wuninitialized")
       : ideque<T>(reinterpret_cast<T*>(&buffer[0]), MAX_SIZE, BUFFER_SIZE)
+      warnings_clang_pop_ignore()
     {
       ideque<T>::assign(begin, end);
     }
@@ -106,7 +110,9 @@ namespace etl
     /// Assigns data to the deque.
     //*************************************************************************
     explicit deque(size_t n, typename ideque<T>::parameter_t value = value_type())
+      warnings_clang_push_ignore("-Wuninitialized")
       : ideque<T>(reinterpret_cast<T*>(&buffer[0]), MAX_SIZE, BUFFER_SIZE)
+      warnings_clang_pop_ignore()
     {
       ideque<T>::assign(n, value);
     }

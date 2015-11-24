@@ -13,6 +13,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 
 #include "sstl_assert.h"
 #include "__internal/bitset_span.h"
+#include "__internal/warnings.h"
 
 namespace etl
 {
@@ -81,7 +82,10 @@ template <class T, size_t CAPACITY>
 class bitmap_allocator : public __bitmap_allocator_base<T>
 {
 public:
-    bitmap_allocator() : __bitmap_allocator_base<T>(buffer.data(), bitset_span(bitmap.data(), CAPACITY))
+    bitmap_allocator()
+    warnings_clang_push_ignore("-Wuninitialized")
+    : __bitmap_allocator_base<T>(buffer.data(), bitset_span(bitmap.data(),CAPACITY))
+    warnings_clang_pop_ignore()
     {
         bitmap.fill(0);
     }
