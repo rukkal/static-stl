@@ -27,12 +27,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#ifndef __ETL_IN_IFLAT_MAP_H__
+#ifndef _SSTL_IN_IFLAT_MAP_H__
 #error This header is a private element of sstl::flat_map & sstl::iflat_map
 #endif
 
-#ifndef __ETL_FLAT_MAP_BASE__
-#define __ETL_FLAT_MAP_BASE__
+#ifndef _SSTL_FLAT_MAP_BASE__
+#define _SSTL_FLAT_MAP_BASE__
 
 #include <stddef.h>
 

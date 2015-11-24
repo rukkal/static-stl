@@ -27,8 +27,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#ifndef __ETL_POW__
-#define __ETL_POW__
+#ifndef _SSTL_POW__
+#define _SSTL_POW__
 
 #include <cstdint>
 #include "log.h"

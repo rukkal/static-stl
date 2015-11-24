@@ -27,9 +27,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#ifndef __ETL_ILIST__
-#define __ETL_ILIST__
-#define __ETL_IN_ILIST_H__
+#ifndef _SSTL_ILIST__
+#define _SSTL_ILIST__
+#define _SSTL_IN_ILIST_H__
 
 #include <cstddef>
 #include <type_traits>
@@ -1120,6 +1120,6 @@ bool operator >=(const sstl::ilist<T>& lhs, const sstl::ilist<T>& rhs)
 #define min(a,b) (((a) < (b)) ? (a) : (b))
 #endif
 
-#undef __ETL_IN_ILIST_H__
+#undef _SSTL_IN_ILIST_H__
 
 #endif

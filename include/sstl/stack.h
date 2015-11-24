@@ -5,8 +5,8 @@ terms of the Do What The Fuck You Want To Public License, Version 2,
 as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 */
 
-#ifndef __SSTL_STACK__
-#define __SSTL_STACK__
+#ifndef _SSTL_STACK__
+#define _SSTL_STACK__
 
 #include <stack>
 #include "vector.h"

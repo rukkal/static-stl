@@ -27,8 +27,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#ifndef __ETL_DEQUE__
-#define __ETL_DEQUE__
+#ifndef _SSTL_DEQUE__
+#define _SSTL_DEQUE__
 
 #include <stddef.h>
 #include <stdint.h>

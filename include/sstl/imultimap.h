@@ -27,9 +27,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#ifndef __ETL_IMULTIMAP__
-#define __ETL_IMULTIMAP__
-#define __ETL_IN_IMULTIMAP_H__
+#ifndef _SSTL_IMULTIMAP__
+#define _SSTL_IMULTIMAP__
+#define _SSTL_IN_IMULTIMAP_H__
 
 #include <iterator>
 #include <algorithm>
@@ -1799,6 +1799,6 @@ bool operator >=(const sstl::imultimap<TKey, TMapped, TKeyCompare>& lhs, const s
 #define min(a,b) (((a) < (b)) ? (a) : (b))
 #endif
 
-#undef __ETL_IN_IMULTIMAP_H__
+#undef _SSTL_IN_IMULTIMAP_H__
 
 #endif

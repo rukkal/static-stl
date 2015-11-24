@@ -27,12 +27,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#ifndef __ETL_IN_IVECTOR_H__
+#ifndef _SSTL_IN_IVECTOR_H__
 #error This header is a private element of sstl::vector & sstl::ivector
 #endif
 
-#ifndef __ETL_VECTOR_BASE__
-#define __ETL_VECTOR_BASE__
+#ifndef _SSTL_VECTOR_BASE__
+#define _SSTL_VECTOR_BASE__
 
 #include <stddef.h>
 

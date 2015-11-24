@@ -5,8 +5,8 @@ terms of the Do What The Fuck You Want To Public License, Version 2,
 as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 */
 
-#ifndef __SSTL_BITSET_SPAN__
-#define __SSTL_BITSET_SPAN__
+#ifndef _SSTL_BITSET_SPAN__
+#define _SSTL_BITSET_SPAN__
 
 #include <cassert>
 #include <limits>

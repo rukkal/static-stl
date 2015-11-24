@@ -27,9 +27,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#ifndef __ETL_IDEQUE__
-#define __ETL_IDEQUE__
-#define __ETL_IN_IDEQUE_H__
+#ifndef _SSTL_IDEQUE__
+#define _SSTL_IDEQUE__
+#define _SSTL_IN_IDEQUE_H__
 
 #include <cstddef>
 #include <type_traits>
@@ -1400,6 +1400,6 @@ bool operator >=(const sstl::ideque<T>& lhs, const sstl::ideque<T>& rhs)
   return !operator <(lhs, rhs);
 }
 
-#undef __ETL_IN_IDEQUE_H__
+#undef _SSTL_IN_IDEQUE_H__
 
 #endif

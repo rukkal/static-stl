@@ -27,9 +27,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#ifndef __ETL_IMAP__
-#define __ETL_IMAP__
-#define __ETL_IN_IMAP_H__
+#ifndef _SSTL_IMAP__
+#define _SSTL_IMAP__
+#define _SSTL_IN_IMAP_H__
 
 #include <iterator>
 #include <algorithm>
@@ -1885,6 +1885,6 @@ bool operator >=(const sstl::imap<TKey, TMapped, TKeyCompare>& lhs, const sstl::
 #define min(a,b) (((a) < (b)) ? (a) : (b))
 #endif
 
-#undef __ETL_IN_IMAP_H__
+#undef _SSTL_IN_IMAP_H__
 
 #endif

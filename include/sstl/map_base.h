@@ -27,12 +27,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#if !defined(__ETL_IN_IMAP_H__) && !defined(__ETL_IN_IMULTIMAP_H__)
+#if !defined(_SSTL_IN_IMAP_H__) && !defined(_SSTL_IN_IMULTIMAP_H__)
 #error This header is a private element of sstl::map, sstl::multimap & sstl::imap, sstl::imultimap
 #endif
 
-#ifndef __ETL_MAP_BASE__
-#define __ETL_MAP_BASE__
+#ifndef _SSTL_MAP_BASE__
+#define _SSTL_MAP_BASE__
 
 #include <stddef.h>
 

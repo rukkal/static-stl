@@ -27,12 +27,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#ifndef __ETL_IN_IFORWARD_LIST_H__
+#ifndef _SSTL_IN_IFORWARD_LIST_H__
 #error This header is a private element of sstl::forward_list & sstl::iforward_list
 #endif
 
-#ifndef __ETL_LIST_BASE__
-#define __ETL_LIST_BASE__
+#ifndef _SSTL_LIST_BASE__
+#define _SSTL_LIST_BASE__
 
 #include <stddef.h>
 

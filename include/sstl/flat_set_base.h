@@ -27,12 +27,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#ifndef __ETL_IN_IFLAT_SET_H__
+#ifndef _SSTL_IN_IFLAT_SET_H__
 #error This header is a private element of sstl::flat_set & sstl::iflat_set
 #endif
 
-#ifndef __ETL_FLAT_SET_BASE__
-#define __ETL_FLAT_SET_BASE__
+#ifndef _SSTL_FLAT_SET_BASE__
+#define _SSTL_FLAT_SET_BASE__
 
 #include <stddef.h>
 

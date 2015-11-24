@@ -27,12 +27,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#if !defined(__ETL_IN_ISET_H__) && !defined(__ETL_IN_IMULTISET_H__)
+#if !defined(_SSTL_IN_ISET_H__) && !defined(_SSTL_IN_IMULTISET_H__)
 #error This header is a private element of sstl::set, sstl::multiset & sstl::iset, sstl::imultiset
 #endif
 
-#ifndef __ETL_SET_BASE__
-#define __ETL_SET_BASE__
+#ifndef _SSTL_SET_BASE__
+#define _SSTL_SET_BASE__
 
 #include <stddef.h>
 

@@ -27,8 +27,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#ifndef __ETL_FNV_1__
-#define __ETL_FNV_1__
+#ifndef _SSTL_FNV_1__
+#define _SSTL_FNV_1__
 
 #include <cstdint>
 

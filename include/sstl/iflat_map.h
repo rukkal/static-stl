@@ -27,9 +27,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#ifndef __ETL_IFLAT_MAP__
-#define __ETL_IFLAT_MAP__
-#define __ETL_IN_IFLAT_MAP_H__
+#ifndef _SSTL_IFLAT_MAP__
+#define _SSTL_IFLAT_MAP__
+#define _SSTL_IN_IFLAT_MAP_H__
 
 #include <cstddef>
 #include <iterator>
@@ -520,5 +520,5 @@ namespace sstl
   }
 }
 
-#undef __ETL_IN_IFLAT_MAP_H__
+#undef _SSTL_IN_IFLAT_MAP_H__
 #endif

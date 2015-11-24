@@ -27,8 +27,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#ifndef __ETL_PEARSON__
-#define __ETL_PEARSON__
+#ifndef _SSTL_PEARSON__
+#define _SSTL_PEARSON__
 
 #include <stdint.h>
 #include <array>

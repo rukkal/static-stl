@@ -27,8 +27,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#ifndef __ETL_MURMUR3__
-#define __ETL_MURMUR3__
+#ifndef _SSTL_MURMUR3__
+#define _SSTL_MURMUR3__
 
 #include <cstdint>
 #include <type_traits>

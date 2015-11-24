@@ -27,12 +27,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#ifndef __ETL_IN_IDEQUE_H__
+#ifndef _SSTL_IN_IDEQUE_H__
 #error This header is a private element of sstl::deque & sstl::ideque
 #endif
 
-#ifndef __ETL_DEQUE_BASE__
-#define __ETL_DEQUE_BASE__
+#ifndef _SSTL_DEQUE_BASE__
+#define _SSTL_DEQUE_BASE__
 
 #include <stddef.h>
 

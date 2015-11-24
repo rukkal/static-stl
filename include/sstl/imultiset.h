@@ -27,9 +27,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#ifndef __ETL_IMULTISET__
-#define __ETL_IMULTISET__
-#define __ETL_IN_IMULTISET_H__
+#ifndef _SSTL_IMULTISET__
+#define _SSTL_IMULTISET__
+#define _SSTL_IN_IMULTISET_H__
 
 #include <iterator>
 #include <algorithm>
@@ -1782,6 +1782,6 @@ bool operator >=(const sstl::imultiset<T, TCompare>& lhs, const sstl::imultiset<
 #define min(a,b) (((a) < (b)) ? (a) : (b))
 #endif
 
-#undef __ETL_IN_IMULTISET_H__
+#undef _SSTL_IN_IMULTISET_H__
 
 #endif

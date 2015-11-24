@@ -5,8 +5,8 @@ terms of the Do What The Fuck You Want To Public License, Version 2,
 as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 */
 
-#ifndef __SSTL_BITMAP_ALLOCATOR__
-#define __SSTL_BITMAP_ALLOCATOR__
+#ifndef _SSTL_BITMAP_ALLOCATOR__
+#define _SSTL_BITMAP_ALLOCATOR__
 
 #include <array>
 #include <type_traits>

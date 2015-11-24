@@ -27,8 +27,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#ifndef __ETL_PARAMETER__
-#define __ETL_PARAMETER__
+#ifndef _SSTL_PARAMETER__
+#define _SSTL_PARAMETER__
 
 #include <type_traits>
 

@@ -27,9 +27,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#ifndef __ETL_IVECTOR__
-#define __ETL_IVECTOR__
-#define __ETL_IN_IVECTOR_H__
+#ifndef _SSTL_IVECTOR__
+#define _SSTL_IVECTOR__
+#define _SSTL_IN_IVECTOR_H__
 
 #include <cassert>
 #include <iterator>
@@ -733,5 +733,5 @@ namespace sstl
   }
 }
 
-#undef __ETL_IN_IVECTOR_H__
+#undef _SSTL_IN_IVECTOR_H__
 #endif

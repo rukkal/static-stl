@@ -27,8 +27,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#ifndef __ETL_SET__
-#define __ETL_SET__
+#ifndef _SSTL_SET__
+#define _SSTL_SET__
 
 #include <stddef.h>
 #include <iterator>

@@ -27,8 +27,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#ifndef __ETL_BINARY__
-#define __ETL_BINARY__
+#ifndef _SSTL_BINARY__
+#define _SSTL_BINARY__
 
 ///\defgroup binary binary
 /// Binary utilities

@@ -5,7 +5,7 @@ terms of the Do What The Fuck You Want To Public License, Version 2,
 as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 */
 
-#ifndef __SSTL_WARNINGS__
+#ifndef _SSTL_WARNINGS__
 
 #define STRINGIFY(a) #a
 
@@ -24,4 +24,4 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
    #define warnings_clang_pop_ignore()
 #endif
 
-#endif // __SSTL_WARNINGS__
+#endif // _SSTL_WARNINGS__

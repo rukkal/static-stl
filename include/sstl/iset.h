@@ -27,9 +27,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-#ifndef __ETL_ISET__
-#define __ETL_ISET__
-#define __ETL_IN_ISET_H__
+#ifndef _SSTL_ISET__
+#define _SSTL_ISET__
+#define _SSTL_IN_ISET_H__
 
 #include <iterator>
 #include <algorithm>
@@ -1832,6 +1832,6 @@ bool operator >=(const sstl::iset<T, TCompare>& lhs, const sstl::iset<T, TCompar
 #define min(a,b) (((a) < (b)) ? (a) : (b))
 #endif
 
-#undef __ETL_IN_ISET_H__
+#undef _SSTL_IN_ISET_H__
 
 #endif
