@@ -17,6 +17,7 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 
 include_directories("include")
 include_directories("unittest-cpp")
+include_directories("Catch/include")
 
 file(GLOB sstl_srcs "include/sstl/*.cpp" "include/sstl/*.h" "include/sstl/__internal/*.h")
 add_library(sstl ${sstl_srcs})
