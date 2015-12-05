@@ -5,7 +5,7 @@ terms of the Do What The Fuck You Want To Public License, Version 2,
 as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 */
 
-#include <UnitTest++/UnitTest++.h>
+#include <catch.hpp>
 #include <sstl/stack.h>
 
 namespace sstl
@@ -13,34 +13,35 @@ namespace sstl
 namespace test
 {
 
-SUITE(test_stack)
+TEST_CASE("stack")
 {
-    TEST(constructors_can_be_instantiated)
-    {
-        static const auto CAPACITY = 5;
-        auto container = sstl::vector<int, CAPACITY> {};
+   SECTION("constructors can be instantiated")
+   {
+      static const auto CAPACITY = 5;
+      auto container = sstl::vector<int, CAPACITY> {};
 
-        sstl::stack<int, CAPACITY> {};
+      sstl::stack<int, CAPACITY> {};
 
-        sstl::stack<int, CAPACITY> {container};
+      sstl::stack<int, CAPACITY> {container};
 
-        auto other_stack = sstl::stack<int, CAPACITY> {};
-        sstl::stack<int, CAPACITY> {other_stack};
-    }
+      auto other_stack = sstl::stack<int, CAPACITY> {};
+      sstl::stack<int, CAPACITY> {other_stack};
+   }
 
-    TEST(member_functions_can_be_instantiated)
-    {
-        auto stack = sstl::stack<int, 5> {};
-        auto stack2 = stack;
+   SECTION("member functions can be instantiated")
+   {
+      auto stack = sstl::stack<int, 5> {};
+      auto stack2 = stack;
 
-        stack.push(3);
-        stack.emplace(3);
-        stack.top();
-        stack.pop();
-        stack.empty();
-        stack.size();
-        stack.swap(stack2);
-    }
-};
+      stack.push(3);
+      stack.emplace(3);
+      stack.top();
+      stack.pop();
+      stack.empty();
+      stack.size();
+      stack.swap(stack2);
+   }
+}
+
 }
 }

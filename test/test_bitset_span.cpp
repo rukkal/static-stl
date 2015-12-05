@@ -5,7 +5,7 @@ terms of the Do What The Fuck You Want To Public License, Version 2,
 as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 */
 
-#include <UnitTest++/UnitTest++.h>
+#include <catch.hpp>
 #include <bitset>
 #include <array>
 #include <sstl/__internal/bitset_span.h>
@@ -14,110 +14,103 @@ namespace sstl
 {
 namespace test
 {
-SUITE(test_bitset_span)
+
+template<class T1, class T2>
+void check_bitset_equal(const T1& actual, const T2& expected)
 {
-   template<class T1, class T2>
-   void check_equal(const T1& t1, const T2& t2)
+    REQUIRE(actual.size() == expected.size());
+    REQUIRE(actual.count() == expected.count());
+    for(size_t i=0; i<actual.size(); ++i)
+    {
+        REQUIRE(actual.test(i) == expected.test(i));
+    }
+}
+
+TEST_CASE("bitset_span")
+{
+   auto expected = std::bitset<31> {};
+   std::array<char, 5> actual_data;
+   actual_data.fill(0);
+   auto actual = sstl::bitset_span(actual_data.data(), 31);
+
+   SECTION("constructor")
    {
-      CHECK_EQUAL(t1.size(), t2.size());
-      CHECK_EQUAL(t1.count(), t2.count());
-      for(size_t i=0; i<t1.size(); ++i)
-      {
-         CHECK_EQUAL(t1.test(i), t2.test(i));
-      }
+
+      check_bitset_equal(actual, expected);
    }
 
-   TEST(test_constructor)
+   SECTION("set")
    {
-      auto expected = std::bitset<31> {};
-      std::array<char, 5> actual_data;
-      auto actual = sstl::bitset_span(actual_data.data(), 31);
-      check_equal(expected, actual);
+       expected.set(0);
+       actual.set(0);
+       check_bitset_equal(actual, expected);
+
+       expected.set(1);
+       actual.set(1);
+       check_bitset_equal(actual, expected);
+
+       expected.set(29);
+       actual.set(29);
+       check_bitset_equal(actual, expected);
+
+       expected.set(30);
+       actual.set(30);
+       check_bitset_equal(actual, expected);
+
+       expected.set(11);
+       actual.set(11);
+       check_bitset_equal(actual, expected);
+
+       expected.set();
+       actual.set();
+       check_bitset_equal(actual, expected);
    }
 
-   TEST(test_set)
+   SECTION("reset")
    {
-      auto expected = std::bitset<31> {};
-      std::array<char, 5> actual_data;
-      auto actual = sstl::bitset_span(actual_data.data(), 31);
-
-      expected.set(0);
-      actual.set(0);
-      check_equal(expected, actual);
-
-      expected.set(1);
-      actual.set(1);
-      check_equal(expected, actual);
-
-      expected.set(29);
-      actual.set(29);
-      check_equal(expected, actual);
-
-      expected.set(30);
-      actual.set(30);
-      check_equal(expected, actual);
-
-      expected.set(11);
-      actual.set(11);
-      check_equal(expected, actual);
-
       expected.set();
       actual.set();
-      check_equal(expected, actual);
-   }
-
-   TEST(test_reset)
-   {
-      auto expected = std::bitset<31> {};
-      std::array<char, 5> actual_data;
-      auto actual = sstl::bitset_span(actual_data.data(), 31);
-
-      expected.set();
-      actual.set();
-      check_equal(expected, actual);
+      check_bitset_equal(actual, expected);
 
       expected.reset(0);
       actual.reset(0);
-      check_equal(expected, actual);
+      check_bitset_equal(actual, expected);
 
       expected.reset(1);
       actual.reset(1);
-      check_equal(expected, actual);
+      check_bitset_equal(actual, expected);
 
       expected.reset(29);
       actual.reset(29);
-      check_equal(expected, actual);
+      check_bitset_equal(actual, expected);
 
       expected.reset(30);
       actual.reset(30);
-      check_equal(expected, actual);
+      check_bitset_equal(actual, expected);
 
       expected.reset(11);
       actual.reset(11);
-      check_equal(expected, actual);
+      check_bitset_equal(actual, expected);
 
       expected.reset();
       actual.reset();
-      check_equal(expected, actual);
+      check_bitset_equal(actual, expected);
    }
 
-   TEST(test_all)
+   SECTION("all")
    {
-      std::array<char, 5> actual_data;
-      auto actual = sstl::bitset_span(actual_data.data(), 31);
-
-      CHECK_EQUAL(false, actual.all());
+      REQUIRE(actual.all() == false);
       actual.set();
-      CHECK_EQUAL(true, actual.all());
+      REQUIRE(actual.all() == true);
       actual.reset(0);
-      CHECK_EQUAL(false, actual.all());
+      REQUIRE(actual.all() == false);
       actual.set(0);
-      CHECK_EQUAL(true, actual.all());
+      REQUIRE(actual.all() == true);
       actual.reset(30);
-      CHECK_EQUAL(false, actual.all());
+      REQUIRE(actual.all() == false);
       actual.set(30);
-      CHECK_EQUAL(true, actual.all());
+      REQUIRE(actual.all() == true);
    }
-};
+}
 }
 }
