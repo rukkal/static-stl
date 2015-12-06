@@ -1741,91 +1741,91 @@ namespace sstl
       position->weight = kNeither;
     }
   };
-}
 
-//***************************************************************************
-/// Equal operator.
-///\param lhs Reference to the first lookup.
-///\param rhs Reference to the second lookup.
-///\return <b>true</b> if the arrays are equal, otherwise <b>false</b>
-///\ingroup lookup
-//***************************************************************************
-template <typename T, typename TCompare>
-bool operator ==(const sstl::iset<T, TCompare>& lhs, const sstl::iset<T, TCompare>& rhs)
-{
-  return (lhs.size() == rhs.size()) && std::equal(lhs.begin(), lhs.end(), rhs.begin());
-}
+   //***************************************************************************
+   /// Equal operator.
+   ///\param lhs Reference to the first lookup.
+   ///\param rhs Reference to the second lookup.
+   ///\return <b>true</b> if the arrays are equal, otherwise <b>false</b>
+   ///\ingroup lookup
+   //***************************************************************************
+   template <typename T, typename TCompare>
+   bool operator ==(const sstl::iset<T, TCompare>& lhs, const sstl::iset<T, TCompare>& rhs)
+   {
+     return (lhs.size() == rhs.size()) && std::equal(lhs.begin(), lhs.end(), rhs.begin());
+   }
 
-//***************************************************************************
-/// Not equal operator.
-///\param lhs Reference to the first lookup.
-///\param rhs Reference to the second lookup.
-///\return <b>true</b> if the arrays are not equal, otherwise <b>false</b>
-///\ingroup lookup
-//***************************************************************************
-template <typename T, typename TCompare>
-bool operator !=(const sstl::iset<T, TCompare>& lhs, const sstl::iset<T, TCompare>& rhs)
-{
-  return !(lhs == rhs);
-}
+   //***************************************************************************
+   /// Not equal operator.
+   ///\param lhs Reference to the first lookup.
+   ///\param rhs Reference to the second lookup.
+   ///\return <b>true</b> if the arrays are not equal, otherwise <b>false</b>
+   ///\ingroup lookup
+   //***************************************************************************
+   template <typename T, typename TCompare>
+   bool operator !=(const sstl::iset<T, TCompare>& lhs, const sstl::iset<T, TCompare>& rhs)
+   {
+     return !(lhs == rhs);
+   }
 
-//*************************************************************************
-/// Less than operator.
-///\param lhs Reference to the first list.
-///\param rhs Reference to the second list.
-///\return <b>true</b> if the first list is lexicographically less than the
-/// second, otherwise <b>false</b>.
-//*************************************************************************
-template <typename T, typename TCompare>
-bool operator <(const sstl::iset<T, TCompare>& lhs, const sstl::iset<T, TCompare>& rhs)
-{
-  return std::lexicographical_compare(lhs.begin(),
-                                      lhs.end(),
-                                      rhs.begin(),
-                                      rhs.end());
-}
+   //*************************************************************************
+   /// Less than operator.
+   ///\param lhs Reference to the first list.
+   ///\param rhs Reference to the second list.
+   ///\return <b>true</b> if the first list is lexicographically less than the
+   /// second, otherwise <b>false</b>.
+   //*************************************************************************
+   template <typename T, typename TCompare>
+   bool operator <(const sstl::iset<T, TCompare>& lhs, const sstl::iset<T, TCompare>& rhs)
+   {
+     return std::lexicographical_compare(lhs.begin(),
+                                         lhs.end(),
+                                         rhs.begin(),
+                                         rhs.end());
+   }
 
-//*************************************************************************
-/// Greater than operator.
-///\param lhs Reference to the first list.
-///\param rhs Reference to the second list.
-///\return <b>true</b> if the first list is lexicographically greater than the
-/// second, otherwise <b>false</b>.
-//*************************************************************************
-template <typename T, typename TCompare>
-bool operator >(const sstl::iset<T, TCompare>& lhs, const sstl::iset<T, TCompare>& rhs)
-{
-  return std::lexicographical_compare(lhs.begin(),
-                                      lhs.end(),
-                                      rhs.begin(),
-                                      rhs.end(),
-                                      std::greater<T>());
-}
+   //*************************************************************************
+   /// Greater than operator.
+   ///\param lhs Reference to the first list.
+   ///\param rhs Reference to the second list.
+   ///\return <b>true</b> if the first list is lexicographically greater than the
+   /// second, otherwise <b>false</b>.
+   //*************************************************************************
+   template <typename T, typename TCompare>
+   bool operator >(const sstl::iset<T, TCompare>& lhs, const sstl::iset<T, TCompare>& rhs)
+   {
+     return std::lexicographical_compare(lhs.begin(),
+                                         lhs.end(),
+                                         rhs.begin(),
+                                         rhs.end(),
+                                         std::greater<T>());
+   }
 
-//*************************************************************************
-/// Less than or equal operator.
-///\param lhs Reference to the first list.
-///\param rhs Reference to the second list.
-///\return <b>true</b> if the first list is lexicographically less than or equal
-/// to the second, otherwise <b>false</b>.
-//*************************************************************************
-template <typename T, typename TCompare>
-bool operator <=(const sstl::iset<T, TCompare>& lhs, const sstl::iset<T, TCompare>& rhs)
-{
-  return !operator >(lhs, rhs);
-}
+   //*************************************************************************
+   /// Less than or equal operator.
+   ///\param lhs Reference to the first list.
+   ///\param rhs Reference to the second list.
+   ///\return <b>true</b> if the first list is lexicographically less than or equal
+   /// to the second, otherwise <b>false</b>.
+   //*************************************************************************
+   template <typename T, typename TCompare>
+   bool operator <=(const sstl::iset<T, TCompare>& lhs, const sstl::iset<T, TCompare>& rhs)
+   {
+     return !operator >(lhs, rhs);
+   }
 
-//*************************************************************************
-/// Greater than or equal operator.
-///\param lhs Reference to the first list.
-///\param rhs Reference to the second list.
-///\return <b>true</b> if the first list is lexicographically greater than or
-/// equal to the second, otherwise <b>false</b>.
-//*************************************************************************
-template <typename T, typename TCompare>
-bool operator >=(const sstl::iset<T, TCompare>& lhs, const sstl::iset<T, TCompare>& rhs)
-{
-  return !operator <(lhs, rhs);
+   //*************************************************************************
+   /// Greater than or equal operator.
+   ///\param lhs Reference to the first list.
+   ///\param rhs Reference to the second list.
+   ///\return <b>true</b> if the first list is lexicographically greater than or
+   /// equal to the second, otherwise <b>false</b>.
+   //*************************************************************************
+   template <typename T, typename TCompare>
+   bool operator >=(const sstl::iset<T, TCompare>& lhs, const sstl::iset<T, TCompare>& rhs)
+   {
+     return !operator <(lhs, rhs);
+   }
 }
 
 #if WIN32

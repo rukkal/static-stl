@@ -1313,91 +1313,91 @@ namespace sstl
     iterator _end;     ///Iterator to the last-past-one item in the deque.
     pointer  p_buffer; ///The buffer for the deque.
   };
-}
 
-//***************************************************************************
-/// Equal operator.
-///\param lhs  Reference to the first deque.
-///\param rhs  Reference to the second deque.
-///\return <b>true</b> if the arrays are equal, otherwise <b>false</b>
-///\ingroup deque
-//***************************************************************************
-template <typename T>
-bool operator ==(const sstl::ideque<T>& lhs, const sstl::ideque<T>& rhs)
-{
-  return (lhs.size() == rhs.size()) && std::equal(lhs.begin(), lhs.end(), rhs.begin());
-}
+   //***************************************************************************
+   /// Equal operator.
+   ///\param lhs  Reference to the first deque.
+   ///\param rhs  Reference to the second deque.
+   ///\return <b>true</b> if the arrays are equal, otherwise <b>false</b>
+   ///\ingroup deque
+   //***************************************************************************
+   template <typename T>
+   bool operator ==(const sstl::ideque<T>& lhs, const sstl::ideque<T>& rhs)
+   {
+     return (lhs.size() == rhs.size()) && std::equal(lhs.begin(), lhs.end(), rhs.begin());
+   }
 
-//***************************************************************************
-/// Not equal operator.
-///\param lhs  Reference to the first deque.
-///\param rhs  Reference to the second deque.
-///\return <b>true</b> if the arrays are not equal, otherwise <b>false</b>
-///\ingroup deque
-//***************************************************************************
-template <typename T>
-bool operator !=(const sstl::ideque<T>& lhs, const sstl::ideque<T>& rhs)
-{
-  return !(lhs == rhs);
-}
+   //***************************************************************************
+   /// Not equal operator.
+   ///\param lhs  Reference to the first deque.
+   ///\param rhs  Reference to the second deque.
+   ///\return <b>true</b> if the arrays are not equal, otherwise <b>false</b>
+   ///\ingroup deque
+   //***************************************************************************
+   template <typename T>
+   bool operator !=(const sstl::ideque<T>& lhs, const sstl::ideque<T>& rhs)
+   {
+     return !(lhs == rhs);
+   }
 
-//***************************************************************************
-/// Less than operator.
-///\param lhs  Reference to the first deque.
-///\param rhs  Reference to the second deque.
-///\return <b>true</b> if the first deque is lexigraphically less than the second, otherwise <b>false</b>
-///\ingroup deque
-//***************************************************************************
-template <typename T>
-bool operator <(const sstl::ideque<T>& lhs, const sstl::ideque<T>& rhs)
-{
-  return std::lexicographical_compare(lhs.begin(),
-                                      lhs.end(),
-                                      rhs.begin(),
-                                      rhs.end());
-}
+   //***************************************************************************
+   /// Less than operator.
+   ///\param lhs  Reference to the first deque.
+   ///\param rhs  Reference to the second deque.
+   ///\return <b>true</b> if the first deque is lexigraphically less than the second, otherwise <b>false</b>
+   ///\ingroup deque
+   //***************************************************************************
+   template <typename T>
+   bool operator <(const sstl::ideque<T>& lhs, const sstl::ideque<T>& rhs)
+   {
+     return std::lexicographical_compare(lhs.begin(),
+                                         lhs.end(),
+                                         rhs.begin(),
+                                         rhs.end());
+   }
 
-//***************************************************************************
-/// Less than or equal operator.
-///\param lhs  Reference to the first deque.
-///\param rhs  Reference to the second deque.
-///\return <b>true</b> if the first deque is lexigraphically less than or equal to the second, otherwise <b>false</b>
-///\ingroup deque
-//***************************************************************************
-template <typename T>
-bool operator <=(const sstl::ideque<T>& lhs, const sstl::ideque<T>& rhs)
-{
-  return !operator >(lhs, rhs);
-}
+   //***************************************************************************
+   /// Less than or equal operator.
+   ///\param lhs  Reference to the first deque.
+   ///\param rhs  Reference to the second deque.
+   ///\return <b>true</b> if the first deque is lexigraphically less than or equal to the second, otherwise <b>false</b>
+   ///\ingroup deque
+   //***************************************************************************
+   template <typename T>
+   bool operator <=(const sstl::ideque<T>& lhs, const sstl::ideque<T>& rhs)
+   {
+     return !operator >(lhs, rhs);
+   }
 
-//***************************************************************************
-/// Greater than operator.
-///\param lhs  Reference to the first deque.
-///\param rhs  Reference to the second deque.
-///\return <b>true</b> if the first deque is lexigraphically greater than the second, otherwise <b>false</b>
-///\ingroup deque
-//***************************************************************************
-template <typename T>
-bool operator >(const sstl::ideque<T>& lhs, const sstl::ideque<T>& rhs)
-{
-  return std::lexicographical_compare(lhs.begin(),
-                                      lhs.end(),
-                                      rhs.begin(),
-                                      rhs.end(),
-                                      std::greater<T>());
-}
+   //***************************************************************************
+   /// Greater than operator.
+   ///\param lhs  Reference to the first deque.
+   ///\param rhs  Reference to the second deque.
+   ///\return <b>true</b> if the first deque is lexigraphically greater than the second, otherwise <b>false</b>
+   ///\ingroup deque
+   //***************************************************************************
+   template <typename T>
+   bool operator >(const sstl::ideque<T>& lhs, const sstl::ideque<T>& rhs)
+   {
+     return std::lexicographical_compare(lhs.begin(),
+                                         lhs.end(),
+                                         rhs.begin(),
+                                         rhs.end(),
+                                         std::greater<T>());
+   }
 
-//***************************************************************************
-/// Greater than or equal operator.
-///\param "lhs  Reference to the first deque.
-///\param "rhs  Reference to the second deque.
-///\return <b>true</b> if the first deque is lexigraphically greater than or equal to the second, otherwise <b>false</b>
-///\ingroup deque
-//***************************************************************************
-template <typename T>
-bool operator >=(const sstl::ideque<T>& lhs, const sstl::ideque<T>& rhs)
-{
-  return !operator <(lhs, rhs);
+   //***************************************************************************
+   /// Greater than or equal operator.
+   ///\param "lhs  Reference to the first deque.
+   ///\param "rhs  Reference to the second deque.
+   ///\return <b>true</b> if the first deque is lexigraphically greater than or equal to the second, otherwise <b>false</b>
+   ///\ingroup deque
+   //***************************************************************************
+   template <typename T>
+   bool operator >=(const sstl::ideque<T>& lhs, const sstl::ideque<T>& rhs)
+   {
+     return !operator <(lhs, rhs);
+   }
 }
 
 #undef _SSTL_IN_IDEQUE_H__
