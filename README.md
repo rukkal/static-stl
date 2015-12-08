@@ -34,7 +34,6 @@ All the SSTL components, unlike the STL counterparts, rely on an internal storag
 It was fun and relatively quick to reimplement std::vector, however I realized that reimplementing other abstractions such as std::unordered_map would have been more involved. So I look about for some existing work and I came across the Embedded Template Library (ETL) of John Wellbelove. The ETL provides fixed-capacity reimplementations of many STL containers as well as other generic components. Exactly what I needed one might think! Not quite... unfortunately the ETL has some characteristics that don't really fit my needs:
 - Doesn't leverage modern C++ features and will keep doing so in order not to break compatibility with the slow vendors of C++ compilers for embedded systems.
 - Performs runtime checks.
-- Uses virtual functions.
+- Part of the library uses virtual functions.
 
 In my case the runtime checks and use of virtual functions are especially undesired. In fact I often have to implement CPU intensive algorithms and additional runtime overheads would blow up my latencies and CPU usage. To fix these issues I decided to develop my own static STL library and so the SSTL was born! I started to develop the SSTL from a fork of the ETL, thus the SSTL was straight ready to be used at my company (thank you John Wellbelove for making this possible). However, I plan on either reimplement from scratch or drastically refactor most of the components that where originally in the ETL.
-
