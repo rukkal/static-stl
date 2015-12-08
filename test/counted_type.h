@@ -38,6 +38,7 @@ namespace test
       {
          ++destructions;
       }
+      void operator()() {} // make type also usable as function object
       static void reset_counts()
       {
          constructions = 0;
