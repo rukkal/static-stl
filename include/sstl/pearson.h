@@ -30,10 +30,8 @@ SOFTWARE.
 #ifndef _SSTL_PEARSON__
 #define _SSTL_PEARSON__
 
-#include <stdint.h>
+#include <cstdint>
 #include <array>
-
-#include "endian.h"
 
 #if defined(COMPILER_KEIL)
 #pragma diag_suppress 1300
