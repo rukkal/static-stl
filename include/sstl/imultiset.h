@@ -31,10 +31,11 @@ SOFTWARE.
 #define _SSTL_IMULTISET__
 #define _SSTL_IN_IMULTISET_H__
 
+#include <cstddef>
+#include <cstdint>
 #include <iterator>
 #include <algorithm>
 #include <functional>
-#include <stddef.h>
 
 #include "sstl_assert.h"
 #include "set_base.h"

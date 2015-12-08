@@ -34,7 +34,8 @@ SOFTWARE.
 #include <iterator>
 #include <algorithm>
 #include <functional>
-#include <stddef.h>
+#include <cstddef>
+#include <cstdint>
 
 #include "sstl_assert.h"
 #include "map_base.h"

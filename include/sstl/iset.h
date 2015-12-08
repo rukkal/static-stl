@@ -31,10 +31,11 @@ SOFTWARE.
 #define _SSTL_ISET__
 #define _SSTL_IN_ISET_H__
 
+#include <cstdint>
+#include <cstddef>
 #include <iterator>
 #include <algorithm>
 #include <functional>
-#include <stddef.h>
 
 #include "sstl_assert.h"
 #include "set_base.h"
