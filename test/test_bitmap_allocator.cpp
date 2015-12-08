@@ -8,6 +8,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include <catch.hpp>
 #include <algorithm>
 #include <vector>
+#include <type_traits>
 
 #include <sstl/bitmap_allocator.h>
 
@@ -41,7 +42,7 @@ void check_alignment()
 
     for(auto p : allocated)
     {
-        REQUIRE(reinterpret_cast<size_t>(p) % alignof(T) == 0);
+        REQUIRE(reinterpret_cast<size_t>(p) % std::alignment_of<T>::value == 0);
     }
 }
 

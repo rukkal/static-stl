@@ -30,8 +30,8 @@ SOFTWARE.
 #ifndef _SSTL_VECTOR__
 #define _SSTL_VECTOR__
 
-#include <stddef.h>
-#include <stdint.h>
+#include <cstddef>
+#include <cstdint>
 #include <type_traits>
 #include <iterator>
 
@@ -114,7 +114,7 @@ namespace sstl
     }
 
   private:
-    typename std::aligned_storage<sizeof(T) * MAX_SIZE, alignof(T)>::type buffer;
+    typename std::aligned_storage<sizeof(T) * MAX_SIZE, std::alignment_of<T>::value>::type buffer;
   };
 }
 

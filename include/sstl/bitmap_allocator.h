@@ -105,7 +105,7 @@ private:
     static const size_t k_bitmap_size = (CAPACITY-1) / k_bits_per_block + 1;
     std::array<bitset_block_type, k_bitmap_size> bitmap;
 
-    std::array<typename std::aligned_storage<sizeof(T), alignof(T)>::type, CAPACITY> buffer;
+    std::array<typename std::aligned_storage<sizeof(T), std::alignment_of<T>::value>::type, CAPACITY> buffer;
 };
 }
 

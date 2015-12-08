@@ -30,8 +30,8 @@ SOFTWARE.
 #ifndef _SSTL_DEQUE__
 #define _SSTL_DEQUE__
 
-#include <stddef.h>
-#include <stdint.h>
+#include <cstddef>
+#include <cstdint>
 #include <type_traits>
 #include <iterator>
 #include <algorithm>
@@ -133,7 +133,7 @@ namespace sstl
   private:
 
     /// The unititialised buffer of T used in the deque.
-    std::array<typename std::aligned_storage<sizeof(T), alignof(T)>::type, BUFFER_SIZE> buffer;
+    std::array<typename std::aligned_storage<sizeof(T), std::alignment_of<T>::value>::type, BUFFER_SIZE> buffer;
   };
 }
 
