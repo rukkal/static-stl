@@ -9,6 +9,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #define _SSTL_FUNCTION__
 
 #include <cstddef>
+#include <algorithm>
 #include <type_traits>
 #include <new>
 
@@ -23,8 +24,7 @@ class function<TResult(TParams...), CALLABLE_SIZE_BYTES> final
 public:
    function()
    {
-      TResult(*dummy)(TParams...) = nullptr;
-      new(buffer) internal_callable_imp<decltype(dummy)>(dummy);
+      clear_internal_callable();
    }
 
    function(const function& rhs)
@@ -41,7 +41,7 @@ public:
    {
       if (this != &rhs)
       {
-         get_internal_callable().~internal_callable();
+         destroy_internal_callable_if_necessary();
          rhs.get_internal_callable().copy_to_buffer(buffer);
       }
       return *this;
@@ -51,7 +51,7 @@ public:
    {
       if (this != &rhs)
       {
-         get_internal_callable().~internal_callable();
+         destroy_internal_callable_if_necessary();
          rhs.get_internal_callable().move_to_buffer(buffer);
       }
       return *this;
@@ -74,13 +74,18 @@ public:
 
    ~function()
    {
-      get_internal_callable().~internal_callable();
+      destroy_internal_callable_if_necessary();
    }
 
    template<class... TArgs>
    TResult operator()(TArgs&&... args)
    {
       return get_internal_callable()(std::forward<TArgs>(args)...);
+   }
+
+   operator bool() const noexcept
+   {
+      return !is_internal_callable_cleared();
    }
 
 private:
@@ -135,6 +140,28 @@ private:
    const internal_callable& get_internal_callable() const
    {
       return *static_cast<const internal_callable*>(static_cast<const void*>(buffer));
+   }
+
+   void clear_internal_callable() noexcept
+   {
+      auto buffer_begin = buffer;
+      auto buffer_end = buffer+INTERNAL_CALLABLE_SIZE_BYTES;
+      std::fill(buffer_begin, buffer_end, 0);
+   }
+
+   void destroy_internal_callable_if_necessary()
+   {
+      if(!is_internal_callable_cleared())
+      {
+         get_internal_callable().~internal_callable();
+      }
+   }
+
+   bool is_internal_callable_cleared() const noexcept
+   {
+      auto buffer_begin = buffer;
+      auto buffer_end = buffer+INTERNAL_CALLABLE_SIZE_BYTES;
+      return std::all_of(buffer_begin, buffer_end, [](char c){ return c==0; });
    }
 
 private:

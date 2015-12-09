@@ -114,6 +114,14 @@ TEST_CASE("function")
       REQUIRE(std::addressof(ri) == std::addressof(i));
    }
 
+   SECTION("operator bool")
+   {
+      sstl::function<void()> f;
+      REQUIRE(static_cast<bool>(f) == false);
+      f = [](){};
+      REQUIRE(static_cast<bool>(f) == true);
+   }
+
    SECTION("number of constructions of argument")
    {
       {
