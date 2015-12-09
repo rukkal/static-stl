@@ -18,7 +18,7 @@ namespace test
 
 static const int EXPECTED_OUTPUT_PARAMETER = 101;
 
-class Callable
+class callable_type
 {
 public:
    void operator()(int& i) { i=EXPECTED_OUTPUT_PARAMETER; };
@@ -62,7 +62,7 @@ TEST_CASE("function")
 
    SECTION("callable is function object")
    {
-      sstl::function<void(int&)> f = Callable{};
+      sstl::function<void(int&)> f = callable_type{};
       int i = 3;
       f(i);
       REQUIRE(i == EXPECTED_OUTPUT_PARAMETER);
@@ -80,8 +80,8 @@ TEST_CASE("function")
    SECTION("callable is member function pointer")
    {
       REQUIRE(false); // implement
-      sstl::function<void(Callable*, int&), 2*sizeof(void*)> f = &Callable::operation;
-      Callable c;
+      sstl::function<void(callable_type*, int&), 2*sizeof(void*)> f = &callable_type::operation;
+      callable_type c;
       int i = 3;
       f(&c, i);
       REQUIRE(i == EXPECTED_OUTPUT_PARAMETER);
@@ -90,8 +90,8 @@ TEST_CASE("function")
 
    SECTION("callable is result of std::mem_fn")
    {
-      sstl::function<void(Callable*, int&), 2*sizeof(void*)> f = std::mem_fn(&Callable::operation);
-      Callable c;
+      sstl::function<void(callable_type*, int&), 2*sizeof(void*)> f = std::mem_fn(&callable_type::operation);
+      callable_type c;
       int i = 3;
       f(&c, i);
       REQUIRE(i == EXPECTED_OUTPUT_PARAMETER);
@@ -99,8 +99,8 @@ TEST_CASE("function")
 
    SECTION("callable is result of std::bind")
    {
-      Callable c;
-      sstl::function<void(int&), 3*sizeof(void*)> f = std::bind(&Callable::operation, &c, std::placeholders::_1);
+      callable_type c;
+      sstl::function<void(int&), 3*sizeof(void*)> f = std::bind(&callable_type::operation, &c, std::placeholders::_1);
       int i = 3;
       f(i);
       REQUIRE(i == EXPECTED_OUTPUT_PARAMETER);
