@@ -9,8 +9,8 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #define _SSTL_FUNCTION__
 
 #include <cstddef>
-#include <algorithm>
 #include <type_traits>
+#include <algorithm>
 #include <new>
 
 namespace sstl
@@ -22,7 +22,7 @@ template<class TResult, class... TParams, size_t CALLABLE_SIZE_BYTES>
 class function<TResult(TParams...), CALLABLE_SIZE_BYTES> final
 {
 public:
-   function()
+   function() noexcept
    {
       clear_internal_callable();
    }
@@ -59,12 +59,13 @@ public:
 
    template<
       class T,
-      class = typename std::enable_if <
-         !std::is_same<function, typename std::decay<T>::type>::value
-   > ::type>
-   function(T&& callable)
+      class TCallable = typename std::decay<T>::type,
+      class = typename std::enable_if<
+         !std::is_same<function, TCallable>::value
+   >::type>
+   function(T&& callable) noexcept( (std::is_lvalue_reference<T>::value && std::is_nothrow_copy_constructible<TCallable>::value)
+                                 || (!std::is_lvalue_reference<T>::value && std::is_nothrow_move_constructible<TCallable>::value))
    {
-      using TCallable = typename std::decay<T>::type;
       static_assert(
          sizeof(internal_callable_imp<TCallable>) <= sizeof(buffer),
          "Not enough memory available to store the wished callable target."
