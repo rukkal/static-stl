@@ -140,8 +140,8 @@ private:
 private:
    // the default storage size is large enough to store common callables such as
    // stateless closures, stateless function objects and function pointers
-   static constexpr size_t VPTR_SIZE_BYTES{ sizeof(void*) };
-   static constexpr size_t INTERNAL_CALLABLE_SIZE_BYTES{ CALLABLE_SIZE_BYTES + VPTR_SIZE_BYTES };
+   static const size_t VPTR_SIZE_BYTES{ sizeof(void*) };
+   static const size_t INTERNAL_CALLABLE_SIZE_BYTES{ CALLABLE_SIZE_BYTES + VPTR_SIZE_BYTES };
    uint8_t buffer[INTERNAL_CALLABLE_SIZE_BYTES];
 };
 }
