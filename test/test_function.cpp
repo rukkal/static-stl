@@ -124,26 +124,30 @@ TEST_CASE("function")
 
    SECTION("number of constructions of argument")
    {
+      counted_type c;
+      counted_type::reset_counts();
+
+      SECTION("by-reference parameter generates zero constructions")
       {
          sstl::function<void(counted_type&)> f = [](counted_type&){};
-
-         counted_type c;
-         counted_type::reset_counts();
          f(c);
-
-         REQUIRE(counted_type::copy_constructions == 0);
-         REQUIRE(counted_type::move_constructions == 0);
+         REQUIRE(counted_type::constructions == 0);
       }
 
+      SECTION("by-value parameter with lvalue reference argument generates one copy construction")
       {
          sstl::function<void(counted_type)> f = [](counted_type){};
-
-         counted_type c;
-         counted_type::reset_counts();
          f(c);
-
+         REQUIRE(counted_type::constructions == 1);
          REQUIRE(counted_type::copy_constructions == 1);
-         REQUIRE(counted_type::move_constructions == 1);
+      }
+
+      SECTION("by-value parameter with rvalue reference argument generates one copy construction")
+      {
+         sstl::function<void(counted_type)> f = [](counted_type){};
+         f(std::move(c));
+         REQUIRE(counted_type::constructions == 1);
+         REQUIRE(counted_type::copy_constructions == 1);
       }
    }
 

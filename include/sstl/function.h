@@ -15,6 +15,28 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 
 namespace sstl
 {
+
+namespace detail
+{
+   template<class T>
+   struct make_const_ref_if_value
+   {
+      using type = const T&;
+   };
+
+   template<class T>
+   struct make_const_ref_if_value<T&>
+   {
+      using type = T&;
+   };
+
+   template<class T>
+   struct make_const_ref_if_value<T&&>
+   {
+      using type = T&&;
+   };
+}
+
 template<class TCallable, size_t CALLABLE_SIZE_BYTES = sizeof(void*)>
 class function;
 
@@ -78,10 +100,9 @@ public:
       destroy_internal_callable_if_necessary();
    }
 
-   template<class... TArgs>
-   TResult operator()(TArgs&&... args)
+   TResult operator()(typename detail::make_const_ref_if_value<TParams>::type... params)
    {
-      return get_internal_callable()(std::forward<TArgs>(args)...);
+      return get_internal_callable()(std::forward<typename detail::make_const_ref_if_value<TParams>::type>(params)...);
    }
 
    operator bool() const noexcept
@@ -93,7 +114,7 @@ private:
    struct internal_callable
    {
       virtual ~internal_callable() {}
-      virtual TResult operator()(TParams...) = 0;
+      virtual TResult operator()(typename detail::make_const_ref_if_value<TParams>::type...) = 0;
       virtual void copy_to_buffer(void*) const = 0;
       virtual void move_to_buffer(void*) = 0;
    };
@@ -110,13 +131,9 @@ private:
       {
       }
 
-      TResult operator()(TParams... params) override
+      TResult operator()(typename detail::make_const_ref_if_value<TParams>::type... params) override
       {
-         // note: here by-value parameters are forwarded as rvalue references
-         // (even if forwarding reference type deduction doesn't occur,
-         // see reference collapsing rules),
-         // whereas lvalue references are unchanged
-         return callable(std::forward<TParams>(params)...);
+         return callable(std::forward<typename detail::make_const_ref_if_value<TParams>::type>(params)...);
       }
 
       void copy_to_buffer(void* b) const override
