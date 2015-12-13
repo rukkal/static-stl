@@ -12,6 +12,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include <type_traits>
 #include <algorithm>
 #include <new>
+#include <memory>
 
 namespace sstl
 {
@@ -51,32 +52,12 @@ public:
 
    function(const function& rhs)
    {
-      rhs.get_internal_callable().copy_to_buffer(buffer);
+      construct_internal_callable(rhs);
    }
 
    function(function&& rhs)
    {
-      rhs.get_internal_callable().move_to_buffer(buffer);
-   }
-
-   function& operator=(const function& rhs)
-   {
-      if (this != &rhs)
-      {
-         destroy_internal_callable_if_necessary();
-         rhs.get_internal_callable().copy_to_buffer(buffer);
-      }
-      return *this;
-   }
-
-   function& operator=(function&& rhs)
-   {
-      if (this != &rhs)
-      {
-         destroy_internal_callable_if_necessary();
-         rhs.get_internal_callable().move_to_buffer(buffer);
-      }
-      return *this;
+      construct_internal_callable(std::move(rhs));
    }
 
    template<
@@ -95,9 +76,22 @@ public:
       new(buffer)internal_callable_imp<TCallable>(std::forward<T>(callable));
    }
 
+   function& operator=(const function& rhs)
+   {
+      assign_internal_callable(rhs);
+      return *this;
+   }
+
+   function& operator=(function&& rhs)
+   {
+      assign_internal_callable(std::move(rhs));
+      return *this;
+   }
+
    ~function()
    {
-      destroy_internal_callable_if_necessary();
+      if(!is_internal_callable_cleared())
+         get_internal_callable().~internal_callable();
    }
 
    TResult operator()(typename detail::make_const_ref_if_value<TParams>::type... params)
@@ -115,8 +109,18 @@ private:
    {
       virtual ~internal_callable() {}
       virtual TResult operator()(typename detail::make_const_ref_if_value<TParams>::type...) = 0;
-      virtual void copy_to_buffer(void*) const = 0;
-      virtual void move_to_buffer(void*) = 0;
+      // std::true_type -> copy construction
+      void construct_to_buffer(std::true_type, void* buffer) const
+      {
+         copy_construct_to_buffer(buffer);
+      }
+      // std::false_type -> move construction
+      void construct_to_buffer(std::false_type, void* buffer)
+      {
+         move_construct_to_buffer(buffer);
+      }
+      virtual void copy_construct_to_buffer(void*) const = 0;
+      virtual void move_construct_to_buffer(void*) = 0;
    };
 
    template<class T>
@@ -136,12 +140,12 @@ private:
          return callable(std::forward<typename detail::make_const_ref_if_value<TParams>::type>(params)...);
       }
 
-      void copy_to_buffer(void* b) const override
+      void copy_construct_to_buffer(void* b) const override
       {
          new(b) internal_callable_imp(callable);
       }
 
-      void move_to_buffer(void* b) override
+      void move_construct_to_buffer(void* b) override
       {
          new(b) internal_callable_imp(std::move(callable));
       }
@@ -150,6 +154,39 @@ private:
    };
 
 private:
+   template<class TFunction>
+   void construct_internal_callable(TFunction&& rhs)
+   {
+      if(!rhs.is_internal_callable_cleared())
+      {
+         using is_copy_construction = std::is_lvalue_reference<TFunction>;
+         rhs.get_internal_callable().construct_to_buffer(is_copy_construction{}, buffer);
+      }
+      else
+      {
+         clear_internal_callable();
+      }
+   }
+
+   template<class TFunction>
+   void assign_internal_callable(TFunction&& rhs)
+   {
+      if(this == std::addressof(rhs))
+         return;
+
+      using is_copy_construction = std::is_lvalue_reference<TFunction>;
+      if(is_internal_callable_cleared())
+      {
+         if(!rhs.is_internal_callable_cleared())
+            rhs.get_internal_callable().construct_to_buffer(is_copy_construction{}, buffer);
+      }
+      else
+      {
+         get_internal_callable().~internal_callable();
+         construct_internal_callable(std::forward<TFunction>(rhs));
+      }
+   }
+
    internal_callable& get_internal_callable()
    {
       return *static_cast<internal_callable*>(static_cast<void*>(buffer));
@@ -165,14 +202,6 @@ private:
       auto buffer_begin = buffer;
       auto buffer_end = buffer+INTERNAL_CALLABLE_SIZE_BYTES;
       std::fill(buffer_begin, buffer_end, 0);
-   }
-
-   void destroy_internal_callable_if_necessary()
-   {
-      if(!is_internal_callable_cleared())
-      {
-         get_internal_callable().~internal_callable();
-      }
    }
 
    bool is_internal_callable_cleared() const noexcept

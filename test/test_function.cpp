@@ -6,6 +6,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 */
 
 #include <catch.hpp>
+#include <utility>
 #include <memory>
 #include <functional>
 #include "sstl/function.h"
@@ -50,6 +51,108 @@ TEST_CASE("function")
       }
       {
          sstl::function<int&(int&, int&)> f;
+      }
+   }
+
+   SECTION("copy constructor")
+   {
+      SECTION("rhs's target invalid")
+      {
+         auto rhs = sstl::function<int()>{};
+         auto lhs = sstl::function<int()>{ rhs };
+         REQUIRE(lhs == false);
+      }
+      SECTION("rhs's target valid")
+      {
+         auto rhs = sstl::function<int()>{ [](){ return 101; } };
+         auto lhs = sstl::function<int()>{ rhs };
+         REQUIRE(lhs == true);
+         REQUIRE(lhs() == 101);
+      }
+   }
+
+   SECTION("move constructor")
+   {
+      SECTION("rhs's target invalid")
+      {
+         auto rhs = sstl::function<int()>{};
+         auto lhs = sstl::function<int()>{ std::move(rhs) };
+         REQUIRE(lhs == false);
+      }
+      SECTION("rhs's target valid")
+      {
+         auto rhs = sstl::function<int()>{ [](){ return 101; } };
+         auto lhs = sstl::function<int()>{ std::move(rhs) };
+         REQUIRE(lhs == true);
+         REQUIRE(lhs() == 101);
+      }
+   }
+
+   SECTION("copy assignment")
+   {
+      SECTION("lhs's target is invalid and rhs's target is invalid")
+      {
+         auto rhs = sstl::function<int()>{};
+         auto lhs = sstl::function<int()>{};
+         lhs = rhs;
+         REQUIRE(lhs == false);
+      }
+      SECTION("lhs's target is valid and rhs's target is invalid")
+      {
+         auto rhs = sstl::function<int()>{};
+         auto lhs = sstl::function<int()>{ [](){ return 101; } };
+         lhs = rhs;
+         REQUIRE(lhs == false);
+      }
+      SECTION("lhs's target is invalid and rhs's target is valid")
+      {
+         auto rhs = sstl::function<int()>{ [](){ return 101; } };
+         auto lhs = sstl::function<int()>{};
+         lhs = rhs;
+         REQUIRE(lhs == true);
+         REQUIRE(lhs() == 101);
+      }
+      SECTION("lhs's target is valid and rhs's target is valid")
+      {
+         auto rhs = sstl::function<int()>{ [](){ return 101; } };
+         auto lhs = sstl::function<int()>{ [](){ return 0; } };
+         lhs = rhs;
+         REQUIRE(lhs == true);
+         REQUIRE(lhs() == 101);
+      }
+   }
+
+   SECTION("move assignment")
+   {
+      SECTION("lhs's target is invalid and rhs's target is invalid")
+      {
+         auto rhs = sstl::function<int()>{};
+         auto lhs = sstl::function<int()>{};
+         lhs = std::move(rhs);
+         REQUIRE(lhs == false);
+      }
+      SECTION("lhs's target is valid and rhs's target is invalid")
+      {
+         auto rhs = sstl::function<int()>{};
+         auto lhs = sstl::function<int()>{ [](){ return 101; } };
+         lhs = std::move(rhs);
+         REQUIRE(lhs == false);
+      }
+      SECTION("lhs's target is invalid and rhs's target is valid")
+      {
+         auto rhs = sstl::function<int()>{ [](){ return 101; } };
+         auto lhs = sstl::function<int()>{};
+         lhs = std::move(rhs);
+         REQUIRE(lhs == true);
+         REQUIRE(lhs() == 101);
+      }
+      SECTION("lhs's target is valid and rhs's target is valid")
+      {
+         auto rhs = sstl::function<int()>{ [](){ return 101; } };
+         auto lhs = sstl::function<int()>{ [](){ return 0; } };
+         lhs = std::move(rhs);
+         REQUIRE(lhs == true);
+         REQUIRE(lhs() == 101);
       }
    }
 
@@ -105,6 +208,23 @@ TEST_CASE("function")
       int i = 3;
       f(i);
       REQUIRE(i == EXPECTED_OUTPUT_PARAMETER);
+   }
+
+   SECTION("callable is sstl::function")
+   {
+      SECTION("callable's target is invalid")
+      {
+         auto rhs = sstl::function<int()>{};
+         auto f = sstl::function<int()>{ rhs };
+         REQUIRE(f == false);
+      }
+      SECTION("callable's target is valid")
+      {
+         auto rhs = sstl::function<int()>{ [](){ return 101; } };
+         auto f = sstl::function<int()>{ rhs };
+         REQUIRE(f == true);
+         REQUIRE(f() == 101);
+      }
    }
 
    SECTION("callable with covariant return type")
