@@ -69,6 +69,14 @@ TEST_CASE("function")
          REQUIRE(lhs == true);
          REQUIRE(lhs() == 101);
       }
+      SECTION("number of target's constructions")
+      {
+         sstl::function<void()> rhs = counted_type();
+         counted_type::reset_counts();
+         auto lhs = rhs;
+         REQUIRE(counted_type::constructions == 1);
+         REQUIRE(counted_type::copy_constructions == 1);
+      }
    }
 
    SECTION("move constructor")
@@ -85,6 +93,26 @@ TEST_CASE("function")
          auto lhs = sstl::function<int()>{ std::move(rhs) };
          REQUIRE(lhs == true);
          REQUIRE(lhs() == 101);
+      }
+      SECTION("number of target's constructions")
+      {
+         auto rhs = sstl::function<void()>{ counted_type() };
+         counted_type::reset_counts();
+         auto lhs = std::move(rhs);
+         REQUIRE(counted_type::constructions == 1);
+         REQUIRE(counted_type::move_constructions == 1);
+      }
+   }
+
+   SECTION("destructor")
+   {
+      SECTION("underlying target is destroyed")
+      {
+         {
+            sstl::function<void()> f = counted_type();
+            counted_type::reset_counts();
+         }
+         REQUIRE(counted_type::destructions == 1);
       }
    }
 
@@ -120,6 +148,24 @@ TEST_CASE("function")
          REQUIRE(lhs == true);
          REQUIRE(lhs() == 101);
       }
+      SECTION("number of underlying target's constructions")
+      {
+         auto rhs = sstl::function<void()>{ counted_type() };
+         auto lhs = sstl::function<void()>{};
+         counted_type::reset_counts();
+         lhs = rhs;
+         REQUIRE(counted_type::constructions == 1);
+         REQUIRE(counted_type::copy_constructions == 1);
+         REQUIRE(counted_type::destructions == 0);
+      }
+      SECTION("number of underlying target's destructions")
+      {
+         auto lhs = sstl::function<void()>{ counted_type() };
+         counted_type::reset_counts();
+         lhs = [](){};
+         REQUIRE(counted_type::destructions == 1);
+         REQUIRE(counted_type::constructions == 0);
+      }
    }
 
    SECTION("move assignment")
@@ -154,6 +200,25 @@ TEST_CASE("function")
          REQUIRE(lhs == true);
          REQUIRE(lhs() == 101);
       }
+      SECTION("number of underlying target's constructions")
+      {
+         auto rhs = sstl::function<void()>{ counted_type() };
+         auto lhs = sstl::function<void()>{};
+         counted_type::reset_counts();
+         lhs = std::move(rhs);
+         REQUIRE(counted_type::constructions == 1);
+         REQUIRE(counted_type::move_constructions == 1);
+         REQUIRE(counted_type::destructions == 0);
+      }
+      SECTION("number of underlying target's destructions")
+      {
+         auto rhs = sstl::function<void()>{};
+         auto lhs = sstl::function<void()>{ counted_type() };
+         counted_type::reset_counts();
+         lhs = std::move(rhs);
+         REQUIRE(counted_type::destructions == 1);
+         REQUIRE(counted_type::constructions == 0);
+      }
    }
 
    SECTION("callable is free function")
@@ -179,18 +244,6 @@ TEST_CASE("function")
       f(i);
       REQUIRE(i == EXPECTED_OUTPUT_PARAMETER);
    }
-
-   #if 0
-   SECTION("callable is member function pointer")
-   {
-      REQUIRE(false); // implement
-      sstl::function<void(callable_type*, int&), 2*sizeof(void*)> f = &callable_type::operation;
-      callable_type c;
-      int i = 3;
-      f(&c, i);
-      REQUIRE(i == EXPECTED_OUTPUT_PARAMETER);
-   }
-   #endif
 
    SECTION("callable is result of std::mem_fn")
    {
@@ -300,92 +353,6 @@ TEST_CASE("function")
          f(std::move(c));
          REQUIRE(counted_type::constructions == 1);
          REQUIRE(counted_type::copy_constructions == 1);
-      }
-   }
-
-   SECTION("number of constructions of underlying callable object")
-   {
-      {
-         counted_type c;
-         counted_type::reset_counts();
-
-         sstl::function<void()> f = c;
-
-         REQUIRE(counted_type::copy_constructions == 1);
-         REQUIRE(counted_type::move_constructions == 0);
-      }
-
-      {
-         counted_type::reset_counts();
-
-         sstl::function<void()> f = counted_type{};
-
-         REQUIRE(counted_type::copy_constructions == 0);
-         REQUIRE(counted_type::move_constructions == 1);
-      }
-   }
-
-   SECTION("deep construction")
-   {
-      sstl::function<void()> f = counted_type();
-
-      {
-         counted_type::reset_counts();
-         auto f2 = f;
-         REQUIRE(counted_type::copy_constructions == 1);
-         REQUIRE(counted_type::move_constructions == 0);
-      }
-
-      {
-         counted_type::reset_counts();
-         auto f2 = std::move(f);
-         REQUIRE(counted_type::copy_constructions == 0);
-         REQUIRE(counted_type::move_constructions == 1);
-      }
-   }
-
-   SECTION("deep assignment")
-   {
-      sstl::function<void()> f = counted_type();
-
-      {
-         sstl::function<void()> f2;
-         counted_type::reset_counts();
-         f2 = f;
-         REQUIRE(counted_type::copy_constructions == 1);
-         REQUIRE(counted_type::move_constructions == 0);
-      }
-
-      {
-         sstl::function<void()> f2;
-         counted_type::reset_counts();
-         f2 = std::move(f);
-         REQUIRE(counted_type::copy_constructions == 0);
-         REQUIRE(counted_type::move_constructions == 1);
-      }
-   }
-
-   SECTION("deep destruction")
-   {
-      {
-         sstl::function<void()> f = counted_type();
-         counted_type::reset_counts();
-      }
-      REQUIRE(counted_type::destructions == 1);
-
-      {
-         sstl::function<void()> f = counted_type();
-         counted_type::reset_counts();
-         f = [](){};
-         REQUIRE(counted_type::destructions == 1);
-      }
-
-      {
-         sstl::function<void()> to = counted_type();
-         sstl::function<void()> from = counted_type();
-         counted_type::reset_counts();
-         to = std::move(from);
-         REQUIRE(counted_type::destructions == 1);
       }
    }
 
