@@ -125,7 +125,7 @@ private:
       template<
          class U,
          class = typename std::enable_if<
-            !std::is_same<internal_callable_imp, typename std::decay<U>::type>::value
+            !std::is_same<internal_callable, typename std::decay<U>::type>::value
       >::type>
       internal_callable_imp(U&& callable) : callable(std::forward<U>(callable))
       {
