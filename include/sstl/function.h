@@ -38,11 +38,11 @@ namespace detail
    };
 }
 
-template<class TCallable, size_t CALLABLE_SIZE_BYTES = sizeof(void*)>
+template<class TTarget, size_t TARGET_SIZE_BYTES = sizeof(void*)>
 class function;
 
-template<class TResult, class... TParams, size_t CALLABLE_SIZE_BYTES>
-class function<TResult(TParams...), CALLABLE_SIZE_BYTES> final
+template<class TResult, class... TParams, size_t TARGET_SIZE_BYTES>
+class function<TResult(TParams...), TARGET_SIZE_BYTES> final
 {
 public:
    function() noexcept
@@ -62,18 +62,18 @@ public:
 
    template<
       class T,
-      class TCallable = typename std::decay<T>::type,
+      class TTarget = typename std::decay<T>::type,
       class = typename std::enable_if<
-         !std::is_same<function, TCallable>::value
+         !std::is_same<function, TTarget>::value
    >::type>
-   function(T&& callable) noexcept( (std::is_lvalue_reference<T>::value && std::is_nothrow_copy_constructible<TCallable>::value)
-                                 || (!std::is_lvalue_reference<T>::value && std::is_nothrow_move_constructible<TCallable>::value))
+   function(T&& target) noexcept( (std::is_lvalue_reference<T>::value && std::is_nothrow_copy_constructible<TTarget>::value)
+                                 || (!std::is_lvalue_reference<T>::value && std::is_nothrow_move_constructible<TTarget>::value))
    {
       static_assert(
-         sizeof(internal_callable_imp<TCallable>) <= sizeof(buffer),
-         "Not enough memory available to store the wished callable target."
-         "Hint: specify size of the callable target as an extra template argument");
-      new(buffer)internal_callable_imp<TCallable>(std::forward<T>(callable));
+         sizeof(internal_callable_imp<TTarget>) <= sizeof(buffer),
+         "Not enough memory available to store the wished target."
+         "Hint: specify size of the target as an extra template argument");
+      new(buffer)internal_callable_imp<TTarget>(std::forward<T>(target));
    }
 
    function& operator=(const function& rhs)
@@ -91,7 +91,9 @@ public:
    ~function()
    {
       if(!is_internal_callable_cleared())
+      {
          get_internal_callable().~internal_callable();
+      }
    }
 
    TResult operator()(typename detail::make_const_ref_if_value<TParams>::type... params)
@@ -131,26 +133,26 @@ private:
          class = typename std::enable_if<
             !std::is_same<internal_callable, typename std::decay<U>::type>::value
       >::type>
-      internal_callable_imp(U&& callable) : callable(std::forward<U>(callable))
+      internal_callable_imp(U&& target) : target(std::forward<U>(target))
       {
       }
 
       TResult operator()(typename detail::make_const_ref_if_value<TParams>::type... params) override
       {
-         return callable(std::forward<typename detail::make_const_ref_if_value<TParams>::type>(params)...);
+         return target(std::forward<typename detail::make_const_ref_if_value<TParams>::type>(params)...);
       }
 
       void copy_construct_to_buffer(void* b) const override
       {
-         new(b) internal_callable_imp(callable);
+         new(b) internal_callable_imp(target);
       }
 
       void move_construct_to_buffer(void* b) override
       {
-         new(b) internal_callable_imp(std::move(callable));
+         new(b) internal_callable_imp(std::move(target));
       }
 
-      T callable;
+      T target;
    };
 
 private:
@@ -173,12 +175,13 @@ private:
    {
       if(this == std::addressof(rhs))
          return;
-
-      using is_copy_construction = std::is_lvalue_reference<TFunction>;
       if(is_internal_callable_cleared())
       {
          if(!rhs.is_internal_callable_cleared())
+         {
+            using is_copy_construction = std::is_lvalue_reference<TFunction>;
             rhs.get_internal_callable().construct_to_buffer(is_copy_construction{}, buffer);
+         }
       }
       else
       {
@@ -199,23 +202,19 @@ private:
 
    void clear_internal_callable() noexcept
    {
-      auto buffer_begin = buffer;
-      auto buffer_end = buffer+INTERNAL_CALLABLE_SIZE_BYTES;
-      std::fill(buffer_begin, buffer_end, 0);
+      std::fill(std::begin(buffer), std::end(buffer), 0);
    }
 
    bool is_internal_callable_cleared() const noexcept
    {
-      auto buffer_begin = buffer;
-      auto buffer_end = buffer+INTERNAL_CALLABLE_SIZE_BYTES;
-      return std::all_of(buffer_begin, buffer_end, [](char c){ return c==0; });
+      return std::all_of(std::begin(buffer), std::end(buffer), [](uint8_t c){ return c==0; });
    }
 
 private:
-   // the default storage size is large enough to store common callables such as
+   // the default storage size is large enough to store targets such as
    // stateless closures, stateless function objects and function pointers
    static const size_t VPTR_SIZE_BYTES{ sizeof(void*) };
-   static const size_t INTERNAL_CALLABLE_SIZE_BYTES{ CALLABLE_SIZE_BYTES + VPTR_SIZE_BYTES };
+   static const size_t INTERNAL_CALLABLE_SIZE_BYTES{ TARGET_SIZE_BYTES + VPTR_SIZE_BYTES };
    uint8_t buffer[INTERNAL_CALLABLE_SIZE_BYTES];
 };
 }

@@ -221,7 +221,7 @@ TEST_CASE("function")
       }
    }
 
-   SECTION("callable is free function")
+   SECTION("target is free function")
    {
       sstl::function<void(int&)> f = foo;
       int i = 3;
@@ -229,7 +229,7 @@ TEST_CASE("function")
       REQUIRE(i == EXPECTED_OUTPUT_PARAMETER);
    }
 
-   SECTION("callable is function object")
+   SECTION("target is function object")
    {
       sstl::function<void(int&)> f = callable_type{};
       int i = 3;
@@ -237,7 +237,7 @@ TEST_CASE("function")
       REQUIRE(i == EXPECTED_OUTPUT_PARAMETER);
    }
 
-   SECTION("callable is closure")
+   SECTION("target is closure")
    {
       sstl::function<void(int&)> f = [](int& i){ i=EXPECTED_OUTPUT_PARAMETER; };
       int i = 3;
@@ -245,7 +245,7 @@ TEST_CASE("function")
       REQUIRE(i == EXPECTED_OUTPUT_PARAMETER);
    }
 
-   SECTION("callable is result of std::mem_fn")
+   SECTION("target is result of std::mem_fn")
    {
       sstl::function<void(callable_type*, int&), 2*sizeof(void*)> f = std::mem_fn(&callable_type::operation);
       callable_type c;
@@ -254,7 +254,7 @@ TEST_CASE("function")
       REQUIRE(i == EXPECTED_OUTPUT_PARAMETER);
    }
 
-   SECTION("callable is result of std::bind")
+   SECTION("target is result of std::bind")
    {
       callable_type c;
       sstl::function<void(int&), 3*sizeof(void*)> f = std::bind(&callable_type::operation, &c, std::placeholders::_1);
@@ -263,50 +263,51 @@ TEST_CASE("function")
       REQUIRE(i == EXPECTED_OUTPUT_PARAMETER);
    }
 
-   SECTION("callable is sstl::function")
+   SECTION("target is sstl::function")
    {
-      SECTION("callable's target is invalid")
+      SECTION("rhs's target is invalid")
       {
          auto rhs = sstl::function<int()>{};
-         auto f = sstl::function<int()>{ rhs };
-         REQUIRE(f == false);
+         auto lhs = sstl::function<int()>{ rhs };
+         REQUIRE(lhs == false);
       }
-      SECTION("callable's target is valid")
+      SECTION("rhs's target is valid")
       {
          auto rhs = sstl::function<int()>{ [](){ return 101; } };
-         auto f = sstl::function<int()>{ rhs };
-         REQUIRE(f == true);
-         REQUIRE(f() == 101);
+         auto lhs = sstl::function<int()>{ rhs };
+         REQUIRE(lhs == true);
+         REQUIRE(lhs() == 101);
       }
    }
 
-   SECTION("callable with covariant return type")
+   SECTION("target with covariant return type")
    {
       SECTION("construction")
       {
-         SECTION("callable is sstl::function")
+         SECTION("target is sstl::function")
          {
             auto rhs = sstl::function<derived_type()>{};
-            auto f = sstl::function<base_type(), 2*sizeof(void*)>{rhs};
+            auto lhs = sstl::function<base_type(), 2*sizeof(void*)>{ rhs };
          }
-         SECTION("callable is closure")
+         SECTION("target is closure")
          {
             auto rhs = [](){ return derived_type{}; };
-            auto f = sstl::function<base_type()>{rhs};
+            auto lhs = sstl::function<base_type()>{rhs};
          }
       }
       SECTION("assignment")
       {
-         auto f = sstl::function<base_type(), 2*sizeof(void*)>{};
-         SECTION("callable is sstl::function")
+         SECTION("target is sstl::function")
          {
             auto rhs = sstl::function<derived_type()>{};
-            f = rhs;
+            auto lhs = sstl::function<base_type(), 2*sizeof(void*)>{};
+            lhs = rhs;
          }
-         SECTION("callable is closure")
+         SECTION("target is closure")
          {
             auto rhs = [](){ return derived_type{}; };
-            f = rhs;
+            auto lhs = sstl::function<base_type(), 2*sizeof(void*)>{};
+            lhs = rhs;
          }
       }
    }
@@ -338,7 +339,6 @@ TEST_CASE("function")
          f(c);
          REQUIRE(counted_type::constructions == 0);
       }
-
       SECTION("by-value parameter with lvalue reference argument generates one copy construction")
       {
          sstl::function<void(counted_type)> f = [](counted_type){};
@@ -346,7 +346,6 @@ TEST_CASE("function")
          REQUIRE(counted_type::constructions == 1);
          REQUIRE(counted_type::copy_constructions == 1);
       }
-
       SECTION("by-value parameter with rvalue reference argument generates one copy construction")
       {
          sstl::function<void(counted_type)> f = [](counted_type){};
