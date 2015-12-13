@@ -18,15 +18,16 @@ namespace test
 
 static const int EXPECTED_OUTPUT_PARAMETER = 101;
 
-class callable_type
+struct callable_type
 {
-public:
-   void operator()(int& i) { i=EXPECTED_OUTPUT_PARAMETER; };
-
+   virtual void operator()(int& i) { i=EXPECTED_OUTPUT_PARAMETER; };
    void operation(int& i) { i=EXPECTED_OUTPUT_PARAMETER; };
 };
 
 void foo(int& i) { i = EXPECTED_OUTPUT_PARAMETER; }
+
+struct base_type {};
+struct derived_type : base_type {};
 
 TEST_CASE("function")
 {
@@ -104,6 +105,37 @@ TEST_CASE("function")
       int i = 3;
       f(i);
       REQUIRE(i == EXPECTED_OUTPUT_PARAMETER);
+   }
+
+   SECTION("callable with covariant return type")
+   {
+      SECTION("construction")
+      {
+         SECTION("callable is sstl::function")
+         {
+            auto rhs = sstl::function<derived_type()>{};
+            auto f = sstl::function<base_type(), 2*sizeof(void*)>{rhs};
+         }
+         SECTION("callable is closure")
+         {
+            auto rhs = [](){ return derived_type{}; };
+            auto f = sstl::function<base_type()>{rhs};
+         }
+      }
+      SECTION("assignment")
+      {
+         auto f = sstl::function<base_type(), 2*sizeof(void*)>{};
+         SECTION("callable is sstl::function")
+         {
+            auto rhs = sstl::function<derived_type()>{};
+            f = rhs;
+         }
+         SECTION("callable is closure")
+         {
+            auto rhs = [](){ return derived_type{}; };
+            f = rhs;
+         }
+      }
    }
 
    SECTION("return value")
