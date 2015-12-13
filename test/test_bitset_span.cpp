@@ -18,11 +18,11 @@ namespace test
 template<class T1, class T2>
 void check_bitset_equal(const T1& actual, const T2& expected)
 {
-    REQUIRE(actual.size() == expected.size());
-    REQUIRE(actual.count() == expected.count());
+    REQUIRE((actual.size() == expected.size()));
+    REQUIRE((actual.count() == expected.count()));
     for(size_t i=0; i<actual.size(); ++i)
     {
-        REQUIRE(actual.test(i) == expected.test(i));
+        REQUIRE((actual.test(i) == expected.test(i)));
     }
 }
 

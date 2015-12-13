@@ -26,7 +26,7 @@ void check_unique(Titer begin, Titer end)
    auto unique_values = std::vector<typename Titer::value_type> {};
    std::unique_copy(values.begin(), values.end(), std::back_inserter(unique_values));
 
-   REQUIRE(values.size() == unique_values.size());
+   REQUIRE((values.size() == unique_values.size()));
    REQUIRE(std::equal(values.begin(), values.end(), unique_values.begin()));
 }
 
@@ -42,7 +42,7 @@ void check_alignment()
 
     for(auto p : allocated)
     {
-        REQUIRE(reinterpret_cast<size_t>(p) % std::alignment_of<T>::value == 0);
+        REQUIRE((reinterpret_cast<size_t>(p) % std::alignment_of<T>::value == 0));
     }
 }
 
