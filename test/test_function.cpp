@@ -287,7 +287,7 @@ TEST_CASE("function")
          SECTION("target is sstl::function")
          {
             auto rhs = sstl::function<derived_type()>{};
-            auto lhs = sstl::function<base_type(), 2*sizeof(void*)>{ rhs };
+            auto lhs = sstl::function<base_type()>{ rhs };
          }
          SECTION("target is closure")
          {
@@ -300,14 +300,44 @@ TEST_CASE("function")
          SECTION("target is sstl::function")
          {
             auto rhs = sstl::function<derived_type()>{};
-            auto lhs = sstl::function<base_type(), 2*sizeof(void*)>{};
+            auto lhs = sstl::function<base_type()>{};
             lhs = rhs;
          }
          SECTION("target is closure")
          {
             auto rhs = [](){ return derived_type{}; };
-            auto lhs = sstl::function<base_type(), 2*sizeof(void*)>{};
+            auto lhs = sstl::function<base_type()>{};
             lhs = rhs;
+         }
+      }
+   }
+
+   SECTION("callable with contravariant parameter type")
+   {
+      SECTION("construction")
+      {
+         SECTION("target is closure")
+         {
+            auto rhs = [](base_type){};
+            auto lhs = sstl::function<void(derived_type)>{ rhs };
+         }
+         SECTION("target is sstl::function")
+         {
+            auto rhs = sstl::function<void(base_type)>{};
+            auto lhs = sstl::function<void(derived_type)>{ rhs };
+         }
+      }
+      SECTION("assignment")
+      {
+         SECTION("target is closure")
+         {
+            auto rhs = [](base_type){};
+            auto lhs = sstl::function<void(derived_type)>{ rhs };
+         }
+         SECTION("target is sstl::function")
+         {
+            auto rhs = sstl::function<void(base_type)>{};
+            auto lhs = sstl::function<void(derived_type)>{ rhs };
          }
       }
    }

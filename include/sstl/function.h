@@ -17,6 +17,9 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 namespace sstl
 {
 
+template<class TTarget, size_t TARGET_SIZE_BYTES = sizeof(void*)>
+class function;
+
 namespace detail
 {
    template<class T>
@@ -38,36 +41,82 @@ namespace detail
    };
 }
 
-template<class TTarget, size_t TARGET_SIZE_BYTES = sizeof(void*)>
-class function;
+namespace detail
+{
+   // provides a member "value" true if types "From" are convertible to type "To",
+   // false otherwise
+   template<class From, class To>
+   struct are_convertible;
+
+   template<>
+   struct are_convertible<std::tuple<>, std::tuple<>>
+   {
+      static const bool value = true;
+   };
+
+   template<class FromHead, class... FromTail, class ToHead, class... ToTail>
+   struct are_convertible<std::tuple<FromHead, FromTail...>, std::tuple<ToHead, ToTail...>>
+   {
+      static const bool value =
+         std::is_convertible<FromHead, ToHead>::value
+         && are_convertible<std::tuple<FromTail...>, std::tuple<ToTail...>>::value;
+   };
+}
+
+namespace detail
+{
+   // provides a member "value" true if both template parameters are instances of
+   // sstl::function and "From" can be converted to "To",
+   // i.e "To" has covariant return type and contravariant parameter types
+   template<class From, class To>
+   struct is_convertible_function
+   {
+      static const bool value = false;
+   };
+
+   template<class TResultFrom, class... TParamsFrom, size_t TARGET_SIZE_FROM,
+            class TResultTo, class... TParamsTo, size_t TARGET_SIZE_TO>
+   struct is_convertible_function<
+      sstl::function<TResultFrom(TParamsFrom...), TARGET_SIZE_FROM>,
+      sstl::function<TResultTo(TParamsTo...), TARGET_SIZE_TO>>
+   {
+      static const bool value =
+         std::is_convertible<TResultTo, TResultFrom>::value
+         && detail::are_convertible<std::tuple<TParamsFrom...>, std::tuple<TParamsTo...>>::value;
+   };
+}
 
 template<class TResult, class... TParams, size_t TARGET_SIZE_BYTES>
 class function<TResult(TParams...), TARGET_SIZE_BYTES> final
 {
+   template<class, size_t>
+   friend class function;
+
 public:
    function() noexcept
    {
       clear_internal_callable();
    }
 
-   function(const function& rhs)
+   template<
+      class T,
+      class TTarget = typename std::decay<T>::type,
+      class = typename std::enable_if<
+         detail::is_convertible_function<function, TTarget>::value
+      >::type>
+   function(T&& rhs)
    {
-      construct_internal_callable(rhs);
-   }
-
-   function(function&& rhs)
-   {
-      construct_internal_callable(std::move(rhs));
+      construct_internal_callable(std::forward<T>(rhs));
    }
 
    template<
       class T,
       class TTarget = typename std::decay<T>::type,
       class = typename std::enable_if<
-         !std::is_same<function, TTarget>::value
-   >::type>
-   function(T&& target) noexcept( (std::is_lvalue_reference<T>::value && std::is_nothrow_copy_constructible<TTarget>::value)
-                                 || (!std::is_lvalue_reference<T>::value && std::is_nothrow_move_constructible<TTarget>::value))
+         !detail::is_convertible_function<function, TTarget>::value
+      >::type>
+   function(T&& target, char=0) noexcept( (std::is_lvalue_reference<T>::value && std::is_nothrow_copy_constructible<TTarget>::value)
+                                       || (!std::is_lvalue_reference<T>::value && std::is_nothrow_move_constructible<TTarget>::value))
    {
       static_assert(
          sizeof(internal_callable_imp<TTarget>) <= sizeof(buffer),
