@@ -104,6 +104,66 @@ TEST_CASE("function")
       }
    }
 
+   SECTION("template constructor")
+   {
+      SECTION("target is free function")
+      {
+         auto f = sstl::function<void(int&)>{ foo };
+         int i = 3;
+         f(i);
+         REQUIRE(i == EXPECTED_OUTPUT_PARAMETER);
+      }
+      SECTION("target is function object")
+      {
+         auto f = sstl::function<void(int&)>{ callable_type{} };
+         int i = 3;
+         f(i);
+         REQUIRE(i == EXPECTED_OUTPUT_PARAMETER);
+      }
+      SECTION("target is closure")
+      {
+         auto f = sstl::function<void(int&)>{ [](int& i){ i=EXPECTED_OUTPUT_PARAMETER; } };
+         int i = 3;
+         f(i);
+         REQUIRE(i == EXPECTED_OUTPUT_PARAMETER);
+      }
+      SECTION("target is result of std::mem_fn")
+      {
+         auto f = sstl::function<void(callable_type*, int&), 2*sizeof(void*)>{ std::mem_fn(&callable_type::operation) };
+         callable_type c;
+         int i = 3;
+         f(&c, i);
+         REQUIRE(i == EXPECTED_OUTPUT_PARAMETER);
+      }
+      SECTION("target is result of std::bind")
+      {
+         callable_type c;
+         auto target = std::bind(&callable_type::operation, &c, std::placeholders::_1);
+         auto f = sstl::function<void(int&), 3*sizeof(void*)>{ target };
+         int i = 3;
+         f(i);
+         REQUIRE(i == EXPECTED_OUTPUT_PARAMETER);
+      }
+      SECTION("number of argument target's constructions")
+      {
+         auto target = counted_type();
+         counted_type::reset_counts();
+
+         SECTION("target is lvalue")
+         {
+            sstl::function<void()>{ target };
+            REQUIRE(counted_type::constructions == 1);
+            REQUIRE(counted_type::copy_constructions == 1);
+         }
+         SECTION("target is rvalue")
+         {
+            sstl::function<void()>{ std::move(target) };
+            REQUIRE(counted_type::constructions == 1);
+            REQUIRE(counted_type::move_constructions == 1);
+         }
+      }
+   }
+
    SECTION("destructor")
    {
       SECTION("underlying target is destroyed")
@@ -221,65 +281,6 @@ TEST_CASE("function")
       }
    }
 
-   SECTION("target is free function")
-   {
-      sstl::function<void(int&)> f = foo;
-      int i = 3;
-      f(i);
-      REQUIRE(i == EXPECTED_OUTPUT_PARAMETER);
-   }
-
-   SECTION("target is function object")
-   {
-      sstl::function<void(int&)> f = callable_type{};
-      int i = 3;
-      f(i);
-      REQUIRE(i == EXPECTED_OUTPUT_PARAMETER);
-   }
-
-   SECTION("target is closure")
-   {
-      sstl::function<void(int&)> f = [](int& i){ i=EXPECTED_OUTPUT_PARAMETER; };
-      int i = 3;
-      f(i);
-      REQUIRE(i == EXPECTED_OUTPUT_PARAMETER);
-   }
-
-   SECTION("target is result of std::mem_fn")
-   {
-      sstl::function<void(callable_type*, int&), 2*sizeof(void*)> f = std::mem_fn(&callable_type::operation);
-      callable_type c;
-      int i = 3;
-      f(&c, i);
-      REQUIRE(i == EXPECTED_OUTPUT_PARAMETER);
-   }
-
-   SECTION("target is result of std::bind")
-   {
-      callable_type c;
-      sstl::function<void(int&), 3*sizeof(void*)> f = std::bind(&callable_type::operation, &c, std::placeholders::_1);
-      int i = 3;
-      f(i);
-      REQUIRE(i == EXPECTED_OUTPUT_PARAMETER);
-   }
-
-   SECTION("target is sstl::function")
-   {
-      SECTION("rhs's target is invalid")
-      {
-         auto rhs = sstl::function<int()>{};
-         auto lhs = sstl::function<int()>{ rhs };
-         REQUIRE(lhs == false);
-      }
-      SECTION("rhs's target is valid")
-      {
-         auto rhs = sstl::function<int()>{ [](){ return 101; } };
-         auto lhs = sstl::function<int()>{ rhs };
-         REQUIRE(lhs == true);
-         REQUIRE(lhs() == 101);
-      }
-   }
-
    SECTION("target with covariant return type")
    {
       SECTION("construction")
@@ -312,7 +313,7 @@ TEST_CASE("function")
       }
    }
 
-   SECTION("callable with contravariant parameter type")
+   SECTION("target with contravariant parameter type")
    {
       SECTION("construction")
       {
@@ -352,10 +353,30 @@ TEST_CASE("function")
 
    SECTION("operator bool")
    {
-      sstl::function<void()> f;
-      REQUIRE(static_cast<bool>(f) == false);
-      f = [](){};
-      REQUIRE(static_cast<bool>(f) == true);
+      SECTION("invalid sstl::function evaluates to false")
+      {
+         auto f = sstl::function<void()>{};
+         REQUIRE(static_cast<bool>(f) == false);
+      }
+      SECTION("valid sstl::function evaluates to true")
+      {
+         auto f = sstl::function<void()>{ [](){} };
+         REQUIRE(static_cast<bool>(f) == true);
+      }
+      SECTION("after assignment from invalid sstl::function evaluates to false")
+      {
+         auto f = sstl::function<void()>{ [](){} };
+         REQUIRE(static_cast<bool>(f) == true);
+         f = sstl::function<void()>{};
+         REQUIRE(static_cast<bool>(f) == false);
+      }
+      SECTION("after assignment from valid sstl::function evaluates to true")
+      {
+         auto f = sstl::function<void()>{ };
+         REQUIRE(static_cast<bool>(f) == false);
+         f = sstl::function<void()>{ [](){} };
+         REQUIRE(static_cast<bool>(f) == true);
+      }
    }
 
    SECTION("number of constructions of argument")
