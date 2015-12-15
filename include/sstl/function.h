@@ -108,8 +108,8 @@ public:
    function(T&& rhs)
    {
       static_assert( detail::is_convertible_function<function, TTarget>::value,
-                     "the instance of sstl::function on the right hand side of the"
-                     "expression must have covariant return type and contravariant"
+                     "the instance of sstl::function passed as argument"
+                     "must have covariant return type and contravariant"
                      "parameter types in order to be assigned");
       construct_internal_callable(std::forward<T>(rhs));
    }
@@ -119,25 +119,18 @@ public:
       class TTarget = typename std::decay<T>::type,
       class = typename std::enable_if<!detail::is_function<TTarget>::value>::type>
    // dummy parameter required in order not to declare an invalid overload
-   function(T&& target, char=0) noexcept( (std::is_lvalue_reference<T>::value && std::is_nothrow_copy_constructible<TTarget>::value)
+   function(T&& rhs, char=0) noexcept( (std::is_lvalue_reference<T>::value && std::is_nothrow_copy_constructible<TTarget>::value)
                                        || (!std::is_lvalue_reference<T>::value && std::is_nothrow_move_constructible<TTarget>::value))
    {
-      static_assert(
-         sizeof(internal_callable_imp<TTarget>) <= sizeof(buffer),
-         "Not enough memory available to store the wished target."
-         "Hint: specify size of the target as an extra template argument");
-      new(buffer)internal_callable_imp<TTarget>(std::forward<T>(target));
+      construct_internal_callable(std::forward<T>(rhs));
    }
 
-   function& operator=(const function& rhs)
+   template<class T, class TTarget = typename std::decay<T>::type>
+   function& operator=(T&& rhs) noexcept( !detail::is_function<TTarget>::value &&
+                                          ((std::is_lvalue_reference<T>::value && std::is_nothrow_copy_constructible<TTarget>::value)
+                                          || (!std::is_lvalue_reference<T>::value && std::is_nothrow_move_constructible<TTarget>::value)))
    {
-      assign_internal_callable(rhs);
-      return *this;
-   }
-
-   function& operator=(function&& rhs)
-   {
-      assign_internal_callable(std::move(rhs));
+      assign_internal_callable(std::forward<T>(rhs));
       return *this;
    }
 
@@ -209,10 +202,12 @@ private:
    };
 
 private:
-   template<class T, class TFunction = typename std::decay<T>::type>
+   template<class T,
+            class TTarget = typename std::decay<T>::type,
+            class = typename std::enable_if<detail::is_function<TTarget>::value>::type>
    void construct_internal_callable(T&& rhs)
    {
-      static_assert(detail::is_function<TFunction>::value, "");
+      static_assert(detail::is_function<TTarget>::value, "");
       if(!rhs.is_internal_callable_cleared())
       {
          using is_copy_construction = std::is_lvalue_reference<T>;
@@ -224,11 +219,25 @@ private:
       }
    }
 
-   template<class T, class TFunction = typename std::decay<T>::type>
+   template<class T,
+            class TTarget = typename std::decay<T>::type,
+            class = typename std::enable_if<!detail::is_function<TTarget>::value>::type>
+   // dummy parameter required in order not to declare an invalid overload
+   void construct_internal_callable(T&& rhs, char=0)
+   {
+      static_assert(
+         sizeof(internal_callable_imp<TTarget>) <= sizeof(buffer),
+         "Not enough memory available to store the wished target."
+         "Hint: specify size of the target as extra template argument");
+      new(buffer)internal_callable_imp<TTarget>(std::forward<T>(rhs));
+   }
+
+   template<class T,
+            class TTarget = typename std::decay<T>::type,
+            class = typename std::enable_if<detail::is_function<TTarget>::value>::type>
    void assign_internal_callable(T&& rhs)
    {
-      static_assert(detail::is_function<TFunction>::value, "");
-      if(this == std::addressof(rhs))
+      if(static_cast<void*>(this) == static_cast<void*>(std::addressof(rhs)))
          return;
       if(is_internal_callable_cleared())
       {
@@ -243,6 +252,19 @@ private:
          get_internal_callable().~internal_callable();
          construct_internal_callable(std::forward<T>(rhs));
       }
+   }
+
+   template<class T,
+            class TTarget = typename std::decay<T>::type,
+            class = typename std::enable_if<!detail::is_function<TTarget>::value>::type>
+   // dummy parameter required in order not to declare an invalid overload
+   void assign_internal_callable(T&& rhs, char=0)
+   {
+      if(!is_internal_callable_cleared())
+      {
+         get_internal_callable().~internal_callable();
+      }
+      construct_internal_callable(std::forward<T>(rhs));
    }
 
    internal_callable& get_internal_callable()

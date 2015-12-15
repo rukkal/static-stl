@@ -54,28 +54,6 @@ TEST_CASE("function")
       }
    }
 
-   SECTION("constructor (non special member)")
-   {
-      SECTION("number of argument target's constructions")
-      {
-         auto target = counted_type();
-         counted_type::reset_counts();
-
-         SECTION("target is lvalue")
-         {
-            sstl::function<void()>{ target };
-            REQUIRE(counted_type::constructions == 1);
-            REQUIRE(counted_type::copy_constructions == 1);
-         }
-         SECTION("target is rvalue")
-         {
-            sstl::function<void()>{ std::move(target) };
-            REQUIRE(counted_type::constructions == 1);
-            REQUIRE(counted_type::move_constructions == 1);
-         }
-      }
-   }
-
    SECTION("copy constructor")
    {
       SECTION("rhs's target invalid")
@@ -300,6 +278,29 @@ TEST_CASE("function")
          lhs = std::move(rhs);
          REQUIRE(counted_type::destructions == 1);
          REQUIRE(counted_type::constructions == 0);
+      }
+   }
+
+   SECTION("template assignment")
+   {
+      SECTION("number of argument target's constructions")
+      {
+         auto rhs = counted_type{};
+         auto lhs = sstl::function<void()>{};
+         counted_type::reset_counts();
+
+         SECTION("rhs is lvalue")
+         {
+            lhs = rhs;
+            REQUIRE(counted_type::constructions == 1);
+            REQUIRE(counted_type::copy_constructions == 1);
+         }
+         SECTION("ths is rvalue")
+         {
+            lhs = std::move(rhs);
+            REQUIRE(counted_type::constructions == 1);
+            REQUIRE(counted_type::move_constructions == 1);
+         }
       }
    }
 
