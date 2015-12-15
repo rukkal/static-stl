@@ -43,16 +43,23 @@ namespace detail
 
 namespace detail
 {
+   // provides a member "value" true if the template parameter is an instance of sstl::function
+   template<class>
+   struct is_function : std::false_type {};
+
+   template<class TResult, class... TParams, size_t TARGET_SIZE>
+   struct is_function<sstl::function<TResult(TParams...), TARGET_SIZE>> : std::true_type {};
+}
+
+namespace detail
+{
    // provides a member "value" true if types "From" are convertible to type "To",
    // false otherwise
    template<class From, class To>
    struct are_convertible;
 
    template<>
-   struct are_convertible<std::tuple<>, std::tuple<>>
-   {
-      static const bool value = true;
-   };
+   struct are_convertible<std::tuple<>, std::tuple<>> : std::true_type {};
 
    template<class FromHead, class... FromTail, class ToHead, class... ToTail>
    struct are_convertible<std::tuple<FromHead, FromTail...>, std::tuple<ToHead, ToTail...>>
@@ -65,14 +72,10 @@ namespace detail
 
 namespace detail
 {
-   // provides a member "value" true if both template parameters are instances of
-   // sstl::function and "From" can be converted to "To",
+   // provides a member "value" true if "From" can be converted to "To",
    // i.e "To" has covariant return type and contravariant parameter types
    template<class From, class To>
-   struct is_convertible_function
-   {
-      static const bool value = false;
-   };
+   struct is_convertible_function;
 
    template<class TResultFrom, class... TParamsFrom, size_t TARGET_SIZE_FROM,
             class TResultTo, class... TParamsTo, size_t TARGET_SIZE_TO>
@@ -101,20 +104,21 @@ public:
    template<
       class T,
       class TTarget = typename std::decay<T>::type,
-      class = typename std::enable_if<
-         detail::is_convertible_function<function, TTarget>::value
-      >::type>
+      class = typename std::enable_if<detail::is_function<TTarget>::value>::type>
    function(T&& rhs)
    {
+      static_assert( detail::is_convertible_function<function, TTarget>::value,
+                     "the instance of sstl::function on the right hand side of the"
+                     "expression must have covariant return type and contravariant"
+                     "parameter types in order to be assigned");
       construct_internal_callable(std::forward<T>(rhs));
    }
 
    template<
       class T,
       class TTarget = typename std::decay<T>::type,
-      class = typename std::enable_if<
-         !detail::is_convertible_function<function, TTarget>::value
-      >::type>
+      class = typename std::enable_if<!detail::is_function<TTarget>::value>::type>
+   // dummy parameter required in order not to declare an invalid overload
    function(T&& target, char=0) noexcept( (std::is_lvalue_reference<T>::value && std::is_nothrow_copy_constructible<TTarget>::value)
                                        || (!std::is_lvalue_reference<T>::value && std::is_nothrow_move_constructible<TTarget>::value))
    {
@@ -205,12 +209,13 @@ private:
    };
 
 private:
-   template<class TFunction>
-   void construct_internal_callable(TFunction&& rhs)
+   template<class T, class TFunction = typename std::decay<T>::type>
+   void construct_internal_callable(T&& rhs)
    {
+      static_assert(detail::is_function<TFunction>::value, "");
       if(!rhs.is_internal_callable_cleared())
       {
-         using is_copy_construction = std::is_lvalue_reference<TFunction>;
+         using is_copy_construction = std::is_lvalue_reference<T>;
          rhs.get_internal_callable().construct_to_buffer(is_copy_construction{}, buffer);
       }
       else
@@ -219,23 +224,24 @@ private:
       }
    }
 
-   template<class TFunction>
-   void assign_internal_callable(TFunction&& rhs)
+   template<class T, class TFunction = typename std::decay<T>::type>
+   void assign_internal_callable(T&& rhs)
    {
+      static_assert(detail::is_function<TFunction>::value, "");
       if(this == std::addressof(rhs))
          return;
       if(is_internal_callable_cleared())
       {
          if(!rhs.is_internal_callable_cleared())
          {
-            using is_copy_construction = std::is_lvalue_reference<TFunction>;
+            using is_copy_construction = std::is_lvalue_reference<T>;
             rhs.get_internal_callable().construct_to_buffer(is_copy_construction{}, buffer);
          }
       }
       else
       {
          get_internal_callable().~internal_callable();
-         construct_internal_callable(std::forward<TFunction>(rhs));
+         construct_internal_callable(std::forward<T>(rhs));
       }
    }
 
