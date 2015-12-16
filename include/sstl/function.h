@@ -17,7 +17,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 namespace sstl
 {
 
-template<class TTarget, size_t TARGET_SIZE_BYTES = sizeof(void*)>
+template<class TTarget, size_t SIZE_WORDS = 1>
 class function;
 
 namespace detail
@@ -43,7 +43,7 @@ namespace detail
 
 namespace detail
 {
-   // provides a member "value" true if the template parameter is an instance of sstl::function
+   // true if the template parameter is an instance of sstl::function
    template<class>
    struct is_function : std::false_type {};
 
@@ -53,8 +53,7 @@ namespace detail
 
 namespace detail
 {
-   // provides a member "value" true if types "From" are convertible to type "To",
-   // false otherwise
+   // true if types "From" are convertible to type "To"
    template<class From, class To>
    struct are_convertible;
 
@@ -72,7 +71,7 @@ namespace detail
 
 namespace detail
 {
-   // provides a member "value" true if "From" can be converted to "To",
+   // true if "From" can be converted to "To",
    // i.e "To" has covariant return type and contravariant parameter types
    template<class From, class To>
    struct is_convertible_function;
@@ -89,8 +88,18 @@ namespace detail
    };
 }
 
-template<class TResult, class... TParams, size_t TARGET_SIZE_BYTES>
-class function<TResult(TParams...), TARGET_SIZE_BYTES> final
+namespace detail
+{
+   template<class T, class=void>
+   struct is_inheritable
+   {
+      // FIXME: fix with "&& std::is_final<T>::value" as soon as C++14 support is available
+      static const bool value = std::is_class<T>::value;
+   };
+};
+
+template<class TResult, class... TParams, size_t SIZE_WORDS>
+class function<TResult(TParams...), SIZE_WORDS> final
 {
    template<class, size_t>
    friend class function;
@@ -144,7 +153,7 @@ public:
 
    TResult operator()(typename detail::make_const_ref_if_value<TParams>::type... params)
    {
-      return get_internal_callable()(std::forward<typename detail::make_const_ref_if_value<TParams>::type>(params)...);
+      return get_internal_callable().call(std::forward<typename detail::make_const_ref_if_value<TParams>::type>(params)...);
    }
 
    operator bool() const noexcept
@@ -156,7 +165,7 @@ private:
    struct internal_callable
    {
       virtual ~internal_callable() {}
-      virtual TResult operator()(typename detail::make_const_ref_if_value<TParams>::type...) = 0;
+      virtual TResult call(typename detail::make_const_ref_if_value<TParams>::type...) = 0;
       // std::true_type -> copy construction
       void construct_to_buffer(std::true_type, void* buffer) const
       {
@@ -171,19 +180,45 @@ private:
       virtual void move_construct_to_buffer(void*) = 0;
    };
 
-   template<class T>
-   struct internal_callable_imp : internal_callable
+   template<class, class=void>
+   struct internal_callable_imp;
+
+   // ebo template specialization
+   template<class TTarget>
+   struct internal_callable_imp<TTarget, typename std::enable_if<detail::is_inheritable<TTarget>::value>::type >
+      : internal_callable, TTarget
    {
-      template<
-         class U,
-         class = typename std::enable_if<
-            !std::is_same<internal_callable, typename std::decay<U>::type>::value
-      >::type>
-      internal_callable_imp(U&& target) : target(std::forward<U>(target))
+      template<class T>
+      internal_callable_imp(T&& target) : TTarget(std::forward<T>(target))
       {
       }
 
-      TResult operator()(typename detail::make_const_ref_if_value<TParams>::type... params) override
+      TResult call(typename detail::make_const_ref_if_value<TParams>::type... params) override
+      {
+         return (*this)(std::forward<typename detail::make_const_ref_if_value<TParams>::type>(params)...);
+      }
+
+      void copy_construct_to_buffer(void* b) const override
+      {
+         new(b) internal_callable_imp(static_cast<const TTarget&>(*this));
+      }
+
+      void move_construct_to_buffer(void* b) override
+      {
+         new(b) internal_callable_imp(std::move(static_cast<TTarget&>(*this)));
+      }
+   };
+
+   template<class TTarget>
+   struct internal_callable_imp<TTarget, typename std::enable_if<!detail::is_inheritable<TTarget>::value>::type >
+      : internal_callable
+   {
+      template<class T>
+      internal_callable_imp(T&& target) : target(std::forward<T>(target))
+      {
+      }
+
+      TResult call(typename detail::make_const_ref_if_value<TParams>::type... params) override
       {
          return target(std::forward<typename detail::make_const_ref_if_value<TParams>::type>(params)...);
       }
@@ -198,7 +233,7 @@ private:
          new(b) internal_callable_imp(std::move(target));
       }
 
-      T target;
+      TTarget target;
    };
 
 private:
@@ -290,9 +325,8 @@ private:
 private:
    // the default storage size is large enough to store targets such as
    // stateless closures, stateless function objects and function pointers
-   static const size_t VPTR_SIZE_BYTES{ sizeof(void*) };
-   static const size_t INTERNAL_CALLABLE_SIZE_BYTES{ TARGET_SIZE_BYTES + VPTR_SIZE_BYTES };
-   uint8_t buffer[INTERNAL_CALLABLE_SIZE_BYTES];
+   static const size_t BYTES_PER_WORD{ sizeof(void*) };
+   uint8_t buffer[SIZE_WORDS * BYTES_PER_WORD];
 };
 }
 

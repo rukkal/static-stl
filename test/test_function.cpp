@@ -17,11 +17,13 @@ namespace sstl
 namespace test
 {
 
+         template<size_t> struct print;
+
 static const int EXPECTED_OUTPUT_PARAMETER = 101;
 
 struct callable_type
 {
-   virtual void operator()(int& i) { i=EXPECTED_OUTPUT_PARAMETER; };
+   void operator()(int& i) { i=EXPECTED_OUTPUT_PARAMETER; };
    void operation(int& i) { i=EXPECTED_OUTPUT_PARAMETER; };
 };
 
@@ -71,7 +73,7 @@ TEST_CASE("function")
       }
       SECTION("number of underlying target's constructions")
       {
-         sstl::function<void()> rhs = counted_type();
+         auto rhs = sstl::function<void(), 2>{ counted_type{} };
          counted_type::reset_counts();
          auto lhs = rhs;
          REQUIRE(counted_type::constructions == 1);
@@ -96,7 +98,7 @@ TEST_CASE("function")
       }
       SECTION("number of underlying target's constructions")
       {
-         auto rhs = sstl::function<void()>{ counted_type() };
+         auto rhs = sstl::function<void(), 2>{ counted_type{} };
          counted_type::reset_counts();
          auto lhs = std::move(rhs);
          REQUIRE(counted_type::constructions == 1);
@@ -108,7 +110,7 @@ TEST_CASE("function")
    {
       SECTION("target is free function")
       {
-         auto f = sstl::function<void(int&)>{ foo };
+         auto f = sstl::function<void(int&), 2>{ foo };
          int i = 3;
          f(i);
          REQUIRE(i == EXPECTED_OUTPUT_PARAMETER);
@@ -129,7 +131,7 @@ TEST_CASE("function")
       }
       SECTION("target is result of std::mem_fn")
       {
-         auto f = sstl::function<void(callable_type*, int&), 2*sizeof(void*)>{ std::mem_fn(&callable_type::operation) };
+         auto f = sstl::function<void(callable_type*, int&), 3>{ std::mem_fn(&callable_type::operation) };
          callable_type c;
          int i = 3;
          f(&c, i);
@@ -139,25 +141,25 @@ TEST_CASE("function")
       {
          callable_type c;
          auto target = std::bind(&callable_type::operation, &c, std::placeholders::_1);
-         auto f = sstl::function<void(int&), 3*sizeof(void*)>{ target };
+         auto f = sstl::function<void(int&), 4>{ target };
          int i = 3;
          f(i);
          REQUIRE(i == EXPECTED_OUTPUT_PARAMETER);
       }
       SECTION("number of argument target's constructions")
       {
-         auto target = counted_type();
+         auto target = counted_type{};
          counted_type::reset_counts();
 
          SECTION("target is lvalue")
          {
-            sstl::function<void()>{ target };
+            sstl::function<void(), 2>{ target };
             REQUIRE(counted_type::constructions == 1);
             REQUIRE(counted_type::copy_constructions == 1);
          }
          SECTION("target is rvalue")
          {
-            sstl::function<void()>{ std::move(target) };
+            sstl::function<void(), 2>{ std::move(target) };
             REQUIRE(counted_type::constructions == 1);
             REQUIRE(counted_type::move_constructions == 1);
          }
@@ -169,7 +171,7 @@ TEST_CASE("function")
       SECTION("underlying target is destroyed")
       {
          {
-            sstl::function<void()> f = counted_type();
+            sstl::function<void(), 2> f = counted_type();
             counted_type::reset_counts();
          }
          REQUIRE(counted_type::destructions == 1);
@@ -210,8 +212,8 @@ TEST_CASE("function")
       }
       SECTION("number of underlying target's constructions")
       {
-         auto rhs = sstl::function<void()>{ counted_type() };
-         auto lhs = sstl::function<void()>{};
+         auto rhs = sstl::function<void(), 2>{ counted_type() };
+         auto lhs = sstl::function<void(), 2>{};
          counted_type::reset_counts();
          lhs = rhs;
          REQUIRE(counted_type::constructions == 1);
@@ -220,7 +222,7 @@ TEST_CASE("function")
       }
       SECTION("number of underlying target's destructions")
       {
-         auto lhs = sstl::function<void()>{ counted_type() };
+         auto lhs = sstl::function<void(), 2>{ counted_type() };
          counted_type::reset_counts();
          lhs = [](){};
          REQUIRE(counted_type::destructions == 1);
@@ -262,8 +264,8 @@ TEST_CASE("function")
       }
       SECTION("number of underlying target's constructions")
       {
-         auto rhs = sstl::function<void()>{ counted_type() };
-         auto lhs = sstl::function<void()>{};
+         auto rhs = sstl::function<void(), 2>{ counted_type() };
+         auto lhs = sstl::function<void(), 2>{};
          counted_type::reset_counts();
          lhs = std::move(rhs);
          REQUIRE(counted_type::constructions == 1);
@@ -272,8 +274,8 @@ TEST_CASE("function")
       }
       SECTION("number of underlying target's destructions")
       {
-         auto rhs = sstl::function<void()>{};
-         auto lhs = sstl::function<void()>{ counted_type() };
+         auto rhs = sstl::function<void(), 2>{};
+         auto lhs = sstl::function<void(), 2>{ counted_type() };
          counted_type::reset_counts();
          lhs = std::move(rhs);
          REQUIRE(counted_type::destructions == 1);
@@ -283,10 +285,34 @@ TEST_CASE("function")
 
    SECTION("template assignment")
    {
+      SECTION("target is free function")
+      {
+         auto f = sstl::function<void(int&), 2>{};
+         f = foo;
+         int i = 3;
+         f(i);
+         REQUIRE(i == EXPECTED_OUTPUT_PARAMETER);
+      }
+      SECTION("target is function object")
+      {
+         auto f = sstl::function<void(int&)>{};
+         f = callable_type{};
+         int i = 3;
+         f(i);
+         REQUIRE(i == EXPECTED_OUTPUT_PARAMETER);
+      }
+      SECTION("target is closure")
+      {
+         auto f = sstl::function<void(int&)>{};
+         f = [](int& i){ i=EXPECTED_OUTPUT_PARAMETER; };
+         int i = 3;
+         f(i);
+         REQUIRE(i == EXPECTED_OUTPUT_PARAMETER);
+      }
       SECTION("number of argument target's constructions")
       {
          auto rhs = counted_type{};
-         auto lhs = sstl::function<void()>{};
+         auto lhs = sstl::function<void(), 2>{};
          counted_type::reset_counts();
 
          SECTION("rhs is lvalue")
@@ -432,7 +458,7 @@ TEST_CASE("function")
    SECTION("size (let's keep it under control)")
    {
       using function_type = sstl::function<void()>;
-      REQUIRE(sizeof(function_type) == 2*sizeof(void*));
+      REQUIRE(sizeof(function_type) == sizeof(void*));
    }
 }
 
