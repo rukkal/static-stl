@@ -151,7 +151,7 @@ public:
       }
    }
 
-   TResult operator()(typename detail::make_const_ref_if_value<TParams>::type... params)
+   TResult operator()(typename detail::make_const_ref_if_value<TParams>::type... params) const
    {
       return get_internal_callable().call(std::forward<typename detail::make_const_ref_if_value<TParams>::type>(params)...);
    }
@@ -302,14 +302,9 @@ private:
       construct_internal_callable(std::forward<T>(rhs));
    }
 
-   internal_callable& get_internal_callable()
+   internal_callable& get_internal_callable() const
    {
       return *static_cast<internal_callable*>(static_cast<void*>(buffer));
-   }
-
-   const internal_callable& get_internal_callable() const
-   {
-      return *static_cast<const internal_callable*>(static_cast<const void*>(buffer));
    }
 
    void clear_internal_callable() noexcept
@@ -326,7 +321,7 @@ private:
    // the default storage size is large enough to store targets such as
    // stateless closures, stateless function objects and function pointers
    static const size_t BYTES_PER_WORD{ sizeof(void*) };
-   uint8_t buffer[SIZE_WORDS * BYTES_PER_WORD];
+   mutable uint8_t buffer[SIZE_WORDS * BYTES_PER_WORD];
 };
 }
 

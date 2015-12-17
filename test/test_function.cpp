@@ -455,6 +455,30 @@ TEST_CASE("function")
       }
    }
 
+   SECTION("constness")
+   {
+      struct nonconst_call_operator_type
+      {
+         void operator()() {};
+      };
+
+      struct const_call_operator_type
+      {
+         void operator()() const {};
+      };
+
+      SECTION("sstl::function with const-call-operator target")
+      {
+         auto f = sstl::function<void()>{ const_call_operator_type{} };
+         f();
+      }
+      SECTION("const sstl::function with non-const-call-operator target")
+      {
+         const auto f = sstl::function<void()>{ nonconst_call_operator_type{} };
+         f();
+      }
+   }
+
    SECTION("size (let's keep it under control)")
    {
       using function_type = sstl::function<void()>;
