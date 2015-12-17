@@ -13,6 +13,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include <algorithm>
 #include <new>
 #include <memory>
+#include "__internal/preprocessor.h"
 
 namespace sstl
 {
@@ -105,7 +106,7 @@ class function<TResult(TParams...), SIZE_WORDS> final
    friend class function;
 
 public:
-   function() noexcept
+   function() sstl_noexcept(true)
    {
       clear_internal_callable();
    }
@@ -128,16 +129,16 @@ public:
       class TTarget = typename std::decay<T>::type,
       class = typename std::enable_if<!detail::is_function<TTarget>::value>::type>
    // dummy parameter required in order not to declare an invalid overload
-   function(T&& rhs, char=0) noexcept( (std::is_lvalue_reference<T>::value && std::is_nothrow_copy_constructible<TTarget>::value)
-                                       || (!std::is_lvalue_reference<T>::value && std::is_nothrow_move_constructible<TTarget>::value))
+   function(T&& rhs, char=0) sstl_noexcept(  (std::is_lvalue_reference<T>::value && std::is_nothrow_copy_constructible<TTarget>::value)
+                                             || (!std::is_lvalue_reference<T>::value && std::is_nothrow_move_constructible<TTarget>::value))
    {
       construct_internal_callable(std::forward<T>(rhs));
    }
 
    template<class T, class TTarget = typename std::decay<T>::type>
-   function& operator=(T&& rhs) noexcept( !detail::is_function<TTarget>::value &&
-                                          ((std::is_lvalue_reference<T>::value && std::is_nothrow_copy_constructible<TTarget>::value)
-                                          || (!std::is_lvalue_reference<T>::value && std::is_nothrow_move_constructible<TTarget>::value)))
+   function& operator=(T&& rhs) sstl_noexcept(  !detail::is_function<TTarget>::value &&
+                                                ((std::is_lvalue_reference<T>::value && std::is_nothrow_copy_constructible<TTarget>::value)
+                                                || (!std::is_lvalue_reference<T>::value && std::is_nothrow_move_constructible<TTarget>::value)))
    {
       assign_internal_callable(std::forward<T>(rhs));
       return *this;
@@ -156,7 +157,7 @@ public:
       return get_internal_callable().call(std::forward<typename detail::make_const_ref_if_value<TParams>::type>(params)...);
    }
 
-   operator bool() const noexcept
+   operator bool() const sstl_noexcept(true)
    {
       return !is_internal_callable_cleared();
    }
@@ -307,12 +308,12 @@ private:
       return *static_cast<internal_callable*>(static_cast<void*>(buffer));
    }
 
-   void clear_internal_callable() noexcept
+   void clear_internal_callable() sstl_noexcept(true)
    {
       std::fill(std::begin(buffer), std::end(buffer), 0);
    }
 
-   bool is_internal_callable_cleared() const noexcept
+   bool is_internal_callable_cleared() const sstl_noexcept(true)
    {
       return std::all_of(std::begin(buffer), std::end(buffer), [](uint8_t c){ return c==0; });
    }
