@@ -42,7 +42,7 @@ void check_alignment()
 
     for(auto p : allocated)
     {
-        REQUIRE((reinterpret_cast<size_t>(p) % std::alignment_of<T>::value == 0));
+        REQUIRE((reinterpret_cast<size_t>(p) % std::alignment_of<T>::value) == 0);
     }
 }
 
@@ -86,13 +86,13 @@ TEST_CASE("bitmap_allocator")
 
       check_alignment<long double>();
 
-      struct alignas(16) type_align_16 {};
+      using type_align_16 = std::aligned_storage<1, 16>::type;
       check_alignment<type_align_16>();
 
-      struct alignas(32) type_align_32 {};
+      using type_align_32 = std::aligned_storage<1, 32>::type;
       check_alignment<type_align_32>();
 
-      struct alignas(64) type_align_64 {};
+      using type_align_64 = std::aligned_storage<1, 64>::type;
       check_alignment<type_align_64>();
    }
 }
