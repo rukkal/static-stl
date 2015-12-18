@@ -22,5 +22,4 @@ script:
   - mkdir build
   - mkdir build/unix_makefiles
   - cd build/unix_makefiles
-  - cmake -G "Unix Makefiles" ../.. && make && ./test
-
+  - cmake -G "Unix Makefiles" ../.. && make && ./test-sstl

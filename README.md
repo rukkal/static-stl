@@ -1,6 +1,6 @@
 Static Standard Template Library (SSTL)
 -------------------------
-Build status [![Build Status](https://travis-ci.org/rukkal/StaticSTL.svg)](https://travis-ci.org/rukkal/sstl)
+[![Build Status](https://travis-ci.org/rukkal/static-stl.svg)](https://travis-ci.org/rukkal/static-stl)
 
 **What is SSTL?**
 

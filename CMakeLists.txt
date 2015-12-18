@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
-project("StaticSTL")
+project("static-stl")
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     set(compilation_flags "-std=c++11 -Wall -g")
@@ -38,7 +38,7 @@ endif()
 add_library(unittestcpp ${unittestcpp_srcs})
 
 file(GLOB test_srcs "test/*.cpp" "test/*.h")
-add_executable(test ${test_srcs})
+add_executable(test-sstl ${test_srcs})
 
-target_link_libraries(test sstl unittestcpp)
+target_link_libraries(test-sstl sstl unittestcpp)
 
