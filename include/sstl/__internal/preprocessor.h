@@ -7,7 +7,13 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 
 #ifndef _SSTL_PREPROCESSOR__
 
-#if _MSC_VER && !__INTEL_COMPILER // MSVC
+#if _MSC_VER && !__INTEL_COMPILER
+   #define IS_MSVC() 1
+#else
+   #define IS_MSVC() 0
+#endif
+
+#if IS_MSVC()
    /*
    MSVC++ 14.0 _MSC_VER == 1900 (Visual Studio 2015)
    MSVC++ 12.0 _MSC_VER == 1800 (Visual Studio 2013)
