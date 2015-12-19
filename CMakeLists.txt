@@ -19,9 +19,6 @@ include_directories("include")
 include_directories("unittest-cpp")
 include_directories("Catch/include")
 
-file(GLOB sstl_srcs "include/sstl/*.cpp" "include/sstl/*.h" "include/sstl/__internal/*.h")
-add_library(sstl ${sstl_srcs})
-
 if (${UNIX})
     file(GLOB unittestcpp_srcs   "unittest-cpp/UnitTest++/*.cpp"
                                  "unittest-cpp/UnitTest++/*.h"
@@ -37,8 +34,9 @@ else (${UNIX})
 endif()
 add_library(unittestcpp ${unittestcpp_srcs})
 
-file(GLOB test_srcs "test/*.cpp" "test/*.h")
+file(GLOB sstl_srcs "include/sstl/*.cpp" "include/sstl/*.h" "include/sstl/__internal/*.cpp" "include/sstl/__internal/*.h")
+file(GLOB test_srcs "test/*.cpp" "test/*.h" ${sstl_srcs})
 add_executable(test-sstl ${test_srcs})
 
-target_link_libraries(test-sstl sstl unittestcpp)
+target_link_libraries(test-sstl unittestcpp)
 
