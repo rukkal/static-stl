@@ -30,22 +30,6 @@ void check_unique(Titer begin, Titer end)
    REQUIRE(std::equal(values.begin(), values.end(), unique_values.begin()));
 }
 
-template<class T>
-void check_alignment()
-{
-    static const size_t capacity = 31;
-    auto allocator = sstl::bitmap_allocator<T, capacity> {};
-    auto allocated = std::vector<T*> {};
-    std::generate_n(std::back_inserter(allocated),
-                    capacity,
-                    [&allocator]() { return allocator.allocate(); });
-
-    for(auto p : allocated)
-    {
-        REQUIRE((reinterpret_cast<size_t>(p) % std::alignment_of<T>::value) == 0);
-    }
-}
-
 TEST_CASE("bitmap_allocator")
 {
    SECTION("allocate/deallocate")
@@ -72,28 +56,6 @@ TEST_CASE("bitmap_allocator")
                     capacity,
                     [&allocator]() { return allocator.allocate(); });
       check_unique(allocated.begin(), allocated.end());
-   }
-
-   SECTION("alignment")
-   {
-      check_alignment<char>();
-
-      check_alignment<short>();
-
-      check_alignment<int>();
-
-      check_alignment<long long>();
-
-      check_alignment<long double>();
-
-      using type_align_16 = std::aligned_storage<1, 16>::type;
-      check_alignment<type_align_16>();
-
-      using type_align_32 = std::aligned_storage<1, 32>::type;
-      check_alignment<type_align_32>();
-
-      using type_align_64 = std::aligned_storage<1, 64>::type;
-      check_alignment<type_align_64>();
    }
 }
 

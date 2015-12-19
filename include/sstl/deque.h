@@ -39,6 +39,7 @@ SOFTWARE.
 
 #include "ideque.h"
 #include "__internal/warnings.h"
+#include "__internal/aligned_storage.h"
 
 //*****************************************************************************
 ///\defgroup deque deque
@@ -133,7 +134,7 @@ namespace sstl
   private:
 
     /// The unititialised buffer of T used in the deque.
-    std::array<typename std::aligned_storage<sizeof(T), std::alignment_of<T>::value>::type, BUFFER_SIZE> buffer;
+    std::array<typename aligned_storage<sizeof(T), std::alignment_of<T>::value>::type, BUFFER_SIZE> buffer;
   };
 }
 

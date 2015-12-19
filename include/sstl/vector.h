@@ -36,6 +36,7 @@ SOFTWARE.
 #include <iterator>
 
 #include "ivector.h"
+#include "__internal/aligned_storage.h"
 
 //*****************************************************************************
 ///\defgroup vector vector
@@ -114,7 +115,7 @@ namespace sstl
     }
 
   private:
-    typename std::aligned_storage<sizeof(T) * MAX_SIZE, std::alignment_of<T>::value>::type buffer;
+    typename aligned_storage<sizeof(T) * MAX_SIZE, std::alignment_of<T>::value>::type buffer;
   };
 }
 
