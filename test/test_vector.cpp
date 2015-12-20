@@ -431,22 +431,18 @@ namespace test
     {
       counted_type::reset_counts();
       auto vector = sstl::vector<counted_type, 5>{};
-      CHECK(counted_type::constructions == 0);
-      CHECK(counted_type::destructions == 0);
+      CHECK(counted_type::check().constructions(0).destructions(0));
 
       counted_type::reset_counts();
       vector.emplace_back(3);
       CHECK(vector.back().member == 3);
-      CHECK(counted_type::constructions == 1);
-      CHECK(counted_type::destructions == 0);
+      CHECK(counted_type::check().constructions(1).destructions(0));
 
       auto c = counted_type{5};
       counted_type::reset_counts();
       vector.emplace_back(std::move(c));
       CHECK(vector.back().member == 5);
-      CHECK(counted_type::constructions == 1);
-      CHECK(counted_type::move_constructions == 1);
-      CHECK(counted_type::destructions == 0);
+      CHECK(counted_type::check().move_constructions(1).destructions(0));
     }
 
     //*************************************************************************

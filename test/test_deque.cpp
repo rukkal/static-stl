@@ -1095,22 +1095,18 @@ namespace test
     {
       counted_type::reset_counts();
       auto deque = sstl::deque<counted_type, 5>{};
-      CHECK(counted_type::constructions == 0);
-      CHECK(counted_type::destructions == 0);
+      CHECK(counted_type::check().constructions(0).destructions(0));
 
       counted_type::reset_counts();
       deque.emplace_back(3);
       CHECK(deque.back().member == 3);
-      CHECK(counted_type::constructions == 1);
-      CHECK(counted_type::destructions == 0);
+      CHECK(counted_type::check().constructions(1).destructions(0));
 
       auto c = counted_type{5};
       counted_type::reset_counts();
       deque.emplace_back(std::move(c));
       CHECK(deque.back().member == 5);
-      CHECK(counted_type::constructions == 1);
-      CHECK(counted_type::move_constructions == 1);
-      CHECK(counted_type::destructions == 0);
+      CHECK(counted_type::check().move_constructions(1).destructions(0));
     }
 
     //*************************************************************************
@@ -1213,22 +1209,18 @@ namespace test
     {
       counted_type::reset_counts();
       auto deque = sstl::deque<counted_type, 5>{};
-      CHECK(counted_type::constructions == 0);
-      CHECK(counted_type::destructions == 0);
+      CHECK(counted_type::check().constructions(0).destructions(0));
 
       counted_type::reset_counts();
       deque.emplace_front(3);
       CHECK(deque.front().member == 3);
-      CHECK(counted_type::constructions == 1);
-      CHECK(counted_type::destructions == 0);
+      CHECK(counted_type::check().constructions(1).destructions(0));
 
       auto c = counted_type{5};
       counted_type::reset_counts();
       deque.emplace_front(std::move(c));
       CHECK(deque.front().member == 5);
-      CHECK(counted_type::constructions == 1);
-      CHECK(counted_type::move_constructions == 1);
-      CHECK(counted_type::destructions == 0);
+      CHECK(counted_type::check().move_constructions(1).destructions(0));
     }
 
     //*************************************************************************

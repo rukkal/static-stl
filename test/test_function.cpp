@@ -76,8 +76,7 @@ TEST_CASE("function")
          auto rhs = sstl::function<void(), 2>{ counted_type{} };
          counted_type::reset_counts();
          auto lhs = rhs;
-         REQUIRE(counted_type::constructions == 1);
-         REQUIRE(counted_type::copy_constructions == 1);
+         REQUIRE(counted_type::check().copy_constructions(1));
       }
    }
 
@@ -101,8 +100,7 @@ TEST_CASE("function")
          auto rhs = sstl::function<void(), 2>{ counted_type{} };
          counted_type::reset_counts();
          auto lhs = std::move(rhs);
-         REQUIRE(counted_type::constructions == 1);
-         REQUIRE(counted_type::move_constructions == 1);
+         REQUIRE(counted_type::check().move_constructions(1));
       }
    }
 
@@ -154,14 +152,12 @@ TEST_CASE("function")
          SECTION("target is lvalue")
          {
             sstl::function<void(), 2>{ target };
-            REQUIRE(counted_type::constructions == 1);
-            REQUIRE(counted_type::copy_constructions == 1);
+            REQUIRE(counted_type::check().copy_constructions(1));
          }
          SECTION("target is rvalue")
          {
             sstl::function<void(), 2>{ std::move(target) };
-            REQUIRE(counted_type::constructions == 1);
-            REQUIRE(counted_type::move_constructions == 1);
+            REQUIRE(counted_type::check().move_constructions(1));
          }
       }
    }
@@ -174,7 +170,7 @@ TEST_CASE("function")
             sstl::function<void(), 2> f = counted_type();
             counted_type::reset_counts();
          }
-         REQUIRE(counted_type::destructions == 1);
+         REQUIRE(counted_type::check().destructions(1));
       }
    }
 
@@ -216,17 +212,14 @@ TEST_CASE("function")
          auto lhs = sstl::function<void(), 2>{};
          counted_type::reset_counts();
          lhs = rhs;
-         REQUIRE(counted_type::constructions == 1);
-         REQUIRE(counted_type::copy_constructions == 1);
-         REQUIRE(counted_type::destructions == 0);
+         REQUIRE(counted_type::check().copy_constructions(1).destructions(0));
       }
       SECTION("number of underlying target's destructions")
       {
          auto lhs = sstl::function<void(), 2>{ counted_type() };
          counted_type::reset_counts();
          lhs = [](){};
-         REQUIRE(counted_type::destructions == 1);
-         REQUIRE(counted_type::constructions == 0);
+         REQUIRE(counted_type::check().constructions(0).destructions(1));
       }
    }
 
@@ -268,9 +261,7 @@ TEST_CASE("function")
          auto lhs = sstl::function<void(), 2>{};
          counted_type::reset_counts();
          lhs = std::move(rhs);
-         REQUIRE(counted_type::constructions == 1);
-         REQUIRE(counted_type::move_constructions == 1);
-         REQUIRE(counted_type::destructions == 0);
+         REQUIRE(counted_type::check().move_constructions(1));
       }
       SECTION("number of underlying target's destructions")
       {
@@ -278,8 +269,7 @@ TEST_CASE("function")
          auto lhs = sstl::function<void(), 2>{ counted_type() };
          counted_type::reset_counts();
          lhs = std::move(rhs);
-         REQUIRE(counted_type::destructions == 1);
-         REQUIRE(counted_type::constructions == 0);
+         REQUIRE(counted_type::check().destructions(1));
       }
    }
 
@@ -318,14 +308,12 @@ TEST_CASE("function")
          SECTION("rhs is lvalue")
          {
             lhs = rhs;
-            REQUIRE(counted_type::constructions == 1);
-            REQUIRE(counted_type::copy_constructions == 1);
+            REQUIRE(counted_type::check().copy_constructions(1));
          }
          SECTION("ths is rvalue")
          {
             lhs = std::move(rhs);
-            REQUIRE(counted_type::constructions == 1);
-            REQUIRE(counted_type::move_constructions == 1);
+            REQUIRE(counted_type::check().move_constructions(1));
          }
       }
    }
@@ -437,21 +425,19 @@ TEST_CASE("function")
       {
          sstl::function<void(counted_type&)> f = [](counted_type&){};
          f(c);
-         REQUIRE(counted_type::constructions == 0);
+         REQUIRE(counted_type::check().constructions(0));
       }
       SECTION("by-value parameter with lvalue reference argument generates one copy construction")
       {
          sstl::function<void(counted_type)> f = [](counted_type){};
          f(c);
-         REQUIRE(counted_type::constructions == 1);
-         REQUIRE(counted_type::copy_constructions == 1);
+         REQUIRE(counted_type::check().copy_constructions(1));
       }
       SECTION("by-value parameter with rvalue reference argument generates one copy construction")
       {
          sstl::function<void(counted_type)> f = [](counted_type){};
          f(std::move(c));
-         REQUIRE(counted_type::constructions == 1);
-         REQUIRE(counted_type::copy_constructions == 1);
+         REQUIRE(counted_type::check().copy_constructions(1));
       }
    }
 
