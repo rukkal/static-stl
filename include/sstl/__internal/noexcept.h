@@ -11,10 +11,10 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 
 #if IS_MSVC() && _MSC_VER < 1900
    #define _sstl_noexcept_
-   #define _sstl_noexcept(expr)
+   #define _sstl_noexcept(...)
 #else
    #define _sstl_noexcept_ noexcept
-   #define _sstl_noexcept(expr) noexcept(expr)
+   #define _sstl_noexcept(...) noexcept(__VA_ARGS__)
 #endif
 
 #endif // _SSTL_NOEXCEPT__
