@@ -8,12 +8,6 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #ifndef _SSTL_PREPROCESSOR__
 
 #if _MSC_VER && !__INTEL_COMPILER
-   #define IS_MSVC() 1
-#else
-   #define IS_MSVC() 0
-#endif
-
-#if IS_MSVC()
    /*
    MSVC++ 14.0 _MSC_VER == 1900 (Visual Studio 2015)
    MSVC++ 12.0 _MSC_VER == 1800 (Visual Studio 2013)
@@ -26,13 +20,9 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
    MSVC++ 6.0  _MSC_VER == 1200
    MSVC++ 5.0  _MSC_VER == 1100
    */
-   #if (_MSC_VER >= 1900)
-      #define sstl_noexcept(expr) noexcept(expr)
-   #else
-      #define sstl_noexcept(expr)
-   #endif
+   #define IS_MSVC() 1
 #else
-   #define sstl_noexcept(expr) noexcept(expr)
+   #define IS_MSVC() 0
 #endif
 
 #endif // _SSTL_PREPROCESSOR__
