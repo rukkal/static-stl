@@ -9,6 +9,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #define _SSTL_ALIGNED_STORAGE__
 
 #include <cstddef>
+#include <cstdint>
 #include <type_traits>
 
 #include "preprocessor.h"
@@ -29,6 +30,24 @@ namespace sstl
       {
          static const bool error = false;
       };
+
+      template < size_t A, size_t B, bool SelectA >
+      struct select
+      {
+         static const size_t value = A;
+      };
+
+      template<size_t A, size_t B>
+      struct select < A, B, false >
+      {
+         static const size_t value = B;
+      };
+
+      template<size_t A, size_t B>
+      struct max
+      {
+         static const size_t value = select<A, B, (A>B)>::value;
+      };
    };
 
    template<size_t Len, size_t Align>
@@ -41,10 +60,9 @@ namespace sstl
       template<size_t Len> \
       struct aligned_storage<Len, Align> \
       { \
-         static_assert(Len <= Align, "cannot have a type with size greater than alignment requirement") \
          __declspec(align(Align)) struct type \
          { \
-            uint8_t _data[Len]; \
+            uint8_t _data[detail::max<Len, Align>::value]; /* max required to avoid MSVC's warning about padding */ \
          }; \
       };
 
@@ -56,7 +74,7 @@ namespace sstl
    define_aligned_storage(32)
    define_aligned_storage(64)
    define_aligned_storage(128)
-   define_aligned_storage(258)
+   define_aligned_storage(256)
    define_aligned_storage(512)
    define_aligned_storage(1024)
    define_aligned_storage(2048)

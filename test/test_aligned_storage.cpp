@@ -9,6 +9,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include <cstddef>
 #include <type_traits>
 #include <memory>
+#include <array>
 
 #include <sstl/__internal/aligned_storage.h>
 
