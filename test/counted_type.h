@@ -22,7 +22,12 @@ public:
    class check
    {
    public:
-      check& constructions(size_t count) { expected_constructions=count; return *this; }
+      check& constructions(size_t count)
+      {
+         expected_constructions=count;
+         return *this;
+      }
+
       check& copy_constructions(size_t count)
       {
          expected_copy_constructions=count;
@@ -30,6 +35,7 @@ public:
             expected_move_constructions=0;
          return *this;
       }
+
       check& move_constructions(size_t count)
       {
          expected_move_constructions=count;
@@ -37,7 +43,29 @@ public:
             expected_copy_constructions=0;
          return *this;
       }
-      check& destructions(size_t count) { expected_destructions=count; return *this; }
+
+      check& destructions(size_t count)
+      {
+         expected_destructions=count;
+         return *this;
+      }
+
+      check& copy_assignments(size_t count)
+      {
+         expected_copy_assignments=count;
+         if(expected_move_assignments==invalid)
+            expected_move_assignments=0;
+         return *this;
+      }
+
+      check& move_assignments(size_t count)
+      {
+         expected_move_assignments=count;
+         if(expected_copy_assignments==invalid)
+            expected_copy_assignments=0;
+         return *this;
+      }
+
       operator bool() const
       {
          // assert that if a constructions check is performed it is either a general constructions check
@@ -46,10 +74,14 @@ public:
          assert((!is_valid(expected_constructions) && !is_valid(expected_copy_constructions))
                || is_valid(expected_constructions) != is_valid(expected_copy_constructions));
 
+         assert(is_valid(expected_copy_assignments) == is_valid(expected_move_assignments));
+
          return check_value(counted_type::constructions, expected_constructions)
             && check_value(counted_type::copy_constructions, expected_copy_constructions)
             && check_value(counted_type::move_constructions, expected_move_constructions)
-            && check_value(counted_type::destructions, expected_destructions);
+            && check_value(counted_type::destructions, expected_destructions)
+            && check_value(counted_type::copy_assignments, expected_copy_assignments)
+            && check_value(counted_type::move_assignments, expected_move_assignments);
       }
 
    private:
@@ -72,6 +104,8 @@ public:
       size_t expected_copy_constructions{ invalid };
       size_t expected_move_constructions{ invalid };
       size_t expected_destructions{ invalid };
+      size_t expected_copy_assignments{ invalid };
+      size_t expected_move_assignments{ invalid };
    };
 
 public:
@@ -97,6 +131,16 @@ public:
    {
       ++destructions;
    }
+   counted_type& operator=(const counted_type& rhs)
+   {
+      ++copy_assignments;
+      return *this;
+   }
+   counted_type& operator=(counted_type&& rhs)
+   {
+      ++move_assignments;
+      return *this;
+   }
    void operator()() const {} // make type also usable as function object
    static void reset_counts()
    {
@@ -104,15 +148,19 @@ public:
       copy_constructions = 0;
       move_constructions = 0;
       destructions = 0;
+      copy_assignments = 0;
+      move_assignments = 0;
    }
 
    size_t member { static_cast<size_t>(-1) };
 
-private:
+public:
    static size_t constructions;
    static size_t copy_constructions;
    static size_t move_constructions;
    static size_t destructions;
+   static size_t copy_assignments;
+   static size_t move_assignments;
 };
 
 }

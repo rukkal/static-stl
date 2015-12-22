@@ -1,767 +1,435 @@
-/******************************************************************************
-The MIT License(MIT)
+/*
+Copyright © 2015 Kean Mariotti <kean.mariotti@gmail.com>
+This work is free. You can redistribute it and/or modify it under the
+terms of the Do What The Fuck You Want To Public License, Version 2,
+as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
+*/
 
-Embedded Template Library.
-https://github.com/ETLCPP/etl
-
-Copyright(c) 2014 jwellbelove
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files(the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions :
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-******************************************************************************/
-
-#include <UnitTest++/UnitTest++.h>
-
-#include <vector>
-#include <array>
-#include <algorithm>
-#include <utility>
-
+#include <catch.hpp>
 #include <sstl/vector.h>
+
+#include "utility.h"
 #include "counted_type.h"
 
 namespace sstl
 {
 namespace test
 {
-  SUITE(test_vector)
-  {
-    static const size_t SIZE = 10;
 
-    typedef sstl::vector<int, SIZE>  Data;
-    typedef std::vector<int>        Compare_Data;
+using vector_int_t = vector<int, 11>;
+using vector_counted_type_t = vector<counted_type, 11>;
 
-    Compare_Data initial_data;
-    Compare_Data less_data;
-    Compare_Data greater_data;
-    Compare_Data shorter_data;
-    Compare_Data different_data;
-    Compare_Data insert_data;
+TEST_CASE("vector")
+{
+   SECTION("default constructor")
+   {
+      auto v = vector_int_t();
+      REQUIRE(v.empty());
+   }
 
-    //*************************************************************************
-    struct SetupFixture
-    {
-      SetupFixture()
+   SECTION("count constructor")
+   {
+      SECTION("default value")
       {
-        int n[]         = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-        int n_insert[]  = { 11, 12, 13 };
-        int n_less[]    = { 0, 1, 2, 3, 3, 5, 6, 7, 8, 9 };
-        int n_greater[] = { 0, 1, 2, 4, 4, 5, 6, 7, 8, 9 };
-
-        initial_data.assign(std::begin(n), std::end(n));
-        insert_data.assign(std::begin(n_insert), std::end(n_insert));
-        less_data.assign(std::begin(n_less), std::end(n_less));
-        greater_data.assign(std::begin(n_greater), std::end(n_greater));
-        shorter_data.assign(std::begin(n_greater), std::end(n_greater) - 1);
-        different_data.assign(initial_data.rbegin(), initial_data.rend());
+         auto expected = {0, 0, 0, 0, 0};
+         auto v = vector_int_t(5);
+         REQUIRE(are_containers_equal(v, expected));
       }
-    };
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_default_constructor)
-    {
-      Data data;
-
-      CHECK_EQUAL(data.size(), size_t(0));
-      CHECK(data.empty());
-      CHECK_EQUAL(data.capacity(), SIZE);
-      CHECK_EQUAL(data.max_size(), SIZE);
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_constructor_size)
-    {
-      const size_t INITIAL_SIZE = 5;
-      Data data(INITIAL_SIZE);
-
-      CHECK(data.size() == INITIAL_SIZE);
-      CHECK(!data.empty());
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_constructor_size_value)
-    {
-      const size_t INITIAL_SIZE = 5;
-      const int INITIAL_VALUE = 1;
-
-      std::array<int, INITIAL_SIZE> compare_data;
-      compare_data.fill(INITIAL_VALUE);
-
-      Data data(INITIAL_SIZE, INITIAL_VALUE);
-
-      CHECK(data.size() == INITIAL_SIZE);
-      CHECK(!data.empty());
-
-      bool is_equal = std::equal(data.begin(),
-                                data.end(),
-                                compare_data.begin());
-
-      CHECK(is_equal);
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_constructor_range)
-    {
-      Compare_Data compare_data(initial_data.begin(), initial_data.end());
-
-      Data data(compare_data.begin(), compare_data.end());
-
-      CHECK(data.size() == SIZE);
-      CHECK(!data.empty());
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_assignment)
-    {
-      Data data(initial_data.begin(), initial_data.end());
-      Data other_data;
-
-      other_data = data;
-
-      bool is_equal = std::equal(data.begin(),
-                                data.end(),
-                                other_data.begin());
-
-      CHECK(is_equal);
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_self_assignment)
-    {
-      Data data(initial_data.begin(), initial_data.end());
-      Data other_data(data);
-
-      other_data = other_data;
-
-      bool is_equal = std::equal(data.begin(),
-                                data.end(),
-                                other_data.begin());
-
-      CHECK(is_equal);
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_begin)
-    {
-      Data data(10);
-      const Data constData(10);
-
-      CHECK_EQUAL(&data[0], data.begin());
-      CHECK_EQUAL(&constData[0], constData.begin());
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_end)
-    {
-      Data data(10);
-      const Data constData(10);
-
-      CHECK_EQUAL(&data[10], data.end());
-      CHECK_EQUAL(&constData[10], constData.end());
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_resize_up)
-    {
-      const size_t INITIAL_SIZE = 5;
-      const size_t NEW_SIZE = 8;
-
-      Data data(INITIAL_SIZE);
-      data.resize(NEW_SIZE);
-
-      CHECK_EQUAL(data.size(), NEW_SIZE);
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_resize_up_value)
-    {
-      const size_t INITIAL_SIZE = 5;
-      const size_t NEW_SIZE = 8;
-      const int INITIAL_VALUE = 1;
-
-      Data data(INITIAL_SIZE, INITIAL_VALUE);
-      data.resize(NEW_SIZE, INITIAL_VALUE);
-
-      std::array<int, NEW_SIZE> compare_data;
-      compare_data.fill(INITIAL_VALUE);
-
-      bool is_equal = std::equal(data.begin(), data.end(), compare_data.begin());
-
-      CHECK(is_equal);
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_resize_down)
-    {
-      const size_t INITIAL_SIZE = 5;
-      const size_t NEW_SIZE = 2;
-
-      Data data(INITIAL_SIZE);
-      data.resize(NEW_SIZE);
-
-      CHECK_EQUAL(data.size(), NEW_SIZE);
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_empty)
-    {
-      Data data;
-      data.resize(data.max_size());
-
-      CHECK(data.full());
-      CHECK(!data.empty());
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_full)
-    {
-      Data data;
-
-      CHECK(!data.full());
-      CHECK(data.empty());
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_index)
-    {
-      Compare_Data compare_data(initial_data.begin(), initial_data.end());
-
-      Data data(compare_data.begin(), compare_data.end());
-
-      for (size_t i = 0; i < data.size(); ++i)
+      SECTION("custom value")
       {
-        CHECK_EQUAL(data[i], compare_data[i]);
+         auto expected = {3, 3, 3, 3, 3};
+         auto v = vector_int_t(5, 3);
+         REQUIRE(are_containers_equal(v, expected));
       }
-    }
+   }
 
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_index_const)
-    {
-      const Compare_Data compare_data(initial_data.begin(), initial_data.end());
-
-      const Data data(compare_data.begin(), compare_data.end());
-
-      for (size_t i = 0; i < data.size(); ++i)
+   SECTION("copy constructor")
+   {
+      SECTION("contained values")
       {
-        CHECK_EQUAL(data[i], compare_data[i]);
+         auto rhs = vector_int_t{1, 2, 3};
+         auto lhs = vector_int_t{ rhs };
+         auto expected = {1, 2, 3};
+         REQUIRE(are_containers_equal(lhs, expected));
       }
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_at)
-    {
-      Compare_Data compare_data(initial_data.begin(), initial_data.end());
-      Data data(initial_data.begin(), initial_data.end());
-
-      for (size_t i = 0; i < data.size(); ++i)
+      SECTION("number of copy constructions")
       {
-        CHECK_EQUAL(data.at(i), compare_data.at(i));
+         auto rhs = vector_counted_type_t{1, 2, 3};
+         counted_type::reset_counts();
+         auto lhs = vector_counted_type_t{ rhs };
+         REQUIRE(counted_type::check().copy_constructions(3));
       }
-    }
+   }
 
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_at_const)
-    {
-      const Compare_Data compare_data(initial_data.begin(), initial_data.end());
-      const Data data(initial_data.begin(), initial_data.end());
-
-      for (size_t i = 0; i < data.size(); ++i)
+   SECTION("move constructor")
+   {
+      SECTION("contained values")
       {
-        CHECK_EQUAL(data.at(i), compare_data.at(i));
+         auto rhs = vector_int_t{1, 2, 3};
+         auto lhs = vector_int_t{ rhs };
+         auto expected = {1, 2, 3};
+         REQUIRE(are_containers_equal(lhs, expected));
       }
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_front)
-    {
-      Compare_Data compare_data(initial_data.begin(), initial_data.end());
-      Data data(initial_data.begin(), initial_data.end());
-
-      CHECK(data.front() == compare_data.front());
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_front_const)
-    {
-      const Compare_Data compare_data(initial_data.begin(), initial_data.end());
-      const Data data(initial_data.begin(), initial_data.end());
-
-      CHECK(data.front() == compare_data.front());
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_back)
-    {
-      Compare_Data compare_data(initial_data.begin(), initial_data.end());
-      Data data(initial_data.begin(), initial_data.end());
-
-      CHECK(data.back() == compare_data.back());
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_back_const)
-    {
-      const Compare_Data compare_data(initial_data.begin(), initial_data.end());
-      const Data data(initial_data.begin(), initial_data.end());
-
-      CHECK(data.back() == compare_data.back());
-    }
-
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_data)
-    {
-      Compare_Data compare_data(initial_data.begin(), initial_data.end());
-
-      Data data(compare_data.begin(), compare_data.end());
-
-      bool is_equal = std::equal(data.data(),
-        data.data() + data.size(),
-        compare_data.begin());
-
-      CHECK(is_equal);
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_data_const)
-    {
-      Compare_Data compare_data(initial_data.begin(), initial_data.end());
-
-      const Data data(compare_data.begin(), compare_data.end());
-
-      bool is_equal = std::equal(data.data(),
-                                data.data() + data.size(),
-                                compare_data.begin());
-
-      CHECK(is_equal);
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_assign_range)
-    {
-      Compare_Data compare_data(initial_data.begin(), initial_data.end());
-
-      Data data;
-
-      data.assign(compare_data.begin(), compare_data.end());
-
-      bool is_equal = std::equal(data.begin(),
-                                data.end(),
-                                compare_data.begin());
-
-      CHECK(is_equal);
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_assign_size_value)
-    {
-      const size_t INITIAL_SIZE = 5;
-      const int INITIAL_VALUE = 1;
-      std::array<int, INITIAL_SIZE> compare_data;
-      compare_data.fill(INITIAL_VALUE);
-
-      Data data;
-      data.assign(INITIAL_SIZE, INITIAL_VALUE);
-
-      bool is_equal = std::equal(data.begin(),
-                                data.end(),
-                                compare_data.begin());
-
-      CHECK(is_equal);
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_push_back)
-    {
-      Compare_Data compare_data;
-      Data data;
-
-      for (size_t i = 0; i < SIZE; ++i)
+      SECTION("number of move constructions")
       {
-        compare_data.push_back(i);
+         auto rhs = vector_counted_type_t{1, 2, 3};
+         counted_type::reset_counts();
+         auto lhs = vector_counted_type_t{ std::move(rhs) };
+         REQUIRE(counted_type::check().move_constructions(3));
       }
+   }
 
-      for (size_t i = 0; i < SIZE; ++i)
+   SECTION("range constructor")
+   {
+      auto range = {1, 2, 3};
+      auto v = vector_int_t(range.begin(), range.end());
+      REQUIRE(are_containers_equal(v, range));
+   }
+
+   SECTION("initializer-list constructor")
+   {
+      auto init = std::initializer_list<int>{1, 2, 3};
+      auto v = vector_int_t(init);
+      REQUIRE(are_containers_equal(v, init));
+   }
+
+   SECTION("destructor (contained values are destroyed)")
+   {
       {
-        data.push_back(i);
+         auto v = vector_counted_type_t(7);
+         counted_type::reset_counts();
       }
+      REQUIRE(counted_type::check().destructions(7));
+   }
 
-      bool is_equal = std::equal(data.begin(),
-                                data.end(),
-                                compare_data.begin());
-
-      CHECK(is_equal);
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_push_back_null)
-    {
-      Compare_Data compare_data;
-      Data data;
-
-      compare_data.push_back(1);
-
-      data.push_back();
-      data[0] = 1;
-
-      bool is_equal = std::equal(data.begin(),
-                                data.end(),
-                                compare_data.begin());
-
-      CHECK(is_equal);
-    }
-
-    //*************************************************************************
-    TEST(emplace_back)
-    {
-      counted_type::reset_counts();
-      auto vector = sstl::vector<counted_type, 5>{};
-      CHECK(counted_type::check().constructions(0).destructions(0));
-
-      counted_type::reset_counts();
-      vector.emplace_back(3);
-      CHECK(vector.back().member == 3);
-      CHECK(counted_type::check().constructions(1).destructions(0));
-
-      auto c = counted_type{5};
-      counted_type::reset_counts();
-      vector.emplace_back(std::move(c));
-      CHECK(vector.back().member == 5);
-      CHECK(counted_type::check().move_constructions(1).destructions(0));
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_pop_back)
-    {
-      Compare_Data compare_data(initial_data.begin(), initial_data.end());
-      Data data(initial_data.begin(), initial_data.end());
-
-      compare_data.pop_back();
-      compare_data.pop_back();
-
-      data.pop_back();
-      data.pop_back();
-
-      bool is_equal = std::equal(data.begin(),
-                                data.end(),
-                                compare_data.begin());
-
-      CHECK(is_equal);
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_insert_position_value)
-    {
-      const size_t INITIAL_SIZE = 5;
-      const int INITIAL_VALUE   = 1;
-
-      for (size_t offset = 0; offset <= INITIAL_SIZE; ++offset)
+   SECTION("copy assignment operator")
+   {
+      SECTION("contained values")
       {
-        Compare_Data compare_data;
-        Data data;
-
-        data.assign(initial_data.begin(), initial_data.begin() + INITIAL_SIZE);
-        compare_data.assign(initial_data.begin(), initial_data.begin() + INITIAL_SIZE);
-
-        data.insert(data.begin() + offset, INITIAL_VALUE);
-        compare_data.insert(compare_data.begin() + offset, INITIAL_VALUE);
-
-        bool is_equal = std::equal(data.begin(),
-                                   data.end(),
-                                  compare_data.begin());
-
-        CHECK(is_equal);
+         auto rhs = vector_int_t{1, 2, 3};
+         auto lhs = vector_int_t{};
+         lhs = rhs;
+         REQUIRE(are_containers_equal(lhs, rhs));
       }
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_insert_position_n_value)
-    {
-      const size_t INITIAL_SIZE     = 5;
-      const size_t INSERT_SIZE      = 3;
-      const int INITIAL_VALUE       = 11;
-
-      for (size_t offset = 0; offset <= INITIAL_SIZE; ++offset)
+      SECTION("number of copy assignments")
       {
-        Compare_Data compare_data;
-        Data data;
-
-        data.assign(initial_data.begin(), initial_data.begin() + INITIAL_SIZE);
-        compare_data.assign(initial_data.begin(), initial_data.begin() + INITIAL_SIZE);
-        data.insert(data.begin() + offset, INSERT_SIZE, INITIAL_VALUE);
-        compare_data.insert(compare_data.begin() + offset, INSERT_SIZE, INITIAL_VALUE);
-
-        bool is_equal = std::equal(data.begin(),
-                                   data.end(),
-                                   compare_data.begin());
-
-        CHECK(is_equal);
+         auto rhs = vector_counted_type_t{1, 2, 3, 4, 5};
+         auto lhs = vector_counted_type_t{1, 2, 3};
+         counted_type::reset_counts();
+         lhs = rhs;
+         REQUIRE(counted_type::check().copy_assignments(3));
       }
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_insert_position_range)
-    {
-      const size_t INITIAL_SIZE = 5;
-
-      for (size_t offset = 0; offset <= INITIAL_SIZE; ++offset)
+      SECTION("number of copy constructions")
       {
-        Compare_Data compare_data;
-        Data data;
-
-        data.assign(initial_data.begin(), initial_data.begin() + INITIAL_SIZE);
-        compare_data.assign(initial_data.begin(), initial_data.begin() + INITIAL_SIZE);
-        data.insert(data.begin() + offset, insert_data.begin(), insert_data.end());
-        compare_data.insert(compare_data.begin() + offset, insert_data.begin(), insert_data.end());
-
-        bool is_equal = std::equal(data.begin(),
-                                   data.end(),
-                                   compare_data.begin());
-
-        CHECK(is_equal);
+         auto rhs = vector_counted_type_t{1, 2, 3, 4, 5};
+         auto lhs = vector_counted_type_t{1, 2, 3};
+         counted_type::reset_counts();
+         lhs = rhs;
+         REQUIRE(counted_type::check().copy_constructions(2));
       }
-    }
+      SECTION("number of destructions")
+      {
+         auto rhs = vector_counted_type_t{1, 2, 3};
+         auto lhs = vector_counted_type_t{1, 2, 3, 4, 5};
+         counted_type::reset_counts();
+         lhs = rhs;
+         REQUIRE(counted_type::check().destructions(2));
+      }
+   }
+
+   SECTION("move assignment operator")
+   {
+      SECTION("contained values")
+      {
+         auto rhs = vector_int_t{1, 2, 3};
+         auto lhs = vector_int_t{};
+         lhs = std::move(rhs);
+         REQUIRE(are_containers_equal(lhs, rhs));
+      }
+      SECTION("number of move assignments")
+      {
+         auto rhs = vector_counted_type_t{1, 2, 3, 4, 5};
+         auto lhs = vector_counted_type_t{1, 2, 3};
+         counted_type::reset_counts();
+         lhs = std::move(rhs);
+         REQUIRE(counted_type::check().move_assignments(3));
+      }
+      SECTION("number of copy constructions")
+      {
+         auto rhs = vector_counted_type_t{1, 2, 3, 4, 5};
+         auto lhs = vector_counted_type_t{1, 2, 3};
+         counted_type::reset_counts();
+         lhs = std::move(rhs);
+         REQUIRE(counted_type::check().move_constructions(2));
+      }
+      SECTION("number of destructions")
+      {
+         auto rhs = vector_counted_type_t{1, 2, 3};
+         auto lhs = vector_counted_type_t{1, 2, 3, 4, 5};
+         counted_type::reset_counts();
+         lhs = std::move(rhs);
+         REQUIRE(counted_type::check().destructions(2));
+      }
+   }
+
+   SECTION("initializer-list assignment operator")
+   {
+      SECTION("contained values")
+      {
+         auto rhs = {1, 2, 3};
+         auto lhs = vector_int_t{};
+         lhs = rhs;
+         REQUIRE(are_containers_equal(lhs, rhs));
+      }
+      SECTION("number of copy assignments")
+      {
+         auto rhs = std::initializer_list<counted_type>{1, 2, 3, 4, 5};
+         auto lhs = vector_counted_type_t{1, 2, 3};
+         counted_type::reset_counts();
+         lhs = rhs;
+         REQUIRE(counted_type::check().copy_assignments(3));
+      }
+      SECTION("number of copy constructions")
+      {
+         auto rhs = std::initializer_list<counted_type>{1, 2, 3, 4, 5};
+         auto lhs = vector_counted_type_t{1, 2, 3};
+         counted_type::reset_counts();
+         lhs = rhs;
+         REQUIRE(counted_type::check().copy_constructions(2));
+      }
+      SECTION("number of destructions")
+      {
+         auto rhs = std::initializer_list<counted_type>{1, 2, 3};
+         auto lhs = vector_counted_type_t{1, 2, 3, 4, 5};
+         counted_type::reset_counts();
+         lhs = rhs;
+         REQUIRE(counted_type::check().destructions(2));
+      }
+   }
+
+   SECTION("count assign")
+   {
+      SECTION("contained values")
+      {
+         auto v = vector_int_t{1, 2, 3};
+         v.assign(5, 7);
+         auto expected = {7, 7, 7, 7, 7};
+         REQUIRE(are_containers_equal(v, expected));
+      }
+      SECTION("number of copy assignments / copy constructions")
+      {
+         auto v = vector_counted_type_t{1, 2, 3};
+         counted_type::reset_counts();
+         v.assign(5, 7);
+         REQUIRE(counted_type::check().copy_assignments(3).copy_constructions(2));
+      }
+      SECTION("number of destructions")
+      {
+         auto v = vector_counted_type_t{1, 2, 3, 4, 5};
+         auto value = counted_type{ 7 };
+         counted_type::reset_counts();
+         v.assign(3, value);
+         REQUIRE(counted_type::check().destructions(2));
+      }
+   }
+
+   SECTION("range assign")
+   {
+      SECTION("contained values")
+      {
+         auto range = {7, 7, 7, 7, 7};
+         auto v = vector_int_t{1, 2, 3};
+         v.assign(range.begin(), range.end());
+         REQUIRE(are_containers_equal(v, range));
+      }
+      SECTION("number of copy assignments / copy constructions")
+      {
+         auto range = std::initializer_list<counted_type>{7, 7, 7, 7, 7};
+         auto v = vector_counted_type_t{1, 2, 3};
+         counted_type::reset_counts();
+         v.assign(range.begin(), range.end());
+         REQUIRE(counted_type::check().copy_assignments(3).copy_constructions(2));
+      }
+      SECTION("number of destructions")
+      {
+         auto range = std::initializer_list<counted_type>{7, 7, 7};
+         auto v = vector_counted_type_t{1, 2, 3, 4, 5};
+         counted_type::reset_counts();
+         v.assign(range.begin(), range.end());
+         REQUIRE(counted_type::destructions == 2);
+         REQUIRE(counted_type::check().destructions(2));
+      }
+   }
+
+   SECTION("at")
+   {
+      auto v = vector_int_t{1, 2, 3, 4, 5};
+      SECTION("read access")
+      {
+         const auto& cv = v;
+         REQUIRE(v.at(0) == 1);
+         REQUIRE(v.at(2) == 3);
+         REQUIRE(v.at(4) == 5);
+      }
+      SECTION("write access")
+      {
+         v.at(0) = 10;
+         v.at(2) = 30;
+         v.at(4) = 50;
+         REQUIRE(v.at(0) == 10);
+         REQUIRE(v.at(2) == 30);
+         REQUIRE(v.at(4) == 50);
+      }
+   }
+
+   SECTION("operator[]")
+   {
+      auto v = vector_int_t{1, 2, 3, 4, 5};
+      SECTION("read access")
+      {
+         const auto& cv = v;
+         REQUIRE(v[0] == 1);
+         REQUIRE(v[2] == 3);
+         REQUIRE(v[4] == 5);
+      }
+      SECTION("write access")
+      {
+         v[0] = 10;
+         v[2] = 30;
+         v[4] = 50;
+         REQUIRE(v[0] == 10);
+         REQUIRE(v[2] == 30);
+         REQUIRE(v[4] == 50);
+      }
+   }
+
+   SECTION("front")
+   {
+      auto v = vector_int_t{1, 2, 3};
+      SECTION("read access")
+      {
+         const auto& cv = v;
+         REQUIRE(v.front() == 1);
+      }
+      SECTION("write access")
+      {
+         v.front() = 10;
+         REQUIRE(v.front() == 10);
+      }
+   }
+
+   SECTION("data")
+   {
+      auto v = vector_int_t{1, 2, 3};
+      SECTION("read access")
+      {
+         const auto& cv = v;
+         REQUIRE(*v.data() == 1);
+      }
+      SECTION("write access")
+      {
+         *v.data() = 10;
+         REQUIRE(v[0] == 10);
+      }
+   }
+
+   SECTION("iterators")
+   {
+      SECTION("zero elements")
+      {
+         auto v = vector_int_t{};
+         const auto& cv = v;
+
+         REQUIRE(v.begin() == v.end());
+         REQUIRE(cv.cbegin() == cv.cend());
+         REQUIRE(v.rbegin() == v.rend());
+         REQUIRE(cv.crbegin() == cv.crend());
+      }
+      SECTION("one elements")
+      {
+         auto v = vector_int_t{1};
+         const auto& cv = v;
+
+         REQUIRE(std::distance(v.begin(), v.end()) == 1);
+         REQUIRE(std::distance(cv.cbegin(), cv.cend()) == 1);
+         REQUIRE(std::distance(v.rbegin(), v.rend()) == 1);
+         REQUIRE(std::distance(cv.crbegin(), cv.crend()) == 1);
+
+         REQUIRE(*v.begin() == 1);
+         REQUIRE(*cv.cbegin() == 1);
+         REQUIRE(*v.rbegin() == 1);
+         REQUIRE(*cv.crbegin() == 1);
+      }
+      SECTION("many elements")
+      {
+         auto l = std::initializer_list<int>{1, 2, 3, 4, 5};
+         auto lbegin = l.begin();
+         auto lend = l.end();
+         auto lrbegin = std::reverse_iterator<decltype(lend)>{ lend };
+         auto lrend = std::reverse_iterator<decltype(lbegin)>{ lbegin };
+
+         auto v = vector_int_t(l);
+         const auto& cv = v;
+
+         REQUIRE(std::distance(v.begin(), v.end()) == 5);
+         REQUIRE(std::distance(cv.cbegin(), cv.cend()) == 5);
+         REQUIRE(std::distance(v.rbegin(), v.rend()) == 5);
+         REQUIRE(std::distance(cv.crbegin(), cv.crend()) == 5);
+
+         REQUIRE(std::equal(lbegin, lend, v.begin()));
+         REQUIRE(std::equal(lbegin, lend, cv.cbegin()));
+         REQUIRE(std::equal(lrbegin, lrend, v.rbegin()));
+         REQUIRE(std::equal(lrbegin, lrend, cv.crbegin()));
+      }
+   }
+
+   SECTION("empty / size")
+   {
+      auto v = vector_int_t{};
+      SECTION("zero elements")
+      {
+         REQUIRE(v.empty());
+         REQUIRE(v.size() == 0);
+      }
+      SECTION("one elements")
+      {
+         v.push_back(0);
+         REQUIRE(!v.empty());
+         REQUIRE(v.size() == 1);
+
+         SECTION("many elements")
+         {
+            v.push_back(0); v.push_back(0);
+            REQUIRE(!v.empty());
+            REQUIRE(v.size() == 3);
+
+            SECTION("zero elements (again)")
+            {
+               v.pop_back(); v.pop_back(); v.pop_back();
+               REQUIRE(v.empty());
+               REQUIRE(v.size() == 0);
+            }
+         }
+      }
+   }
+
+   SECTION("max size / capacity")
+   {
+      SECTION("capacity is 1")
+      {
+         auto v = sstl::vector<int, 1>{};
+         REQUIRE(v.max_size() == 1);
+         REQUIRE(v.capacity() == 1);
+      }
+      SECTION("capacity is 11")
+      {
+         auto v = sstl::vector<int, 11>{};
+         REQUIRE(v.max_size() == 11);
+         REQUIRE(v.capacity() == 11);
+      }
+   }
+
+}
 
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_erase_single)
-    {
-      Compare_Data compare_data(initial_data.begin(), initial_data.end());
-      Data data(initial_data.begin(), initial_data.end());
-
-      compare_data.erase(compare_data.begin() + 2);
-
-      data.erase(data.begin() + 2);
-
-      bool is_equal = std::equal(data.begin(),
-                                data.end(),
-                                compare_data.begin());
-
-      CHECK(is_equal);
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_erase_range)
-    {
-      Compare_Data compare_data(initial_data.begin(), initial_data.end());
-      Data data(initial_data.begin(), initial_data.end());
-
-      compare_data.erase(compare_data.begin() + 2, compare_data.begin() + 4);
-
-      data.erase(data.begin() + 2, data.begin() + 4);
-
-      bool is_equal = std::equal(data.begin(),
-                                data.end(),
-                                compare_data.begin());
-
-      CHECK(is_equal);
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_clear)
-    {
-      Compare_Data compare_data(initial_data.begin(), initial_data.end());
-
-      Data data(compare_data.begin(), compare_data.end());
-      data.clear();
-
-      CHECK_EQUAL(data.size(), size_t(0));
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_iterator)
-    {
-      Compare_Data compare_data(initial_data.begin(), initial_data.end());
-
-      Data data(compare_data.begin(), compare_data.end());
-
-      bool is_equal = std::equal(data.begin(),
-                                data.end(),
-                                compare_data.begin());
-
-      CHECK(is_equal);
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_const_iterator)
-    {
-      Compare_Data compare_data(initial_data.begin(), initial_data.end());
-
-      Data data(compare_data.begin(), compare_data.end());
-
-      bool is_equal = std::equal(data.cbegin(),
-                                data.cend(),
-                                compare_data.cbegin());
-
-      CHECK(is_equal);
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_reverse_iterator)
-    {
-      Compare_Data compare_data(initial_data.begin(), initial_data.end());
-
-      Data data(compare_data.begin(), compare_data.end());
-
-      bool is_equal = std::equal(data.rbegin(),
-                                data.rend(),
-                                compare_data.rbegin());
-
-      CHECK(is_equal);
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_const_reverse_iterator)
-    {
-      Compare_Data compare_data(initial_data.begin(), initial_data.end());
-
-      Data data(compare_data.begin(), compare_data.end());
-
-      bool is_equal = std::equal(data.crbegin(),
-                                data.crend(),
-                                compare_data.crbegin());
-
-      CHECK(is_equal);
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_equal)
-    {
-      const Data initial1(initial_data.begin(), initial_data.end());
-      const Data initial2(initial_data.begin(), initial_data.end());
-
-      CHECK(initial1 == initial2);
-
-      const Data different(different_data.begin(), different_data.end());
-
-      CHECK(!(initial1 == different));
-
-      const Data shorter(shorter_data.begin(), shorter_data.end());
-
-      CHECK(!(shorter == initial1));
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_not_equal)
-    {
-      const Data initial1(initial_data.begin(), initial_data.end());
-      const Data initial2(initial_data.begin(), initial_data.end());
-
-      CHECK(!(initial1 != initial2));
-
-      const Data different(different_data.begin(), different_data.end());
-
-      CHECK(initial1 != different);
-
-      const Data shorter(shorter_data.begin(), shorter_data.end());
-
-      CHECK(shorter != initial1);
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_less_than)
-    {
-      const Data less(less_data.begin(), less_data.end());
-      const Data initial(initial_data.begin(), initial_data.end());
-
-      CHECK((less < initial) == (less_data < initial_data));
-
-      const Data greater(greater_data.begin(), greater_data.end());
-
-      CHECK((greater < initial) == (greater_data < initial_data));
-
-      const Data shorter(shorter_data.begin(), shorter_data.end());
-
-      CHECK((shorter < initial) == (shorter_data < initial_data));
-      CHECK((initial < shorter) == (initial_data < shorter_data));
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_less_than_or_equal)
-    {
-      const Data less(less_data.begin(), less_data.end());
-      const Data initial(initial_data.begin(), initial_data.end());
-
-      CHECK((less <= initial) == (less_data <= initial_data));
-
-      const Data greater(greater_data.begin(), greater_data.end());
-
-      CHECK((greater <= initial) == (greater_data <= initial_data));
-
-      const Data shorter(shorter_data.begin(), shorter_data.end());
-
-      CHECK((shorter <= initial) == (shorter_data <= initial_data));
-      CHECK((initial <= shorter) == (initial_data <= shorter_data));
-
-      const Data initial2(initial_data.begin(), initial_data.end());
-      CHECK((initial <= initial2) == (initial_data <= initial_data));
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_greater_than)
-    {
-      const Data less(less_data.begin(), less_data.end());
-      const Data initial(initial_data.begin(), initial_data.end());
-
-      CHECK((less > initial) == (less_data > initial_data));
-
-      const Data greater(greater_data.begin(), greater_data.end());
-
-      CHECK((greater > initial) == (greater_data > initial_data));
-
-      const Data shorter(shorter_data.begin(), shorter_data.end());
-
-      CHECK((shorter > initial) == (shorter_data > initial_data));
-      CHECK((initial > shorter) == (initial_data > shorter_data));
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_greater_than_or_equal)
-    {
-      const Data less(less_data.begin(), less_data.end());
-      const Data initial(initial_data.begin(), initial_data.end());
-
-      CHECK((less >= initial) == (less_data >= initial_data));
-
-      const Data greater(greater_data.begin(), greater_data.end());
-
-      CHECK((greater >= initial) == (greater_data >= initial_data));
-
-      const Data shorter(shorter_data.begin(), shorter_data.end());
-
-      CHECK((shorter >= initial) == (shorter_data >= initial_data));
-      CHECK((initial >= shorter) == (initial_data > shorter_data));
-
-      const Data initial2(initial_data.begin(), initial_data.end());
-      CHECK((initial >= initial2) == (initial_data >= initial_data));
-    }
-
-    //*************************************************************************
-    TEST_FIXTURE(SetupFixture, test_allocated_size)
-    {
-      const size_t INITIAL_SIZE = 5;
-
-      Data data(INITIAL_SIZE);
-
-      size_t expected_size = (SIZE * sizeof(int)) + (2 * sizeof(size_t)) + sizeof(int*);
-
-      CHECK_EQUAL(expected_size, sizeof(Data));
-    }
-  };
 }
 }

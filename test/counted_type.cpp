@@ -15,5 +15,7 @@ namespace test
    size_t counted_type::copy_constructions;
    size_t counted_type::move_constructions;
    size_t counted_type::destructions;
+   size_t counted_type::copy_assignments;
+   size_t counted_type::move_assignments;
 }
 }
