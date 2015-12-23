@@ -21,7 +21,7 @@ There are applications in which such additional costs cannot be accepted. An exa
 - Static reimplementations of STL abstractions:
   - std::function (OK)
   - std::shared_ptr (TODO)
-  - std::vector (TODO)
+  - std::vector (IN PROGRESS)
   - std::list (PERFORMANCE REFACTORING REQUIRED)
   - std::forward_list (PERFORMANCE REFACTORING REQUIRED)
   - std::deque (PERFORMANCE REFACTORING REQUIRED)
