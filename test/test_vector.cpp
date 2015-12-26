@@ -429,6 +429,31 @@ TEST_CASE("vector")
       }
    }
 
+   SECTION("clear")
+   {
+      SECTION("contained values")
+      {
+         auto v = vector_int_t{1, 2, 3, 4, 5, 6, 7};
+         v.clear();
+         REQUIRE(v.empty());
+         v.assign(7, 0);
+         REQUIRE(!v.empty());
+         v.clear();
+         REQUIRE(v.empty());
+      }
+      SECTION("number of destructions")
+      {
+         auto v = vector_counted_type_t(7);
+         counted_type::reset_counts();
+         v.clear();
+         REQUIRE(counted_type::check().destructions(7));
+         v.assign(7, 0);
+         counted_type::reset_counts();
+         v.clear();
+         REQUIRE(counted_type::check().destructions(7));
+      }
+   }
+
 }
 
 }

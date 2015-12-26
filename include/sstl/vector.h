@@ -156,6 +156,9 @@ protected:
       return *(_end()-1);
    }
 
+   pointer _begin() noexcept;
+   pointer _end() noexcept;
+   void _set_end(pointer) noexcept;
    reverse_iterator _rbegin() _sstl_noexcept(std::is_nothrow_constructible<reverse_iterator, iterator>::value)
    {
       return reverse_iterator(_end());
@@ -174,6 +177,16 @@ protected:
    {
       return std::distance(const_cast<_vector_base&>(*this)._begin(),
                            const_cast<_vector_base&>(*this)._end());
+   }
+
+   void _clear() _sstl_noexcept(std::is_nothrow_destructible<value_type>::value)
+   {
+      auto begin = _begin();
+      auto pos = begin;
+      auto end = _end();
+      while(pos != end)
+         (pos++)->~value_type();
+      _set_end(begin);
    }
 
    void _push_back(const_reference value)
@@ -208,10 +221,6 @@ protected:
       (--end)->~value_type();
       _set_end(end);
    }
-
-   pointer _begin() noexcept;
-   pointer _end() noexcept;
-   void _set_end(pointer) noexcept;
 
 protected:
    static const bool _is_copy = true;
@@ -442,7 +451,10 @@ public:
    size_type capacity() const _sstl_noexcept_ { return Capacity; }
 
 
-
+   void clear() _sstl_noexcept(noexcept(std::declval<_base>()._clear()))
+   {
+      _base::_clear();
+   }
 
    void push_back(const_reference value)
       _sstl_noexcept(noexcept(std::declval<_base>()._push_back(reference())))
