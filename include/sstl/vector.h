@@ -76,8 +76,8 @@ protected:
 
    void _destructor() _sstl_noexcept(std::is_nothrow_destructible<value_type>::value)
    {
-      auto begin = _get_begin();
-      auto end = _get_end();
+      auto begin = _begin();
+      auto end = _end();
       while(begin != end)
          (begin++)->~value_type();
    }
@@ -95,8 +95,8 @@ protected:
                      && std::is_nothrow_destructible<value_type>::value))
    {
       auto src = rhs_begin;
-      auto dest = _get_begin();
-      auto end = _get_end();
+      auto dest = _begin();
+      auto end = _end();
       while(src != rhs_end)
       {
          if(dest < end)
@@ -119,8 +119,8 @@ protected:
                      && std::is_nothrow_copy_constructible<value_type>::value
                      && std::is_nothrow_destructible<value_type>::value)
    {
-      auto dest = _get_begin();
-      auto end = _get_end();
+      auto dest = _begin();
+      auto end = _end();
       while(count > 0)
       {
          if(dest < end)
@@ -138,10 +138,48 @@ protected:
       _set_end(new_end);
    }
 
+   reference _at(size_type idx) _sstl_noexcept_
+   {
+      auto pos = _begin() + idx;
+      sstl_assert(pos < _end());
+      return *pos;
+   }
+
+   reference _front() _sstl_noexcept_
+   {
+      sstl_assert(!_empty());
+      return *_begin();
+   }
+   reference _back() _sstl_noexcept_
+   {
+      sstl_assert(!_empty());
+      return *(_end()-1);
+   }
+
+   reverse_iterator _rbegin() _sstl_noexcept(std::is_nothrow_constructible<reverse_iterator, iterator>::value)
+   {
+      return reverse_iterator(_end());
+   }
+   reverse_iterator _rend() _sstl_noexcept(std::is_nothrow_constructible<reverse_iterator, iterator>::value)
+   {
+      return reverse_iterator(_begin());
+   }
+
+   bool _empty() const _sstl_noexcept_
+   {
+      return const_cast<_vector_base&>(*this)._begin() == const_cast<_vector_base&>(*this)._end();
+   }
+
+   size_type _size() const _sstl_noexcept_
+   {
+      return std::distance(const_cast<_vector_base&>(*this)._begin(),
+                           const_cast<_vector_base&>(*this)._end());
+   }
+
    void _push_back(const_reference value)
       _sstl_noexcept(std::is_nothrow_copy_constructible<value_type>::value)
    {
-      auto end = _get_end();
+      auto end = _end();
       new(end++) value_type(value);
       _set_end(end);
    }
@@ -149,13 +187,30 @@ protected:
    void _push_back(value_type&& value)
       _sstl_noexcept(std::is_nothrow_move_constructible<value_type>::value)
    {
-      auto end = _get_end();
+      auto end = _end();
       new(end++) value_type(std::move(value));
       _set_end(end);
    }
 
-   pointer _get_begin() noexcept;
-   pointer _get_end() noexcept;
+   template<class... Args>
+   void _emplace_back(Args&&... args)
+      _sstl_noexcept(std::is_nothrow_constructible<value_type, typename std::add_rvalue_reference<Args>::type...>::value)
+   {
+      auto end = _end();
+      new(end++) value_type(std::forward<Args>(args)...);
+      _set_end(end);
+   }
+
+   void _pop_back() _sstl_noexcept(std::is_nothrow_destructible<value_type>::value)
+   {
+      sstl_assert(!_empty());
+      auto end = _end();
+      (--end)->~value_type();
+      _set_end(end);
+   }
+
+   pointer _begin() noexcept;
+   pointer _end() noexcept;
    void _set_end(pointer) noexcept;
 
 protected:
@@ -165,9 +220,9 @@ protected:
 template<class T, size_t Capacity>
 class vector : public _vector_base<T>
 {
-   friend T* _vector_base<T>::_get_begin() noexcept;
-   friend T* _vector_base<T>::_get_end() noexcept;
-   friend void _vector_base<T>::_set_end(T*) noexcept;
+   friend T* _vector_base<T>::_begin() _sstl_noexcept_;
+   friend T* _vector_base<T>::_end() _sstl_noexcept_;
+   friend void _vector_base<T>::_set_end(T*) _sstl_noexcept_;
 
 private:
    using _base = _vector_base<T>;
@@ -206,14 +261,14 @@ public:
 
 public:
    vector() _sstl_noexcept_
-      : _end(begin())
+      : _end_(begin())
    {
       _assert_vector_derived_member_variable_access_is_valid(_type_tag<vector>{});
    }
 
    explicit vector(size_type count, const_reference value=value_type())
       _sstl_noexcept(noexcept(std::declval<_base>()._count_constructor(count, value)))
-      : _end(begin())
+      : _end_(begin())
    {
       sstl_assert(count <= Capacity);
       _assert_vector_derived_member_variable_access_is_valid(_type_tag<vector>{});
@@ -225,7 +280,7 @@ public:
    vector(TIterator first, TIterator last)
       _sstl_noexcept(noexcept(std::declval<_base>().template _range_constructor<_base::_is_copy>(  std::declval<TIterator>(),
                                                                                                    std::declval<TIterator>())))
-      : _end(begin())
+      : _end_(begin())
    {
       sstl_assert(std::distance(first, last) <= Capacity);
       _assert_vector_derived_member_variable_access_is_valid(_type_tag<vector>{});
@@ -235,7 +290,7 @@ public:
    vector(const vector& rhs)
       _sstl_noexcept(noexcept(std::declval<_base>().template _range_constructor<_base::_is_copy>(  std::declval<const_iterator>(),
                                                                                                    std::declval<const_iterator>())))
-      : _end(begin())
+      : _end_(begin())
    {
       _assert_vector_derived_member_variable_access_is_valid(_type_tag<vector>{});
       _base::template _range_constructor<_base::_is_copy>(rhs.cbegin(), rhs.cend());
@@ -244,7 +299,7 @@ public:
    vector(vector&& rhs)
       _sstl_noexcept(noexcept(std::declval<_base>().template _range_constructor<!_base::_is_copy>( std::declval<iterator>(),
                                                                                                    std::declval<iterator>())))
-      : _end(begin())
+      : _end_(begin())
    {
       _assert_vector_derived_member_variable_access_is_valid(_type_tag<vector>{});
       _base::template _range_constructor<!_base::_is_copy>(rhs.begin(), rhs.end());
@@ -252,7 +307,7 @@ public:
 
    vector(std::initializer_list<value_type> init)
       _sstl_noexcept(noexcept(std::declval<_base>()._initializer_list_constructor(std::declval<std::initializer_list<value_type>>())))
-      : _end(begin())
+      : _end_(begin())
    {
       sstl_assert(init.size() <= Capacity);
       _assert_vector_derived_member_variable_access_is_valid(_type_tag<vector>{});
@@ -310,60 +365,79 @@ public:
 
    reference at(size_type idx) _sstl_noexcept_
    {
-      auto pos = begin() + idx;
-      sstl_assert(pos < end());
-      return *pos;
+      return _base::_at(idx);
    }
    const_reference at(size_type idx) const _sstl_noexcept_
    {
-      return const_cast<vector&>(*this).at(idx);
+      return const_cast<vector&>(*this)._base::_at(idx);
    }
 
    reference operator[](size_type idx) _sstl_noexcept_
    {
-      return at(idx);
+      return _base::_at(idx);
    }
    const_reference operator[](size_type idx) const _sstl_noexcept_
    {
-      return const_cast<vector&>(*this).at(idx);
+      return const_cast<vector&>(*this)._base::_at(idx);
    }
 
    reference front() _sstl_noexcept_
    {
-      sstl_assert(!empty());
-      return *begin();
+      return _base::_front();
    }
-   const_reference front() const _sstl_noexcept_ { return const_cast<vector&>(*this).front(); }
+   const_reference front() const _sstl_noexcept_
+   {
+      return const_cast<vector&>(*this)._base::_front();
+   }
 
    reference back() _sstl_noexcept_
    {
-      sstl_assert(!empty());
-      return *(_end-1);
+      return _base::_back();
    }
-   const_reference back() const _sstl_noexcept_ { return const_cast<vector&>(*this).back(); }
+   const_reference back() const _sstl_noexcept_
+   {
+      return const_cast<vector&>(*this)._base::_back();
+   }
 
-   pointer data() _sstl_noexcept_ { return std::addressof(*begin()); }
-   const_pointer data() const _sstl_noexcept_ { return const_cast<vector&>(this).data(); }
+   pointer data() _sstl_noexcept_ { return _base::_begin(); }
+   const_pointer data() const _sstl_noexcept_ { return const_cast<vector&>(this)._base::_begin(); }
 
+   iterator begin() _sstl_noexcept_ { return _base::_begin(); }
+   const_iterator begin() const _sstl_noexcept_ { return const_cast<vector&>(*this)._base::_begin(); }
+   const_iterator cbegin() const _sstl_noexcept_ { return const_cast<vector&>(*this)._base::_begin(); }
 
-   iterator begin() _sstl_noexcept_ { return static_cast<iterator>(static_cast<void*>(_buffer)); }
-   const_iterator begin() const _sstl_noexcept_ { return const_cast<vector&>(*this).begin(); }
-   const_iterator cbegin() const _sstl_noexcept_ { return const_cast<vector&>(*this).begin(); }
+   iterator end() _sstl_noexcept_ { return _end_; }
+   const_iterator end() const _sstl_noexcept_ { return _end_; }
+   const_iterator cend() const _sstl_noexcept_ { return _end_; }
 
-   iterator end() _sstl_noexcept_ { return _end; }
-   const_iterator end() const _sstl_noexcept_ { return _end; }
-   const_iterator cend() const _sstl_noexcept_ { return _end; }
+   reverse_iterator rbegin() _sstl_noexcept(noexcept(std::declval<_base>()._rbegin()))
+   {
+      return _base::_rbegin();
+   }
+   const_reverse_iterator rbegin() const _sstl_noexcept(noexcept(std::declval<_base>()._rbegin()))
+   {
+      return const_cast<vector&>(*this)._base::_rbegin();
+   }
+   const_reverse_iterator crbegin() const _sstl_noexcept(noexcept(std::declval<_base>()._rbegin()))
+   {
+      return const_cast<vector&>(*this)._base::_rbegin();
+   }
 
-   reverse_iterator rbegin() _sstl_noexcept_ { return reverse_iterator( end() ); }
-   const_reverse_iterator rbegin() const _sstl_noexcept_ { return const_cast<vector&>(*this).rbegin(); }
-   const_reverse_iterator crbegin() const _sstl_noexcept_ { return const_cast<vector&>(*this).rbegin(); }
+   reverse_iterator rend() _sstl_noexcept(noexcept(std::declval<_base>()._rend()))
+   {
+      return _base::_rend();
+   }
+   const_reverse_iterator rend() const _sstl_noexcept(noexcept(std::declval<_base>()._rend()))
+   {
+      return const_cast<vector&>(*this)._base::_rend();
+   }
+   const_reverse_iterator crend() const _sstl_noexcept(noexcept(std::declval<_base>()._rend()))
+   {
+      return const_cast<vector&>(*this)._base::_rend();
+   }
 
-   reverse_iterator rend() _sstl_noexcept_ { return reverse_iterator( begin() ); }
-   const_reverse_iterator rend() const _sstl_noexcept_ { return const_cast<vector&>(*this).rend(); }
-   const_reverse_iterator crend() const _sstl_noexcept_ { return const_cast<vector&>(*this).rend(); }
-
-   bool empty() const _sstl_noexcept_ { return cbegin()==cend(); }
-   size_type size() const _sstl_noexcept_ { return std::distance(cbegin(), cend()); }
+   bool empty() const _sstl_noexcept_ { return _base::_empty(); }
+   size_type size() const _sstl_noexcept_ { return _base::_size(); }
    size_type max_size() const _sstl_noexcept_ { return Capacity; }
    size_type capacity() const _sstl_noexcept_ { return Capacity; }
 
@@ -371,14 +445,14 @@ public:
 
 
    void push_back(const_reference value)
-      _sstl_noexcept(noexcept(std::declval<_base>()._push_back(std::declval<value_type>())))
+      _sstl_noexcept(noexcept(std::declval<_base>()._push_back(reference())))
    {
       sstl_assert(size() < Capacity);
       _push_back(value);
    }
 
    void push_back(value_type&& value)
-      _sstl_noexcept(noexcept(std::declval<_base>()._push_back(std::move(std::declval<value_type>()))))
+      _sstl_noexcept(noexcept(std::declval<_base>()._push_back(std::declval<value_type>())))
    {
       sstl_assert(size() < Capacity);
       _base::_push_back(std::move(value));
@@ -386,42 +460,41 @@ public:
 
    template<class... Args>
    void emplace_back(Args&&... args)
-      _sstl_noexcept(std::is_nothrow_constructible<value_type, typename std::add_rvalue_reference<Args>::type...>::value)
+      _sstl_noexcept(noexcept(std::declval<_base>()._emplace_back(std::declval<Args>()...)))
    {
       sstl_assert(size() < Capacity);
-      new(_end++) value_type(std::forward<Args>(args)...);
+      _base::_emplace_back(std::forward<Args>(args)...);
    }
 
-   void pop_back() _sstl_noexcept(std::is_nothrow_destructible<value_type>::value)
+   void pop_back() _sstl_noexcept(noexcept(std::declval<_base>()._pop_back()))
    {
-      sstl_assert(!empty());
-      (--_end)->~value_type();
+      _base::_pop_back();
    }
 
 private:
-   pointer _end;
-   typename aligned_storage<sizeof(value_type), std::alignment_of<value_type>::value>::type _buffer[Capacity];
+   pointer _end_;
+   typename aligned_storage<sizeof(value_type), std::alignment_of<value_type>::value>::type _buffer_[Capacity];
 };
 
 template<class T>
-T* _vector_base<T>::_get_begin() noexcept
+T* _vector_base<T>::_begin() _sstl_noexcept_
 {
    using type_for_derived_member_variable_access = typename vector<T, 1>::_type_for_derived_member_variable_access;
-   return reinterpret_cast<T*>(reinterpret_cast<type_for_derived_member_variable_access&>(*this)._buffer);
+   return reinterpret_cast<T*>(reinterpret_cast<type_for_derived_member_variable_access&>(*this)._buffer_);
 }
 
 template<class T>
-T* _vector_base<T>::_get_end() noexcept
+T* _vector_base<T>::_end() _sstl_noexcept_
 {
    using type_for_derived_member_variable_access = typename vector<T, 1>::_type_for_derived_member_variable_access;
-   return reinterpret_cast<type_for_derived_member_variable_access&>(*this)._end;
+   return reinterpret_cast<type_for_derived_member_variable_access&>(*this)._end_;
 }
 
 template<class T>
-void _vector_base<T>::_set_end(T* value) noexcept
+void _vector_base<T>::_set_end(T* value) _sstl_noexcept_
 {
    using type_for_derived_member_variable_access = typename vector<T, 1>::_type_for_derived_member_variable_access;
-   reinterpret_cast<type_for_derived_member_variable_access&>(*this)._end = value;
+   reinterpret_cast<type_for_derived_member_variable_access&>(*this)._end_ = value;
 }
 
 }
