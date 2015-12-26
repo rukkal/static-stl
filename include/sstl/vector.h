@@ -30,7 +30,7 @@ template<class T>
 class _vector_base
 {
 template<class U, size_t S>
-friend class vector;
+friend class vector; //friend declaration required for vector's noexcept expressions
 
 protected:
    using value_type = T;
@@ -269,9 +269,7 @@ public:
                                                                                        std::declval<const_iterator>())))
    {
       if(this != &rhs)
-      {
-         _base::template _assign<!_base::_is_copy>(rhs.cbegin(), rhs.cend());
-      }
+         _base::template _assign<_base::_is_copy>(rhs.cbegin(), rhs.cend());
       return *this;
    }
 
