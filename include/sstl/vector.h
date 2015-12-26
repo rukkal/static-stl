@@ -53,16 +53,19 @@ protected:
          _push_back(value);
    }
 
-   // const-qualified TIterator -> copy values
-   // non const-qualified TIterator -> move values
-   template<class TIterator,
+   template<bool is_copy_construction, class TIterator,
             class = _enable_if_input_iterator_t<TIterator>>
    void _range_constructor(TIterator first, TIterator last)
-      _sstl_noexcept((std::is_const<TIterator>::value && std::is_nothrow_copy_constructible<value_type>::value)
-                     || (std::is_const<TIterator>::value && std::is_nothrow_move_constructible<value_type>::value))
+      _sstl_noexcept((is_copy_construction && std::is_nothrow_copy_constructible<value_type>::value)
+                     || (!is_copy_construction && std::is_nothrow_move_constructible<value_type>::value))
    {
       using source_reference = typename std::iterator_traits<TIterator>::reference;
-      std::for_each(first, last, [this](source_reference value){ this->_push_back(std::move(value)); });
+      std::for_each( first,
+                     last,
+                     [this](source_reference value)
+                     {
+                        this->_push_back(_conditional_move<!is_copy_construction>(value));
+                     });
    }
 
    void _initializer_list_constructor(std::initializer_list<value_type> init)
@@ -216,15 +219,14 @@ public:
    }
 
    template<class TIterator,
-            class = _enable_if_input_iterator_t<TIterator>,
-            class TConstIterator = typename std::add_const<TIterator>::type>
+            class = _enable_if_input_iterator_t<TIterator>>
    vector(TIterator first, TIterator last)
       _sstl_noexcept(std::is_nothrow_copy_constructible<value_type>::value)
       : _end(begin())
    {
       sstl_assert(std::distance(first, last) <= Capacity);
       _assert_vector_derived_member_variable_access_is_valid(_type_tag<vector>{});
-      _base::_range_constructor(static_cast<TConstIterator>(first), static_cast<TConstIterator>(last));
+      _base::template _range_constructor<_base::_is_copy>(first, last);
    }
 
    vector(const vector& rhs)
@@ -232,7 +234,7 @@ public:
       : _end(begin())
    {
       _assert_vector_derived_member_variable_access_is_valid(_type_tag<vector>{});
-      _base::_range_constructor(rhs.cbegin(), rhs.cend());
+      _base::template _range_constructor<_base::_is_copy>(rhs.cbegin(), rhs.cend());
    }
 
    vector(vector&& rhs)
@@ -240,7 +242,7 @@ public:
       : _end(begin())
    {
       _assert_vector_derived_member_variable_access_is_valid(_type_tag<vector>{});
-      _base::_range_constructor(rhs.begin(), rhs.end());
+      _base::template _range_constructor<!_base::_is_copy>(rhs.begin(), rhs.end());
    }
 
    vector(std::initializer_list<value_type> init)
