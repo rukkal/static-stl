@@ -74,7 +74,7 @@ protected:
       std::for_each(init.begin(), init.end(), [this](const_reference value){ this->_push_back(value); });
    }
 
-   void _destructor()
+   void _destructor() _sstl_noexcept(std::is_nothrow_destructible<value_type>::value)
    {
       auto begin = _get_begin();
       auto end = _get_end();
@@ -85,12 +85,14 @@ protected:
    template<bool is_copy_assignment, class TIterator>
    void _assign(TIterator rhs_begin, TIterator rhs_end)
       _sstl_noexcept((is_copy_assignment
-                     &&std::is_nothrow_copy_assignable<value_type>::value
-                     && std::is_nothrow_copy_constructible<value_type>::value)
+                     && std::is_nothrow_copy_assignable<value_type>::value
+                     && std::is_nothrow_copy_constructible<value_type>::value
+                     && std::is_nothrow_destructible<value_type>::value)
                      ||
                      (!is_copy_assignment
                      && std::is_nothrow_move_assignable<value_type>::value
-                     && std::is_nothrow_move_constructible<value_type>::value))
+                     && std::is_nothrow_move_constructible<value_type>::value
+                     && std::is_nothrow_destructible<value_type>::value))
    {
       auto src = rhs_begin;
       auto dest = _get_begin();
@@ -114,7 +116,8 @@ protected:
 
    void _assign(size_type count, const_reference value)
       _sstl_noexcept(std::is_nothrow_copy_assignable<value_type>::value
-                     && std::is_nothrow_copy_constructible<value_type>::value)
+                     && std::is_nothrow_copy_constructible<value_type>::value
+                     && std::is_nothrow_destructible<value_type>::value)
    {
       auto dest = _get_begin();
       auto end = _get_end();
@@ -209,8 +212,7 @@ public:
    }
 
    explicit vector(size_type count, const_reference value=value_type())
-      _sstl_noexcept(std::is_nothrow_default_constructible<value_type>::value
-                     && std::is_nothrow_copy_constructible<value_type>::value)
+      _sstl_noexcept(noexcept(std::declval<_base>()._count_constructor(count, value)))
       : _end(begin())
    {
       sstl_assert(count <= Capacity);
@@ -221,7 +223,8 @@ public:
    template<class TIterator,
             class = _enable_if_input_iterator_t<TIterator>>
    vector(TIterator first, TIterator last)
-      _sstl_noexcept(std::is_nothrow_copy_constructible<value_type>::value)
+      _sstl_noexcept(noexcept(std::declval<_base>().template _range_constructor<_base::_is_copy>(  std::declval<TIterator>(),
+                                                                                                   std::declval<TIterator>())))
       : _end(begin())
    {
       sstl_assert(std::distance(first, last) <= Capacity);
@@ -230,7 +233,8 @@ public:
    }
 
    vector(const vector& rhs)
-      _sstl_noexcept(std::is_nothrow_copy_constructible<value_type>::value)
+      _sstl_noexcept(noexcept(std::declval<_base>().template _range_constructor<_base::_is_copy>(  std::declval<const_iterator>(),
+                                                                                                   std::declval<const_iterator>())))
       : _end(begin())
    {
       _assert_vector_derived_member_variable_access_is_valid(_type_tag<vector>{});
@@ -238,7 +242,8 @@ public:
    }
 
    vector(vector&& rhs)
-      _sstl_noexcept(std::is_nothrow_move_constructible<value_type>::value)
+      _sstl_noexcept(noexcept(std::declval<_base>().template _range_constructor<!_base::_is_copy>( std::declval<iterator>(),
+                                                                                                   std::declval<iterator>())))
       : _end(begin())
    {
       _assert_vector_derived_member_variable_access_is_valid(_type_tag<vector>{});
@@ -246,7 +251,7 @@ public:
    }
 
    vector(std::initializer_list<value_type> init)
-      _sstl_noexcept(std::is_nothrow_copy_constructible<value_type>::value)
+      _sstl_noexcept(noexcept(std::declval<_base>()._initializer_list_constructor(std::declval<std::initializer_list<value_type>>())))
       : _end(begin())
    {
       sstl_assert(init.size() <= Capacity);
@@ -254,14 +259,14 @@ public:
       _base::_initializer_list_constructor(init);
    }
 
-   ~vector()
+   ~vector() _sstl_noexcept(noexcept(std::declval<_base>()._destructor()))
    {
       _base::_destructor();
    }
 
    vector& operator=(const vector& rhs)
-      _sstl_noexcept(std::is_nothrow_copy_assignable<value_type>::value
-                     && std::is_nothrow_copy_constructible<value_type>::value)
+      _sstl_noexcept(noexcept(std::declval<_base>().template _assign<!_base::_is_copy>(std::declval<const_iterator>(),
+                                                                                       std::declval<const_iterator>())))
    {
       if(this != &rhs)
       {
@@ -271,8 +276,8 @@ public:
    }
 
    vector& operator=(vector&& rhs)
-      _sstl_noexcept(std::is_nothrow_move_assignable<value_type>::value
-                     && std::is_nothrow_move_constructible<value_type>::value)
+      _sstl_noexcept(noexcept(std::declval<_base>().template _assign<!_base::_is_copy>(std::declval<iterator>(),
+                                                                                       std::declval<iterator>())))
    {
       if(this != &rhs)
          _base::template _assign<!_base::_is_copy>(rhs.begin(), rhs.end());
@@ -280,16 +285,16 @@ public:
    }
 
    vector& operator=(std::initializer_list<value_type> init)
-      _sstl_noexcept(std::is_nothrow_copy_assignable<value_type>::value
-                     && std::is_nothrow_copy_constructible<value_type>::value)
+      _sstl_noexcept(noexcept(std::declval<_base>().template _assign<_base::_is_copy>(
+            std::declval<typename std::initializer_list<value_type>::iterator>(),
+            std::declval<typename std::initializer_list<value_type>::iterator>())))
    {
       _base::template _assign<_base::_is_copy>(init.begin(), init.end());
       return *this;
    }
 
    void assign(size_type count, const_reference value)
-      _sstl_noexcept(std::is_nothrow_copy_assignable<value_type>::value
-                     && std::is_nothrow_copy_constructible<value_type>::value)
+      _sstl_noexcept(noexcept(std::declval<_base>()._assign(count, value)))
    {
       sstl_assert(count <= Capacity);
       _base::_assign(count, value);
@@ -298,8 +303,8 @@ public:
    template<class TIterator,
             class = _enable_if_input_iterator_t<TIterator>>
    void assign(TIterator first, TIterator last)
-      _sstl_noexcept(std::is_nothrow_copy_assignable<value_type>::value
-                     && std::is_nothrow_copy_constructible<value_type>::value)
+      _sstl_noexcept(noexcept(std::declval<_base>().template _assign<_base::_is_copy>( std::declval<TIterator>(),
+                                                                                       std::declval<TIterator>())))
    {
       sstl_assert(std::distance(first, last) <= Capacity);
       _base::template _assign<_base::_is_copy>(first, last);
@@ -367,13 +372,15 @@ public:
 
 
 
-   void push_back(const_reference value) _sstl_noexcept(std::is_nothrow_copy_constructible<value_type>::value)
+   void push_back(const_reference value)
+      _sstl_noexcept(noexcept(std::declval<_base>()._push_back(std::declval<value_type>())))
    {
       sstl_assert(size() < Capacity);
       _push_back(value);
    }
 
-   void push_back(value_type&& value) _sstl_noexcept(std::is_nothrow_move_constructible<value_type>::value)
+   void push_back(value_type&& value)
+      _sstl_noexcept(noexcept(std::declval<_base>()._push_back(std::move(std::declval<value_type>()))))
    {
       sstl_assert(size() < Capacity);
       _base::_push_back(std::move(value));
@@ -387,7 +394,7 @@ public:
       new(_end++) value_type(std::forward<Args>(args)...);
    }
 
-   void pop_back()
+   void pop_back() _sstl_noexcept(std::is_nothrow_destructible<value_type>::value)
    {
       sstl_assert(!empty());
       (--_end)->~value_type();
