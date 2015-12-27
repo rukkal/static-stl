@@ -462,14 +462,15 @@ TEST_CASE("vector")
          {
             auto expected = {7, 3, 3, 3, 3, 3};
             auto v = vector_int_t{3, 3, 3, 3, 3};
-            auto pos = v.insert(v.begin(), 7);
+            auto value = 7;
+            auto pos = v.insert(v.begin(), value);
             REQUIRE(*pos == 7);
             REQUIRE(are_containers_equal(v, expected));
          }
          SECTION("number of operations")
          {
-            auto value = counted_type{};
             auto v = vector_counted_type_t(5);
+            auto value = counted_type{};
             counted_type::reset_counts();
             v.insert(v.begin(), value);
             REQUIRE(counted_type::check().move_constructions(1).move_assignments(4).copy_assignments(1));
@@ -481,14 +482,15 @@ TEST_CASE("vector")
          {
             auto expected = {3, 3, 3, 3, 3, 7};
             auto v = vector_int_t{3, 3, 3, 3, 3};
-            auto pos = v.insert(v.end(), 7);
+            auto value = 7;
+            auto pos = v.insert(v.end(), value);
             REQUIRE(*pos == 7);
             REQUIRE(are_containers_equal(v, expected));
          }
          SECTION("number of operations")
          {
-            auto value = counted_type{};
             auto v = vector_counted_type_t(5);
+            auto value = counted_type{};
             counted_type::reset_counts();
             v.insert(v.end(), value);
             REQUIRE(counted_type::check().copy_constructions(1));
@@ -499,8 +501,9 @@ TEST_CASE("vector")
          SECTION("contained values")
          {
             auto expected = {3, 3, 7, 3, 3, 3};
+            auto value = 7;
             auto v = vector_int_t{3, 3, 3, 3, 3};
-            auto pos = v.insert(v.begin() + 2, 7);
+            auto pos = v.insert(v.begin() + 2, value);
             REQUIRE(*pos == 7);
             REQUIRE(are_containers_equal(v, expected));
          }
@@ -511,6 +514,70 @@ TEST_CASE("vector")
             counted_type::reset_counts();
             v.insert(v.begin()+2, value);
             REQUIRE(counted_type::check().move_constructions(1).move_assignments(2).copy_assignments(1));
+         }
+      }
+   }
+
+   SECTION("rvalue insert")
+   {
+      SECTION("begin")
+      {
+         SECTION("contained values")
+         {
+            auto expected = {7, 3, 3, 3, 3, 3};
+            auto v = vector_int_t{3, 3, 3, 3, 3};
+            auto value = 7;
+            auto pos = v.insert(v.begin(), std::move(value));
+            REQUIRE(*pos == 7);
+            REQUIRE(are_containers_equal(v, expected));
+         }
+         SECTION("number of operations")
+         {
+            auto v = vector_counted_type_t(5);
+            auto value = counted_type{};
+            counted_type::reset_counts();
+            v.insert(v.begin(), std::move(value));
+            REQUIRE(counted_type::check().move_constructions(1).move_assignments(5));
+         }
+      }
+      SECTION("end")
+      {
+         SECTION("contained values")
+         {
+            auto expected = {3, 3, 3, 3, 3, 7};
+            auto v = vector_int_t{3, 3, 3, 3, 3};
+            auto value = 7;
+            auto pos = v.insert(v.end(), std::move(value));
+            REQUIRE(*pos == 7);
+            REQUIRE(are_containers_equal(v, expected));
+         }
+         SECTION("number of operations")
+         {
+            auto v = vector_counted_type_t(5);
+            auto value = counted_type{};
+            counted_type::reset_counts();
+            v.insert(v.end(), std::move(value));
+            REQUIRE(counted_type::check().move_constructions(1));
+         }
+      }
+      SECTION("middle")
+      {
+         SECTION("contained values")
+         {
+            auto expected = {3, 3, 7, 3, 3, 3};
+            auto value = 7;
+            auto v = vector_int_t{3, 3, 3, 3, 3};
+            auto pos = v.insert(v.begin() + 2, std::move(value));
+            REQUIRE(*pos == 7);
+            REQUIRE(are_containers_equal(v, expected));
+         }
+         SECTION("number of operations")
+         {
+            auto value = counted_type{};
+            auto v = vector_counted_type_t(5);
+            counted_type::reset_counts();
+            v.insert(v.begin()+2, std::move(value));
+            REQUIRE(counted_type::check().move_constructions(1).move_assignments(3));
          }
       }
    }

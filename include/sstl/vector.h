@@ -183,23 +183,23 @@ protected:
       _set_end(begin);
    }
 
-   iterator _insert(const_iterator const_pos, const_reference value)
+   template<bool is_copy_insertion>
+   iterator _insert(iterator pos, reference value)
       _sstl_noexcept(std::is_nothrow_move_constructible<value_type>::value
                      && std::is_nothrow_move_assignable<value_type>::value
                      && std::is_nothrow_copy_constructible<value_type>::value)
    {
-      auto pos = const_cast<iterator>(const_pos);
       auto end = _end();
       if(pos != end)
       {
          auto last = end-1;
          new(end) value_type(std::move(*last));
          std::move_backward(pos, last, end);
-         *pos = value;
+         *pos = _conditional_move<!is_copy_insertion>(value);
       }
       else
       {
-         new(end) value_type(value);
+         new(end) value_type(_conditional_move<!is_copy_insertion>(value));
       }
       _set_end(end+1);
       return pos;
@@ -486,11 +486,19 @@ public:
    }
 
    iterator insert(const_iterator pos, const_reference value)
-      _sstl_noexcept(noexcept(std::declval<_base>()._insert(std::declval<const_iterator>(),
-                                                            std::declval<const_reference>())))
+      _sstl_noexcept(noexcept(std::declval<_base>().template _insert<_base::_is_copy>( std::declval<iterator>(),
+                                                                                       std::declval<reference>())))
    {
       sstl_assert(size() < Capacity);
-      return _base::_insert(pos, value);
+      return _base::template _insert<_base::_is_copy>(const_cast<iterator>(pos), const_cast<reference>(value));
+   }
+
+   iterator insert(const_iterator pos, value_type&& value)
+      _sstl_noexcept(noexcept(std::declval<_base>().template _insert<!_base::_is_copy>(std::declval<iterator>(),
+                                                                                       std::declval<reference>())))
+   {
+      sstl_assert(size() < Capacity);
+      return _base::template _insert<!_base::_is_copy>(const_cast<iterator>(pos), const_cast<reference>(value));
    }
 
 private:
