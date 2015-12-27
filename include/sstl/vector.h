@@ -189,6 +189,28 @@ protected:
       _set_end(begin);
    }
 
+   iterator _insert(const_iterator const_pos, const_reference value)
+      _sstl_noexcept(std::is_nothrow_move_constructible<value_type>::value
+                     && std::is_nothrow_move_assignable<value_type>::value
+                     && std::is_nothrow_copy_constructible<value_type>::value)
+   {
+      auto pos = const_cast<iterator>(const_pos);
+      auto end = _end();
+      if(pos != end)
+      {
+         auto last = end-1;
+         new(end) value_type(std::move(*last));
+         std::move_backward(pos, last, end);
+         *pos = value;
+      }
+      else
+      {
+         new(end) value_type(value);
+      }
+      _set_end(end+1);
+      return pos;
+   }
+
    void _push_back(const_reference value)
       _sstl_noexcept(std::is_nothrow_copy_constructible<value_type>::value)
    {
@@ -457,7 +479,7 @@ public:
    }
 
    void push_back(const_reference value)
-      _sstl_noexcept(noexcept(std::declval<_base>()._push_back(reference())))
+      _sstl_noexcept(noexcept(std::declval<_base>()._push_back(std::declval<const_reference>())))
    {
       sstl_assert(size() < Capacity);
       _push_back(value);
@@ -481,6 +503,14 @@ public:
    void pop_back() _sstl_noexcept(noexcept(std::declval<_base>()._pop_back()))
    {
       _base::_pop_back();
+   }
+
+   iterator insert(const_iterator pos, const_reference value)
+      _sstl_noexcept(noexcept(std::declval<_base>()._insert(std::declval<const_iterator>(),
+                                                            std::declval<const_reference>())))
+   {
+      sstl_assert(size() < Capacity);
+      return _base::_insert(pos, value);
    }
 
 private:
