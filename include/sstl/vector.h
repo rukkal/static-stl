@@ -485,14 +485,14 @@ public:
 
 private:
    pointer _end_;
-   typename aligned_storage<sizeof(value_type), std::alignment_of<value_type>::value>::type _buffer_[Capacity];
+   std::array<typename aligned_storage<sizeof(value_type), std::alignment_of<value_type>::value>::type, Capacity> _buffer_;
 };
 
 template<class T>
 T* _vector_base<T>::_begin() _sstl_noexcept_
 {
    using type_for_derived_member_variable_access = typename vector<T, 1>::_type_for_derived_member_variable_access;
-   return reinterpret_cast<T*>(reinterpret_cast<type_for_derived_member_variable_access&>(*this)._buffer_);
+   return reinterpret_cast<T*>(reinterpret_cast<type_for_derived_member_variable_access&>(*this)._buffer_.begin());
 }
 
 template<class T>
