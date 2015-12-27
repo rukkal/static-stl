@@ -133,15 +133,18 @@ public:
    }
    counted_type& operator=(const counted_type& rhs)
    {
+      member = rhs.member;
       ++copy_assignments;
       return *this;
    }
    counted_type& operator=(counted_type&& rhs)
    {
+      member = rhs.member;
       ++move_assignments;
       return *this;
    }
    void operator()() const {} // make type also usable as function object
+   bool operator==(const counted_type& rhs) const { return member == rhs.member; }
    static void reset_counts()
    {
       constructions = 0;
