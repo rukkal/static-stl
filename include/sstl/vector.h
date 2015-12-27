@@ -50,28 +50,22 @@ protected:
       _sstl_noexcept(std::is_nothrow_copy_constructible<value_type>::value)
    {
       for(size_t i=0; i<count; ++i)
-         _push_back(value);
+         _emplace_back(value);
    }
 
    template<bool is_copy_construction, class TIterator,
             class = _enable_if_input_iterator_t<TIterator>>
-   void _range_constructor(TIterator first, TIterator last)
+   void _range_constructor(TIterator begin, TIterator end)
       _sstl_noexcept((is_copy_construction && std::is_nothrow_copy_constructible<value_type>::value)
                      || (!is_copy_construction && std::is_nothrow_move_constructible<value_type>::value))
    {
       using source_reference = typename std::iterator_traits<TIterator>::reference;
-      std::for_each( first,
-                     last,
+      std::for_each( begin,
+                     end,
                      [this](source_reference value)
                      {
-                        this->_push_back(_conditional_move<!is_copy_construction>(value));
+                        this->_emplace_back(_conditional_move<!is_copy_construction>(value));
                      });
-   }
-
-   void _initializer_list_constructor(std::initializer_list<value_type> init)
-      _sstl_noexcept(std::is_nothrow_copy_constructible<value_type>::value)
-   {
-      std::for_each(init.begin(), init.end(), [this](const_reference value){ this->_push_back(value); });
    }
 
    void _destructor() _sstl_noexcept(std::is_nothrow_destructible<value_type>::value)
@@ -211,29 +205,13 @@ protected:
       return pos;
    }
 
-   void _push_back(const_reference value)
-      _sstl_noexcept(std::is_nothrow_copy_constructible<value_type>::value)
-   {
-      auto end = _end();
-      new(end++) value_type(value);
-      _set_end(end);
-   }
-
-   void _push_back(value_type&& value)
-      _sstl_noexcept(std::is_nothrow_move_constructible<value_type>::value)
-   {
-      auto end = _end();
-      new(end++) value_type(std::move(value));
-      _set_end(end);
-   }
-
    template<class... Args>
    void _emplace_back(Args&&... args)
       _sstl_noexcept(std::is_nothrow_constructible<value_type, typename std::add_rvalue_reference<Args>::type...>::value)
    {
       auto end = _end();
-      new(end++) value_type(std::forward<Args>(args)...);
-      _set_end(end);
+      new(end) value_type(std::forward<Args>(args)...);
+      _set_end(end+1);
    }
 
    void _pop_back() _sstl_noexcept(std::is_nothrow_destructible<value_type>::value)
@@ -337,12 +315,14 @@ public:
    }
 
    vector(std::initializer_list<value_type> init)
-      _sstl_noexcept(noexcept(std::declval<_base>()._initializer_list_constructor(std::declval<std::initializer_list<value_type>>())))
+      _sstl_noexcept(noexcept(std::declval<_base>().template _range_constructor<_base::_is_copy>(
+         std::declval<std::initializer_list<value_type>>().begin(),
+         std::declval<std::initializer_list<value_type>>().end())))
       : _end_(begin())
    {
       sstl_assert(init.size() <= Capacity);
       _assert_vector_derived_member_variable_access_is_valid(_type_tag<vector>{});
-      _base::_initializer_list_constructor(init);
+      _base::template _range_constructor<_base::_is_copy>(init.begin(), init.end());
    }
 
    ~vector() _sstl_noexcept(noexcept(std::declval<_base>()._destructor()))
@@ -479,17 +459,17 @@ public:
    }
 
    void push_back(const_reference value)
-      _sstl_noexcept(noexcept(std::declval<_base>()._push_back(std::declval<const_reference>())))
+      _sstl_noexcept(noexcept(std::declval<_base>()._emplace_back(std::declval<const_reference>())))
    {
       sstl_assert(size() < Capacity);
-      _push_back(value);
+      _base::_emplace_back(value);
    }
 
    void push_back(value_type&& value)
-      _sstl_noexcept(noexcept(std::declval<_base>()._push_back(std::declval<value_type>())))
+      _sstl_noexcept(noexcept(std::declval<_base>()._emplace_back(std::declval<value_type>())))
    {
       sstl_assert(size() < Capacity);
-      _base::_push_back(std::move(value));
+      _base::_emplace_back(std::move(value));
    }
 
    template<class... Args>
