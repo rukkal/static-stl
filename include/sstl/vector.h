@@ -365,7 +365,7 @@ public:
    }
 
    explicit vector(size_type count, const_reference value=value_type())
-      _sstl_noexcept(noexcept(std::declval<_base>()._count_constructor(count, value)))
+      _sstl_noexcept(noexcept(std::declval<_base>()._count_constructor(std::declval<size_type>(), std::declval<const_reference>())))
       : _end_(begin())
    {
       sstl_assert(count <= Capacity);
@@ -420,11 +420,11 @@ public:
    }
 
    vector& operator=(const vector& rhs)
-      _sstl_noexcept(noexcept(std::declval<_base>().template _assign<!_base::_is_copy>(std::declval<const_iterator>(),
-                                                                                       std::declval<const_iterator>())))
+      _sstl_noexcept(noexcept(std::declval<_base>().template _assign<!_base::_is_copy>(std::declval<iterator>(),
+                                                                                       std::declval<iterator>())))
    {
       if(this != &rhs)
-         _base::template _assign<_base::_is_copy>(rhs.cbegin(), rhs.cend());
+         _base::template _assign<_base::_is_copy>(rhs.begin(), rhs.end());
       return *this;
    }
 
@@ -439,15 +439,15 @@ public:
 
    vector& operator=(std::initializer_list<value_type> init)
       _sstl_noexcept(noexcept(std::declval<_base>().template _assign<_base::_is_copy>(
-            std::declval<typename std::initializer_list<value_type>::iterator>(),
-            std::declval<typename std::initializer_list<value_type>::iterator>())))
+            std::declval<std::initializer_list<value_type>>().begin(),
+            std::declval<std::initializer_list<value_type>>().end())))
    {
       _base::template _assign<_base::_is_copy>(init.begin(), init.end());
       return *this;
    }
 
    void assign(size_type count, const_reference value)
-      _sstl_noexcept(noexcept(std::declval<_base>()._assign(count, value)))
+      _sstl_noexcept(noexcept(std::declval<_base>()._assign(std::declval<size_type>(), std::declval<const_reference>())))
    {
       sstl_assert(count <= Capacity);
       _base::_assign(count, value);
@@ -563,7 +563,7 @@ public:
 
    template<class... Args>
    void emplace_back(Args&&... args)
-      _sstl_noexcept(noexcept(std::declval<_base>()._emplace_back(std::declval<Args>()...)))
+      _sstl_noexcept(noexcept(std::declval<_base>()._emplace_back(std::forward<Args>(std::declval<Args>())...)))
    {
       sstl_assert(size() < Capacity);
       _base::_emplace_back(std::forward<Args>(args)...);
