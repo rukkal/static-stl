@@ -248,6 +248,52 @@ protected:
       return pos;
    }
 
+   template<class TIterator, class = _enable_if_input_iterator_t<TIterator>>
+   iterator insert(iterator pos, TIterator range_begin, TIterator range_end)
+      _sstl_noexcept(std::is_nothrow_move_constructible<value_type>::value
+                     && std::is_nothrow_move_assignable<value_type>::value
+                     && noexcept(value_type(*std::declval<TIterator&>()))
+                     && noexcept(std::declval<value_type&>() = *std::declval<TIterator&>()))
+   {
+      auto count = std::distance(range_begin, range_end);
+      auto end = _end();
+      auto new_end = end + count;
+      auto src_range = range_end - 1;
+      auto src_vector = end - 1;
+      auto dst_vector = new_end - 1;
+      _set_end(new_end);
+
+      auto end_src_move_construction = std::max(pos-1, end-count-1);
+      while(src_vector > end_src_move_construction)
+      {
+         new(dst_vector) value_type(std::move(*src_vector));
+         --src_vector; --dst_vector;
+      }
+
+      auto end_src_move_assignment = pos - 1;
+      while(src_vector > end_src_move_assignment)
+      {
+         *dst_vector = std::move(*src_vector);
+         --src_vector; --dst_vector;
+      }
+
+      auto end_dst_construction = end - 1;
+      while(dst_vector > end_dst_construction)
+      {
+         new(dst_vector) value_type(*src_range);
+         --dst_vector; --src_range;
+      }
+
+      auto end_dst_assignment = pos - 1;
+      while(dst_vector > end_dst_assignment)
+      {
+         *dst_vector = *src_range;
+         --dst_vector; --src_range;
+      }
+
+      return pos;
+   }
+
    template<class... Args>
    void _emplace_back(Args&&... args)
       _sstl_noexcept(std::is_nothrow_constructible<value_type, typename std::add_rvalue_reference<Args>::type...>::value)
@@ -329,14 +375,14 @@ public:
 
    template<class TIterator,
             class = _enable_if_input_iterator_t<TIterator>>
-   vector(TIterator first, TIterator last)
+   vector(TIterator range_begin, TIterator range_end)
       _sstl_noexcept(noexcept(std::declval<_base>().template _range_constructor<_base::_is_copy>(  std::declval<TIterator>(),
                                                                                                    std::declval<TIterator>())))
       : _end_(begin())
    {
-      sstl_assert(std::distance(first, last) <= Capacity);
+      sstl_assert(std::distance(range_begin, range_end) <= Capacity);
       _assert_vector_derived_member_variable_access_is_valid(_type_tag<vector>{});
-      _base::template _range_constructor<_base::_is_copy>(first, last);
+      _base::template _range_constructor<_base::_is_copy>(range_begin, range_end);
    }
 
    vector(const vector& rhs)
@@ -409,12 +455,12 @@ public:
 
    template<class TIterator,
             class = _enable_if_input_iterator_t<TIterator>>
-   void assign(TIterator first, TIterator last)
+   void assign(TIterator range_begin, TIterator range_end)
       _sstl_noexcept(noexcept(std::declval<_base>().template _assign<_base::_is_copy>( std::declval<TIterator>(),
                                                                                        std::declval<TIterator>())))
    {
-      sstl_assert(std::distance(first, last) <= Capacity);
-      _base::template _assign<_base::_is_copy>(first, last);
+      sstl_assert(std::distance(range_begin, range_end) <= Capacity);
+      _base::template _assign<_base::_is_copy>(range_begin, range_end);
    }
 
    reference at(size_type idx) _sstl_noexcept_
@@ -551,6 +597,16 @@ public:
    {
       sstl_assert(size() + count <= Capacity);
       return _base::_insert(const_cast<iterator>(pos), count, value);
+   }
+
+   template<class TIterator, class = _enable_if_input_iterator_t<TIterator>>
+   iterator insert(const_iterator pos, TIterator range_begin, TIterator range_end)
+      _sstl_noexcept(noexcept(std::declval<_base>().insert( std::declval<iterator>(),
+                                                            std::declval<TIterator>(),
+                                                            std::declval<TIterator>())))
+   {
+      sstl_assert(size() + std::distance(range_begin, range_end) <= Capacity);
+      return _base::insert(const_cast<iterator>(pos), range_begin, range_end);
    }
 
 private:

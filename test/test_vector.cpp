@@ -681,6 +681,161 @@ TEST_CASE("vector")
          }
       }
    }
+
+   SECTION("range insert")
+   {
+      auto v = vector_counted_type_t{3, 3, 3, 3, 3};
+
+      SECTION("begin")
+      {
+         SECTION("count=0")
+         {
+            auto expected = std::initializer_list<counted_type>{3, 3, 3, 3, 3};
+            auto values = std::initializer_list<counted_type>{};
+            counted_type::reset_counts();
+            auto pos = v.insert(v.begin(), values.begin(), values.end());
+            REQUIRE(pos == v.begin());
+            REQUIRE(are_containers_equal(v, expected));
+            REQUIRE(counted_type::check().constructions(0));
+         }
+         SECTION("count=1")
+         {
+            auto expected = std::initializer_list<counted_type>{7, 3, 3, 3, 3, 3};
+            auto values = std::initializer_list<counted_type>{7};
+            counted_type::reset_counts();
+            auto pos = v.insert(v.begin(), values.begin(), values.end());
+            REQUIRE(pos == v.begin());
+            REQUIRE(are_containers_equal(v, expected));
+            REQUIRE(counted_type::check().move_constructions(1).move_assignments(4).copy_assignments(1));
+         }
+         SECTION("count=2")
+         {
+            auto expected = std::initializer_list<counted_type>{7, 11, 3, 3, 3, 3, 3};
+            auto values = std::initializer_list<counted_type>{7, 11};
+            counted_type::reset_counts();
+            auto pos = v.insert(v.begin(), values.begin(), values.end());
+            REQUIRE(pos == v.begin());
+            REQUIRE(are_containers_equal(v, expected));
+            REQUIRE(counted_type::check().move_constructions(2).move_assignments(3).copy_assignments(2));
+         }
+         SECTION("count=4")
+         {
+            auto expected = std::initializer_list<counted_type>{7, 11, 13, 17, 3, 3, 3, 3, 3};
+            auto values = std::initializer_list<counted_type>{7, 11, 13, 17};
+            counted_type::reset_counts();
+            auto pos = v.insert(v.begin(), values.begin(), values.end());
+            REQUIRE(pos == v.begin());
+            REQUIRE(are_containers_equal(v, expected));
+            REQUIRE(counted_type::check().move_constructions(4).move_assignments(1).copy_assignments(4));
+         }
+      }
+      SECTION("end")
+      {
+         SECTION("count=0")
+         {
+            auto expected = std::initializer_list<counted_type>{3, 3, 3, 3, 3};
+            auto values = std::initializer_list<counted_type>{};
+            counted_type::reset_counts();
+            auto pos = v.insert(v.end(), values.begin(), values.end());
+            REQUIRE(pos == v.begin()+5);
+            REQUIRE(are_containers_equal(v, expected));
+            REQUIRE(counted_type::check().constructions(0));
+         }
+         SECTION("count=1")
+         {
+            auto expected = std::initializer_list<counted_type>{3, 3, 3, 3, 3, 7};
+            auto values = std::initializer_list<counted_type>{7};
+            counted_type::reset_counts();
+            auto pos = v.insert(v.end(), values.begin(), values.end());
+            REQUIRE(pos == v.begin()+5);
+            REQUIRE(are_containers_equal(v, expected));
+            REQUIRE(counted_type::check().copy_constructions(1));
+         }
+         SECTION("count=2")
+         {
+            auto expected = std::initializer_list<counted_type>{3, 3, 3, 3, 3, 7, 11};
+            auto values = std::initializer_list<counted_type>{7, 11};
+            counted_type::reset_counts();
+            auto pos = v.insert(v.end(), values.begin(), values.end());
+            REQUIRE(pos == v.begin()+5);
+            REQUIRE(are_containers_equal(v, expected));
+            REQUIRE(counted_type::check().copy_constructions(2));
+         }
+         SECTION("count=4")
+         {
+            auto expected = std::initializer_list<counted_type>{3, 3, 3, 3, 3, 7, 11, 13, 17};
+            auto values = std::initializer_list<counted_type>{7, 11, 13, 17};
+            counted_type::reset_counts();
+            auto pos = v.insert(v.end(), values.begin(), values.end());
+            REQUIRE(pos == v.begin()+5);
+            REQUIRE(are_containers_equal(v, expected));
+            REQUIRE(counted_type::check().copy_constructions(4));
+         }
+      }
+      SECTION("middle")
+      {
+         SECTION("count=0")
+         {
+            auto expected = std::initializer_list<counted_type>{3, 3, 3, 3, 3};
+            auto values = std::initializer_list<counted_type>{};
+            counted_type::reset_counts();
+            auto pos = v.insert(v.begin()+2, values.begin(), values.end());
+            REQUIRE(pos == v.begin()+2);
+            REQUIRE(are_containers_equal(v, expected));
+            REQUIRE(counted_type::check().constructions(0));
+         }
+         SECTION("count=1")
+         {
+            auto expected = std::initializer_list<counted_type>{3, 3, 7, 3, 3, 3};
+            auto values = std::initializer_list<counted_type>{7};
+            counted_type::reset_counts();
+            auto pos = v.insert(v.begin()+2, values.begin(), values.end());
+            REQUIRE(pos == v.begin()+2);
+            REQUIRE(are_containers_equal(v, expected));
+            REQUIRE(counted_type::check().move_constructions(1).move_assignments(2).copy_assignments(1));
+         }
+         SECTION("count=2")
+         {
+            auto expected = std::initializer_list<counted_type>{3, 3, 7, 11, 3, 3, 3};
+            auto values = std::initializer_list<counted_type>{7, 11};
+            counted_type::reset_counts();
+            auto pos = v.insert(v.begin()+2, values.begin(), values.end());
+            REQUIRE(pos == v.begin()+2);
+            REQUIRE(are_containers_equal(v, expected));
+            REQUIRE(counted_type::check().move_constructions(2).move_assignments(1).copy_assignments(2));
+         }
+         SECTION("count=3")
+         {
+            auto expected = std::initializer_list<counted_type>{3, 3, 7, 11, 13, 3, 3, 3};
+            auto values = std::initializer_list<counted_type>{7, 11, 13};
+            counted_type::reset_counts();
+            auto pos = v.insert(v.begin()+2, values.begin(), values.end());
+            REQUIRE(pos == v.begin()+2);
+            REQUIRE(are_containers_equal(v, expected));
+            REQUIRE(counted_type::check().move_constructions(3).copy_assignments(3));
+         }
+         SECTION("count=4")
+         {
+            auto expected = std::initializer_list<counted_type>{3, 3, 7, 11, 13, 17, 3, 3, 3};
+            auto values = std::initializer_list<counted_type>{7, 11, 13, 17};
+            counted_type::reset_counts();
+            auto pos = v.insert(v.begin()+2, values.begin(), values.end());
+            REQUIRE(pos == v.begin()+2);
+            REQUIRE(are_containers_equal(v, expected));
+            REQUIRE(counted_type::check().move_constructions(3).copy_constructions(1).copy_assignments(3));
+         }
+         SECTION("count=5")
+         {
+            auto expected = std::initializer_list<counted_type>{3, 3, 7, 11, 13, 17, 23, 3, 3, 3};
+            auto values = std::initializer_list<counted_type>{7, 11, 13, 17, 23};
+            counted_type::reset_counts();
+            auto pos = v.insert(v.begin()+2, values.begin(), values.end());
+            REQUIRE(pos == v.begin()+2);
+            REQUIRE(are_containers_equal(v, expected));
+            REQUIRE(counted_type::check().move_constructions(3).copy_constructions(2).copy_assignments(3));
+         }
+      }
+   }
 }
 
 }
