@@ -12,6 +12,8 @@ namespace sstl
 namespace test
 {
    size_t counted_type::constructions;
+   size_t counted_type::default_constructions;
+   size_t counted_type::parameter_constructions;
    size_t counted_type::copy_constructions;
    size_t counted_type::move_constructions;
    size_t counted_type::destructions;

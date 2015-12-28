@@ -46,6 +46,9 @@ protected:
    using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
 protected:
+   static const bool _is_copy = true;
+
+protected:
    void _count_constructor(size_type count, const_reference value)
       _sstl_noexcept(std::is_nothrow_copy_constructible<value_type>::value)
    {
@@ -249,7 +252,7 @@ protected:
    }
 
    template<class TIterator, class = _enable_if_input_iterator_t<TIterator>>
-   iterator insert(iterator pos, TIterator range_begin, TIterator range_end)
+   iterator _insert(iterator pos, TIterator range_begin, TIterator range_end)
       _sstl_noexcept(std::is_nothrow_move_constructible<value_type>::value
                      && std::is_nothrow_move_assignable<value_type>::value
                      && noexcept(value_type(*std::declval<TIterator&>()))
@@ -295,6 +298,16 @@ protected:
    }
 
    template<class... Args>
+   iterator _emplace(iterator pos, Args&&... args)
+      _sstl_noexcept(std::is_nothrow_constructible<value_type, typename std::add_rvalue_reference<Args>::type...>::value
+                     && noexcept(std::declval<_vector_base>().template _insert<!_is_copy>(std::declval<iterator>(),
+                                                                                 std::declval<value_type&>())))
+   {
+      value_type value(std::forward<Args>(args)...);
+      return _insert<!_is_copy>(pos, value);
+   }
+
+   template<class... Args>
    void _emplace_back(Args&&... args)
       _sstl_noexcept(std::is_nothrow_constructible<value_type, typename std::add_rvalue_reference<Args>::type...>::value)
    {
@@ -310,9 +323,6 @@ protected:
       (--end)->~value_type();
       _set_end(end);
    }
-
-protected:
-   static const bool _is_copy = true;
 };
 
 template<class T, size_t Capacity>
@@ -601,21 +611,30 @@ public:
 
    template<class TIterator, class = _enable_if_input_iterator_t<TIterator>>
    iterator insert(const_iterator pos, TIterator range_begin, TIterator range_end)
-      _sstl_noexcept(noexcept(std::declval<_base>().insert( std::declval<iterator>(),
+      _sstl_noexcept(noexcept(std::declval<_base>()._insert(std::declval<iterator>(),
                                                             std::declval<TIterator>(),
                                                             std::declval<TIterator>())))
    {
       sstl_assert(size() + std::distance(range_begin, range_end) <= Capacity);
-      return _base::insert(const_cast<iterator>(pos), range_begin, range_end);
+      return _base::_insert(const_cast<iterator>(pos), range_begin, range_end);
    }
 
    iterator insert(const_iterator pos, std::initializer_list<value_type> init)
-      _sstl_noexcept(noexcept(std::declval<_base>().insert( std::declval<iterator>(),
+      _sstl_noexcept(noexcept(std::declval<_base>()._insert( std::declval<iterator>(),
                                                             std::declval<std::initializer_list<value_type>>().begin(),
                                                             std::declval<std::initializer_list<value_type>>().end())))
    {
       sstl_assert(size() + init.size() <= Capacity);
-      return _base::insert(const_cast<iterator>(pos), init.begin(), init.end());
+      return _base::_insert(const_cast<iterator>(pos), init.begin(), init.end());
+   }
+
+   template<class... Args>
+   iterator emplace(const_iterator pos, Args&&... args)
+      _sstl_noexcept(std::is_nothrow_constructible<value_type, typename std::add_rvalue_reference<Args>::type...>::value
+                     && noexcept(std::declval<_base>()._emplace(std::declval<iterator>(), std::declval<Args>()...)))
+   {
+      sstl_assert(size() < Capacity);
+      return _base::_emplace(const_cast<iterator>(pos), std::forward<Args>(args)...);
    }
 
 private:
