@@ -458,7 +458,7 @@ TEST_CASE("vector")
    {
       SECTION("begin")
       {
-         auto expected = {7, 3, 3, 3, 3, 3};
+         auto expected = std::initializer_list<counted_type>{7, 3, 3, 3, 3, 3};
          auto v = vector_counted_type_t{3, 3, 3, 3, 3};
          auto value = counted_type{ 7 };
 
@@ -471,7 +471,7 @@ TEST_CASE("vector")
       }
       SECTION("end")
       {
-         auto expected = {3, 3, 3, 3, 3, 7};
+         auto expected = std::initializer_list<counted_type>{3, 3, 3, 3, 3, 7};
          auto v = vector_counted_type_t{3, 3, 3, 3, 3};
          auto value = counted_type{ 7 };
 
@@ -484,7 +484,7 @@ TEST_CASE("vector")
       }
       SECTION("middle")
       {
-         auto expected = {3, 3, 7, 3, 3, 3};
+         auto expected = std::initializer_list<counted_type>{3, 3, 7, 3, 3, 3};
          auto value = counted_type{ 7 };
          auto v = vector_counted_type_t{3, 3, 3, 3, 3};
 
@@ -501,7 +501,7 @@ TEST_CASE("vector")
    {
       SECTION("begin")
       {
-         auto expected = {7, 3, 3, 3, 3, 3};
+         auto expected = std::initializer_list<counted_type>{7, 3, 3, 3, 3, 3};
          auto v = vector_counted_type_t{3, 3, 3, 3, 3};
          auto value = counted_type{ 7 };
 
@@ -514,7 +514,7 @@ TEST_CASE("vector")
       }
       SECTION("end")
       {
-         auto expected = {3, 3, 3, 3, 3, 7};
+         auto expected = std::initializer_list<counted_type>{3, 3, 3, 3, 3, 7};
          auto v = vector_counted_type_t{3, 3, 3, 3, 3};
          auto value = counted_type{ 7 };
 
@@ -527,7 +527,7 @@ TEST_CASE("vector")
       }
       SECTION("middle")
       {
-         auto expected = {3, 3, 7, 3, 3, 3};
+         auto expected = std::initializer_list<counted_type>{3, 3, 7, 3, 3, 3};
          auto value = counted_type{ 7 };
          auto v = vector_counted_type_t{3, 3, 3, 3, 3};
 
@@ -537,6 +537,148 @@ TEST_CASE("vector")
          REQUIRE(*pos == 7);
          REQUIRE(are_containers_equal(v, expected));
          REQUIRE(counted_type::check().move_constructions(1).move_assignments(3));
+      }
+   }
+
+   SECTION("count insert")
+   {
+      auto v = vector_counted_type_t{3, 3, 3, 3, 3};
+      auto value = counted_type{ 7 };
+
+      SECTION("begin")
+      {
+         SECTION("count=0")
+         {
+            auto expected = std::initializer_list<counted_type>{3, 3, 3, 3, 3};
+            counted_type::reset_counts();
+            auto pos = v.insert(v.begin(), 0, value);
+            REQUIRE(pos == v.begin());
+            REQUIRE(are_containers_equal(v, expected));
+            REQUIRE(counted_type::check().constructions(0));
+         }
+         SECTION("count=1")
+         {
+            auto expected = std::initializer_list<counted_type>{7, 3, 3, 3, 3, 3};
+            counted_type::reset_counts();
+            auto pos = v.insert(v.begin(), 1, value);
+            REQUIRE(pos == v.begin());
+            REQUIRE(are_containers_equal(v, expected));
+            REQUIRE(counted_type::check().move_constructions(1).move_assignments(4).copy_assignments(1));
+         }
+         SECTION("count=2")
+         {
+            auto expected = std::initializer_list<counted_type>{7, 7, 3, 3, 3, 3, 3};
+            counted_type::reset_counts();
+            auto pos = v.insert(v.begin(), 2, value);
+            REQUIRE(pos == v.begin());
+            REQUIRE(are_containers_equal(v, expected));
+            REQUIRE(counted_type::check().move_constructions(2).move_assignments(3).copy_assignments(2));
+         }
+         SECTION("count=4")
+         {
+            auto expected = std::initializer_list<counted_type>{7, 7, 7, 7, 3, 3, 3, 3, 3};
+            counted_type::reset_counts();
+            auto pos = v.insert(v.begin(), 4, value);
+            REQUIRE(pos == v.begin());
+            REQUIRE(are_containers_equal(v, expected));
+            REQUIRE(counted_type::check().move_constructions(4).move_assignments(1).copy_assignments(4));
+         }
+      }
+      SECTION("end")
+      {
+         SECTION("count=0")
+         {
+            auto expected = std::initializer_list<counted_type>{3, 3, 3, 3, 3};
+            counted_type::reset_counts();
+            auto pos = v.insert(v.end(), 0, value);
+            REQUIRE(pos == v.begin()+5);
+            REQUIRE(are_containers_equal(v, expected));
+            REQUIRE(counted_type::check().constructions(0));
+         }
+         SECTION("count=1")
+         {
+            auto expected = std::initializer_list<counted_type>{3, 3, 3, 3, 3, 7};
+            counted_type::reset_counts();
+            auto pos = v.insert(v.end(), 1, value);
+            REQUIRE(pos == v.begin()+5);
+            REQUIRE(are_containers_equal(v, expected));
+            REQUIRE(counted_type::check().copy_constructions(1));
+         }
+         SECTION("count=2")
+         {
+            auto expected = std::initializer_list<counted_type>{3, 3, 3, 3, 3, 7, 7};
+            counted_type::reset_counts();
+            auto pos = v.insert(v.end(), 2, value);
+            REQUIRE(pos == v.begin()+5);
+            REQUIRE(are_containers_equal(v, expected));
+            REQUIRE(counted_type::check().copy_constructions(2));
+         }
+         SECTION("count=4")
+         {
+            auto expected = std::initializer_list<counted_type>{3, 3, 3, 3, 3, 7, 7, 7, 7};
+            counted_type::reset_counts();
+            auto pos = v.insert(v.end(), 4, value);
+            REQUIRE(pos == v.begin()+5);
+            REQUIRE(are_containers_equal(v, expected));
+            REQUIRE(counted_type::check().copy_constructions(4));
+         }
+      }
+      SECTION("middle")
+      {
+         SECTION("count=0")
+         {
+            auto expected = std::initializer_list<counted_type>{3, 3, 3, 3, 3};
+            counted_type::reset_counts();
+            auto pos = v.insert(v.begin()+2, 0, value);
+            REQUIRE(pos == v.begin()+2);
+            REQUIRE(are_containers_equal(v, expected));
+            REQUIRE(counted_type::check().constructions(0));
+         }
+         SECTION("count=1")
+         {
+            auto expected = std::initializer_list<counted_type>{3, 3, 7, 3, 3, 3};
+            counted_type::reset_counts();
+            auto pos = v.insert(v.begin()+2, 1, value);
+            REQUIRE(pos == v.begin()+2);
+            REQUIRE(are_containers_equal(v, expected));
+            REQUIRE(counted_type::check().move_constructions(1).move_assignments(2).copy_assignments(1));
+         }
+         SECTION("count=2")
+         {
+            auto expected = std::initializer_list<counted_type>{3, 3, 7, 7, 3, 3, 3};
+            counted_type::reset_counts();
+            auto pos = v.insert(v.begin()+2, 2, value);
+            REQUIRE(pos == v.begin()+2);
+            REQUIRE(are_containers_equal(v, expected));
+            REQUIRE(counted_type::check().move_constructions(2).move_assignments(1).copy_assignments(2));
+         }
+         SECTION("count=3")
+         {
+            auto expected = std::initializer_list<counted_type>{3, 3, 7, 7, 7, 3, 3, 3};
+            counted_type::reset_counts();
+            auto pos = v.insert(v.begin()+2, 3, value);
+            REQUIRE(pos == v.begin()+2);
+            REQUIRE(are_containers_equal(v, expected));
+            REQUIRE(counted_type::check().move_constructions(3).copy_assignments(3));
+         }
+         SECTION("count=4")
+         {
+            auto expected = std::initializer_list<counted_type>{3, 3, 7, 7, 7, 7, 3, 3, 3};
+            counted_type::reset_counts();
+            auto pos = v.insert(v.begin()+2, 4, value);
+            REQUIRE(pos == v.begin()+2);
+            REQUIRE(are_containers_equal(v, expected));
+            REQUIRE(counted_type::check().move_constructions(3).copy_constructions(1).copy_assignments(3));
+         }
+         SECTION("count=5")
+         {
+            auto expected = std::initializer_list<counted_type>{3, 3, 7, 7, 7, 7, 7, 3, 3, 3};
+            counted_type::reset_counts();
+            auto pos = v.insert(v.begin()+2, 5, value);
+            REQUIRE(pos == v.begin()+2);
+            REQUIRE(are_containers_equal(v, expected));
+            REQUIRE(counted_type::check().move_constructions(3).copy_constructions(2).copy_assignments(3));
+         }
       }
    }
 }

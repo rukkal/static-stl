@@ -187,7 +187,7 @@ protected:
    iterator _insert(iterator pos, reference value)
       _sstl_noexcept(std::is_nothrow_move_constructible<value_type>::value
                      && std::is_nothrow_move_assignable<value_type>::value
-                     && std::is_nothrow_copy_constructible<value_type>::value)
+                     && (!is_copy_insertion || std::is_nothrow_copy_constructible<value_type>::value))
    {
       auto end = _end();
       if(pos != end)
@@ -202,6 +202,49 @@ protected:
          new(end) value_type(_conditional_move<!is_copy_insertion>(value));
       }
       _set_end(end+1);
+      return pos;
+   }
+
+   iterator _insert(iterator pos, size_type count, const_reference value)
+      _sstl_noexcept(std::is_nothrow_move_constructible<value_type>::value
+                     && std::is_nothrow_move_assignable<value_type>::value
+                     && std::is_nothrow_copy_constructible<value_type>::value
+                     && std::is_nothrow_copy_assignable<value_type>::value)
+   {
+      auto end = _end();
+      auto new_end = end + count;
+      auto src = end - 1;
+      auto dst = new_end - 1;
+      _set_end(new_end);
+
+      auto end_src_move_construction = std::max(pos-1, end-count-1);
+      while(src > end_src_move_construction)
+      {
+         new(dst) value_type(std::move(*src));
+         --src; --dst;
+      }
+
+      auto end_src_move_assignment = pos - 1;
+      while(src > end_src_move_assignment)
+      {
+         *dst = std::move(*src);
+         --src; --dst;
+      }
+
+      auto end_dst_copy_construction = end - 1;
+      while(dst > end_dst_copy_construction)
+      {
+         new(dst) value_type(value);
+         --dst;
+      }
+
+      auto end_dst_copy_assignment = pos - 1;
+      while(dst > end_dst_copy_assignment)
+      {
+         *dst = value;
+         --dst;
+      }
+
       return pos;
    }
 
@@ -499,6 +542,15 @@ public:
    {
       sstl_assert(size() < Capacity);
       return _base::template _insert<!_base::_is_copy>(const_cast<iterator>(pos), const_cast<reference>(value));
+   }
+
+   iterator insert(const_iterator pos, size_type count, const_reference value)
+      _sstl_noexcept(noexcept(std::declval<_base>()._insert(std::declval<iterator>(),
+                                                            std::declval<size_type>(),
+                                                            std::declval<const_reference>())))
+   {
+      sstl_assert(size() + count <= Capacity);
+      return _base::_insert(const_cast<iterator>(pos), count, value);
    }
 
 private:
