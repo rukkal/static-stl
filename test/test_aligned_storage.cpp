@@ -25,7 +25,7 @@ void check_alignment(TIter begin, TIter end, size_t alignment_requirement)
    {
       auto& value = *it;
       size_t address = reinterpret_cast<size_t>(std::addressof(value));
-      REQUIRE( (address % alignment_requirement) == 0 );
+      REQUIRE( (address % alignment_requirement == 0) );
    }
 }
 
