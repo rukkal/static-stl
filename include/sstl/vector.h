@@ -609,6 +609,15 @@ public:
       return _base::insert(const_cast<iterator>(pos), range_begin, range_end);
    }
 
+   iterator insert(const_iterator pos, std::initializer_list<value_type> init)
+      _sstl_noexcept(noexcept(std::declval<_base>().insert( std::declval<iterator>(),
+                                                            std::declval<std::initializer_list<value_type>>().begin(),
+                                                            std::declval<std::initializer_list<value_type>>().end())))
+   {
+      sstl_assert(size() + init.size() <= Capacity);
+      return _base::insert(const_cast<iterator>(pos), init.begin(), init.end());
+   }
+
 private:
    pointer _end_;
    std::array<typename aligned_storage<sizeof(value_type), std::alignment_of<value_type>::value>::type, Capacity> _buffer_;
