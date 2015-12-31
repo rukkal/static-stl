@@ -307,6 +307,21 @@ protected:
       return _insert<!_is_copy>(pos, value);
    }
 
+   iterator _erase(iterator pos) _sstl_noexcept(std::is_nothrow_move_assignable<value_type>::value
+                                                && std::is_nothrow_destructible<value_type>::value)
+   {
+      auto end = _end();
+      auto current = pos;
+      while(current+1 != end)
+      {
+         *current = std::move(*(current+1));
+         ++current;
+      }
+      current->~value_type();
+      _set_end(current);
+      return pos;
+   }
+
    template<class... Args>
    void _emplace_back(Args&&... args)
       _sstl_noexcept(std::is_nothrow_constructible<value_type, typename std::add_rvalue_reference<Args>::type...>::value)
@@ -635,6 +650,13 @@ public:
    {
       sstl_assert(size() < Capacity);
       return _base::_emplace(const_cast<iterator>(pos), std::forward<Args>(args)...);
+   }
+
+   iterator erase(const_iterator pos)
+      _sstl_noexcept(noexcept(std::declval<_base>()._erase(std::declval<iterator>())))
+   {
+      sstl_assert(pos >= begin() && pos < end());
+      return _base::_erase(const_cast<iterator>(pos));
    }
 
 private:

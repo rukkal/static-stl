@@ -1017,6 +1017,46 @@ TEST_CASE("vector")
          REQUIRE(counted_type::check().parameter_constructions(1).move_constructions(1).move_assignments(3));
       }
    }
+
+   SECTION("erase")
+   {
+      SECTION("begin")
+      {
+         auto expected = std::initializer_list<counted_type>{3, 3, 3, 3};
+         auto v = vector_counted_type_t{7, 3, 3, 3, 3};
+
+         counted_type::reset_counts();
+         auto pos = v.erase(v.begin());
+
+         REQUIRE(pos == v.begin());
+         REQUIRE(are_containers_equal(v, expected));
+         REQUIRE(counted_type::check().move_assignments(4).destructions(1));
+      }
+      SECTION("end-1")
+      {
+         auto expected = std::initializer_list<counted_type>{3, 3, 3, 3};
+         auto v = vector_counted_type_t{3, 3, 3, 3, 7};
+
+         counted_type::reset_counts();
+         auto pos = v.erase(v.end()-1);
+
+         REQUIRE(pos == v.end());
+         REQUIRE(are_containers_equal(v, expected));
+         REQUIRE(counted_type::check().destructions(1));
+      }
+      SECTION("middle")
+      {
+         auto expected = std::initializer_list<counted_type>{3, 3, 3, 3};
+         auto v = vector_counted_type_t{3, 3, 7, 3, 3};
+
+         counted_type::reset_counts();
+         auto pos = v.erase(v.begin()+2);
+
+         REQUIRE(pos == v.begin()+2);
+         REQUIRE(are_containers_equal(v, expected));
+         REQUIRE(counted_type::check().move_assignments(2).destructions(1));
+      }
+   }
 }
 
 }
