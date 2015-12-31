@@ -322,6 +322,29 @@ protected:
       return pos;
    }
 
+   iterator _erase(iterator range_begin, iterator range_end)
+      _sstl_noexcept(std::is_nothrow_move_assignable<value_type>::value && std::is_nothrow_destructible<value_type>::value)
+   {
+      auto end = _end();
+      auto dst = range_begin;
+      auto src = range_end;
+
+      while(src != end)
+      {
+         *dst = std::move(*src);
+         ++src; ++dst;
+      }
+      auto new_end = dst;
+
+      while(dst != end)
+      {
+         dst->~value_type();
+         ++dst;
+      }
+      _set_end(new_end);
+      return range_begin;
+   }
+
    template<class... Args>
    void _emplace_back(Args&&... args)
       _sstl_noexcept(std::is_nothrow_constructible<value_type, typename std::add_rvalue_reference<Args>::type...>::value)
@@ -657,6 +680,14 @@ public:
    {
       sstl_assert(pos >= begin() && pos < end());
       return _base::_erase(const_cast<iterator>(pos));
+   }
+
+   iterator erase(const_iterator range_begin, const_iterator range_end)
+      _sstl_noexcept(noexcept(std::declval<_base>()._erase(std::declval<iterator>(), std::declval<iterator>())))
+   {
+      sstl_assert(range_begin <= range_end);
+      sstl_assert(range_begin >= begin() && range_end <= end());
+      return _base::_erase(const_cast<iterator>(range_begin), const_cast<iterator>(range_end));
    }
 
 private:

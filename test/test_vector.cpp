@@ -1057,6 +1057,130 @@ TEST_CASE("vector")
          REQUIRE(counted_type::check().move_assignments(2).destructions(1));
       }
    }
+
+   SECTION("range erase")
+   {
+      auto v = vector_counted_type_t{1, 3, 7, 11, 13};
+      SECTION("begin")
+      {
+         SECTION("range is empty")
+         {
+            auto expected = std::initializer_list<counted_type>{1, 3, 7, 11, 13};
+            counted_type::reset_counts();
+            auto pos = v.erase(v.begin(), v.begin());
+            REQUIRE(pos == v.begin());
+            REQUIRE(are_containers_equal(v, expected));
+            REQUIRE(counted_type::check().move_assignments(5).destructions(0));
+         }
+         SECTION("range = [begin; begin+1)")
+         {
+            auto expected = std::initializer_list<counted_type>{3, 7, 11, 13};
+            counted_type::reset_counts();
+            auto pos = v.erase(v.begin(), v.begin()+1);
+            REQUIRE(pos == v.begin());
+            REQUIRE(are_containers_equal(v, expected));
+            REQUIRE(counted_type::check().move_assignments(4).destructions(1));
+         }
+         SECTION("range = [begin; begin+2)")
+         {
+            auto expected = std::initializer_list<counted_type>{7, 11, 13};
+            counted_type::reset_counts();
+            auto pos = v.erase(v.begin(), v.begin()+2);
+            REQUIRE(pos == v.begin());
+            REQUIRE(are_containers_equal(v, expected));
+            REQUIRE(counted_type::check().move_assignments(3).destructions(2));
+         }
+         SECTION("range = [begin; end-1)")
+         {
+            auto expected = std::initializer_list<counted_type>{13};
+            counted_type::reset_counts();
+            auto pos = v.erase(v.begin(), v.end()-1);
+            REQUIRE(pos == v.begin());
+            REQUIRE(are_containers_equal(v, expected));
+            REQUIRE(counted_type::check().move_assignments(1).destructions(4));
+         }
+         SECTION("range = [begin; end)")
+         {
+            auto expected = std::initializer_list<counted_type>{};
+            counted_type::reset_counts();
+            auto pos = v.erase(v.begin(), v.end());
+            REQUIRE(pos == v.begin());
+            REQUIRE(pos == v.end());
+            REQUIRE(are_containers_equal(v, expected));
+            REQUIRE(counted_type::check().move_assignments(0).destructions(5));
+         }
+
+      }
+      SECTION("end (range is empty)")
+      {
+         auto expected = std::initializer_list<counted_type>{1, 3, 7, 11, 13};
+         counted_type::reset_counts();
+         auto pos = v.erase(v.end(), v.end());
+         REQUIRE(pos == v.end());
+         REQUIRE(are_containers_equal(v, expected));
+         REQUIRE(counted_type::check().move_assignments(0).destructions(0));
+      }
+      SECTION("end-1")
+      {
+         SECTION("range is empty")
+         {
+            auto expected = std::initializer_list<counted_type>{1, 3, 7, 11, 13};
+            counted_type::reset_counts();
+            auto pos = v.erase(v.end()-1, v.end()-1);
+            REQUIRE(pos == v.end()-1);
+            REQUIRE(are_containers_equal(v, expected));
+            REQUIRE(counted_type::check().move_assignments(1).destructions(0));
+         }
+         SECTION("range = [end-1; end)")
+         {
+            auto expected = std::initializer_list<counted_type>{1, 3, 7, 11};
+            counted_type::reset_counts();
+            auto pos = v.erase(v.end()-1, v.end());
+            REQUIRE(pos == v.end());
+            REQUIRE(are_containers_equal(v, expected));
+            REQUIRE(counted_type::check().move_assignments(0).destructions(1));
+         }
+      }
+      SECTION("middle")
+      {
+         SECTION("range is empty")
+         {
+            auto expected = std::initializer_list<counted_type>{1, 3, 7, 11, 13};
+            counted_type::reset_counts();
+            auto pos = v.erase(v.begin()+2, v.begin()+2);
+            REQUIRE(pos == v.begin()+2);
+            REQUIRE(are_containers_equal(v, expected));
+            REQUIRE(counted_type::check().move_assignments(3).destructions(0));
+         }
+         SECTION("range = [middle; middle+1)")
+         {
+            auto expected = std::initializer_list<counted_type>{1, 3, 11, 13};
+            counted_type::reset_counts();
+            auto pos = v.erase(v.begin()+2, v.begin()+3);
+            REQUIRE(pos == v.begin()+2);
+            REQUIRE(are_containers_equal(v, expected));
+            REQUIRE(counted_type::check().move_assignments(2).destructions(1));
+         }
+         SECTION("range = [middle; middle+2) , i.e. [middle; end-1)")
+         {
+            auto expected = std::initializer_list<counted_type>{1, 3, 13};
+            counted_type::reset_counts();
+            auto pos = v.erase(v.begin()+2, v.begin()+4);
+            REQUIRE(pos == v.begin()+2);
+            REQUIRE(are_containers_equal(v, expected));
+            REQUIRE(counted_type::check().move_assignments(1).destructions(2));
+         }
+         SECTION("range = [middle; end)")
+         {
+            auto expected = std::initializer_list<counted_type>{1, 3};
+            counted_type::reset_counts();
+            auto pos = v.erase(v.begin()+2, v.end());
+            REQUIRE(pos == v.begin()+2);
+            REQUIRE(are_containers_equal(v, expected));
+            REQUIRE(counted_type::check().move_assignments(0).destructions(3));
+         }
+      }
+   }
 }
 
 }
