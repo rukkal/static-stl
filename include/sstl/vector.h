@@ -58,17 +58,22 @@ protected:
 
    template<bool is_copy_construction, class TIterator,
             class = _enable_if_input_iterator_t<TIterator>>
-   void _range_constructor(TIterator begin, TIterator end)
+   void _range_constructor(TIterator range_begin, TIterator range_end)
       _sstl_noexcept((is_copy_construction && std::is_nothrow_copy_constructible<value_type>::value)
-                     || (!is_copy_construction && std::is_nothrow_move_constructible<value_type>::value))
+                     || (!is_copy_construction
+                        && std::is_nothrow_move_constructible<value_type>::value
+                        && std::is_nothrow_destructible<value_type>::value))
    {
-      using source_reference = typename std::iterator_traits<TIterator>::reference;
-      std::for_each( begin,
-                     end,
-                     [this](source_reference value)
-                     {
-                        this->_emplace_back(_conditional_move<!is_copy_construction>(value));
-                     });
+      auto src = range_begin;
+      auto dst = _begin();
+      while(src != range_end)
+      {
+         new(dst) value_type(_conditional_move<!is_copy_construction>(*src));
+         if(!is_copy_construction)
+            src->~value_type();
+         ++src; ++dst;
+      }
+      _set_end(dst);
    }
 
    void _destructor() _sstl_noexcept(std::is_nothrow_destructible<value_type>::value)
@@ -100,6 +105,8 @@ protected:
             *dest = _conditional_move<!is_copy_assignment>(*src);
          else
             new(dest) value_type(_conditional_move<!is_copy_assignment>(*src));
+         if(!is_copy_assignment)
+            src->~value_type();
          ++dest; ++src;
       }
       auto new_end = dest;
@@ -449,6 +456,7 @@ public:
    {
       _assert_vector_derived_member_variable_access_is_valid(_type_tag<vector>{});
       _base::template _range_constructor<!_base::_is_copy>(rhs.begin(), rhs.end());
+      rhs._end_ = rhs.begin();
    }
 
    vector(std::initializer_list<value_type> init)
@@ -481,7 +489,10 @@ public:
                                                                                        std::declval<iterator>())))
    {
       if(this != &rhs)
+      {
          _base::template _assign<!_base::_is_copy>(rhs.begin(), rhs.end());
+         rhs._end_ = rhs.begin();
+      }
       return *this;
    }
 

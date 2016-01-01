@@ -47,10 +47,11 @@ TEST_CASE("vector")
    {
       SECTION("contained values")
       {
+         auto expected = {1, 2, 3};
          auto rhs = vector_int_t{1, 2, 3};
          auto lhs = vector_int_t{ rhs };
-         auto expected = {1, 2, 3};
          REQUIRE(are_containers_equal(lhs, expected));
+         REQUIRE(are_containers_equal(rhs, expected));
       }
       SECTION("number of copy constructions")
       {
@@ -65,17 +66,18 @@ TEST_CASE("vector")
    {
       SECTION("contained values")
       {
-         auto rhs = vector_int_t{1, 2, 3};
-         auto lhs = vector_int_t{ rhs };
          auto expected = {1, 2, 3};
+         auto rhs = vector_int_t{1, 2, 3};
+         auto lhs = vector_int_t{ std::move(rhs) };
          REQUIRE(are_containers_equal(lhs, expected));
+         REQUIRE(rhs.empty());
       }
-      SECTION("number of move constructions")
+      SECTION("number of operations")
       {
          auto rhs = vector_counted_type_t{1, 2, 3};
          counted_type::reset_counts();
          auto lhs = vector_counted_type_t{ std::move(rhs) };
-         REQUIRE(counted_type::check().move_constructions(3));
+         REQUIRE(counted_type::check().move_constructions(3).destructions(3));
       }
    }
 
@@ -141,10 +143,12 @@ TEST_CASE("vector")
    {
       SECTION("contained values")
       {
+         auto expected = {1, 2, 3};
          auto rhs = vector_int_t{1, 2, 3};
          auto lhs = vector_int_t{};
          lhs = std::move(rhs);
-         REQUIRE(are_containers_equal(lhs, rhs));
+         REQUIRE(are_containers_equal(lhs, expected));
+         REQUIRE(rhs.empty());
       }
       SECTION("number of move assignments")
       {
@@ -168,7 +172,7 @@ TEST_CASE("vector")
          auto lhs = vector_counted_type_t{1, 2, 3, 4, 5};
          counted_type::reset_counts();
          lhs = std::move(rhs);
-         REQUIRE(counted_type::check().destructions(2));
+         REQUIRE(counted_type::check().destructions(5));
       }
    }
 
