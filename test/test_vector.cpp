@@ -455,7 +455,7 @@ TEST_CASE("vector")
       }
    }
 
-   SECTION("lvalue insert")
+   SECTION("by-lvalue-reference insert")
    {
       SECTION("begin")
       {
@@ -498,7 +498,7 @@ TEST_CASE("vector")
       }
    }
 
-   SECTION("rvalue insert")
+   SECTION("by-rvalue-reference insert")
    {
       SECTION("begin")
       {
@@ -1179,6 +1179,40 @@ TEST_CASE("vector")
             REQUIRE(are_containers_equal(v, expected));
             REQUIRE(counted_type::check().move_assignments(0).destructions(3));
          }
+      }
+   }
+
+   SECTION("push_back")
+   {
+      SECTION("contained values")
+      {
+         auto v = vector_int_t{};
+         auto expected = std::vector<int>{};
+
+         v.push_back(1);
+         expected.push_back(1);
+         REQUIRE(are_containers_equal(v, expected));
+
+         v.push_back(3);
+         expected.push_back(3);
+         REQUIRE(are_containers_equal(v, expected));
+
+         v.push_back(5);
+         expected.push_back(5);
+         REQUIRE(are_containers_equal(v, expected));
+      }
+      SECTION("number of constructions")
+      {
+         auto v = vector_counted_type_t{};
+         auto value = counted_type{};
+
+         counted_type::reset_counts();
+         v.push_back(value);
+         REQUIRE(counted_type::check().copy_constructions(1));
+
+         counted_type::reset_counts();
+         v.push_back(std::move(value));
+         REQUIRE(counted_type::check().move_constructions(1));
       }
    }
 }
