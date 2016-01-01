@@ -1215,6 +1215,40 @@ TEST_CASE("vector")
          REQUIRE(counted_type::check().move_constructions(1));
       }
    }
+
+   SECTION("emplace_back")
+   {
+      SECTION("contained values")
+      {
+         auto v = vector_int_t{};
+         auto expected = std::vector<int>{};
+
+         v.emplace_back(1);
+         expected.emplace_back(1);
+         REQUIRE(are_containers_equal(v, expected));
+
+         v.emplace_back(3);
+         expected.emplace_back(3);
+         REQUIRE(are_containers_equal(v, expected));
+
+         v.emplace_back(5);
+         expected.emplace_back(5);
+         REQUIRE(are_containers_equal(v, expected));
+      }
+      SECTION("number of constructions")
+      {
+         auto v = vector_counted_type_t{};
+         auto value = counted_type{};
+
+         counted_type::reset_counts();
+         v.emplace_back();
+         REQUIRE(counted_type::check().default_constructions(1));
+
+         counted_type::reset_counts();
+         v.emplace_back(1);
+         REQUIRE(counted_type::check().parameter_constructions(1));
+      }
+   }
 }
 
 }

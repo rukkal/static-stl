@@ -595,33 +595,6 @@ public:
       _base::_clear();
    }
 
-   void push_back(const_reference value)
-      _sstl_noexcept(noexcept(std::declval<_base>()._emplace_back(std::declval<const_reference>())))
-   {
-      sstl_assert(size() < Capacity);
-      _base::_emplace_back(value);
-   }
-
-   void push_back(value_type&& value)
-      _sstl_noexcept(noexcept(std::declval<_base>()._emplace_back(std::declval<value_type>())))
-   {
-      sstl_assert(size() < Capacity);
-      _base::_emplace_back(std::move(value));
-   }
-
-   template<class... Args>
-   void emplace_back(Args&&... args)
-      _sstl_noexcept(noexcept(std::declval<_base>()._emplace_back(std::forward<Args>(std::declval<Args>())...)))
-   {
-      sstl_assert(size() < Capacity);
-      _base::_emplace_back(std::forward<Args>(args)...);
-   }
-
-   void pop_back() _sstl_noexcept(noexcept(std::declval<_base>()._pop_back()))
-   {
-      _base::_pop_back();
-   }
-
    iterator insert(const_iterator pos, const_reference value)
       _sstl_noexcept(noexcept(std::declval<_base>().template _insert<_base::_is_copy>( std::declval<iterator>(),
                                                                                        std::declval<reference>())))
@@ -688,6 +661,33 @@ public:
       sstl_assert(range_begin <= range_end);
       sstl_assert(range_begin >= begin() && range_end <= end());
       return _base::_erase(const_cast<iterator>(range_begin), const_cast<iterator>(range_end));
+   }
+
+   void push_back(const_reference value)
+      _sstl_noexcept(noexcept(std::declval<_base>()._emplace_back(std::declval<const_reference>())))
+   {
+      sstl_assert(size() < Capacity);
+      _base::_emplace_back(value);
+   }
+
+   void push_back(value_type&& value)
+      _sstl_noexcept(noexcept(std::declval<_base>()._emplace_back(std::declval<value_type>())))
+   {
+      sstl_assert(size() < Capacity);
+      _base::_emplace_back(std::move(value));
+   }
+
+   template<class... Args>
+   void emplace_back(Args&&... args)
+      _sstl_noexcept(noexcept(std::declval<_base>()._emplace_back(std::forward<Args>(std::declval<Args>())...)))
+   {
+      sstl_assert(size() < Capacity);
+      _base::_emplace_back(std::forward<Args>(args)...);
+   }
+
+   void pop_back() _sstl_noexcept(noexcept(std::declval<_base>()._pop_back()))
+   {
+      _base::_pop_back();
    }
 
 private:
