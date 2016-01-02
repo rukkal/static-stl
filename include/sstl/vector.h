@@ -440,24 +440,38 @@ public:
       _base::template _range_constructor<_base::_is_copy>(range_begin, range_end);
    }
 
-   vector(const vector& rhs)
+   // copy construction from vectors with same value type (capacity doesn't matter)
+   vector(const _base& rhs)
       _sstl_noexcept(noexcept(std::declval<_base>().template _range_constructor<_base::_is_copy>(  std::declval<const_iterator>(),
                                                                                                    std::declval<const_iterator>())))
       : _end_(begin())
    {
+      sstl_assert(rhs._size() <= Capacity);
       _assert_vector_derived_member_variable_access_is_valid(_type_tag<vector>{});
-      _base::template _range_constructor<_base::_is_copy>(rhs.cbegin(), rhs.cend());
+      _base::template _range_constructor<_base::_is_copy>(const_cast<_base&>(rhs)._begin(), const_cast<_base&>(rhs)._end());
    }
 
-   vector(vector&& rhs)
+   vector(const vector& rhs)
+      _sstl_noexcept(noexcept(vector(std::declval<const _base&>())))
+      : vector(static_cast<const _base&>(rhs))
+   {}
+
+   // move construction from vectors with same value type (capacity doesn't matter)
+   vector(_base&& rhs)
       _sstl_noexcept(noexcept(std::declval<_base>().template _range_constructor<!_base::_is_copy>( std::declval<iterator>(),
                                                                                                    std::declval<iterator>())))
       : _end_(begin())
    {
+      sstl_assert(rhs._size() <= Capacity);
       _assert_vector_derived_member_variable_access_is_valid(_type_tag<vector>{});
-      _base::template _range_constructor<!_base::_is_copy>(rhs.begin(), rhs.end());
-      rhs._end_ = rhs.begin();
+      _base::template _range_constructor<!_base::_is_copy>(rhs._begin(), rhs._end());
+      rhs._set_end(rhs._begin());
    }
+
+   vector(vector&& rhs)
+      _sstl_noexcept(noexcept(vector(std::declval<_base>())))
+      : vector(static_cast<_base&&>(rhs))
+   {}
 
    vector(std::initializer_list<value_type> init)
       _sstl_noexcept(noexcept(std::declval<_base>().template _range_constructor<_base::_is_copy>(

@@ -47,11 +47,22 @@ TEST_CASE("vector")
    {
       SECTION("contained values")
       {
-         auto expected = {1, 2, 3};
-         auto rhs = vector_int_t{1, 2, 3};
-         auto lhs = vector_int_t{ rhs };
-         REQUIRE(are_containers_equal(lhs, expected));
-         REQUIRE(are_containers_equal(rhs, expected));
+         SECTION("rhs' capacity is same")
+         {
+            auto expected = {1, 2, 3};
+            auto rhs = vector_int_t{1, 2, 3};
+            auto lhs = vector_int_t{ rhs };
+            REQUIRE(are_containers_equal(lhs, expected));
+            REQUIRE(are_containers_equal(rhs, expected));
+         }
+         SECTION("rhs' capacity is different")
+         {
+            auto expected = {1, 2, 3};
+            auto rhs = vector<int, 30>{1, 2, 3};
+            auto lhs = vector<int, 10>{ rhs };
+            REQUIRE(are_containers_equal(lhs, expected));
+            REQUIRE(are_containers_equal(rhs, expected));
+         }
       }
       SECTION("number of copy constructions")
       {
@@ -66,11 +77,22 @@ TEST_CASE("vector")
    {
       SECTION("contained values")
       {
-         auto expected = {1, 2, 3};
-         auto rhs = vector_int_t{1, 2, 3};
-         auto lhs = vector_int_t{ std::move(rhs) };
-         REQUIRE(are_containers_equal(lhs, expected));
-         REQUIRE(rhs.empty());
+         SECTION("rhs' capacity is same")
+         {
+            auto expected = {1, 2, 3};
+            auto rhs = vector_int_t{1, 2, 3};
+            auto lhs = vector_int_t{ std::move(rhs) };
+            REQUIRE(are_containers_equal(lhs, expected));
+            REQUIRE(rhs.empty());
+         }
+         SECTION("rhs' capacity is different")
+         {
+            auto expected = {1, 2, 3};
+            auto rhs = vector<int, 30>{1, 2, 3};
+            auto lhs = vector<int, 10>{ std::move(rhs) };
+            REQUIRE(are_containers_equal(lhs, expected));
+            REQUIRE(rhs.empty());
+         }
       }
       SECTION("number of operations")
       {
@@ -108,10 +130,20 @@ TEST_CASE("vector")
    {
       SECTION("contained values")
       {
-         auto rhs = vector_int_t{1, 2, 3};
-         auto lhs = vector_int_t{};
-         lhs = rhs;
-         REQUIRE(are_containers_equal(lhs, rhs));
+         SECTION("rhs' capacity is same")
+         {
+            auto rhs = vector_int_t{1, 2, 3};
+            auto lhs = vector_int_t{};
+            lhs = rhs;
+            REQUIRE(are_containers_equal(lhs, rhs));
+         }
+         SECTION("rhs' capacity is different")
+         {
+            auto rhs = vector<int, 30>{1, 2, 3};
+            auto lhs = vector<int, 10>{};
+            lhs = rhs;
+            REQUIRE(are_containers_equal(lhs, rhs));
+         }
       }
       SECTION("number of copy assignments")
       {
@@ -143,12 +175,24 @@ TEST_CASE("vector")
    {
       SECTION("contained values")
       {
-         auto expected = {1, 2, 3};
-         auto rhs = vector_int_t{1, 2, 3};
-         auto lhs = vector_int_t{};
-         lhs = std::move(rhs);
-         REQUIRE(are_containers_equal(lhs, expected));
-         REQUIRE(rhs.empty());
+         SECTION("rhs' capacity is same")
+         {
+            auto expected = {1, 2, 3};
+            auto rhs = vector_int_t{1, 2, 3};
+            auto lhs = vector_int_t{};
+            lhs = std::move(rhs);
+            REQUIRE(are_containers_equal(lhs, expected));
+            REQUIRE(rhs.empty());
+         }
+         SECTION("rhs' capacity is different")
+         {
+            auto expected = {1, 2, 3};
+            auto rhs = vector<int, 30>{1, 2, 3};
+            auto lhs = vector<int, 10>{};
+            lhs = std::move(rhs);
+            REQUIRE(are_containers_equal(lhs, expected));
+            REQUIRE(rhs.empty());
+         }
       }
       SECTION("number of move assignments")
       {
