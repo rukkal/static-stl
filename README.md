@@ -21,7 +21,7 @@ There are applications in which such additional costs cannot be accepted. An exa
 - Static reimplementations of STL abstractions:
   - std::function (OK)
   - std::shared_ptr (TODO)
-  - std::vector (IN PROGRESS)
+  - std::vector (OK)
   - std::list (PERFORMANCE REFACTORING REQUIRED)
   - std::forward_list (PERFORMANCE REFACTORING REQUIRED)
   - std::deque (PERFORMANCE REFACTORING REQUIRED)
@@ -43,6 +43,7 @@ There are applications in which such additional costs cannot be accepted. An exa
 - No virtual functions used (except for sstl::function's type erasure, of course).
 - No runtime check overheads by default (only assertions).
 - C++11 compatible.
+- Header-only library.
 - Tested with clang 3.4, gcc 4.6 and MSVC 1800 (Visual Studio 2013).
 
 **How was SSTL born?**
