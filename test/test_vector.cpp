@@ -1417,6 +1417,69 @@ TEST_CASE("vector")
          REQUIRE(counted_type::check().move_constructions(7).move_assignments(4).destructions(7));
       }
    }
+
+   SECTION("non-member relative operators")
+   {
+      SECTION("lhs < rhs")
+      {
+         {
+            auto lhs = vector_int_t{0, 1, 2};
+            auto rhs = vector_int_t{0, 1, 2, 3};
+            REQUIRE(!(lhs == rhs));
+            REQUIRE(lhs != rhs);
+            REQUIRE(lhs < rhs);
+            REQUIRE(lhs <= rhs);
+            REQUIRE(!(lhs > rhs));
+            REQUIRE(!(lhs >= rhs));
+         }
+         {
+            auto lhs = vector_int_t{0, 1, 2, 3};
+            auto rhs = vector_int_t{0, 1, 3, 3};
+            REQUIRE(!(lhs == rhs));
+            REQUIRE(lhs != rhs);
+            REQUIRE(lhs < rhs);
+            REQUIRE(lhs <= rhs);
+            REQUIRE(!(lhs > rhs));
+            REQUIRE(!(lhs >= rhs));
+         }
+      }
+      SECTION("lhs == rhs")
+      {
+         {
+            auto lhs = vector_int_t{0, 1, 2};
+            auto rhs = vector_int_t{0, 1, 2};
+            REQUIRE(lhs == rhs);
+            REQUIRE(!(lhs != rhs));
+            REQUIRE(!(lhs < rhs));
+            REQUIRE(lhs <= rhs);
+            REQUIRE(!(lhs > rhs));
+            REQUIRE(lhs >= rhs);
+         }
+      }
+      SECTION("lhs > rhs")
+      {
+         {
+            auto lhs = vector_int_t{0, 1, 2, 3};
+            auto rhs = vector_int_t{0, 1, 2};
+            REQUIRE(!(lhs == rhs));
+            REQUIRE(lhs != rhs);
+            REQUIRE(!(lhs < rhs));
+            REQUIRE(!(lhs <= rhs));
+            REQUIRE(lhs > rhs);
+            REQUIRE(lhs >= rhs);
+         }
+         {
+            auto lhs = vector_int_t{0, 1, 3, 3};
+            auto rhs = vector_int_t{0, 1, 2, 3};
+            REQUIRE(!(lhs == rhs));
+            REQUIRE(lhs != rhs);
+            REQUIRE(!(lhs < rhs));
+            REQUIRE(!(lhs <= rhs));
+            REQUIRE(lhs > rhs);
+            REQUIRE(lhs >= rhs);
+         }
+      }
+   }
 }
 
 }

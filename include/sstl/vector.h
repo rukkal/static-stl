@@ -807,6 +807,42 @@ void _vector_base<T>::_set_end(T* value) _sstl_noexcept_
    reinterpret_cast<type_for_derived_member_variable_access&>(*this)._end_ = value;
 }
 
+template <class T, size_t CapacityLhs, size_t CapacityRhs>
+inline bool operator==(const vector<T, CapacityLhs>& lhs, const vector<T, CapacityRhs>& rhs)
+{
+    return lhs.size() == rhs.size() && std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
+}
+
+template <class T, size_t CapacityLhs, size_t CapacityRhs>
+inline bool operator!=(const vector<T, CapacityLhs>& lhs, const vector<T, CapacityRhs>& rhs)
+{
+    return !(lhs == rhs);
+}
+
+template <class T, size_t CapacityLhs, size_t CapacityRhs>
+inline bool operator<(const vector<T, CapacityLhs>& lhs, const vector<T, CapacityRhs>& rhs)
+{
+   return std::lexicographical_compare(lhs.cbegin(), lhs.cend(), rhs.cbegin(), rhs.cend());
+}
+
+template <class T, size_t CapacityLhs, size_t CapacityRhs>
+inline bool operator<=(const vector<T, CapacityLhs>& lhs, const vector<T, CapacityRhs>& rhs)
+{
+   return !(rhs < lhs);
+}
+
+template <class T, size_t CapacityLhs, size_t CapacityRhs>
+inline bool operator>(const vector<T, CapacityLhs>& lhs, const vector<T, CapacityRhs>& rhs)
+{
+   return rhs < lhs;
+}
+
+template <class T, size_t CapacityLhs, size_t CapacityRhs>
+inline bool operator>=(const vector<T, CapacityLhs>& lhs, const vector<T, CapacityRhs>& rhs)
+{
+   return !(lhs < rhs);
+}
+
 template<class T, size_t Capacity>
 void swap(vector<T, Capacity>& lhs, vector<T, Capacity>& rhs)
 {
