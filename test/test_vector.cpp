@@ -1381,6 +1381,42 @@ TEST_CASE("vector")
          REQUIRE(counted_type::check().destructions(1));
       }
    }
+
+   SECTION("swap")
+   {
+      SECTION("contained values")
+      {
+         auto expected_lhs = {1, 3, 5, 7, 13, 17, 19};
+         auto expected_rhs = {23, 29};
+         SECTION("rhs' capacity is same")
+         {
+            auto lhs = vector_int_t{expected_rhs};
+            auto rhs = vector_int_t{expected_lhs};
+            swap(lhs, rhs);
+            REQUIRE(are_containers_equal(lhs, expected_lhs));
+            REQUIRE(are_containers_equal(rhs, expected_rhs));
+         }
+         SECTION("rhs' capacity is different")
+         {
+            auto lhs = vector<int, 10>{expected_rhs};
+            auto rhs = vector<int, 30>{expected_lhs};
+            swap(lhs, rhs);
+            REQUIRE(are_containers_equal(lhs, expected_lhs));
+            REQUIRE(are_containers_equal(rhs, expected_rhs));
+         }
+      }
+      SECTION("number of operations")
+      {
+         auto expected_lhs = std::initializer_list<counted_type>{1, 3, 5, 7, 13, 17, 19};
+         auto expected_rhs = std::initializer_list<counted_type>{23, 29};
+
+         auto lhs = vector<counted_type, 10>{expected_rhs};
+         auto rhs = vector<counted_type, 30>{expected_lhs};
+         counted_type::reset_counts();
+         swap(lhs, rhs);
+         REQUIRE(counted_type::check().move_constructions(7).move_assignments(4).destructions(7));
+      }
+   }
 }
 
 }

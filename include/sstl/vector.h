@@ -368,6 +368,45 @@ protected:
       (--end)->~value_type();
       _set_end(end);
    }
+
+   void _swap(_vector_base& rhs)
+      _sstl_noexcept(std::is_nothrow_move_constructible<value_type>::value
+                     && std::is_nothrow_move_assignable<value_type>::value
+                     && std::is_nothrow_destructible<value_type>::value)
+   {
+      _vector_base *large, *small;
+
+      if(_size() < rhs._size())
+      {
+         large = &rhs;
+         small = this;
+      }
+      else
+      {
+         large = this;
+         small = &rhs;
+      }
+
+      auto large_pos = large->_begin();
+      auto large_end_swaps = large->_begin() + small->_size();
+      auto large_end = large->_end();
+      auto small_pos = small->_begin();
+
+      while(large_pos != large_end_swaps)
+      {
+         std::iter_swap(large_pos, small_pos);
+         ++large_pos; ++small_pos;
+      }
+      large->_set_end(large_pos);
+
+      while(large_pos != large_end)
+      {
+         new(small_pos) value_type(std::move(*large_pos));
+         large_pos->~value_type();
+         ++large_pos; ++small_pos;
+      }
+      small->_set_end(small_pos);
+   }
 };
 
 template<class T, size_t Capacity>
@@ -733,6 +772,15 @@ public:
       _base::_pop_back();
    }
 
+   template<size_type CapacityRhs>
+   void swap(vector<value_type, CapacityRhs>& rhs)
+      _sstl_noexcept(noexcept(std::declval<_base>()._swap(std::declval<_base&>())))
+   {
+      sstl_assert(rhs.size() <= Capacity);
+      sstl_assert(size() <= CapacityRhs);
+      _base::_swap(rhs);
+   }
+
 private:
    pointer _end_;
    std::array<typename aligned_storage<sizeof(value_type), std::alignment_of<value_type>::value>::type, Capacity> _buffer_;
@@ -757,6 +805,18 @@ void _vector_base<T>::_set_end(T* value) _sstl_noexcept_
 {
    using type_for_derived_member_variable_access = typename vector<T, 1>::_type_for_derived_member_variable_access;
    reinterpret_cast<type_for_derived_member_variable_access&>(*this)._end_ = value;
+}
+
+template<class T, size_t Capacity>
+void swap(vector<T, Capacity>& lhs, vector<T, Capacity>& rhs)
+{
+   lhs.swap(rhs);
+}
+
+template<class T, size_t CapacityLhs, size_t CapacityRhs>
+void swap(vector<T, CapacityLhs>& lhs, vector<T, CapacityRhs>& rhs)
+{
+   lhs.swap(rhs);
 }
 
 }
