@@ -489,25 +489,43 @@ public:
       _base::_destructor();
    }
 
-   vector& operator=(const vector& rhs)
-      _sstl_noexcept(noexcept(std::declval<_base>().template _assign<!_base::_is_copy>(std::declval<iterator>(),
-                                                                                       std::declval<iterator>())))
-   {
-      if(this != &rhs)
-         _base::template _assign<_base::_is_copy>(rhs.begin(), rhs.end());
-      return *this;
-   }
-
-   vector& operator=(vector&& rhs)
+   // copy assignment from vectors with same value type (capacity doesn't matter)
+   vector& operator=(const _base& rhs)
       _sstl_noexcept(noexcept(std::declval<_base>().template _assign<!_base::_is_copy>(std::declval<iterator>(),
                                                                                        std::declval<iterator>())))
    {
       if(this != &rhs)
       {
-         _base::template _assign<!_base::_is_copy>(rhs.begin(), rhs.end());
-         rhs._end_ = rhs.begin();
+         sstl_assert(rhs._size() <= Capacity);
+         _base::template _assign<_base::_is_copy>(const_cast<_base&>(rhs)._begin(), const_cast<_base&>(rhs)._end());
       }
       return *this;
+   }
+
+   vector& operator=(const vector& rhs)
+      _sstl_noexcept(noexcept(std::declval<vector>().operator=(std::declval<const _base&>())))
+   {
+      return operator=(static_cast<const _base&>(rhs));
+   }
+
+   // move assignment from vectors with same value type (capacity doesn't matter)
+   vector& operator=(_base&& rhs)
+      _sstl_noexcept(noexcept(std::declval<_base>().template _assign<!_base::_is_copy>(std::declval<iterator>(),
+                                                                                       std::declval<iterator>())))
+   {
+      if(this != &rhs)
+      {
+         sstl_assert(rhs._size() <= Capacity);
+         _base::template _assign<!_base::_is_copy>(rhs._begin(), rhs._end());
+         rhs._set_end(rhs._begin());
+      }
+      return *this;
+   }
+
+   vector& operator=(vector&& rhs)
+      _sstl_noexcept(noexcept(std::declval<vector>().operator=(std::declval<_base>())))
+   {
+      return operator=(static_cast<_base&&>(rhs));
    }
 
    vector& operator=(std::initializer_list<value_type> init)

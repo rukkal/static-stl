@@ -66,10 +66,20 @@ TEST_CASE("vector")
       }
       SECTION("number of copy constructions")
       {
-         auto rhs = vector_counted_type_t{1, 2, 3};
-         counted_type::reset_counts();
-         auto lhs = vector_counted_type_t{ rhs };
-         REQUIRE(counted_type::check().copy_constructions(3));
+         SECTION("rhs' capacity is the same")
+         {
+            auto rhs = vector_counted_type_t{1, 2, 3};
+            counted_type::reset_counts();
+            auto lhs = vector_counted_type_t{ rhs };
+            REQUIRE(counted_type::check().copy_constructions(3));
+         }
+         SECTION("rhs' capacity is different")
+         {
+            auto rhs = vector<counted_type, 30>{1, 2, 3};
+            counted_type::reset_counts();
+            auto lhs = vector<counted_type, 10>{ rhs };
+            REQUIRE(counted_type::check().copy_constructions(3));
+         }
       }
    }
 
@@ -96,10 +106,20 @@ TEST_CASE("vector")
       }
       SECTION("number of operations")
       {
-         auto rhs = vector_counted_type_t{1, 2, 3};
-         counted_type::reset_counts();
-         auto lhs = vector_counted_type_t{ std::move(rhs) };
-         REQUIRE(counted_type::check().move_constructions(3).destructions(3));
+         SECTION("rhs' capacity is same")
+         {
+            auto rhs = vector_counted_type_t{1, 2, 3};
+            counted_type::reset_counts();
+            auto lhs = vector_counted_type_t{ std::move(rhs) };
+            REQUIRE(counted_type::check().move_constructions(3).destructions(3));
+         }
+         SECTION("rhs' capacity is different")
+         {
+            auto rhs = vector<counted_type, 30>{1, 2, 3};
+            counted_type::reset_counts();
+            auto lhs = vector<counted_type, 10>{ std::move(rhs) };
+            REQUIRE(counted_type::check().move_constructions(3).destructions(3));
+         }
       }
    }
 
@@ -145,29 +165,43 @@ TEST_CASE("vector")
             REQUIRE(are_containers_equal(lhs, rhs));
          }
       }
-      SECTION("number of copy assignments")
+      SECTION("number of copy assignments + copy constructions")
       {
-         auto rhs = vector_counted_type_t{1, 2, 3, 4, 5};
-         auto lhs = vector_counted_type_t{1, 2, 3};
-         counted_type::reset_counts();
-         lhs = rhs;
-         REQUIRE(counted_type::check().copy_assignments(3));
-      }
-      SECTION("number of copy constructions")
-      {
-         auto rhs = vector_counted_type_t{1, 2, 3, 4, 5};
-         auto lhs = vector_counted_type_t{1, 2, 3};
-         counted_type::reset_counts();
-         lhs = rhs;
-         REQUIRE(counted_type::check().copy_constructions(2));
+         SECTION("rhs' capacity is same")
+         {
+            auto rhs = vector_counted_type_t{1, 2, 3, 4, 5};
+            auto lhs = vector_counted_type_t{1, 2, 3};
+            counted_type::reset_counts();
+            lhs = rhs;
+            REQUIRE(counted_type::check().copy_assignments(3).copy_constructions(2));
+         }
+         SECTION("rhs' capacity is different")
+         {
+            auto rhs = vector<counted_type, 30>{1, 2, 3, 4, 5};
+            auto lhs = vector<counted_type, 10>{1, 2, 3};
+            counted_type::reset_counts();
+            lhs = rhs;
+            REQUIRE(counted_type::check().copy_assignments(3).copy_constructions(2));
+         }
       }
       SECTION("number of destructions")
       {
-         auto rhs = vector_counted_type_t{1, 2, 3};
-         auto lhs = vector_counted_type_t{1, 2, 3, 4, 5};
-         counted_type::reset_counts();
-         lhs = rhs;
-         REQUIRE(counted_type::check().destructions(2));
+         SECTION("rhs' capacity is same")
+         {
+            auto rhs = vector_counted_type_t{1, 2, 3};
+            auto lhs = vector_counted_type_t{1, 2, 3, 4, 5};
+            counted_type::reset_counts();
+            lhs = rhs;
+            REQUIRE(counted_type::check().destructions(2));
+         }
+         SECTION("rhs' capacity is different")
+         {
+            auto rhs = vector<counted_type, 30>{1, 2, 3};
+            auto lhs = vector<counted_type, 10>{1, 2, 3, 4, 5};
+            counted_type::reset_counts();
+            lhs = rhs;
+            REQUIRE(counted_type::check().destructions(2));
+         }
       }
    }
 
@@ -194,29 +228,43 @@ TEST_CASE("vector")
             REQUIRE(rhs.empty());
          }
       }
-      SECTION("number of move assignments")
+      SECTION("number of move assignments + copy constructions")
       {
-         auto rhs = vector_counted_type_t{1, 2, 3, 4, 5};
-         auto lhs = vector_counted_type_t{1, 2, 3};
-         counted_type::reset_counts();
-         lhs = std::move(rhs);
-         REQUIRE(counted_type::check().move_assignments(3));
-      }
-      SECTION("number of copy constructions")
-      {
-         auto rhs = vector_counted_type_t{1, 2, 3, 4, 5};
-         auto lhs = vector_counted_type_t{1, 2, 3};
-         counted_type::reset_counts();
-         lhs = std::move(rhs);
-         REQUIRE(counted_type::check().move_constructions(2));
+         SECTION("rhs' capacity is same")
+         {
+            auto rhs = vector_counted_type_t{1, 2, 3, 4, 5};
+            auto lhs = vector_counted_type_t{1, 2, 3};
+            counted_type::reset_counts();
+            lhs = std::move(rhs);
+            REQUIRE(counted_type::check().move_assignments(3).move_constructions(2));
+         }
+         SECTION("rhs' capacity is different")
+         {
+            auto rhs = vector<counted_type, 30>{1, 2, 3, 4, 5};
+            auto lhs = vector<counted_type, 20>{1, 2, 3};
+            counted_type::reset_counts();
+            lhs = std::move(rhs);
+            REQUIRE(counted_type::check().move_assignments(3).move_constructions(2));
+         }
       }
       SECTION("number of destructions")
       {
-         auto rhs = vector_counted_type_t{1, 2, 3};
-         auto lhs = vector_counted_type_t{1, 2, 3, 4, 5};
-         counted_type::reset_counts();
-         lhs = std::move(rhs);
-         REQUIRE(counted_type::check().destructions(5));
+         SECTION("rhs' capacity is same")
+         {
+            auto rhs = vector_counted_type_t{1, 2, 3};
+            auto lhs = vector_counted_type_t{1, 2, 3, 4, 5};
+            counted_type::reset_counts();
+            lhs = std::move(rhs);
+            REQUIRE(counted_type::check().destructions(5));
+         }
+         SECTION("rhs' capacity is different")
+         {
+            auto rhs = vector<counted_type, 30>{1, 2, 3};
+            auto lhs = vector<counted_type, 10>{1, 2, 3, 4, 5};
+            counted_type::reset_counts();
+            lhs = std::move(rhs);
+            REQUIRE(counted_type::check().destructions(5));
+         }
       }
    }
 
