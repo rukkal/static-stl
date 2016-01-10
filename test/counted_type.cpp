@@ -19,5 +19,14 @@ namespace test
    size_t counted_type::destructions;
    size_t counted_type::copy_assignments;
    size_t counted_type::move_assignments;
+
+   size_t counted_type::throw_expected_at_nth_construction;
+   size_t counted_type::throw_expected_at_nth_default_construction;
+   size_t counted_type::throw_expected_at_nth_parameter_construction;
+   size_t counted_type::throw_expected_at_nth_copy_construction;
+   size_t counted_type::throw_expected_at_nth_move_construction;
+   size_t counted_type::throw_expected_at_nth_destruction;
+   size_t counted_type::throw_expected_at_nth_copy_assignment;
+   size_t counted_type::throw_expected_at_nth_move_assignment;
 }
 }
