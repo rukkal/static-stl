@@ -41,6 +41,13 @@ TEST_CASE("vector")
          auto v = vector_int_t(5, 3);
          REQUIRE(are_containers_equal(v, expected));
       }
+      SECTION("exception handling")
+      {
+         counted_type::reset_counts();
+         counted_type::throw_at_nth_copy_construction(3);
+         REQUIRE_THROWS_AS(vector_counted_type_t(7), counted_type::copy_construction::exception);
+         REQUIRE(counted_type::check().default_constructions(1).copy_constructions(2).destructions(3));
+      }
    }
 
    SECTION("copy constructor")
@@ -353,7 +360,6 @@ TEST_CASE("vector")
          auto v = vector_counted_type_t{1, 2, 3, 4, 5};
          counted_type::reset_counts();
          v.assign(range.begin(), range.end());
-         REQUIRE(counted_type::destructions == 2);
          REQUIRE(counted_type::check().destructions(2));
       }
    }

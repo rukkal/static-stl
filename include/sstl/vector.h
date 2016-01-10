@@ -52,8 +52,20 @@ protected:
    void _count_constructor(size_type count, const_reference value)
       _sstl_noexcept(std::is_nothrow_copy_constructible<value_type>::value)
    {
-      for(size_t i=0; i<count; ++i)
-         _emplace_back(value);
+      #ifdef __EXCEPTIONS
+      try
+      {
+      #endif
+         for(size_t i=0; i<count; ++i)
+            _emplace_back(value);
+      #ifdef __EXCEPTIONS
+      }
+      catch(...)
+      {
+         _clear();
+         throw;
+      }
+      #endif
    }
 
    template<bool is_copy_construction, class TIterator,
