@@ -74,12 +74,25 @@ protected:
    {
       auto src = range_begin;
       auto dst = _begin();
-      while(src != range_end)
+      #if _sstl_has_exceptions()
+      try
       {
-         new(dst) value_type(*src);
-         ++src; ++dst;
+      #endif
+         while(src != range_end)
+         {
+            new(dst) value_type(*src);
+            ++src; ++dst;
+         }
+         _set_end(dst);
+      #if _sstl_has_exceptions()
       }
-      _set_end(dst);
+      catch(...)
+      {
+         _set_end(dst);
+         _clear();
+         throw;
+      }
+      #endif
    }
 
    void _move_constructor(_vector_base&& rhs)

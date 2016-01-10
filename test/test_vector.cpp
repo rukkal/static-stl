@@ -88,6 +88,14 @@ TEST_CASE("vector")
             REQUIRE(counted_type::check().copy_constructions(3));
          }
       }
+      SECTION("exception handling")
+      {
+         auto rhs = vector_counted_type_t{1, 2, 3, 4, 5};
+         counted_type::reset_counts();
+         counted_type::throw_at_nth_copy_construction(3);
+         REQUIRE_THROWS_AS(vector_counted_type_t{ rhs }, counted_type::copy_construction::exception);
+         REQUIRE(counted_type::check().copy_constructions(2).destructions(2));
+      }
    }
 
    SECTION("move constructor")
