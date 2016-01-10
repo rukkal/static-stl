@@ -11,22 +11,22 @@ namespace sstl
 {
 namespace test
 {
-   size_t counted_type::constructions;
-   size_t counted_type::default_constructions;
-   size_t counted_type::parameter_constructions;
-   size_t counted_type::copy_constructions;
-   size_t counted_type::move_constructions;
-   size_t counted_type::destructions;
-   size_t counted_type::copy_assignments;
-   size_t counted_type::move_assignments;
+   size_t counted_type::construction::count;
+   size_t counted_type::default_construction::count;
+   size_t counted_type::parameter_construction::count;
+   size_t counted_type::copy_construction::count;
+   size_t counted_type::move_construction::count;
+   size_t counted_type::destruction::count;
+   size_t counted_type::copy_assignment::count;
+   size_t counted_type::move_assignment::count;
 
-   size_t counted_type::throw_expected_at_nth_construction;
-   size_t counted_type::throw_expected_at_nth_default_construction;
-   size_t counted_type::throw_expected_at_nth_parameter_construction;
-   size_t counted_type::throw_expected_at_nth_copy_construction;
-   size_t counted_type::throw_expected_at_nth_move_construction;
-   size_t counted_type::throw_expected_at_nth_destruction;
-   size_t counted_type::throw_expected_at_nth_copy_assignment;
-   size_t counted_type::throw_expected_at_nth_move_assignment;
+   size_t counted_type::construction::throw_expected_at_count;
+   size_t counted_type::default_construction::throw_expected_at_count;
+   size_t counted_type::parameter_construction::throw_expected_at_count;
+   size_t counted_type::copy_construction::throw_expected_at_count;
+   size_t counted_type::move_construction::throw_expected_at_count;
+   size_t counted_type::destruction::throw_expected_at_count;
+   size_t counted_type::copy_assignment::throw_expected_at_count;
+   size_t counted_type::move_assignment::throw_expected_at_count;
 }
 }
