@@ -13,7 +13,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include <algorithm>
 #include <new>
 #include <memory>
-#include "__internal/noexcept.h"
+#include "__internal/_except.h"
 
 namespace sstl
 {

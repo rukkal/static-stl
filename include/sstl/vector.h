@@ -17,7 +17,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include <array>
 
 #include "sstl_assert.h"
-#include "__internal/noexcept.h"
+#include "__internal/_except.h"
 #include "__internal/_type_tag.h"
 #include "__internal/_utility.h"
 #include "__internal/_iterator.h"
@@ -52,13 +52,13 @@ protected:
    void _count_constructor(size_type count, const_reference value)
       _sstl_noexcept(std::is_nothrow_copy_constructible<value_type>::value)
    {
-      #ifdef __EXCEPTIONS
+      #if _sstl_has_exceptions()
       try
       {
       #endif
          for(size_t i=0; i<count; ++i)
             _emplace_back(value);
-      #ifdef __EXCEPTIONS
+      #if _sstl_has_exceptions()
       }
       catch(...)
       {
@@ -68,24 +68,34 @@ protected:
       #endif
    }
 
-   template<bool is_copy_construction, class TIterator,
-            class = _enable_if_input_iterator_t<TIterator>>
+   template<class TIterator, class = _enable_if_input_iterator_t<TIterator>>
    void _range_constructor(TIterator range_begin, TIterator range_end)
-      _sstl_noexcept((is_copy_construction && std::is_nothrow_copy_constructible<value_type>::value)
-                     || (!is_copy_construction
-                        && std::is_nothrow_move_constructible<value_type>::value
-                        && std::is_nothrow_destructible<value_type>::value))
+      _sstl_noexcept(std::is_nothrow_copy_constructible<value_type>::value)
    {
       auto src = range_begin;
       auto dst = _begin();
       while(src != range_end)
       {
-         new(dst) value_type(_conditional_move<!is_copy_construction>(*src));
-         if(!is_copy_construction)
-            src->~value_type();
+         new(dst) value_type(*src);
          ++src; ++dst;
       }
       _set_end(dst);
+   }
+
+   void _move_constructor(_vector_base&& rhs)
+      _sstl_noexcept(std::is_nothrow_move_constructible<value_type>::value
+                     && std::is_nothrow_destructible<value_type>::value)
+   {
+      auto src = rhs._begin();
+      auto dst = _begin();
+      while(src != rhs._end())
+      {
+         new(dst) value_type(std::move(*src));
+         src->~value_type();
+         ++src; ++dst;
+      }
+      _set_end(dst);
+      rhs._set_end(rhs._begin());
    }
 
    void _destructor() _sstl_noexcept(std::is_nothrow_destructible<value_type>::value)
@@ -479,27 +489,24 @@ public:
       _base::_count_constructor(count, value);
    }
 
-   template<class TIterator,
-            class = _enable_if_input_iterator_t<TIterator>>
+   template<class TIterator, class = _enable_if_input_iterator_t<TIterator>>
    vector(TIterator range_begin, TIterator range_end)
-      _sstl_noexcept(noexcept(std::declval<_base>().template _range_constructor<_base::_is_copy>(  std::declval<TIterator>(),
-                                                                                                   std::declval<TIterator>())))
-      : _end_(begin())
+      _sstl_noexcept(noexcept(std::declval<_base>()._range_constructor( std::declval<TIterator>(),
+                                                                        std::declval<TIterator>())))
    {
       sstl_assert(std::distance(range_begin, range_end) <= Capacity);
       _assert_vector_derived_member_variable_access_is_valid(_type_tag<vector>{});
-      _base::template _range_constructor<_base::_is_copy>(range_begin, range_end);
+      _base::_range_constructor(range_begin, range_end);
    }
 
-   // copy construction from vectors with same value type (capacity doesn't matter)
+   // copy construction from any vector with same value type (capacity doesn't matter)
    vector(const _base& rhs)
-      _sstl_noexcept(noexcept(std::declval<_base>().template _range_constructor<_base::_is_copy>(  std::declval<const_iterator>(),
-                                                                                                   std::declval<const_iterator>())))
-      : _end_(begin())
+      _sstl_noexcept(noexcept(std::declval<_base>()._range_constructor( std::declval<const_iterator>(),
+                                                                        std::declval<const_iterator>())))
    {
       sstl_assert(rhs._size() <= Capacity);
       _assert_vector_derived_member_variable_access_is_valid(_type_tag<vector>{});
-      _base::template _range_constructor<_base::_is_copy>(const_cast<_base&>(rhs)._begin(), const_cast<_base&>(rhs)._end());
+      _base::_range_constructor(const_cast<_base&>(rhs)._begin(), const_cast<_base&>(rhs)._end());
    }
 
    vector(const vector& rhs)
@@ -507,16 +514,13 @@ public:
       : vector(static_cast<const _base&>(rhs))
    {}
 
-   // move construction from vectors with same value type (capacity doesn't matter)
+   // move construction from any vector with same value type (capacity doesn't matter)
    vector(_base&& rhs)
-      _sstl_noexcept(noexcept(std::declval<_base>().template _range_constructor<!_base::_is_copy>( std::declval<iterator>(),
-                                                                                                   std::declval<iterator>())))
-      : _end_(begin())
+      _sstl_noexcept(noexcept(std::declval<_base>()._move_constructor(std::declval<_base>())))
    {
       sstl_assert(rhs._size() <= Capacity);
       _assert_vector_derived_member_variable_access_is_valid(_type_tag<vector>{});
-      _base::template _range_constructor<!_base::_is_copy>(rhs._begin(), rhs._end());
-      rhs._set_end(rhs._begin());
+      _base::_move_constructor(std::move(rhs));
    }
 
    vector(vector&& rhs)
@@ -525,14 +529,13 @@ public:
    {}
 
    vector(std::initializer_list<value_type> init)
-      _sstl_noexcept(noexcept(std::declval<_base>().template _range_constructor<_base::_is_copy>(
+      _sstl_noexcept(noexcept(std::declval<_base>()._range_constructor(
          std::declval<std::initializer_list<value_type>>().begin(),
          std::declval<std::initializer_list<value_type>>().end())))
-      : _end_(begin())
    {
       sstl_assert(init.size() <= Capacity);
       _assert_vector_derived_member_variable_access_is_valid(_type_tag<vector>{});
-      _base::template _range_constructor<_base::_is_copy>(init.begin(), init.end());
+      _base::_range_constructor(init.begin(), init.end());
    }
 
    ~vector() _sstl_noexcept(noexcept(std::declval<_base>()._destructor()))

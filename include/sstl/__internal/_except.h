@@ -5,9 +5,15 @@ terms of the Do What The Fuck You Want To Public License, Version 2,
 as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 */
 
-#ifndef _SSTL_NOEXCEPT__
+#ifndef _SSTL_EXCEPT__
 
 #include "preprocessor.h"
+
+#ifdef __EXCEPTIONS
+   #define _sstl_has_exceptions() 1
+#else
+   #define _sstl_has_exceptions() 0
+#endif
 
 #if IS_MSVC() && _MSC_VER < 1900
    #define _sstl_noexcept_
@@ -17,4 +23,4 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
    #define _sstl_noexcept(...) noexcept(__VA_ARGS__)
 #endif
 
-#endif // _SSTL_NOEXCEPT__
+#endif // _SSTL_EXCEPT__
