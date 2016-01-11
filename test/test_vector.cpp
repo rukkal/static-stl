@@ -1211,12 +1211,11 @@ TEST_CASE("vector")
          }
          SECTION("range = [begin; end)")
          {
-            auto expected = std::initializer_list<counted_type>{};
             counted_type::reset_counts();
             auto pos = v.erase(v.begin(), v.end());
             REQUIRE(pos == v.begin());
             REQUIRE(pos == v.end());
-            REQUIRE(are_containers_equal(v, expected));
+            REQUIRE(v.empty());
             REQUIRE(counted_type::check().move_assignments(0).destructions(5));
          }
 

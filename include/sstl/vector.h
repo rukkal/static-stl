@@ -195,9 +195,9 @@ protected:
       return *(_end()-1);
    }
 
-   pointer _begin() noexcept;
-   pointer _end() noexcept;
-   void _set_end(pointer) noexcept;
+   pointer _begin() _sstl_noexcept_;
+   pointer _end() _sstl_noexcept_;
+   void _set_end(pointer) _sstl_noexcept_;
    reverse_iterator _rbegin() _sstl_noexcept(std::is_nothrow_constructible<reverse_iterator, iterator>::value)
    {
       return reverse_iterator(_end());
@@ -462,6 +462,11 @@ private:
    //(would be an incomplete type inside a member function)
    friend void _assert_vector_derived_member_variable_access_is_valid(_type_tag<vector>)
    {
+      #if IS_MSVC()
+      // MSVC can't compute derived-to-base pointer conversion at compile-time
+      sstl_assert(static_cast<_base*>(static_cast<_type_for_derived_member_variable_access*>(0)) == static_cast<_base*>(0));
+      sstl_assert(static_cast<_base*>(static_cast<vector*>(0)) == static_cast<_base*>(0));
+      #else
       static_assert( static_cast<_base*>(static_cast<_type_for_derived_member_variable_access*>(0))
                      == static_cast<_base*>(0),
                      "base and derived vector classes must have the same address, such property"
@@ -471,6 +476,7 @@ private:
                      == static_cast<_base*>(0),
                      "base and derived vector classes must have the same address, such property"
                      " is exploited by the base class to access the derived member variables");
+      #endif
    }
 
 public:
@@ -818,7 +824,7 @@ template<class T>
 T* _vector_base<T>::_begin() _sstl_noexcept_
 {
    using type_for_derived_member_variable_access = typename vector<T, 1>::_type_for_derived_member_variable_access;
-   return reinterpret_cast<T*>(reinterpret_cast<type_for_derived_member_variable_access&>(*this)._buffer_.begin());
+   return reinterpret_cast<T*>(reinterpret_cast<type_for_derived_member_variable_access&>(*this)._buffer_.data());
 }
 
 template<class T>

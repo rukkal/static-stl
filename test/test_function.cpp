@@ -9,7 +9,9 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include <utility>
 #include <memory>
 #include <functional>
-#include "sstl/function.h"
+#include <sstl/function.h>
+#include <sstl/__internal/preprocessor.h>
+#include "utility.h"
 #include "counted_type.h"
 
 namespace sstl
@@ -206,6 +208,9 @@ TEST_CASE("function")
          REQUIRE(lhs == true);
          REQUIRE(lhs() == 101);
       }
+      #if !IS_MSVC()
+      //note: the test breaks because MSVC elides the assignment (although the optimizer is turned off)
+      //even when the sstl::function instances are escaped (compiler is forced not to optimize them)
       SECTION("number of underlying target's constructions")
       {
          auto rhs = sstl::function<void(), 2>{ counted_type() };
@@ -214,6 +219,7 @@ TEST_CASE("function")
          lhs = rhs;
          REQUIRE(counted_type::check().copy_constructions(1).destructions(0));
       }
+      #endif
       SECTION("number of underlying target's destructions")
       {
          auto lhs = sstl::function<void(), 2>{ counted_type() };

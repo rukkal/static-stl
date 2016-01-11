@@ -21,7 +21,7 @@ namespace test
          return false;
       return true;
    }
-};
-};
+}
+}
 
 #endif

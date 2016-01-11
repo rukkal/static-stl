@@ -9,7 +9,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 
 #include "preprocessor.h"
 
-#ifdef __EXCEPTIONS
+#if defined(__EXCEPTIONS) || IS_MSVC()
    #define _sstl_has_exceptions() 1
 #else
    #define _sstl_has_exceptions() 0
