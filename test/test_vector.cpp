@@ -6,6 +6,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 */
 
 #include <catch.hpp>
+#include <sstl/__internal/_except.h>
 #include <sstl/vector.h>
 
 #include "utility.h"
@@ -41,6 +42,7 @@ TEST_CASE("vector")
          auto v = vector_int_t(5, 3);
          REQUIRE(are_containers_equal(v, expected));
       }
+      #if _sstl_has_exceptions()
       SECTION("exception handling")
       {
          counted_type::reset_counts();
@@ -48,6 +50,7 @@ TEST_CASE("vector")
          REQUIRE_THROWS_AS(vector_counted_type_t(7), counted_type::copy_construction::exception);
          REQUIRE(counted_type::check().default_constructions(1).copy_constructions(2).destructions(3));
       }
+      #endif
    }
 
    SECTION("copy constructor")
@@ -88,6 +91,7 @@ TEST_CASE("vector")
             REQUIRE(counted_type::check().copy_constructions(3));
          }
       }
+      #if _sstl_has_exceptions()
       SECTION("exception handling")
       {
          auto rhs = vector_counted_type_t{1, 2, 3, 4, 5};
@@ -96,6 +100,7 @@ TEST_CASE("vector")
          REQUIRE_THROWS_AS(vector_counted_type_t{ rhs }, counted_type::copy_construction::exception);
          REQUIRE(counted_type::check().copy_constructions(2).destructions(2));
       }
+      #endif
    }
 
    SECTION("move constructor")

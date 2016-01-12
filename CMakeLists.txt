@@ -36,7 +36,10 @@ add_library(unittestcpp ${unittestcpp_srcs})
 
 file(GLOB sstl_srcs "include/sstl/*.cpp" "include/sstl/*.h" "include/sstl/__internal/*.cpp" "include/sstl/__internal/*.h")
 file(GLOB test_srcs "test/*.cpp" "test/*.h" ${sstl_srcs})
-add_executable(test-sstl ${test_srcs})
 
+add_executable(test-sstl ${test_srcs})
 target_link_libraries(test-sstl unittestcpp)
 
+add_executable(test-sstl-noexceptions ${test_srcs})
+set_target_properties(test-sstl-noexceptions PROPERTIES COMPILE_DEFINITIONS "_SSTL_NOEXCEPTIONS_TEST")
+target_link_libraries(test-sstl-noexceptions unittestcpp)

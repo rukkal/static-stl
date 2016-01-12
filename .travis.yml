@@ -20,6 +20,6 @@ install:
 
 script:
   - mkdir build
-  - mkdir build/unix_makefiles
-  - cd build/unix_makefiles
-  - cmake -G "Unix Makefiles" ../.. && make && ./test-sstl
+  - cd build
+  - cmake -G "Unix Makefiles" .. && make && ./test-sstl && ./test-sstl-noexceptions
+

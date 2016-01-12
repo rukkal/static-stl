@@ -44,7 +44,7 @@ There are applications in which such additional costs cannot be accepted. An exa
 - No runtime check overheads by default (only assertions).
 - C++11 compatible.
 - Header-only library.
-- Tested with clang 3.4, gcc 4.6 and MSVC 1800 (Visual Studio 2013).
+- Tested with clang 3.7, gcc 5 and MSVC 1800 (Visual Studio 2013).
 
 **How was SSTL born?**
 

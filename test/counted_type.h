@@ -11,6 +11,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include <cstddef>
 #include <cassert>
 #include <stdexcept>
+#include <sstl/__internal/_except.h>
 
 namespace sstl
 {
@@ -336,11 +337,13 @@ private:
    template<class TOperation>
    static void throw_if_necessary()
    {
+      #if _sstl_has_exceptions()
       if(TOperation::count+1 == TOperation::throw_expected_at_count)
       {
          TOperation::throw_expected_at_count = invalid_count;
          throw typename TOperation::exception();
       }
+      #endif
    }
 
    static bool is_valid_count(size_t value)
