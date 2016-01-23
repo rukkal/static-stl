@@ -96,8 +96,8 @@ protected:
    }
 
    void _move_constructor(_vector_base&& rhs)
-      _sstl_noexcept(((!_sstl_has_exceptions() && std::is_nothrow_move_constructible<value_type>::value) ||
-                     (_sstl_has_exceptions() && std::is_nothrow_copy_constructible<value_type>::value))
+      _sstl_noexcept((std::is_nothrow_move_constructible<value_type>::value
+                     || std::is_nothrow_copy_constructible<value_type>::value)
                      && std::is_nothrow_destructible<value_type>::value)
    {
       auto src = rhs._begin();
@@ -521,6 +521,7 @@ public:
       _assert_vector_derived_member_variable_access_is_valid(_type_tag<vector>{});
    }
 
+   //exception safety: no-throw (for noexcept-specified constructor of value_type), otherwise strong
    explicit vector(size_type count, const_reference value=value_type())
       _sstl_noexcept(noexcept(std::declval<_base>()._count_constructor(std::declval<size_type>(), std::declval<const_reference>())))
       : _end_(begin())
@@ -530,6 +531,7 @@ public:
       _base::_count_constructor(count, value);
    }
 
+   //exception safety: no-throw (for noexcept-specified copy constructor of value_type), otherwise strong
    template<class TIterator, class = _enable_if_input_iterator_t<TIterator>>
    vector(TIterator range_begin, TIterator range_end)
       _sstl_noexcept(noexcept(std::declval<_base>()._range_constructor( std::declval<TIterator>(),
@@ -540,7 +542,8 @@ public:
       _base::_range_constructor(range_begin, range_end);
    }
 
-   // copy construction from any vector with same value type (capacity doesn't matter)
+   //copy construction from any vector with same value type (capacity doesn't matter)
+   //exception safety: no-throw (for noexcept-specified copy constructor of value_type), otherwise strong
    vector(const _base& rhs)
       _sstl_noexcept(noexcept(std::declval<_base>()._range_constructor( std::declval<const_iterator>(),
                                                                         std::declval<const_iterator>())))
@@ -550,12 +553,17 @@ public:
       _base::_range_constructor(const_cast<_base&>(rhs)._begin(), const_cast<_base&>(rhs)._end());
    }
 
+   //exception safety: no-throw (for noexcept-specified copy constructor of value_type), otherwise strong
    vector(const vector& rhs)
       _sstl_noexcept(noexcept(vector(std::declval<const _base&>())))
       : vector(static_cast<const _base&>(rhs))
    {}
 
-   // move construction from any vector with same value type (capacity doesn't matter)
+   //move construction from any vector with same value type (capacity doesn't matter)
+   //exception safety: no-throw (if value_type has either a noexcept-specified move constructor
+   // or a noexcept-specified copy constructor),
+   //strong (if value_type doesn't have a noexcept-specified move constructor, but has a copy constructor),
+   //otherwise basic
    vector(_base&& rhs)
       _sstl_noexcept(noexcept(std::declval<_base>()._move_constructor(std::declval<_base>())))
    {
@@ -564,11 +572,16 @@ public:
       _base::_move_constructor(std::move(rhs));
    }
 
+   //exception safety: no-throw (if value_type has either a noexcept-specified move constructor
+   // or a noexcept-specified copy constructor),
+   //strong (if value_type doesn't have a noexcept-specified move constructor, but has a copy constructor),
+   //otherwise basic
    vector(vector&& rhs)
       _sstl_noexcept(noexcept(vector(std::declval<_base>())))
       : vector(static_cast<_base&&>(rhs))
    {}
 
+   //exception safety: no-throw (for noexcept-specified copy constructor of value_type), otherwise strong
    vector(std::initializer_list<value_type> init)
       _sstl_noexcept(noexcept(std::declval<_base>()._range_constructor(
          std::declval<std::initializer_list<value_type>>().begin(),
