@@ -163,9 +163,22 @@ TEST_CASE("vector")
 
    SECTION("range constructor")
    {
-      auto range = {1, 2, 3};
-      auto v = vector_int_t(range.begin(), range.end());
-      REQUIRE(are_containers_equal(v, range));
+      SECTION("contained values")
+      {
+         auto range = {1, 2, 3};
+         auto v = vector_int_t(range.begin(), range.end());
+         REQUIRE(are_containers_equal(v, range));
+      }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling")
+      {
+         auto range = std::initializer_list<counted_type>{1, 2, 3, 4, 5};
+         counted_type::reset_counts();
+         counted_type::throw_at_nth_copy_construction(3);
+         REQUIRE_THROWS_AS(vector_counted_type_t(range.begin(), range.end()), counted_type::copy_construction::exception);
+         REQUIRE(counted_type::check().copy_constructions(2).destructions(2));
+      }
+      #endif
    }
 
    SECTION("initializer-list constructor")
