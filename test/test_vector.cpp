@@ -312,7 +312,11 @@ TEST_CASE("vector")
             auto lhs = vector_counted_type_t{1, 2, 3};
             counted_type::reset_counts();
             lhs = std::move(rhs);
+            #if _sstl_has_exceptions()
+            REQUIRE(counted_type::check().copy_assignments(3).copy_constructions(2));
+            #else
             REQUIRE(counted_type::check().move_assignments(3).move_constructions(2));
+            #endif
          }
          SECTION("rhs' capacity is different")
          {
@@ -320,7 +324,11 @@ TEST_CASE("vector")
             auto lhs = vector<counted_type, 20>{1, 2, 3};
             counted_type::reset_counts();
             lhs = std::move(rhs);
+            #if _sstl_has_exceptions()
+            REQUIRE(counted_type::check().copy_assignments(3).copy_constructions(2));
+            #else
             REQUIRE(counted_type::check().move_assignments(3).move_constructions(2));
+            #endif
          }
       }
       SECTION("number of destructions")
@@ -342,6 +350,18 @@ TEST_CASE("vector")
             REQUIRE(counted_type::check().destructions(5));
          }
       }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling")
+      {
+         auto lhs = vector_counted_type_t{0};
+         auto rhs = vector_counted_type_t{1, 2, 3, 4, 5};
+         counted_type::reset_counts();
+         counted_type::throw_at_nth_copy_construction(2);
+         REQUIRE_THROWS_AS(lhs = std::move(rhs), counted_type::copy_construction::exception);
+         REQUIRE(counted_type::check().copy_assignments(1).copy_constructions(1).destructions(2));
+         REQUIRE(lhs.empty());
+      }
+      #endif
    }
 
    SECTION("initializer-list assignment operator")

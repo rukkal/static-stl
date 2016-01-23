@@ -108,7 +108,7 @@ protected:
       #endif
          while(src != rhs._end())
          {
-            new(dst) value_type(_move_if_noexcept(*src));
+            new(dst) value_type(_move_construct_if_noexcept(*src));
             #if !_sstl_has_exceptions()
             src->~value_type();
             #endif
@@ -172,40 +172,62 @@ protected:
          throw;
       }
       #endif
-      auto new_end = dest;
+      _set_end(dest);
       while(dest < end)
       {
          dest->~value_type();
          ++dest;
       }
-      _set_end(new_end);
    }
 
    template<class TIterator>
    void _move_assign(TIterator rhs_begin, TIterator rhs_end)
-      _sstl_noexcept(std::is_nothrow_move_assignable<value_type>::value
-                     && std::is_nothrow_move_constructible<value_type>::value
+      _sstl_noexcept((std::is_nothrow_move_assignable<value_type>::value || std::is_nothrow_copy_assignable<value_type>::value)
+                     && (std::is_nothrow_move_constructible<value_type>::value || std::is_nothrow_copy_constructible<value_type>::value)
                      && std::is_nothrow_destructible<value_type>::value)
    {
       auto src = rhs_begin;
       auto dest = _begin();
       auto end = _end();
-      while(src != rhs_end)
+      #if _sstl_has_exceptions()
+      try
       {
-         if(dest < end)
-            *dest = std::move(*src);
-         else
-            new(dest) value_type(std::move(*src));
-         src->~value_type();
-         ++dest; ++src;
+      #endif
+         while(src != rhs_end)
+         {
+            if(dest < end)
+               *dest = _move_assign_if_noexcept(*src);
+            else
+               new(dest) value_type(_move_assign_if_noexcept(*src));
+            #if !_sstl_has_exceptions()
+            src->~value_type();
+            #endif
+            ++dest; ++src;
+         }
+      #if _sstl_has_exceptions()
       }
-      auto new_end = dest;
+      catch(...)
+      {
+         while(dest-- > _begin())
+            dest->~value_type();
+         _set_end(_begin());
+         throw;
+      }
+      #endif
+
+      _set_end(dest);
       while(dest < end)
       {
          dest->~value_type();
          ++dest;
       }
-      _set_end(new_end);
+
+      #if _sstl_has_exceptions()
+      while(src-- > rhs_begin)
+      {
+         src->~value_type();
+      }
+      #endif
    }
 
    void _assign(size_type count, const_reference value)
@@ -652,6 +674,10 @@ public:
    }
 
    // move assignment from vectors with same value type (capacity doesn't matter)
+   //exception safety: no-throw (if value_type has either a noexcept-specified move assignment operator
+   // or a noexcept-specified copy assignment operator),
+   //basic for lhs and strong for rhs (if value_type doesn't have a noexcept-specified move constructor, but has a copy constructor),
+   //otherwise basic
    vector& operator=(_base&& rhs)
       _sstl_noexcept(noexcept(std::declval<_base>()._move_assign( std::declval<iterator>(),
                                                                   std::declval<iterator>())))
@@ -665,6 +691,10 @@ public:
       return *this;
    }
 
+   //exception safety: no-throw (if value_type has either a noexcept-specified move assignment operator
+   // or a noexcept-specified copy assignment operator),
+   //basic for lhs and strong for rhs (if value_type doesn't have a noexcept-specified move constructor, but has a copy constructor),
+   //otherwise basic
    vector& operator=(vector&& rhs)
       _sstl_noexcept(noexcept(std::declval<vector>().operator=(std::declval<_base>())))
    {
