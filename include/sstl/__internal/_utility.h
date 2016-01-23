@@ -15,12 +15,23 @@ namespace sstl
 
 template<bool Cond,
          class T,
-         class TRValueRef = typename std::remove_reference<T>::type&&,
-         class TLValueRef = typename std::remove_reference<T>::type&,
-         class TRet = typename std::conditional<Cond, TRValueRef, TLValueRef>::type>
-TRet _conditional_move(T&& value)
+         class _TRet = typename std::conditional<Cond, T&&, const T&>::type>
+_TRet _conditional_move(T& value)
 {
-   return static_cast<TRet>(value);
+   return static_cast<_TRet>(value);
+}
+
+//as std::move_if_noexcept, except that returns rvalue reference also when the move constructor
+//is not noexcept qualified, but exceptions are turned off (e.g. -fno-exceptions)
+template<class T,
+         bool _ShouldBeMoveConstructed =
+            !_sstl_has_exceptions()
+            || std::is_nothrow_move_constructible<T>::value
+            || !std::is_copy_constructible<T>::value,
+         class _TRet = typename std::conditional<_ShouldBeMoveConstructed, T&&, const T&>::type>
+_TRet _move_if_noexcept(T& value)
+{
+   return static_cast<_TRet>(value);
 }
 
 }

@@ -96,17 +96,39 @@ protected:
    }
 
    void _move_constructor(_vector_base&& rhs)
-      _sstl_noexcept(std::is_nothrow_move_constructible<value_type>::value
+      _sstl_noexcept(((!_sstl_has_exceptions() && std::is_nothrow_move_constructible<value_type>::value) ||
+                     (_sstl_has_exceptions() && std::is_nothrow_copy_constructible<value_type>::value))
                      && std::is_nothrow_destructible<value_type>::value)
    {
       auto src = rhs._begin();
       auto dst = _begin();
+      #if _sstl_has_exceptions()
+      try
+      {
+      #endif
+         while(src != rhs._end())
+         {
+            new(dst) value_type(_move_if_noexcept(*src));
+            #if !_sstl_has_exceptions()
+            src->~value_type();
+            #endif
+            ++src; ++dst;
+         }
+      #if _sstl_has_exceptions()
+      }
+      catch(...)
+      {
+         while(dst-- > _begin())
+            dst->~value_type();
+         throw;
+      }
+      src = rhs._begin();
       while(src != rhs._end())
       {
-         new(dst) value_type(std::move(*src));
          src->~value_type();
-         ++src; ++dst;
+         ++src;
       }
+      #endif
       _set_end(dst);
       rhs._set_end(rhs._begin());
    }

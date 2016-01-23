@@ -131,16 +131,34 @@ TEST_CASE("vector")
             auto rhs = vector_counted_type_t{1, 2, 3};
             counted_type::reset_counts();
             auto lhs = vector_counted_type_t{ std::move(rhs) };
+            #if _sstl_has_exceptions()
+            REQUIRE(counted_type::check().copy_constructions(3).destructions(3));
+            #else
             REQUIRE(counted_type::check().move_constructions(3).destructions(3));
+            #endif
          }
          SECTION("rhs' capacity is different")
          {
             auto rhs = vector<counted_type, 30>{1, 2, 3};
             counted_type::reset_counts();
             auto lhs = vector<counted_type, 10>{ std::move(rhs) };
+            #if _sstl_has_exceptions()
+            REQUIRE(counted_type::check().copy_constructions(3).destructions(3));
+            #else
             REQUIRE(counted_type::check().move_constructions(3).destructions(3));
+            #endif
          }
       }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling")
+      {
+         auto rhs = vector_counted_type_t{1, 2, 3, 4, 5};
+         counted_type::reset_counts();
+         counted_type::throw_at_nth_copy_construction(3);
+         REQUIRE_THROWS_AS(vector_counted_type_t{ std::move(rhs) }, counted_type::copy_construction::exception);
+         REQUIRE(counted_type::check().copy_constructions(2).destructions(2));
+      }
+      #endif
    }
 
    SECTION("range constructor")
