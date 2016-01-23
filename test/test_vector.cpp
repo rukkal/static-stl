@@ -183,9 +183,22 @@ TEST_CASE("vector")
 
    SECTION("initializer-list constructor")
    {
-      auto init = std::initializer_list<int>{1, 2, 3};
-      auto v = vector_int_t(init);
-      REQUIRE(are_containers_equal(v, init));
+      SECTION("contained values")
+      {
+         auto init = std::initializer_list<int>{1, 2, 3};
+         auto v = vector_int_t(init);
+         REQUIRE(are_containers_equal(v, init));
+      }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling")
+      {
+         auto init = std::initializer_list<counted_type>{1, 2, 3, 4, 5};
+         counted_type::reset_counts();
+         counted_type::throw_at_nth_copy_construction(3);
+         REQUIRE_THROWS_AS(vector_counted_type_t{ init }, counted_type::copy_construction::exception);
+         REQUIRE(counted_type::check().copy_constructions(2).destructions(2));
+      }
+      #endif
    }
 
    SECTION("destructor (contained values are destroyed)")
