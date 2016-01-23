@@ -267,6 +267,18 @@ TEST_CASE("vector")
             REQUIRE(counted_type::check().destructions(2));
          }
       }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling")
+      {
+         auto lhs = vector_counted_type_t{0};
+         auto rhs = vector_counted_type_t{1, 2, 3, 4, 5};
+         counted_type::reset_counts();
+         counted_type::throw_at_nth_copy_construction(2);
+         REQUIRE_THROWS_AS(lhs = rhs, counted_type::copy_construction::exception);
+         REQUIRE(counted_type::check().copy_assignments(1).copy_constructions(1).destructions(2));
+         REQUIRE(lhs.empty());
+      }
+      #endif
    }
 
    SECTION("move assignment operator")

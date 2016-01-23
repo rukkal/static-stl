@@ -150,14 +150,28 @@ protected:
       auto src = rhs_begin;
       auto dest = _begin();
       auto end = _end();
-      while(src != rhs_end)
+      #if _sstl_has_exceptions()
+      try
       {
-         if(dest < end)
-            *dest = *src;
-         else
-            new(dest) value_type(*src);
-         ++dest; ++src;
+      #endif
+         while(src != rhs_end)
+         {
+            if(dest < end)
+               *dest = *src;
+            else
+               new(dest) value_type(*src);
+            ++dest; ++src;
+         }
+      #if _sstl_has_exceptions()
       }
+      catch(...)
+      {
+         while(dest-- > _begin())
+            dest->~value_type();
+         _set_end(_begin());
+         throw;
+      }
+      #endif
       auto new_end = dest;
       while(dest < end)
       {
@@ -617,6 +631,7 @@ public:
    }
 
    // copy assignment from vectors with same value type (capacity doesn't matter)
+   //exception safety: no-throw (for noexcept-specified copy constructor of value_type), otherwise strong
    vector& operator=(const _base& rhs)
       _sstl_noexcept(noexcept(std::declval<_base>()._copy_assign( std::declval<iterator>(),
                                                                   std::declval<iterator>())))
@@ -629,6 +644,7 @@ public:
       return *this;
    }
 
+   //exception safety: no-throw (for noexcept-specified copy constructor of value_type), otherwise strong
    vector& operator=(const vector& rhs)
       _sstl_noexcept(noexcept(std::declval<vector>().operator=(std::declval<const _base&>())))
    {
