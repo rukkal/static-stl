@@ -230,23 +230,37 @@ protected:
       #endif
    }
 
-   void _assign(size_type count, const_reference value)
+   void _count_assign(size_type count, const_reference value)
       _sstl_noexcept(std::is_nothrow_copy_assignable<value_type>::value
                      && std::is_nothrow_copy_constructible<value_type>::value
                      && std::is_nothrow_destructible<value_type>::value)
    {
       auto dest = _begin();
-      auto end = _end();
-      while(count > 0)
+      #if _sstl_has_exceptions()
+      try
       {
-         if(dest < end)
-            *dest = value;
-         else
-            new(dest) value_type(value);
-         ++dest; --count;
+      #endif
+         while(count > 0)
+         {
+            if(dest < _end())
+               *dest = value;
+            else
+               new(dest) value_type(value);
+            ++dest; --count;
+         }
+      #if _sstl_has_exceptions()
       }
+      catch(...)
+      {
+         auto end_so_far = std::max(dest, _end());
+         for(auto pos=_begin(); pos != end_so_far; ++pos)
+            pos->~value_type();
+         _set_end(_begin());
+         throw;
+      }
+      #endif
       auto new_end = dest;
-      while(dest < end)
+      while(dest < _end())
       {
          dest->~value_type();
          ++dest;
@@ -615,8 +629,7 @@ public:
    {}
 
    //move construction from any vector with same value type (capacity doesn't matter)
-   //exception safety: no-throw (if value_type has either a noexcept-specified move constructor
-   // or a noexcept-specified copy constructor),
+   //exception safety: no-throw (if value_type has noexcept-specified move constructor or noexcept-specified copy constructor),
    //strong (if value_type doesn't have a noexcept-specified move constructor, but has a copy constructor),
    //otherwise basic
    vector(_base&& rhs)
@@ -627,8 +640,7 @@ public:
       _base::_move_constructor(std::move(rhs));
    }
 
-   //exception safety: no-throw (if value_type has either a noexcept-specified move constructor
-   // or a noexcept-specified copy constructor),
+   //exception safety: no-throw (if value_type noexcept-specified move constructor or noexcept-specified copy constructor),
    //strong (if value_type doesn't have a noexcept-specified move constructor, but has a copy constructor),
    //otherwise basic
    vector(vector&& rhs)
@@ -653,8 +665,7 @@ public:
    }
 
    //copy assignment from vectors with same value type (capacity doesn't matter)
-   //exception safety: no-throw (if value_type has noexcept-specified copy constructor
-   //and noexcept-specified copy assignment operator),
+   //exception safety: no-throw (if value_type has noexcept-specified copy constructor and noexcept-specified copy assignment operator),
    //otherwise basic for lhs and strong for rhs
    vector& operator=(const _base& rhs)
       _sstl_noexcept(noexcept(std::declval<_base>()._copy_assign( std::declval<iterator>(),
@@ -668,8 +679,7 @@ public:
       return *this;
    }
 
-   //exception safety: no-throw (if value_type has noexcept-specified copy constructor
-   //and noexcept-specified copy assignment operator),
+   //exception safety: no-throw (if value_type has noexcept-specified copy constructor and noexcept-specified copy assignment operator),
    //otherwise basic for lhs and strong for rhs
    vector& operator=(const vector& rhs)
       _sstl_noexcept(noexcept(std::declval<vector>().operator=(std::declval<const _base&>())))
@@ -677,9 +687,9 @@ public:
       return operator=(static_cast<const _base&>(rhs));
    }
 
-   // move assignment from vectors with same value type (capacity doesn't matter)
+   //move assignment from vectors with same value type (capacity doesn't matter)
    //exception safety: no-throw (if value_type has either a noexcept-specified move assignment operator
-   // or a noexcept-specified copy assignment operator),
+   //or a noexcept-specified copy assignment operator),
    //basic for lhs and strong for rhs (if value_type doesn't have a noexcept-specified move constructor, but has a copy constructor),
    //otherwise basic
    vector& operator=(_base&& rhs)
@@ -696,7 +706,7 @@ public:
    }
 
    //exception safety: no-throw (if value_type has either a noexcept-specified move assignment operator
-   // or a noexcept-specified copy assignment operator),
+   //or a noexcept-specified copy assignment operator),
    //basic for lhs and strong for rhs (if value_type doesn't have a noexcept-specified move constructor, but has a copy constructor),
    //otherwise basic
    vector& operator=(vector&& rhs)
@@ -705,8 +715,7 @@ public:
       return operator=(static_cast<_base&&>(rhs));
    }
 
-   //exception safety: no-throw (if value_type has noexcept-specified copy constructor
-   //and noexcept-specified copy assignment operator),
+   //exception safety: no-throw (if value_type has noexcept-specified copy constructor and noexcept-specified copy assignment operator),
    //otherwise basic for lhs and strong for rhs
    vector& operator=(std::initializer_list<value_type> init)
       _sstl_noexcept(noexcept(std::declval<_base>()._copy_assign(
@@ -717,11 +726,13 @@ public:
       return *this;
    }
 
+   //exception safety: no-throw (if value_type has noexcept-specified copy constructor and noexcept-specified copy assignment operator),
+   //otherwise basic
    void assign(size_type count, const_reference value)
-      _sstl_noexcept(noexcept(std::declval<_base>()._assign(std::declval<size_type>(), std::declval<const_reference>())))
+      _sstl_noexcept(noexcept(std::declval<_base>()._count_assign(std::declval<size_type>(), std::declval<const_reference>())))
    {
       sstl_assert(count <= Capacity);
-      _base::_assign(count, value);
+      _base::_count_assign(count, value);
    }
 
    template<class TIterator,

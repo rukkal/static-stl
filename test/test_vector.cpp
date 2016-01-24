@@ -436,6 +436,18 @@ TEST_CASE("vector")
          v.assign(3, value);
          REQUIRE(counted_type::check().destructions(2));
       }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling")
+      {
+         auto v = vector_counted_type_t{ 1 };
+         auto value = counted_type{ 7 };
+         counted_type::reset_counts();
+         counted_type::throw_at_nth_copy_construction(2);
+         REQUIRE_THROWS_AS(v.assign(5, value), counted_type::copy_construction::exception);
+         REQUIRE(counted_type::check().copy_assignments(1).copy_constructions(1).destructions(2));
+         REQUIRE(v.empty());
+      }
+      #endif
    }
 
    SECTION("range assign")
