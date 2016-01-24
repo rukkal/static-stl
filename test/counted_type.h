@@ -299,11 +299,11 @@ public:
    {
       destruction::throw_expected_at_count = n;
    }
-   static void throw_at_nth_copy_assigment(size_t n)
+   static void throw_at_nth_copy_assignment(size_t n)
    {
       copy_assignment::throw_expected_at_count = n;
    }
-   static void throw_at_nth_move_assigment(size_t n)
+   static void throw_at_nth_move_assignment(size_t n)
    {
       move_assignment::throw_expected_at_count = n;
    }

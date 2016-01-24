@@ -270,12 +270,12 @@ TEST_CASE("vector")
       #if _sstl_has_exceptions()
       SECTION("exception handling")
       {
-         auto lhs = vector_counted_type_t{0};
-         auto rhs = vector_counted_type_t{1, 2, 3, 4, 5};
+         auto lhs = vector_counted_type_t{1, 2, 3, 4, 5};
+         auto rhs = vector_counted_type_t{1, 2, 3};
          counted_type::reset_counts();
-         counted_type::throw_at_nth_copy_construction(2);
-         REQUIRE_THROWS_AS(lhs = rhs, counted_type::copy_construction::exception);
-         REQUIRE(counted_type::check().copy_assignments(1).copy_constructions(1).destructions(2));
+         counted_type::throw_at_nth_copy_assignment(3);
+         REQUIRE_THROWS_AS(lhs = rhs, counted_type::copy_assignment::exception);
+         REQUIRE(counted_type::check().copy_assignments(2).destructions(5));
          REQUIRE(lhs.empty());
       }
       #endif
@@ -353,12 +353,12 @@ TEST_CASE("vector")
       #if _sstl_has_exceptions()
       SECTION("exception handling")
       {
-         auto lhs = vector_counted_type_t{0};
-         auto rhs = vector_counted_type_t{1, 2, 3, 4, 5};
+         auto lhs = vector_counted_type_t{1, 2, 3, 4, 5};
+         auto rhs = vector_counted_type_t{1, 2, 3};
          counted_type::reset_counts();
-         counted_type::throw_at_nth_copy_construction(2);
-         REQUIRE_THROWS_AS(lhs = std::move(rhs), counted_type::copy_construction::exception);
-         REQUIRE(counted_type::check().copy_assignments(1).copy_constructions(1).destructions(2));
+         counted_type::throw_at_nth_copy_assignment(3);
+         REQUIRE_THROWS_AS(lhs = std::move(rhs), counted_type::copy_assignment::exception);
+         REQUIRE(counted_type::check().copy_assignments(2).destructions(5));
          REQUIRE(lhs.empty());
       }
       #endif
@@ -400,12 +400,12 @@ TEST_CASE("vector")
       #if _sstl_has_exceptions()
       SECTION("exception handling")
       {
-         auto rhs = std::initializer_list<counted_type>{1, 2, 3, 4, 5};
-         auto lhs = vector_counted_type_t{0};
+         auto rhs = std::initializer_list<counted_type>{1, 2, 3};
+         auto lhs = vector_counted_type_t{1, 2, 3, 4, 5};
          counted_type::reset_counts();
-         counted_type::throw_at_nth_copy_construction(2);
-         REQUIRE_THROWS_AS(lhs = rhs, counted_type::copy_construction::exception);
-         REQUIRE(counted_type::check().copy_assignments(1).copy_constructions(1).destructions(2));
+         counted_type::throw_at_nth_copy_assignment(3);
+         REQUIRE_THROWS_AS(lhs = rhs, counted_type::copy_assignment::exception);
+         REQUIRE(counted_type::check().copy_assignments(2).destructions(5));
          REQUIRE(lhs.empty());
       }
       #endif
@@ -439,12 +439,12 @@ TEST_CASE("vector")
       #if _sstl_has_exceptions()
       SECTION("exception handling")
       {
-         auto v = vector_counted_type_t{ 1 };
+         auto v = vector_counted_type_t{1, 2, 3, 4, 5};
          auto value = counted_type{ 7 };
          counted_type::reset_counts();
-         counted_type::throw_at_nth_copy_construction(2);
-         REQUIRE_THROWS_AS(v.assign(5, value), counted_type::copy_construction::exception);
-         REQUIRE(counted_type::check().copy_assignments(1).copy_constructions(1).destructions(2));
+         counted_type::throw_at_nth_copy_assignment(3);
+         REQUIRE_THROWS_AS(v.assign(3, value), counted_type::copy_assignment::exception);
+         REQUIRE(counted_type::check().copy_assignments(2).destructions(5));
          REQUIRE(v.empty());
       }
       #endif
@@ -478,12 +478,12 @@ TEST_CASE("vector")
       #if _sstl_has_exceptions()
       SECTION("exception handling")
       {
-         auto range = std::initializer_list<counted_type>{1, 2, 3, 4, 5};
-         auto v = vector_counted_type_t{0};
+         auto range = std::initializer_list<counted_type>{1, 2, 3};
+         auto v = vector_counted_type_t{1, 2, 3, 4, 5};
          counted_type::reset_counts();
-         counted_type::throw_at_nth_copy_construction(2);
-         REQUIRE_THROWS_AS(v.assign(range.begin(), range.end()), counted_type::copy_construction::exception);
-         REQUIRE(counted_type::check().copy_assignments(1).copy_constructions(1).destructions(2));
+         counted_type::throw_at_nth_copy_assignment(3);
+         REQUIRE_THROWS_AS(v.assign(range.begin(), range.end()), counted_type::copy_assignment::exception);
+         REQUIRE(counted_type::check().copy_assignments(2).destructions(5));
          REQUIRE(v.empty());
       }
       #endif

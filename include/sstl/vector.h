@@ -118,8 +118,8 @@ protected:
       }
       catch(...)
       {
-         while(dst-- > _begin())
-            dst->~value_type();
+         _set_end(dst);
+         _clear();
          throw;
       }
       src = rhs._begin();
@@ -166,9 +166,8 @@ protected:
       }
       catch(...)
       {
-         while(dest-- > _begin())
-            dest->~value_type();
-         _set_end(_begin());
+         _set_end(std::max(dest, _end()));
+         _clear();
          throw;
       }
       #endif
@@ -208,9 +207,8 @@ protected:
       }
       catch(...)
       {
-         while(dest-- > _begin())
-            dest->~value_type();
-         _set_end(_begin());
+         _set_end(std::max(dest, _end()));
+         _clear();
          throw;
       }
       #endif
@@ -252,10 +250,8 @@ protected:
       }
       catch(...)
       {
-         auto end_so_far = std::max(dest, _end());
-         for(auto pos=_begin(); pos != end_so_far; ++pos)
-            pos->~value_type();
-         _set_end(_begin());
+         _set_end(std::max(dest, _end()));
+         _clear();
          throw;
       }
       #endif
