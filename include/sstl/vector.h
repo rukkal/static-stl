@@ -15,6 +15,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include <initializer_list>
 #include <algorithm>
 #include <array>
+#include <stdexcept>
 
 #include "sstl_assert.h"
 #include "__internal/_except.h"
@@ -22,6 +23,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include "__internal/_utility.h"
 #include "__internal/_iterator.h"
 #include "__internal/aligned_storage.h"
+#include "__internal/_debug.h"
 
 namespace sstl
 {
@@ -264,7 +266,20 @@ protected:
       _set_end(new_end);
    }
 
-   reference _at(size_type idx) _sstl_noexcept_
+   reference _at(size_type idx) _sstl_noexcept_if_doesnt_have_exceptions_
+   {
+      #if _sstl_has_exceptions()
+      if(idx >= _size())
+      {
+         throw std::out_of_range(_sstl_debug_message("vector access out of range"));
+      }
+      #endif
+      auto pos = _begin() + idx;
+      sstl_assert(pos < _end());
+      return *pos;
+   }
+
+   reference _subscript_operator(size_type idx) _sstl_noexcept_
    {
       auto pos = _begin() + idx;
       sstl_assert(pos < _end());
@@ -743,22 +758,26 @@ public:
       _base::_copy_assign(range_begin, range_end);
    }
 
-   reference at(size_type idx) _sstl_noexcept_
+   reference at(size_type idx)
+      _sstl_noexcept(noexcept(std::declval<_base>()._at(size_type{})))
    {
       return _base::_at(idx);
    }
-   const_reference at(size_type idx) const _sstl_noexcept_
+   const_reference at(size_type idx) const
+      _sstl_noexcept(noexcept(std::declval<_base>()._at(size_type{})))
    {
       return const_cast<vector&>(*this)._base::_at(idx);
    }
 
-   reference operator[](size_type idx) _sstl_noexcept_
+   reference operator[](size_type idx)
+      _sstl_noexcept(noexcept(std::declval<_base>()._subscript_operator(size_type{})))
    {
-      return _base::_at(idx);
+      return _base::_subscript_operator(idx);
    }
-   const_reference operator[](size_type idx) const _sstl_noexcept_
+   const_reference operator[](size_type idx) const
+      _sstl_noexcept(noexcept(std::declval<_base>()._subscript_operator(size_type{})))
    {
-      return const_cast<vector&>(*this)._base::_at(idx);
+      return const_cast<vector&>(*this)._base::_subscript_operator(idx);
    }
 
    reference front() _sstl_noexcept_

@@ -508,6 +508,12 @@ TEST_CASE("vector")
          REQUIRE(v.at(2) == 30);
          REQUIRE(v.at(4) == 50);
       }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling")
+      {
+         REQUIRE_THROWS_AS(v.at(5), std::out_of_range);
+      }
+      #endif
    }
 
    SECTION("operator[]")
