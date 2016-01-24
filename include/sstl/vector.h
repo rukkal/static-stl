@@ -735,6 +735,8 @@ public:
       _base::_count_assign(count, value);
    }
 
+   //exception safety: no-throw (if value_type has noexcept-specified copy constructor and noexcept-specified copy assignment operator),
+   //otherwise basic
    template<class TIterator,
             class = _enable_if_input_iterator_t<TIterator>>
    void assign(TIterator range_begin, TIterator range_end)
