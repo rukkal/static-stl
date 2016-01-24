@@ -340,9 +340,33 @@ protected:
       if(pos != end)
       {
          auto last = end-1;
-         new(end) value_type(std::move(*last));
-         std::move_backward(pos, last, end);
-         *pos = _conditional_move<!is_copy_insertion>(value);
+         #if _sstl_has_exceptions()
+         try
+         {
+         #endif
+            new(end) value_type(std::move(*last));
+         #if _sstl_has_exceptions()
+         }
+         catch(...)
+         {
+            _clear();
+            throw;
+         }
+
+         try
+         {
+         #endif
+            std::move_backward(pos, last, end);
+            *pos = _conditional_move<!is_copy_insertion>(value);
+         #if _sstl_has_exceptions()
+         }
+         catch(...)
+         {
+            _set_end(end+1);
+            _clear();
+            throw;
+         }
+         #endif
       }
       else
       {
@@ -839,7 +863,6 @@ public:
    size_type size() const _sstl_noexcept_ { return _base::_size(); }
    size_type max_size() const _sstl_noexcept_ { return Capacity; }
    size_type capacity() const _sstl_noexcept_ { return Capacity; }
-
 
    void clear() _sstl_noexcept(noexcept(std::declval<_base>()._clear()))
    {

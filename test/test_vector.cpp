@@ -729,6 +729,30 @@ TEST_CASE("vector")
          REQUIRE(are_containers_equal(v, expected));
          REQUIRE(counted_type::check().move_constructions(1).move_assignments(2).copy_assignments(1));
       }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling")
+      {
+         auto value = counted_type{ 7 };
+         auto v = vector_counted_type_t{1, 2, 3, 4, 5};
+         SECTION("end (strong exception safety)")
+         {
+            auto expected = std::initializer_list<counted_type>{1, 2, 3, 4, 5};
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_copy_construction(1);
+            REQUIRE_THROWS_AS(v.insert(v.end(), value), counted_type::copy_construction::exception);
+            REQUIRE(counted_type::check().constructions(0).destructions(0));
+            REQUIRE(are_containers_equal(v, expected));
+         }
+         SECTION("middle (basic exception safety)")
+         {
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_copy_assignment(1);
+            REQUIRE_THROWS_AS(v.insert(v.begin()+2, value), counted_type::copy_assignment::exception);
+            REQUIRE(counted_type::check().move_constructions(1).move_assignments(2).destructions(6));
+            REQUIRE(v.empty());
+         }
+      }
+      #endif
    }
 
    SECTION("by-rvalue-reference insert")
@@ -772,6 +796,30 @@ TEST_CASE("vector")
          REQUIRE(are_containers_equal(v, expected));
          REQUIRE(counted_type::check().move_constructions(1).move_assignments(3));
       }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling")
+      {
+         auto value = counted_type{ 7 };
+         auto v = vector_counted_type_t{1, 2, 3, 4, 5};
+         SECTION("end (strong exception safety)")
+         {
+            auto expected = std::initializer_list<counted_type>{1, 2, 3, 4, 5};
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_move_construction(1);
+            REQUIRE_THROWS_AS(v.insert(v.end(), std::move(value)), counted_type::move_construction::exception);
+            REQUIRE(counted_type::check().constructions(0).destructions(0));
+            REQUIRE(are_containers_equal(v, expected));
+         }
+         SECTION("middle (basic exception safety)")
+         {
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_move_assignment(3);
+            REQUIRE_THROWS_AS(v.insert(v.begin()+2, std::move(value)), counted_type::move_assignment::exception);
+            REQUIRE(counted_type::check().move_constructions(1).move_assignments(2).destructions(6));
+            REQUIRE(v.empty());
+         }
+      }
+      #endif
    }
 
    SECTION("count insert")
