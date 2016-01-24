@@ -652,8 +652,10 @@ public:
       _base::_destructor();
    }
 
-   // copy assignment from vectors with same value type (capacity doesn't matter)
-   //exception safety: no-throw (for noexcept-specified copy constructor of value_type), otherwise strong
+   //copy assignment from vectors with same value type (capacity doesn't matter)
+   //exception safety: no-throw (if value_type has noexcept-specified copy constructor
+   //and noexcept-specified copy assignment operator),
+   //otherwise basic for lhs and strong for rhs
    vector& operator=(const _base& rhs)
       _sstl_noexcept(noexcept(std::declval<_base>()._copy_assign( std::declval<iterator>(),
                                                                   std::declval<iterator>())))
@@ -666,7 +668,9 @@ public:
       return *this;
    }
 
-   //exception safety: no-throw (for noexcept-specified copy constructor of value_type), otherwise strong
+   //exception safety: no-throw (if value_type has noexcept-specified copy constructor
+   //and noexcept-specified copy assignment operator),
+   //otherwise basic for lhs and strong for rhs
    vector& operator=(const vector& rhs)
       _sstl_noexcept(noexcept(std::declval<vector>().operator=(std::declval<const _base&>())))
    {
@@ -701,6 +705,9 @@ public:
       return operator=(static_cast<_base&&>(rhs));
    }
 
+   //exception safety: no-throw (if value_type has noexcept-specified copy constructor
+   //and noexcept-specified copy assignment operator),
+   //otherwise basic for lhs and strong for rhs
    vector& operator=(std::initializer_list<value_type> init)
       _sstl_noexcept(noexcept(std::declval<_base>()._copy_assign(
             std::declval<std::initializer_list<value_type>>().begin(),
