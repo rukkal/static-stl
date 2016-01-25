@@ -26,11 +26,9 @@ _TRet _conditional_move(T& value)
 //- the argument's move constructor is noexcept specified
 //- the argument cannot be copy constructed
 template<class T,
-         bool _ShouldBeMoveConstructed =
-            !_sstl_has_exceptions()
-            || std::is_nothrow_move_constructible<T>::value
-            || !std::is_copy_constructible<T>::value,
-         class _TRet = typename std::conditional<_ShouldBeMoveConstructed, T&&, const T&>::type>
+         class _TRet = typename std::conditional<  !_sstl_has_exceptions()
+                                                   || std::is_nothrow_move_constructible<T>::value
+                                                   || !std::is_copy_constructible<T>::value, T&&, const T& >::type>
 _TRet _move_construct_if_noexcept(T& value)
 {
    return static_cast<_TRet>(value);
@@ -41,11 +39,9 @@ _TRet _move_construct_if_noexcept(T& value)
 //- the argument's move assignment operator is noexcept specified
 //- the argument cannot be copy assigned
 template<class T,
-         bool _ShouldBeMoveAssigned =
-            !_sstl_has_exceptions()
-            || std::is_nothrow_move_assignable<T>::value
-            || !std::is_copy_assignable<T>::value,
-         class _TRet = typename std::conditional<_ShouldBeMoveAssigned, T&&, const T&>::type>
+         class _TRet = typename std::conditional<  !_sstl_has_exceptions()
+                                                   || std::is_nothrow_move_assignable<T>::value
+                                                   || !std::is_copy_assignable<T>::value, T&&, const T& >::type>
 _TRet _move_assign_if_noexcept(T& value)
 {
    return static_cast<_TRet>(value);
