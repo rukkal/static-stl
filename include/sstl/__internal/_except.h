@@ -9,10 +9,14 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 
 #include "preprocessor.h"
 
-#if !defined(__EXCEPTIONS) || defined(_SSTL_NOEXCEPTIONS_TEST)
+#if defined(_SSTL_NOEXCEPTIONS_TEST)
    #define _sstl_has_exceptions() 0
-#else
+#elif IS_MSVC()
    #define _sstl_has_exceptions() 1
+#elif defined(__EXCEPTIONS)
+   #define _sstl_has_exceptions() 1
+#else
+   #define _sstl_has_exceptions() 0
 #endif
 
 #if IS_MSVC() && _MSC_VER < 1900
