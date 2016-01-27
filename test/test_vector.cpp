@@ -1281,6 +1281,51 @@ TEST_CASE("vector")
             }
          }
       }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling")
+      {
+         auto values = std::initializer_list<counted_type>{ 1, 2, 3 };
+         SECTION("end (strong exception safety)")
+         {
+            auto expected = v;
+            SECTION("range")
+            {
+               counted_type::reset_counts();
+               counted_type::throw_at_nth_copy_construction(3);
+               REQUIRE_THROWS_AS(v.insert(v.end(), values.begin(), values.end()), counted_type::copy_construction::exception);
+               REQUIRE(counted_type::check().copy_constructions(2).destructions(2));
+               REQUIRE(are_containers_equal(v, expected));
+            }
+            SECTION("initializer list")
+            {
+               counted_type::reset_counts();
+               counted_type::throw_at_nth_copy_construction(3);
+               REQUIRE_THROWS_AS(v.insert(v.end(), values), counted_type::copy_construction::exception);
+               REQUIRE(counted_type::check().copy_constructions(2).destructions(2));
+               REQUIRE(are_containers_equal(v, expected));
+            }
+         }
+         SECTION("middle (basic exception safety)")
+         {
+            SECTION("range")
+            {
+               counted_type::reset_counts();
+               counted_type::throw_at_nth_copy_assignment(3);
+               REQUIRE_THROWS_AS(v.insert(v.begin()+2, values.begin(), values.end()), counted_type::copy_assignment::exception);
+               REQUIRE(counted_type::check().move_constructions(3).copy_assignments(2).destructions(8));
+               REQUIRE(v.empty());
+            }
+            SECTION("initializer list")
+            {
+               counted_type::reset_counts();
+               counted_type::throw_at_nth_copy_assignment(3);
+               REQUIRE_THROWS_AS(v.insert(v.begin()+2, values), counted_type::copy_assignment::exception);
+               REQUIRE(counted_type::check().move_constructions(3).copy_assignments(2).destructions(8));
+               REQUIRE(v.empty());
+            }
+         }
+      }
+      #endif
    }
 
    SECTION("emplace")

@@ -450,35 +450,53 @@ protected:
       auto src_range = range_end - 1;
       auto src_vector = end - 1;
       auto dst_vector = new_end - 1;
+
+      #if _sstl_has_exceptions()
+      try
+      {
+      #endif
+         auto end_src_move_construction = std::max(pos-1, end-count-1);
+         while(src_vector > end_src_move_construction)
+         {
+            new(dst_vector) value_type(std::move(*src_vector));
+            --src_vector; --dst_vector;
+         }
+
+         auto end_src_move_assignment = pos - 1;
+         while(src_vector > end_src_move_assignment)
+         {
+            *dst_vector = std::move(*src_vector);
+            --src_vector; --dst_vector;
+         }
+
+         auto end_dst_construction = end - 1;
+         while(dst_vector > end_dst_construction)
+         {
+            new(dst_vector) value_type(*src_range);
+            --dst_vector; --src_range;
+         }
+
+         auto end_dst_assignment = pos - 1;
+         while(dst_vector > end_dst_assignment)
+         {
+            *dst_vector = *src_range;
+            --dst_vector; --src_range;
+         }
+      #if _sstl_has_exceptions()
+      }
+      catch(...)
+      {
+         for(auto p=new_end-1; p>dst_vector; --p)
+            p->~value_type();
+         if(pos != end)
+         {
+            _set_end(std::min(end, dst_vector+1));
+            _clear();
+         }
+         throw;
+      }
+      #endif
       _set_end(new_end);
-
-      auto end_src_move_construction = std::max(pos-1, end-count-1);
-      while(src_vector > end_src_move_construction)
-      {
-         new(dst_vector) value_type(std::move(*src_vector));
-         --src_vector; --dst_vector;
-      }
-
-      auto end_src_move_assignment = pos - 1;
-      while(src_vector > end_src_move_assignment)
-      {
-         *dst_vector = std::move(*src_vector);
-         --src_vector; --dst_vector;
-      }
-
-      auto end_dst_construction = end - 1;
-      while(dst_vector > end_dst_construction)
-      {
-         new(dst_vector) value_type(*src_range);
-         --dst_vector; --src_range;
-      }
-
-      auto end_dst_assignment = pos - 1;
-      while(dst_vector > end_dst_assignment)
-      {
-         *dst_vector = *src_range;
-         --dst_vector; --src_range;
-      }
 
       return pos;
    }
