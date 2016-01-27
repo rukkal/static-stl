@@ -386,35 +386,53 @@ protected:
       auto new_end = end + count;
       auto src = end - 1;
       auto dst = new_end - 1;
+
+      #if _sstl_has_exceptions()
+      try
+      {
+      #endif
+         auto end_src_move_construction = std::max(pos-1, end-count-1);
+         while(src > end_src_move_construction)
+         {
+            new(dst) value_type(std::move(*src));
+            --src; --dst;
+         }
+
+         auto end_src_move_assignment = pos - 1;
+         while(src > end_src_move_assignment)
+         {
+            *dst = std::move(*src);
+            --src; --dst;
+         }
+
+         auto end_dst_copy_construction = end - 1;
+         while(dst > end_dst_copy_construction)
+         {
+            new(dst) value_type(value);
+            --dst;
+         }
+
+         auto end_dst_copy_assignment = pos - 1;
+         while(dst > end_dst_copy_assignment)
+         {
+            *dst = value;
+            --dst;
+         }
+      #if _sstl_has_exceptions()
+      }
+      catch(...)
+      {
+         for(auto p=new_end-1; p>dst; --p)
+            p->~value_type();
+         if(pos != end)
+         {
+            _set_end(std::min(end, dst+1));
+            _clear();
+         }
+         throw;
+      }
+      #endif
       _set_end(new_end);
-
-      auto end_src_move_construction = std::max(pos-1, end-count-1);
-      while(src > end_src_move_construction)
-      {
-         new(dst) value_type(std::move(*src));
-         --src; --dst;
-      }
-
-      auto end_src_move_assignment = pos - 1;
-      while(src > end_src_move_assignment)
-      {
-         *dst = std::move(*src);
-         --src; --dst;
-      }
-
-      auto end_dst_copy_construction = end - 1;
-      while(dst > end_dst_copy_construction)
-      {
-         new(dst) value_type(value);
-         --dst;
-      }
-
-      auto end_dst_copy_assignment = pos - 1;
-      while(dst > end_dst_copy_assignment)
-      {
-         *dst = value;
-         --dst;
-      }
 
       return pos;
    }
@@ -625,7 +643,8 @@ public:
       _assert_vector_derived_member_variable_access_is_valid(_type_tag<vector>{});
    }
 
-   //exception safety: no-throw (for noexcept-specified constructor of value_type), otherwise strong
+   //exception safety: no-throw (for noexcept-specified constructor of value_type),
+   //otherwise strong
    explicit vector(size_type count, const_reference value=value_type())
       _sstl_noexcept(noexcept(std::declval<_base>()._count_constructor(std::declval<size_type>(), std::declval<const_reference>())))
       : _end_(begin())
@@ -635,7 +654,8 @@ public:
       _base::_count_constructor(count, value);
    }
 
-   //exception safety: no-throw (for noexcept-specified copy constructor of value_type), otherwise strong
+   //exception safety: no-throw (for noexcept-specified copy constructor of value_type),
+   //otherwise strong
    template<class TIterator, class = _enable_if_input_iterator_t<TIterator>>
    vector(TIterator range_begin, TIterator range_end)
       _sstl_noexcept(noexcept(std::declval<_base>()._range_constructor( std::declval<TIterator>(),
@@ -647,7 +667,8 @@ public:
    }
 
    //copy construction from any vector with same value type (capacity doesn't matter)
-   //exception safety: no-throw (for noexcept-specified copy constructor of value_type), otherwise strong
+   //exception safety: no-throw (for noexcept-specified copy constructor of value_type),
+   //otherwise strong
    vector(const _base& rhs)
       _sstl_noexcept(noexcept(std::declval<_base>()._range_constructor( std::declval<const_iterator>(),
                                                                         std::declval<const_iterator>())))
@@ -657,16 +678,17 @@ public:
       _base::_range_constructor(const_cast<_base&>(rhs)._begin(), const_cast<_base&>(rhs)._end());
    }
 
-   //exception safety: no-throw (for noexcept-specified copy constructor of value_type), otherwise strong
+   //exception safety: no-throw (for noexcept-specified copy constructor of value_type),
+   //otherwise strong
    vector(const vector& rhs)
       _sstl_noexcept(noexcept(vector(std::declval<const _base&>())))
       : vector(static_cast<const _base&>(rhs))
    {}
 
    //move construction from any vector with same value type (capacity doesn't matter)
-   //exception safety: no-throw (if value_type has noexcept-specified move constructor or noexcept-specified copy constructor),
-   //strong (if value_type doesn't have a noexcept-specified move constructor, but has a copy constructor),
-   //otherwise basic
+   //exception safety: no-throw (if value_type has noexcept-specified move constructor
+   //or noexcept-specified copy constructor), strong (if value_type doesn't have
+   //a noexcept-specified move constructor, but has a copy constructor), otherwise basic
    vector(_base&& rhs)
       _sstl_noexcept(noexcept(std::declval<_base>()._move_constructor(std::declval<_base>())))
    {
@@ -675,9 +697,9 @@ public:
       _base::_move_constructor(std::move(rhs));
    }
 
-   //exception safety: no-throw (if value_type noexcept-specified move constructor or noexcept-specified copy constructor),
-   //strong (if value_type doesn't have a noexcept-specified move constructor, but has a copy constructor),
-   //otherwise basic
+   //exception safety: no-throw (if value_type has noexcept-specified move constructor
+   //or noexcept-specified copy constructor), strong (if value_type doesn't have
+   //a noexcept-specified move constructor, but has a copy constructor), otherwise basic
    vector(vector&& rhs)
       _sstl_noexcept(noexcept(vector(std::declval<_base>())))
       : vector(static_cast<_base&&>(rhs))
@@ -700,8 +722,8 @@ public:
    }
 
    //copy assignment from vectors with same value type (capacity doesn't matter)
-   //exception safety: no-throw (if value_type has noexcept-specified copy constructor and noexcept-specified copy assignment operator),
-   //otherwise basic for lhs and strong for rhs
+   //exception safety: no-throw (if value_type has noexcept-specified copy constructor
+   //and noexcept-specified copy assignment operator), otherwise basic for lhs and strong for rhs
    vector& operator=(const _base& rhs)
       _sstl_noexcept(noexcept(std::declval<_base>()._copy_assign( std::declval<iterator>(),
                                                                   std::declval<iterator>())))
@@ -714,8 +736,8 @@ public:
       return *this;
    }
 
-   //exception safety: no-throw (if value_type has noexcept-specified copy constructor and noexcept-specified copy assignment operator),
-   //otherwise basic for lhs and strong for rhs
+   //exception safety: no-throw (if value_type has noexcept-specified copy constructor
+   //and noexcept-specified copy assignment operator), otherwise basic for lhs and strong for rhs
    vector& operator=(const vector& rhs)
       _sstl_noexcept(noexcept(std::declval<vector>().operator=(std::declval<const _base&>())))
    {
@@ -723,10 +745,10 @@ public:
    }
 
    //move assignment from vectors with same value type (capacity doesn't matter)
-   //exception safety: no-throw (if value_type has either a noexcept-specified move assignment operator
-   //or a noexcept-specified copy assignment operator),
-   //basic for lhs and strong for rhs (if value_type doesn't have a noexcept-specified move constructor, but has a copy constructor),
-   //otherwise basic
+   //exception safety: no-throw (if value_type has noexcept-specified move assignment operator
+   //or noexcept-specified copy assignment operator),
+   //basic for lhs and strong for rhs (if value_type doesn't have a noexcept-specified move constructor,
+   //but has a copy constructor), otherwise basic
    vector& operator=(_base&& rhs)
       _sstl_noexcept(noexcept(std::declval<_base>()._move_assign( std::declval<iterator>(),
                                                                   std::declval<iterator>())))
@@ -740,18 +762,18 @@ public:
       return *this;
    }
 
-   //exception safety: no-throw (if value_type has either a noexcept-specified move assignment operator
-   //or a noexcept-specified copy assignment operator),
-   //basic for lhs and strong for rhs (if value_type doesn't have a noexcept-specified move constructor, but has a copy constructor),
-   //otherwise basic
+   //exception safety: no-throw (if value_type has noexcept-specified move assignment operator
+   //or noexcept-specified copy assignment operator),
+   //basic for lhs and strong for rhs (if value_type doesn't have a noexcept-specified move constructor,
+   //but has a copy constructor), otherwise basic
    vector& operator=(vector&& rhs)
       _sstl_noexcept(noexcept(std::declval<vector>().operator=(std::declval<_base>())))
    {
       return operator=(static_cast<_base&&>(rhs));
    }
 
-   //exception safety: no-throw (if value_type has noexcept-specified copy constructor and noexcept-specified copy assignment operator),
-   //otherwise basic for lhs and strong for rhs
+   //exception safety: no-throw (if value_type has noexcept-specified copy constructor
+   //and noexcept-specified copy assignment operator), otherwise basic for lhs and strong for rhs
    vector& operator=(std::initializer_list<value_type> init)
       _sstl_noexcept(noexcept(std::declval<_base>()._copy_assign(
             std::declval<std::initializer_list<value_type>>().begin(),
@@ -761,8 +783,8 @@ public:
       return *this;
    }
 
-   //exception safety: no-throw (if value_type has noexcept-specified copy constructor and noexcept-specified copy assignment operator),
-   //otherwise basic
+   //exception safety: no-throw (if value_type has noexcept-specified copy constructor
+   //and noexcept-specified copy assignment operator), otherwise basic
    void assign(size_type count, const_reference value)
       _sstl_noexcept(noexcept(std::declval<_base>()._count_assign(std::declval<size_type>(), std::declval<const_reference>())))
    {
@@ -770,8 +792,8 @@ public:
       _base::_count_assign(count, value);
    }
 
-   //exception safety: no-throw (if value_type has noexcept-specified copy constructor and noexcept-specified copy assignment operator),
-   //otherwise basic
+   //exception safety: no-throw (if value_type has noexcept-specified copy constructor
+   //and noexcept-specified copy assignment operator), otherwise basic
    template<class TIterator,
             class = _enable_if_input_iterator_t<TIterator>>
    void assign(TIterator range_begin, TIterator range_end)
@@ -869,6 +891,9 @@ public:
       _base::_clear();
    }
 
+   //exception safety: no-throw (if value_type has noexcept-specified copy constructor,
+   //no-except specified move assignment operator and noexcept-specified copy assignment operator),
+   //strong when inserting at the end, otherwise basic
    iterator insert(const_iterator pos, const_reference value)
       _sstl_noexcept(noexcept(std::declval<_base>().template _insert<_base::_is_copy>( std::declval<iterator>(),
                                                                                        std::declval<reference>())))
@@ -877,6 +902,9 @@ public:
       return _base::template _insert<_base::_is_copy>(const_cast<iterator>(pos), const_cast<reference>(value));
    }
 
+   //exception safety: no-throw (if value_type has noexcept-specified move constructor and
+   //no-except specified move assignment operator),
+   //strong when inserting at the end, otherwise basic
    iterator insert(const_iterator pos, value_type&& value)
       _sstl_noexcept(noexcept(std::declval<_base>().template _insert<!_base::_is_copy>(std::declval<iterator>(),
                                                                                        std::declval<reference>())))
@@ -885,6 +913,10 @@ public:
       return _base::template _insert<!_base::_is_copy>(const_cast<iterator>(pos), const_cast<reference>(value));
    }
 
+   //exception safety: no-throw
+   //(if value_type has noexcept-specified copy constructor, noexcept-specified move constructor,
+   //noexcept-specified copy assignment operator and no-except specified move assignment operator),
+   //strong when inserting at the end, otherwise basic
    iterator insert(const_iterator pos, size_type count, const_reference value)
       _sstl_noexcept(noexcept(std::declval<_base>()._insert(std::declval<iterator>(),
                                                             std::declval<size_type>(),
