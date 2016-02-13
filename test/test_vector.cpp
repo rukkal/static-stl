@@ -1629,6 +1629,30 @@ TEST_CASE("vector")
          v.push_back(std::move(value));
          REQUIRE(counted_type::check().move_constructions(1));
       }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling (strong exception safety)")
+      {
+         auto v = vector_counted_type_t{3, 3, 3, 3, 3};
+         auto expected = v;
+         auto value = counted_type{ 5 };
+         SECTION("by-lvalue-reference version")
+         {
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_copy_construction(1);
+            REQUIRE_THROWS_AS(v.push_back(value), counted_type::copy_construction::exception);
+            REQUIRE(counted_type::check().constructions(0).destructions(0));
+            REQUIRE(are_containers_equal(v, expected));
+         }
+         SECTION("by-rvalue-reference version")
+         {
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_move_construction(1);
+            REQUIRE_THROWS_AS(v.push_back(std::move(value)), counted_type::move_construction::exception);
+            REQUIRE(counted_type::check().constructions(0).destructions(0));
+            REQUIRE(are_containers_equal(v, expected));
+         }
+      }
+      #endif
    }
 
    SECTION("emplace_back")
