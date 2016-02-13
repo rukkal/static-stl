@@ -1686,6 +1686,18 @@ TEST_CASE("vector")
          v.emplace_back(1);
          REQUIRE(counted_type::check().parameter_constructions(1));
       }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling (strong exception safety)")
+      {
+         auto v = vector_counted_type_t{3, 3, 3, 3, 3};
+         auto expected = v;
+         counted_type::reset_counts();
+         counted_type::throw_at_nth_parameter_construction(1);
+         REQUIRE_THROWS_AS(v.emplace_back(5), counted_type::parameter_construction::exception);
+         REQUIRE(counted_type::check().constructions(0).destructions(0));
+         REQUIRE(are_containers_equal(v, expected));
+      }
+      #endif
    }
 
    SECTION("pop_back")
