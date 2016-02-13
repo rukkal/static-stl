@@ -516,11 +516,23 @@ protected:
    {
       auto end = _end();
       auto current = pos;
-      while(current+1 != end)
+      #if _sstl_has_exceptions()
+      try
       {
-         *current = std::move(*(current+1));
-         ++current;
+      #endif
+         while(current+1 != end)
+         {
+            *current = std::move(*(current+1));
+            ++current;
+         }
+      #if _sstl_has_exceptions()
       }
+      catch(...)
+      {
+         _clear();
+         throw;
+      }
+      #endif
       current->~value_type();
       _set_end(current);
       return pos;
