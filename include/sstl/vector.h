@@ -545,11 +545,23 @@ protected:
       auto dst = range_begin;
       auto src = range_end;
 
-      while(src != end)
+      #if _sstl_has_exceptions()
+      try
       {
-         *dst = std::move(*src);
-         ++src; ++dst;
+      #endif
+         while(src != end)
+         {
+            *dst = std::move(*src);
+            ++src; ++dst;
+         }
+      #if _sstl_has_exceptions()
       }
+      catch(...)
+      {
+         _clear();
+         throw;
+      }
+      #endif
       auto new_end = dst;
 
       while(dst != end)

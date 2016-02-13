@@ -1584,6 +1584,17 @@ TEST_CASE("vector")
             REQUIRE(counted_type::check().move_assignments(0).destructions(3));
          }
       }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling (basic exception safety)")
+      {
+         auto v = vector_counted_type_t{3, 3, 3, 3, 3};
+         counted_type::reset_counts();
+         counted_type::throw_at_nth_move_assignment(2);
+         REQUIRE_THROWS_AS(v.erase(v.begin()+1, v.begin()+3), counted_type::move_assignment::exception);
+         REQUIRE(counted_type::check().move_assignments(1).destructions(5));
+         REQUIRE(v.empty());
+      }
+      #endif
    }
 
    SECTION("push_back")
