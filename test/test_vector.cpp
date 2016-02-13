@@ -1366,6 +1366,50 @@ TEST_CASE("vector")
          REQUIRE(are_containers_equal(v, expected));
          REQUIRE(counted_type::check().parameter_constructions(1).move_constructions(1).move_assignments(3));
       }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling (of parameter construction)")
+      {
+         auto v = vector_counted_type_t{3, 3, 3, 3, 3};
+         auto expected = v;
+         SECTION("end (strong exception safety)")
+         {
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_parameter_construction(1);
+            REQUIRE_THROWS_AS(v.emplace(v.end(), 5), counted_type::parameter_construction::exception);
+            REQUIRE(counted_type::check().constructions(0).destructions(0));
+            REQUIRE(are_containers_equal(v, expected));
+         }
+         SECTION("middle (strong exception safety)")
+         {
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_parameter_construction(1);
+            REQUIRE_THROWS_AS(v.insert(v.begin()+2, 5), counted_type::parameter_construction::exception);
+            REQUIRE(counted_type::check().constructions(0).destructions(0));
+            REQUIRE(are_containers_equal(v, expected));
+         }
+      }
+      SECTION("exception handling (of move construction)")
+      {
+         auto v = vector_counted_type_t{3, 3, 3, 3, 3};
+         SECTION("end (strong exception safety)")
+         {
+            auto expected = v;
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_move_construction(1);
+            REQUIRE_THROWS_AS(v.emplace(v.end(), 5), counted_type::move_construction::exception);
+            REQUIRE(counted_type::check().parameter_constructions(1).destructions(1));
+            REQUIRE(are_containers_equal(v, expected));
+         }
+         SECTION("middle (basic exception safety)")
+         {
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_move_construction(1);
+            REQUIRE_THROWS_AS(v.insert(v.begin()+2, 5), counted_type::move_construction::exception);
+            REQUIRE(counted_type::check().parameter_constructions(1).destructions(6));
+            REQUIRE(v.empty());
+         }
+      }
+      #endif
    }
 
    SECTION("erase")
