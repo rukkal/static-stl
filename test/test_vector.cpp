@@ -1771,6 +1771,31 @@ TEST_CASE("vector")
          swap(lhs, rhs);
          REQUIRE(counted_type::check().move_constructions(7).move_assignments(4).destructions(7));
       }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling (basic exceptin safety)")
+      {
+         auto lhs = vector<counted_type, 10>{1, 2, 3, 4, 5, 6};
+         auto rhs = vector<counted_type, 30>{1, 2, 3};
+         SECTION("exception thrown during first half of swap operation (while swapping lhs and rhs elements)")
+         {
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_move_assignment(4);
+            REQUIRE_THROWS_AS(swap(lhs, rhs), counted_type::move_assignment::exception);
+            REQUIRE(counted_type::check().move_constructions(2).move_assignments(3).destructions(2 + 3 + 6));
+            REQUIRE(lhs.empty());
+            REQUIRE(rhs.empty());
+         }
+         SECTION("exception thrown during second half of swap operation (while move constructing lhs elements into rhs)")
+         {
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_move_construction(5);
+            REQUIRE_THROWS_AS(swap(lhs, rhs), counted_type::move_construction::exception);
+            REQUIRE(counted_type::check().move_constructions(4).move_assignments(6).destructions(3 + 4 + 6));
+            REQUIRE(lhs.empty());
+            REQUIRE(rhs.empty());
+         }
+      }
+      #endif
    }
 
    SECTION("non-member relative operators")

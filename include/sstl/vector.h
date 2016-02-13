@@ -613,19 +613,42 @@ protected:
       auto large_end = large->_end();
       auto small_pos = small->_begin();
 
-      while(large_pos != large_end_swaps)
+      #if _sstl_has_exceptions()
+      try
       {
-         std::iter_swap(large_pos, small_pos);
-         ++large_pos; ++small_pos;
+      #endif
+         while(large_pos != large_end_swaps)
+         {
+            std::iter_swap(large_pos, small_pos);
+            ++large_pos; ++small_pos;
+         }
+         while(large_pos != large_end)
+         {
+            new(small_pos) value_type(std::move(*large_pos));
+            large_pos->~value_type();
+            ++large_pos; ++small_pos;
+         }
+      #if _sstl_has_exceptions()
       }
-      large->_set_end(large_pos);
+      catch(...)
+      {
+         if(large_pos >= large_end_swaps)
+         {
+            while(large_pos != large_end)
+            {
+               large_pos->~value_type();
+               ++large_pos;
+            }
+            large->_set_end(large_end_swaps);
+            small->_set_end(small_pos);
+         }
+         large->_clear();
+         small->_clear();
+         throw;
+      }
+      #endif
 
-      while(large_pos != large_end)
-      {
-         new(small_pos) value_type(std::move(*large_pos));
-         large_pos->~value_type();
-         ++large_pos; ++small_pos;
-      }
+      large->_set_end(large_end_swaps);
       small->_set_end(small_pos);
    }
 };
