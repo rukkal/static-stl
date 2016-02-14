@@ -545,6 +545,45 @@ TEST_CASE("vector")
       #endif
    }
 
+   SECTION("initializer list assign")
+   {
+      SECTION("contained values")
+      {
+         auto ilist = {7, 7, 7, 7, 7};
+         auto v = vector_int_t{1, 2, 3};
+         v.assign(ilist);
+         REQUIRE(are_containers_equal(v, ilist));
+      }
+      SECTION("number of copy assignments / copy constructions")
+      {
+         auto ilist = std::initializer_list<counted_type>{7, 7, 7, 7, 7};
+         auto v = vector_counted_type_t{1, 2, 3};
+         counted_type::reset_counts();
+         v.assign(ilist);
+         REQUIRE(counted_type::check().copy_assignments(3).copy_constructions(2));
+      }
+      SECTION("number of destructions")
+      {
+         auto ilist = std::initializer_list<counted_type>{7, 7, 7};
+         auto v = vector_counted_type_t{1, 2, 3, 4, 5};
+         counted_type::reset_counts();
+         v.assign(ilist);
+         REQUIRE(counted_type::check().destructions(2));
+      }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling")
+      {
+         auto ilist = std::initializer_list<counted_type>{1, 2, 3};
+         auto v = vector_counted_type_t{1, 2, 3, 4, 5};
+         counted_type::reset_counts();
+         counted_type::throw_at_nth_copy_assignment(3);
+         REQUIRE_THROWS_AS(v.assign(ilist), counted_type::copy_assignment::exception);
+         REQUIRE(counted_type::check().copy_assignments(2).destructions(5));
+         REQUIRE(v.empty());
+      }
+      #endif
+   }
+
    SECTION("at")
    {
       auto v = vector_int_t{1, 2, 3, 4, 5};

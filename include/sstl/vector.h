@@ -103,6 +103,15 @@ public:
       _copy_assign(range_begin, range_end);
    }
 
+   void assign(std::initializer_list<value_type> ilist)
+      _sstl_noexcept(noexcept(std::declval<vector>()._copy_assign(
+         std::declval<std::initializer_list<value_type>>().begin(),
+         std::declval<std::initializer_list<value_type>>().end())))
+   {
+      sstl_assert(ilist.size() <= _capacity());
+      _copy_assign(ilist.begin(), ilist.end());
+   }
+
 protected:
    static const bool _is_copy = true;
 
