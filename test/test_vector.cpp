@@ -6,6 +6,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 */
 
 #include <catch.hpp>
+#include <type_traits>
 #include <sstl/__internal/_except.h>
 #include <sstl/vector.h>
 
@@ -22,6 +23,14 @@ using vector_counted_type_t = vector<counted_type, 11>;
 
 TEST_CASE("vector")
 {
+   SECTION("user cannot directly construct the base class")
+   {
+      using base_class_t = vector<int>;
+      REQUIRE(!std::is_default_constructible<base_class_t>::value);
+      REQUIRE(!std::is_copy_constructible<base_class_t>::value);
+      REQUIRE(!std::is_move_constructible<base_class_t>::value);
+   }
+
    SECTION("default constructor")
    {
       auto v = vector_int_t();
