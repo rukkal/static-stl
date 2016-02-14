@@ -647,6 +647,21 @@ TEST_CASE("vector")
       }
    }
 
+   SECTION("front")
+   {
+      auto v = vector_int_t{1, 2, 3};
+      SECTION("read access")
+      {
+         const auto& cv = v;
+         REQUIRE(v.back() == 3);
+      }
+      SECTION("write access")
+      {
+         v.back() = 10;
+         REQUIRE(v.back() == 10);
+      }
+   }
+
    SECTION("data")
    {
       auto v = vector_int_t{1, 2, 3};
