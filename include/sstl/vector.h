@@ -58,7 +58,7 @@ public:
       sstl_assert(rhs._size() <= _capacity());
       if(this != &rhs)
       {
-         _copy_assign(const_cast<vector&>(rhs)._begin(), const_cast<vector&>(rhs)._end());
+         _copy_assign(const_cast<vector&>(rhs).begin(), const_cast<vector&>(rhs).end());
       }
       return *this;
    }
@@ -69,8 +69,8 @@ public:
       sstl_assert(rhs._size() <= _capacity());
       if(this != &rhs)
       {
-         _move_assign(rhs._begin(), rhs._end());
-         rhs._set_end(rhs._begin());
+         _move_assign(rhs.begin(), rhs.end());
+         rhs._set_end(rhs.begin());
       }
       return *this;
    }
@@ -119,8 +119,8 @@ public:
          throw std::out_of_range(_sstl_debug_message("vector access out of range"));
       }
       #endif
-      auto pos = _begin() + idx;
-      sstl_assert(pos < _end());
+      auto pos = begin() + idx;
+      sstl_assert(pos < end());
       return *pos;
    }
 
@@ -132,8 +132,8 @@ public:
 
    reference operator[](size_type idx) _sstl_noexcept_
    {
-      auto pos = _begin() + idx;
-      sstl_assert(pos < _end());
+      auto pos = begin() + idx;
+      sstl_assert(pos < end());
       return *pos;
    }
 
@@ -146,7 +146,7 @@ public:
    reference front() _sstl_noexcept_
    {
       sstl_assert(!_empty());
-      return *_begin();
+      return *begin();
    }
 
    const_reference front() const
@@ -158,7 +158,7 @@ public:
    reference back() _sstl_noexcept_
    {
       sstl_assert(!_empty());
-      return *(_end()-1);
+      return *(end()-1);
    }
 
    const_reference back() const
@@ -169,7 +169,7 @@ public:
 
    pointer data() _sstl_noexcept_
    {
-      return _begin();
+      return begin();
    }
 
    const_pointer data() const _sstl_noexcept(std::declval<vector>().data())
@@ -276,7 +276,7 @@ protected:
       _sstl_noexcept(std::is_nothrow_copy_constructible<value_type>::value)
    {
       auto src = range_begin;
-      auto dst = _begin();
+      auto dst = begin();
       #if _sstl_has_exceptions()
       try
       {
@@ -305,15 +305,14 @@ protected:
                      && std::is_nothrow_destructible<value_type>::value)
    {
       auto src = rhs_begin;
-      auto dest = _begin();
-      auto end = _end();
+      auto dest = begin();
       #if _sstl_has_exceptions()
       try
       {
       #endif
          while(src != rhs_end)
          {
-            if(dest < end)
+            if(dest < end())
                *dest = *src;
             else
                new(dest) value_type(*src);
@@ -323,13 +322,14 @@ protected:
       }
       catch(...)
       {
-         _set_end(std::max(dest, _end()));
+         _set_end(std::max(dest, end()));
          _clear();
          throw;
       }
       #endif
+      auto old_end = end();
       _set_end(dest);
-      while(dest < end)
+      while(dest < old_end)
       {
          dest->~value_type();
          ++dest;
@@ -341,13 +341,13 @@ protected:
                      || std::is_nothrow_copy_constructible<value_type>::value)
                      && std::is_nothrow_destructible<value_type>::value)
    {
-      auto src = rhs._begin();
-      auto dst = _begin();
+      auto src = rhs.begin();
+      auto dst = begin();
       #if _sstl_has_exceptions()
       try
       {
       #endif
-         while(src != rhs._end())
+         while(src != rhs.end())
          {
             new(dst) value_type(_move_construct_if_noexcept(*src));
             #if !_sstl_has_exceptions()
@@ -363,23 +363,23 @@ protected:
          _clear();
          throw;
       }
-      src = rhs._begin();
-      while(src != rhs._end())
+      src = rhs.begin();
+      while(src != rhs.end())
       {
          src->~value_type();
          ++src;
       }
       #endif
       _set_end(dst);
-      rhs._set_end(rhs._begin());
+      rhs._set_end(rhs.begin());
    }
 
    void _destructor() _sstl_noexcept(std::is_nothrow_destructible<value_type>::value)
    {
-      auto begin = _begin();
-      auto end = _end();
-      while(begin != end)
-         (begin++)->~value_type();
+      auto b = begin();
+      auto e = end();
+      while(b != e)
+         (b++)->~value_type();
    }
 
    template<class TIterator>
@@ -389,15 +389,14 @@ protected:
                      && std::is_nothrow_destructible<value_type>::value)
    {
       auto src = rhs_begin;
-      auto dest = _begin();
-      auto end = _end();
+      auto dest = begin();
       #if _sstl_has_exceptions()
       try
       {
       #endif
          while(src != rhs_end)
          {
-            if(dest < end)
+            if(dest < end())
                *dest = _move_assign_if_noexcept(*src);
             else
                new(dest) value_type(_move_assign_if_noexcept(*src));
@@ -410,14 +409,15 @@ protected:
       }
       catch(...)
       {
-         _set_end(std::max(dest, _end()));
+         _set_end(std::max(dest, end()));
          _clear();
          throw;
       }
       #endif
 
+      auto old_end = end();
       _set_end(dest);
-      while(dest < end)
+      while(dest < old_end)
       {
          dest->~value_type();
          ++dest;
@@ -436,14 +436,14 @@ protected:
                      && std::is_nothrow_copy_constructible<value_type>::value
                      && std::is_nothrow_destructible<value_type>::value)
    {
-      auto dest = _begin();
+      auto dest = begin();
       #if _sstl_has_exceptions()
       try
       {
       #endif
          while(count > 0)
          {
-            if(dest < _end())
+            if(dest < end())
                *dest = value;
             else
                new(dest) value_type(value);
@@ -453,13 +453,13 @@ protected:
       }
       catch(...)
       {
-         _set_end(std::max(dest, _end()));
+         _set_end(std::max(dest, end()));
          _clear();
          throw;
       }
       #endif
       auto new_end = dest;
-      while(dest < _end())
+      while(dest < end())
       {
          dest->~value_type();
          ++dest;
@@ -474,23 +474,23 @@ protected:
 
    bool _empty() const _sstl_noexcept_
    {
-      return const_cast<vector&>(*this)._begin() == const_cast<vector&>(*this)._end();
+      return const_cast<vector&>(*this).begin() == const_cast<vector&>(*this).end();
    }
 
    size_type _size() const _sstl_noexcept_
    {
-      return std::distance(const_cast<vector&>(*this)._begin(),
-                           const_cast<vector&>(*this)._end());
+      return std::distance(const_cast<vector&>(*this).begin(),
+                           const_cast<vector&>(*this).end());
    }
 
    void _clear() _sstl_noexcept(std::is_nothrow_destructible<value_type>::value)
    {
-      auto begin = _begin();
-      auto pos = begin;
-      auto end = _end();
-      while(pos != end)
+      auto b = begin();
+      auto pos = b;
+      auto e = end();
+      while(pos != e)
          (pos++)->~value_type();
-      _set_end(begin);
+      _set_end(b);
    }
 
    template<bool is_copy_insertion>
@@ -499,15 +499,14 @@ protected:
                      && std::is_nothrow_move_assignable<value_type>::value
                      && (!is_copy_insertion || std::is_nothrow_copy_constructible<value_type>::value))
    {
-      auto end = _end();
-      if(pos != end)
+      if(pos != end())
       {
-         auto last = end-1;
+         auto last = end()-1;
          #if _sstl_has_exceptions()
          try
          {
          #endif
-            new(end) value_type(std::move(*last));
+            new(end()) value_type(std::move(*last));
          #if _sstl_has_exceptions()
          }
          catch(...)
@@ -519,13 +518,13 @@ protected:
          try
          {
          #endif
-            std::move_backward(pos, last, end);
+            std::move_backward(pos, last, end());
             *pos = _conditional_move<!is_copy_insertion>(value);
          #if _sstl_has_exceptions()
          }
          catch(...)
          {
-            _set_end(end+1);
+            _set_end(end()+1);
             _clear();
             throw;
          }
@@ -533,9 +532,9 @@ protected:
       }
       else
       {
-         new(end) value_type(_conditional_move<!is_copy_insertion>(value));
+         new(end()) value_type(_conditional_move<!is_copy_insertion>(value));
       }
-      _set_end(end+1);
+      _set_end(end()+1);
       return pos;
    }
 
@@ -545,16 +544,15 @@ protected:
                      && std::is_nothrow_copy_constructible<value_type>::value
                      && std::is_nothrow_copy_assignable<value_type>::value)
    {
-      auto end = _end();
-      auto new_end = end + count;
-      auto src = end - 1;
+      auto new_end = end() + count;
+      auto src = end() - 1;
       auto dst = new_end - 1;
 
       #if _sstl_has_exceptions()
       try
       {
       #endif
-         auto end_src_move_construction = std::max(pos-1, end-count-1);
+         auto end_src_move_construction = std::max(pos-1, end()-count-1);
          while(src > end_src_move_construction)
          {
             new(dst) value_type(std::move(*src));
@@ -568,7 +566,7 @@ protected:
             --src; --dst;
          }
 
-         auto end_dst_copy_construction = end - 1;
+         auto end_dst_copy_construction = end() - 1;
          while(dst > end_dst_copy_construction)
          {
             new(dst) value_type(value);
@@ -587,9 +585,9 @@ protected:
       {
          for(auto p=new_end-1; p>dst; --p)
             p->~value_type();
-         if(pos != end)
+         if(pos != end())
          {
-            _set_end(std::min(end, dst+1));
+            _set_end(std::min(end(), dst+1));
             _clear();
          }
          throw;
@@ -608,17 +606,16 @@ protected:
                      && noexcept(std::declval<value_type&>() = *std::declval<TIterator&>()))
    {
       auto count = std::distance(range_begin, range_end);
-      auto end = _end();
-      auto new_end = end + count;
+      auto new_end = end() + count;
       auto src_range = range_end - 1;
-      auto src_vector = end - 1;
+      auto src_vector = end() - 1;
       auto dst_vector = new_end - 1;
 
       #if _sstl_has_exceptions()
       try
       {
       #endif
-         auto end_src_move_construction = std::max(pos-1, end-count-1);
+         auto end_src_move_construction = std::max(pos-1, end()-count-1);
          while(src_vector > end_src_move_construction)
          {
             new(dst_vector) value_type(std::move(*src_vector));
@@ -632,7 +629,7 @@ protected:
             --src_vector; --dst_vector;
          }
 
-         auto end_dst_construction = end - 1;
+         auto end_dst_construction = end() - 1;
          while(dst_vector > end_dst_construction)
          {
             new(dst_vector) value_type(*src_range);
@@ -651,9 +648,9 @@ protected:
       {
          for(auto p=new_end-1; p>dst_vector; --p)
             p->~value_type();
-         if(pos != end)
+         if(pos != end())
          {
-            _set_end(std::min(end, dst_vector+1));
+            _set_end(std::min(end(), dst_vector+1));
             _clear();
          }
          throw;
@@ -677,13 +674,12 @@ protected:
    iterator _erase(iterator pos) _sstl_noexcept(std::is_nothrow_move_assignable<value_type>::value
                                                 && std::is_nothrow_destructible<value_type>::value)
    {
-      auto end = _end();
       auto current = pos;
       #if _sstl_has_exceptions()
       try
       {
       #endif
-         while(current+1 != end)
+         while(current+1 != end())
          {
             *current = std::move(*(current+1));
             ++current;
@@ -704,7 +700,6 @@ protected:
    iterator _erase(iterator range_begin, iterator range_end)
       _sstl_noexcept(std::is_nothrow_move_assignable<value_type>::value && std::is_nothrow_destructible<value_type>::value)
    {
-      auto end = _end();
       auto dst = range_begin;
       auto src = range_end;
 
@@ -712,7 +707,7 @@ protected:
       try
       {
       #endif
-         while(src != end)
+         while(src != end())
          {
             *dst = std::move(*src);
             ++src; ++dst;
@@ -727,7 +722,7 @@ protected:
       #endif
       auto new_end = dst;
 
-      while(dst != end)
+      while(dst != end())
       {
          dst->~value_type();
          ++dst;
@@ -740,17 +735,15 @@ protected:
    void _emplace_back(Args&&... args)
       _sstl_noexcept(std::is_nothrow_constructible<value_type, typename std::add_rvalue_reference<Args>::type...>::value)
    {
-      auto end = _end();
-      new(end) value_type(std::forward<Args>(args)...);
-      _set_end(end+1);
+      new(end()) value_type(std::forward<Args>(args)...);
+      _set_end(end()+1);
    }
 
    void _pop_back() _sstl_noexcept(std::is_nothrow_destructible<value_type>::value)
    {
       sstl_assert(!_empty());
-      auto end = _end();
-      (--end)->~value_type();
-      _set_end(end);
+      (end()-1)->~value_type();
+      _set_end(end()-1);
    }
 
    void _swap(vector& rhs)
@@ -771,10 +764,10 @@ protected:
          small = &rhs;
       }
 
-      auto large_pos = large->_begin();
-      auto large_end_swaps = large->_begin() + small->_size();
-      auto large_end = large->_end();
-      auto small_pos = small->_begin();
+      auto large_pos = large->begin();
+      auto large_end_swaps = large->begin() + small->_size();
+      auto large_end = large->end();
+      auto small_pos = small->begin();
 
       #if _sstl_has_exceptions()
       try
@@ -897,7 +890,7 @@ public:
    {
       sstl_assert(rhs._size() <= Capacity);
       _assert_vector_derived_member_variable_access_is_valid(_type_tag<vector>{});
-      _base::_range_constructor(const_cast<_base&>(rhs)._begin(), const_cast<_base&>(rhs)._end());
+      _base::_range_constructor(const_cast<_base&>(rhs).begin(), const_cast<_base&>(rhs).end());
    }
 
    vector(const vector& rhs)
