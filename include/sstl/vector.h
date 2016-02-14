@@ -177,6 +177,72 @@ public:
       return const_cast<vector&>(this).data();
    }
 
+   iterator begin() _sstl_noexcept_
+   {
+      return _begin();
+   }
+
+   const_iterator begin() const _sstl_noexcept(noexcept(std::declval<vector>().begin()))
+   {
+      return const_cast<vector&>(*this).begin();
+   }
+
+   const_iterator cbegin() const _sstl_noexcept(noexcept(std::declval<vector>().begin()))
+   {
+      return const_cast<vector&>(*this).begin();
+   }
+
+   iterator end() _sstl_noexcept_
+   {
+      return _end();
+   }
+
+   const_iterator end() const _sstl_noexcept(noexcept(std::declval<vector>().end()))
+   {
+      return const_cast<vector&>(*this).end();
+   }
+
+   const_iterator cend() const _sstl_noexcept(noexcept(std::declval<vector>().end()))
+   {
+      return const_cast<vector&>(*this).end();
+   }
+
+   reverse_iterator rbegin()
+      _sstl_noexcept(std::is_nothrow_constructible<reverse_iterator, iterator>::value)
+   {
+      return reverse_iterator(end());
+   }
+
+   const_reverse_iterator rbegin() const
+      _sstl_noexcept(std::declval<vector>().rbegin())
+   {
+      return const_cast<vector&>(*this).rbegin();
+   }
+
+   const_reverse_iterator crbegin() const
+      _sstl_noexcept(noexcept(std::declval<vector>().rbegin()))
+   {
+      return const_cast<vector&>(*this).rbegin();
+   }
+
+   reverse_iterator rend()
+      _sstl_noexcept(std::is_nothrow_constructible<reverse_iterator, iterator>::value)
+   {
+      return reverse_iterator(begin());
+   }
+
+   const_reverse_iterator rend() const
+      _sstl_noexcept(noexcept(std::declval<vector>().rend()))
+   {
+      return const_cast<vector&>(*this).rend();
+   }
+
+   const_reverse_iterator crend() const
+      _sstl_noexcept(noexcept(std::declval<vector>().rend()))
+   {
+      return const_cast<vector&>(*this).rend();
+   }
+
 protected:
    static const bool _is_copy = true;
 
@@ -405,15 +471,6 @@ protected:
    pointer _end() _sstl_noexcept_;
    void _set_end(pointer) _sstl_noexcept_;
    size_type _capacity() _sstl_noexcept_;
-
-   reverse_iterator _rbegin() _sstl_noexcept(std::is_nothrow_constructible<reverse_iterator, iterator>::value)
-   {
-      return reverse_iterator(_end());
-   }
-   reverse_iterator _rend() _sstl_noexcept(std::is_nothrow_constructible<reverse_iterator, iterator>::value)
-   {
-      return reverse_iterator(_begin());
-   }
 
    bool _empty() const _sstl_noexcept_
    {
@@ -809,14 +866,14 @@ public:
 
 public:
    vector() _sstl_noexcept_
-      : _end_(begin())
+      : _end_(_base::begin())
    {
       _assert_vector_derived_member_variable_access_is_valid(_type_tag<vector>{});
    }
 
    explicit vector(size_type count, const_reference value=value_type())
       _sstl_noexcept(noexcept(std::declval<_base>()._count_constructor(std::declval<size_type>(), std::declval<const_reference>())))
-      : _end_(begin())
+      : _end_(_base::begin())
    {
       sstl_assert(count <= Capacity);
       _assert_vector_derived_member_variable_access_is_valid(_type_tag<vector>{});
@@ -909,40 +966,6 @@ public:
       return *this;
    }
 
-   iterator begin() _sstl_noexcept_ { return _base::_begin(); }
-   const_iterator begin() const _sstl_noexcept_ { return const_cast<vector&>(*this)._base::_begin(); }
-   const_iterator cbegin() const _sstl_noexcept_ { return const_cast<vector&>(*this)._base::_begin(); }
-
-   iterator end() _sstl_noexcept_ { return _end_; }
-   const_iterator end() const _sstl_noexcept_ { return _end_; }
-   const_iterator cend() const _sstl_noexcept_ { return _end_; }
-
-   reverse_iterator rbegin() _sstl_noexcept(noexcept(std::declval<_base>()._rbegin()))
-   {
-      return _base::_rbegin();
-   }
-   const_reverse_iterator rbegin() const _sstl_noexcept(noexcept(std::declval<_base>()._rbegin()))
-   {
-      return const_cast<vector&>(*this)._base::_rbegin();
-   }
-   const_reverse_iterator crbegin() const _sstl_noexcept(noexcept(std::declval<_base>()._rbegin()))
-   {
-      return const_cast<vector&>(*this)._base::_rbegin();
-   }
-
-   reverse_iterator rend() _sstl_noexcept(noexcept(std::declval<_base>()._rend()))
-   {
-      return _base::_rend();
-   }
-   const_reverse_iterator rend() const _sstl_noexcept(noexcept(std::declval<_base>()._rend()))
-   {
-      return const_cast<vector&>(*this)._base::_rend();
-   }
-   const_reverse_iterator crend() const _sstl_noexcept(noexcept(std::declval<_base>()._rend()))
-   {
-      return const_cast<vector&>(*this)._base::_rend();
-   }
-
    bool empty() const _sstl_noexcept_ { return _base::_empty(); }
    size_type size() const _sstl_noexcept_ { return _base::_size(); }
    size_type max_size() const _sstl_noexcept_ { return Capacity; }
@@ -1009,7 +1032,7 @@ public:
    iterator erase(const_iterator pos)
       _sstl_noexcept(noexcept(std::declval<_base>()._erase(std::declval<iterator>())))
    {
-      sstl_assert(pos >= begin() && pos < end());
+      sstl_assert(pos >= _base::begin() && pos < _base::end());
       return _base::_erase(const_cast<iterator>(pos));
    }
 
@@ -1017,7 +1040,7 @@ public:
       _sstl_noexcept(noexcept(std::declval<_base>()._erase(std::declval<iterator>(), std::declval<iterator>())))
    {
       sstl_assert(range_begin <= range_end);
-      sstl_assert(range_begin >= begin() && range_end <= end());
+      sstl_assert(range_begin >= _base::begin() && range_end <= _base::end());
       return _base::_erase(const_cast<iterator>(range_begin), const_cast<iterator>(range_end));
    }
 
