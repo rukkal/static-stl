@@ -28,12 +28,17 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 namespace sstl
 {
 
+template<class, size_t=static_cast<size_t>(-1)>
+class vector;
+
 template<class T>
-class _vector_base
+class vector<T, static_cast<size_t>(-1)>
 {
+//TODO: try to remove
 template<class U, size_t S>
 friend class vector; //friend declaration required for vector's noexcept expressions
 
+//TODO: make public and remove duplication in derived class
 protected:
    using value_type = T;
    using size_type = size_t;
@@ -97,7 +102,7 @@ protected:
       #endif
    }
 
-   void _move_constructor(_vector_base&& rhs)
+   void _move_constructor(vector&& rhs)
       _sstl_noexcept((std::is_nothrow_move_constructible<value_type>::value
                      || std::is_nothrow_copy_constructible<value_type>::value)
                      && std::is_nothrow_destructible<value_type>::value)
@@ -311,13 +316,13 @@ protected:
 
    bool _empty() const _sstl_noexcept_
    {
-      return const_cast<_vector_base&>(*this)._begin() == const_cast<_vector_base&>(*this)._end();
+      return const_cast<vector&>(*this)._begin() == const_cast<vector&>(*this)._end();
    }
 
    size_type _size() const _sstl_noexcept_
    {
-      return std::distance(const_cast<_vector_base&>(*this)._begin(),
-                           const_cast<_vector_base&>(*this)._end());
+      return std::distance(const_cast<vector&>(*this)._begin(),
+                           const_cast<vector&>(*this)._end());
    }
 
    void _clear() _sstl_noexcept(std::is_nothrow_destructible<value_type>::value)
@@ -504,7 +509,7 @@ protected:
    template<class... Args>
    iterator _emplace(iterator pos, Args&&... args)
       _sstl_noexcept(std::is_nothrow_constructible<value_type, typename std::add_rvalue_reference<Args>::type...>::value
-                     && noexcept(std::declval<_vector_base>().template _insert<!_is_copy>(std::declval<iterator>(),
+                     && noexcept(std::declval<vector>().template _insert<!_is_copy>(std::declval<iterator>(),
                                                                                  std::declval<value_type&>())))
    {
       value_type value(std::forward<Args>(args)...);
@@ -590,12 +595,12 @@ protected:
       _set_end(end);
    }
 
-   void _swap(_vector_base& rhs)
+   void _swap(vector& rhs)
       _sstl_noexcept(std::is_nothrow_move_constructible<value_type>::value
                      && std::is_nothrow_move_assignable<value_type>::value
                      && std::is_nothrow_destructible<value_type>::value)
    {
-      _vector_base *large, *small;
+      vector *large, *small;
 
       if(_size() < rhs._size())
       {
@@ -654,14 +659,14 @@ protected:
 };
 
 template<class T, size_t Capacity>
-class vector : public _vector_base<T>
+class vector : public vector<T>
 {
-   friend T* _vector_base<T>::_begin() _sstl_noexcept_;
-   friend T* _vector_base<T>::_end() _sstl_noexcept_;
-   friend void _vector_base<T>::_set_end(T*) _sstl_noexcept_;
+   friend T* vector<T>::_begin() _sstl_noexcept_;
+   friend T* vector<T>::_end() _sstl_noexcept_;
+   friend void vector<T>::_set_end(T*) _sstl_noexcept_;
 
 private:
-   using _base = _vector_base<T>;
+   using _base = vector<T>;
    using _type_for_derived_member_variable_access = vector<T, 11>;
 
 private:
@@ -1033,21 +1038,21 @@ private:
 };
 
 template<class T>
-T* _vector_base<T>::_begin() _sstl_noexcept_
+T* vector<T>::_begin() _sstl_noexcept_
 {
    using type_for_derived_member_variable_access = typename vector<T, 1>::_type_for_derived_member_variable_access;
    return reinterpret_cast<T*>(reinterpret_cast<type_for_derived_member_variable_access&>(*this)._buffer_.data());
 }
 
 template<class T>
-T* _vector_base<T>::_end() _sstl_noexcept_
+T* vector<T>::_end() _sstl_noexcept_
 {
    using type_for_derived_member_variable_access = typename vector<T, 1>::_type_for_derived_member_variable_access;
    return reinterpret_cast<type_for_derived_member_variable_access&>(*this)._end_;
 }
 
 template<class T>
-void _vector_base<T>::_set_end(T* value) _sstl_noexcept_
+void vector<T>::_set_end(T* value) _sstl_noexcept_
 {
    using type_for_derived_member_variable_access = typename vector<T, 1>::_type_for_derived_member_variable_access;
    reinterpret_cast<type_for_derived_member_variable_access&>(*this)._end_ = value;
