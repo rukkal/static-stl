@@ -38,6 +38,18 @@ class vector<T, static_cast<size_t>(-1)>
 template<class U, size_t S>
 friend class vector; //friend declaration required for vector's noexcept expressions
 
+public:
+   vector& operator=(const vector& rhs) _sstl_noexcept(std::is_nothrow_copy_assignable<value_type>::value
+                                          && std::is_nothrow_copy_constructible<value_type>::value
+                                          && std::is_nothrow_destructible<value_type>::value)
+   {
+      if(this != &rhs)
+      {
+         _copy_assign(const_cast<vector&>(rhs)._begin(), const_cast<vector&>(rhs)._end());
+      }
+      return *this;
+   }
+
 //TODO: make public and remove duplication in derived class
 protected:
    using value_type = T;
@@ -106,6 +118,44 @@ protected:
       #endif
    }
 
+   template<class TIterator>
+   void _copy_assign(TIterator rhs_begin, TIterator rhs_end)
+      _sstl_noexcept(std::is_nothrow_copy_assignable<value_type>::value
+                     && std::is_nothrow_copy_constructible<value_type>::value
+                     && std::is_nothrow_destructible<value_type>::value)
+   {
+      auto src = rhs_begin;
+      auto dest = _begin();
+      auto end = _end();
+      #if _sstl_has_exceptions()
+      try
+      {
+      #endif
+         while(src != rhs_end)
+         {
+            if(dest < end)
+               *dest = *src;
+            else
+               new(dest) value_type(*src);
+            ++dest; ++src;
+         }
+      #if _sstl_has_exceptions()
+      }
+      catch(...)
+      {
+         _set_end(std::max(dest, _end()));
+         _clear();
+         throw;
+      }
+      #endif
+      _set_end(dest);
+      while(dest < end)
+      {
+         dest->~value_type();
+         ++dest;
+      }
+   }
+
    void _move_constructor(vector&& rhs)
       _sstl_noexcept((std::is_nothrow_move_constructible<value_type>::value
                      || std::is_nothrow_copy_constructible<value_type>::value)
@@ -150,44 +200,6 @@ protected:
       auto end = _end();
       while(begin != end)
          (begin++)->~value_type();
-   }
-
-   template<class TIterator>
-   void _copy_assign(TIterator rhs_begin, TIterator rhs_end)
-      _sstl_noexcept(std::is_nothrow_copy_assignable<value_type>::value
-                     && std::is_nothrow_copy_constructible<value_type>::value
-                     && std::is_nothrow_destructible<value_type>::value)
-   {
-      auto src = rhs_begin;
-      auto dest = _begin();
-      auto end = _end();
-      #if _sstl_has_exceptions()
-      try
-      {
-      #endif
-         while(src != rhs_end)
-         {
-            if(dest < end)
-               *dest = *src;
-            else
-               new(dest) value_type(*src);
-            ++dest; ++src;
-         }
-      #if _sstl_has_exceptions()
-      }
-      catch(...)
-      {
-         _set_end(std::max(dest, _end()));
-         _clear();
-         throw;
-      }
-      #endif
-      _set_end(dest);
-      while(dest < end)
-      {
-         dest->~value_type();
-         ++dest;
-      }
    }
 
    template<class TIterator>
@@ -309,6 +321,8 @@ protected:
    pointer _begin() _sstl_noexcept_;
    pointer _end() _sstl_noexcept_;
    void _set_end(pointer) _sstl_noexcept_;
+   size_type _capacity() _sstl_noexcept_;
+
    reverse_iterator _rbegin() _sstl_noexcept(std::is_nothrow_constructible<reverse_iterator, iterator>::value)
    {
       return reverse_iterator(_end());
@@ -668,14 +682,15 @@ class vector : public vector<T>
    friend T* vector<T>::_begin() _sstl_noexcept_;
    friend T* vector<T>::_end() _sstl_noexcept_;
    friend void vector<T>::_set_end(T*) _sstl_noexcept_;
+   friend size_t vector<T>::_capacity() _sstl_noexcept_;
 
 private:
    using _base = vector<T>;
    using _type_for_derived_member_variable_access = vector<T, 11>;
 
 private:
-   //function's signature must depend on instantiated vector type
-   //in order not to generate multiple definitions
+   //dummy parameter is necessary because function's signature must depend
+   //on instantiated vector type in order not to generate multiple definitions
    //note: the instantiated vector type is used through a non-member function
    //(would be an incomplete type inside a member function)
    friend void _assert_vector_derived_member_variable_access_is_valid(_type_tag<vector>)
@@ -689,7 +704,6 @@ private:
                      == static_cast<_base*>(0),
                      "base and derived vector classes must have the same address, such property"
                      " is exploited by the base class to access the derived member variables");
-
       static_assert( static_cast<_base*>(static_cast<vector*>(0))
                      == static_cast<_base*>(0),
                      "base and derived vector classes must have the same address, such property"
@@ -780,23 +794,16 @@ public:
       _base::_destructor();
    }
 
-   //copy assignment from vectors with same value type (capacity doesn't matter)
-   vector& operator=(const _base& rhs)
-      _sstl_noexcept(noexcept(std::declval<_base>()._copy_assign( std::declval<iterator>(),
-                                                                  std::declval<iterator>())))
+   vector& operator=(const vector<value_type>& rhs)
+      _sstl_noexcept_(noexcept(std::declval<_base>().operator=(std::declval<_base>())))
    {
-      if(this != &rhs)
-      {
-         sstl_assert(rhs._size() <= Capacity);
-         _base::_copy_assign(const_cast<_base&>(rhs)._begin(), const_cast<_base&>(rhs)._end());
-      }
-      return *this;
+      return reinterpret_cast<vector&>(_base::operator=(rhs));
    }
 
    vector& operator=(const vector& rhs)
-      _sstl_noexcept(noexcept(std::declval<vector>().operator=(std::declval<const _base&>())))
+      _sstl_noexcept_(noexcept(std::declval<_base>().operator=(std::declval<_base>())))
    {
-      return operator=(static_cast<const _base&>(rhs));
+      return reinterpret_cast<vector&>(_base::operator=(rhs));
    }
 
    //move assignment from vectors with same value type (capacity doesn't matter)
@@ -1037,6 +1044,7 @@ public:
    }
 
 private:
+   size_type _capacity_{ Capacity };
    pointer _end_;
    std::array<typename aligned_storage<sizeof(value_type), std::alignment_of<value_type>::value>::type, Capacity> _buffer_;
 };
@@ -1060,6 +1068,13 @@ void vector<T>::_set_end(T* value) _sstl_noexcept_
 {
    using type_for_derived_member_variable_access = typename vector<T, 1>::_type_for_derived_member_variable_access;
    reinterpret_cast<type_for_derived_member_variable_access&>(*this)._end_ = value;
+}
+
+template<class T>
+size_t vector<T>::_capacity() _sstl_noexcept_
+{
+   using type_for_derived_member_variable_access = typename vector<T, 1>::_type_for_derived_member_variable_access;
+   return reinterpret_cast<type_for_derived_member_variable_access&>(*this)._capacity_;
 }
 
 template <class T, size_t CapacityLhs, size_t CapacityRhs>

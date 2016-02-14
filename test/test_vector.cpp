@@ -18,6 +18,7 @@ namespace sstl
 namespace test
 {
 
+using vector_int_base_t = vector<int>;
 using vector_int_t = vector<int, 11>;
 using vector_counted_type_t = vector<counted_type, 11>;
 
@@ -25,10 +26,9 @@ TEST_CASE("vector")
 {
    SECTION("user cannot directly construct the base class")
    {
-      using base_class_t = vector<int>;
-      REQUIRE(!std::is_default_constructible<base_class_t>::value);
-      REQUIRE(!std::is_copy_constructible<base_class_t>::value);
-      REQUIRE(!std::is_move_constructible<base_class_t>::value);
+      REQUIRE(!std::is_default_constructible<vector_int_base_t>::value);
+      REQUIRE(!std::is_copy_constructible<vector_int_base_t>::value);
+      REQUIRE(!std::is_move_constructible<vector_int_base_t>::value);
    }
 
    SECTION("default constructor")
@@ -227,15 +227,31 @@ TEST_CASE("vector")
          {
             auto rhs = vector_int_t{1, 2, 3};
             auto lhs = vector_int_t{};
-            lhs = rhs;
-            REQUIRE(are_containers_equal(lhs, rhs));
+            SECTION("through base class reference")
+            {
+               static_cast<vector_int_base_t&>(lhs) = rhs;
+               REQUIRE(are_containers_equal(lhs, rhs));
+            }
+            SECTION("through derived class reference")
+            {
+               static_cast<vector_int_t&>(lhs) = rhs;
+               REQUIRE(are_containers_equal(lhs, rhs));
+            }
          }
          SECTION("rhs' capacity is different")
          {
             auto rhs = vector<int, 30>{1, 2, 3};
             auto lhs = vector<int, 10>{};
-            lhs = rhs;
-            REQUIRE(are_containers_equal(lhs, rhs));
+            SECTION("through base class reference")
+            {
+               static_cast<vector_int_base_t&>(lhs) = rhs;
+               REQUIRE(are_containers_equal(lhs, rhs));
+            }
+            SECTION("through derived class reference")
+            {
+               static_cast<vector<int, 10>&>(lhs) = rhs;
+               REQUIRE(are_containers_equal(lhs, rhs));
+            }
          }
       }
       SECTION("number of copy assignments + copy constructions")
@@ -1868,6 +1884,13 @@ TEST_CASE("vector")
             REQUIRE(lhs >= rhs);
          }
       }
+   }
+
+   SECTION("memory footprint")
+   {
+      using word_size_t = void*;
+      REQUIRE(sizeof(vector<word_size_t, 1>) == (1+1+1)*sizeof(word_size_t));
+      REQUIRE(sizeof(vector<word_size_t, 10>) == (1+10+1)*sizeof(word_size_t));
    }
 }
 
