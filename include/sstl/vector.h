@@ -130,6 +130,19 @@ public:
       return const_cast<vector&>(*this).at(idx);
    }
 
+   reference operator[](size_type idx) _sstl_noexcept_
+   {
+      auto pos = _begin() + idx;
+      sstl_assert(pos < _end());
+      return *pos;
+   }
+
+   const_reference operator[](size_type idx) const
+      _sstl_noexcept(noexcept(std::declval<vector>().operator[](size_type{})))
+   {
+      return const_cast<vector&>(*this).operator[](idx);
+   }
+
 protected:
    static const bool _is_copy = true;
 
@@ -352,13 +365,6 @@ protected:
          ++dest;
       }
       _set_end(new_end);
-   }
-
-   reference _subscript_operator(size_type idx) _sstl_noexcept_
-   {
-      auto pos = _begin() + idx;
-      sstl_assert(pos < _end());
-      return *pos;
    }
 
    reference _front() _sstl_noexcept_
@@ -878,17 +884,6 @@ public:
    {
       _base::operator=(init);
       return *this;
-   }
-
-   reference operator[](size_type idx)
-      _sstl_noexcept(noexcept(std::declval<_base>()._subscript_operator(size_type{})))
-   {
-      return _base::_subscript_operator(idx);
-   }
-   const_reference operator[](size_type idx) const
-      _sstl_noexcept(noexcept(std::declval<_base>()._subscript_operator(size_type{})))
-   {
-      return const_cast<vector&>(*this)._base::_subscript_operator(idx);
    }
 
    reference front() _sstl_noexcept_
