@@ -38,6 +38,20 @@ class vector<T, static_cast<size_t>(-1)>
 template<class U, size_t S>
 friend class vector; //friend declaration required for vector's noexcept expressions
 
+//TODO: make public and remove duplication in derived class
+protected:
+   using value_type = T;
+   using size_type = size_t;
+   using difference_type = ptrdiff_t;
+   using reference = value_type&;
+   using const_reference = const value_type&;
+   using pointer = value_type*;
+   using const_pointer = const value_type*;
+   using iterator = value_type*;
+   using const_iterator = const value_type*;
+   using reverse_iterator = std::reverse_iterator<iterator>;
+   using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+
 public:
    vector& operator=(const vector& rhs)
       _sstl_noexcept(noexcept(std::declval<vector>()._copy_assign(std::declval<iterator>(), std::declval<iterator>())))
@@ -62,19 +76,15 @@ public:
       return *this;
    }
 
-//TODO: make public and remove duplication in derived class
-protected:
-   using value_type = T;
-   using size_type = size_t;
-   using difference_type = ptrdiff_t;
-   using reference = value_type&;
-   using const_reference = const value_type&;
-   using pointer = value_type*;
-   using const_pointer = const value_type*;
-   using iterator = value_type*;
-   using const_iterator = const value_type*;
-   using reverse_iterator = std::reverse_iterator<iterator>;
-   using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+   vector& operator=(std::initializer_list<value_type> init)
+      _sstl_noexcept(noexcept(std::declval<vector>()._copy_assign(
+            std::declval<std::initializer_list<value_type>>().begin(),
+            std::declval<std::initializer_list<value_type>>().end())))
+   {
+      sstl_assert(init.size() <= _capacity());
+      _copy_assign(init.begin(), init.end());
+      return *this;
+   }
 
 protected:
    static const bool _is_copy = true;
@@ -833,11 +843,9 @@ public:
    }
 
    vector& operator=(std::initializer_list<value_type> init)
-      _sstl_noexcept(noexcept(std::declval<_base>()._copy_assign(
-            std::declval<std::initializer_list<value_type>>().begin(),
-            std::declval<std::initializer_list<value_type>>().end())))
+      _sstl_noexcept(noexcept(std::declval<_base>().operator=(std::declval<std::initializer_list<value_type>>())))
    {
-      _base::_copy_assign(init.begin(), init.end());
+      _base::operator=(init);
       return *this;
    }
 

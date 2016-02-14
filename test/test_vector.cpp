@@ -418,8 +418,16 @@ TEST_CASE("vector")
       {
          auto rhs = {1, 2, 3};
          auto lhs = vector_int_t{};
-         lhs = rhs;
-         REQUIRE(are_containers_equal(lhs, rhs));
+         SECTION("through base class reference")
+         {
+            static_cast<vector_int_base_t&>(lhs) = rhs;
+            REQUIRE(are_containers_equal(lhs, rhs));
+         }
+         SECTION("through derived class reference")
+         {
+            static_cast<vector_int_t&>(lhs) = rhs;
+            REQUIRE(are_containers_equal(lhs, rhs));
+         }
       }
       SECTION("number of copy assignments")
       {
