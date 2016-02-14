@@ -39,13 +39,25 @@ template<class U, size_t S>
 friend class vector; //friend declaration required for vector's noexcept expressions
 
 public:
-   vector& operator=(const vector& rhs) _sstl_noexcept(std::is_nothrow_copy_assignable<value_type>::value
-                                          && std::is_nothrow_copy_constructible<value_type>::value
-                                          && std::is_nothrow_destructible<value_type>::value)
+   vector& operator=(const vector& rhs)
+      _sstl_noexcept(noexcept(std::declval<vector>()._copy_assign(std::declval<iterator>(), std::declval<iterator>())))
    {
+      sstl_assert(rhs._size() <= _capacity());
       if(this != &rhs)
       {
          _copy_assign(const_cast<vector&>(rhs)._begin(), const_cast<vector&>(rhs)._end());
+      }
+      return *this;
+   }
+
+   vector& operator=(vector&& rhs)
+      _sstl_noexcept(noexcept(std::declval<vector>()._move_assign(std::declval<iterator>(), std::declval<iterator>())))
+   {
+      sstl_assert(rhs._size() <= _capacity());
+      if(this != &rhs)
+      {
+         _move_assign(rhs._begin(), rhs._end());
+         rhs._set_end(rhs._begin());
       }
       return *this;
    }
@@ -795,35 +807,28 @@ public:
    }
 
    vector& operator=(const vector<value_type>& rhs)
-      _sstl_noexcept_(noexcept(std::declval<_base>().operator=(std::declval<_base>())))
+      _sstl_noexcept(noexcept(std::declval<_base>().operator=(std::declval<_base>())))
    {
       return reinterpret_cast<vector&>(_base::operator=(rhs));
    }
 
    vector& operator=(const vector& rhs)
-      _sstl_noexcept_(noexcept(std::declval<_base>().operator=(std::declval<_base>())))
+      _sstl_noexcept(noexcept(std::declval<_base>().operator=(std::declval<_base>())))
    {
       return reinterpret_cast<vector&>(_base::operator=(rhs));
    }
 
    //move assignment from vectors with same value type (capacity doesn't matter)
    vector& operator=(_base&& rhs)
-      _sstl_noexcept(noexcept(std::declval<_base>()._move_assign( std::declval<iterator>(),
-                                                                  std::declval<iterator>())))
+      _sstl_noexcept(noexcept(std::declval<_base>().operator=(std::declval<_base>())))
    {
-      if(this != &rhs)
-      {
-         sstl_assert(rhs._size() <= Capacity);
-         _base::_move_assign(rhs._begin(), rhs._end());
-         rhs._set_end(rhs._begin());
-      }
-      return *this;
+      return reinterpret_cast<vector&>(_base::operator=(std::move(rhs)));
    }
 
    vector& operator=(vector&& rhs)
-      _sstl_noexcept(noexcept(std::declval<vector>().operator=(std::declval<_base>())))
+      _sstl_noexcept(noexcept(std::declval<_base>().operator=(std::declval<_base>())))
    {
-      return operator=(static_cast<_base&&>(rhs));
+      return reinterpret_cast<vector&>(_base::operator=(std::move(rhs)));
    }
 
    vector& operator=(std::initializer_list<value_type> init)

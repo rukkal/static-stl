@@ -315,18 +315,36 @@ TEST_CASE("vector")
             auto expected = {1, 2, 3};
             auto rhs = vector_int_t{1, 2, 3};
             auto lhs = vector_int_t{};
-            lhs = std::move(rhs);
-            REQUIRE(are_containers_equal(lhs, expected));
-            REQUIRE(rhs.empty());
+            SECTION("through base class reference")
+            {
+               static_cast<vector_int_base_t&>(lhs) = std::move(rhs);
+               REQUIRE(are_containers_equal(lhs, expected));
+               REQUIRE(rhs.empty());
+            }
+            SECTION("through derived class reference")
+            {
+               static_cast<vector_int_t&>(lhs) = std::move(rhs);
+               REQUIRE(are_containers_equal(lhs, expected));
+               REQUIRE(rhs.empty());
+            }
          }
          SECTION("rhs' capacity is different")
          {
             auto expected = {1, 2, 3};
             auto rhs = vector<int, 30>{1, 2, 3};
             auto lhs = vector<int, 10>{};
-            lhs = std::move(rhs);
-            REQUIRE(are_containers_equal(lhs, expected));
-            REQUIRE(rhs.empty());
+            SECTION("through base class reference")
+            {
+               static_cast<vector_int_base_t&>(lhs) = std::move(rhs);
+               REQUIRE(are_containers_equal(lhs, expected));
+               REQUIRE(rhs.empty());
+            }
+            SECTION("through derived class reference")
+            {
+               static_cast<vector<int, 10>&>(lhs) = std::move(rhs);
+               REQUIRE(are_containers_equal(lhs, expected));
+               REQUIRE(rhs.empty());
+            }
          }
       }
       SECTION("number of move assignments + copy constructions")
