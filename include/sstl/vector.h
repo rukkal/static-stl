@@ -265,6 +265,14 @@ public:
       return _capacity();
    }
 
+   void clear() _sstl_noexcept(std::is_nothrow_destructible<value_type>::value)
+   {
+      auto pos = begin();
+      while(pos != end())
+         (pos++)->~value_type();
+      _set_end(begin());
+   }
+
 protected:
    static const bool _is_copy = true;
 
@@ -287,7 +295,7 @@ protected:
       }
       catch(...)
       {
-         _clear();
+         clear();
          throw;
       }
       #endif
@@ -314,7 +322,7 @@ protected:
       catch(...)
       {
          _set_end(dst);
-         _clear();
+         clear();
          throw;
       }
       #endif
@@ -345,7 +353,7 @@ protected:
       catch(...)
       {
          _set_end(std::max(dest, end()));
-         _clear();
+         clear();
          throw;
       }
       #endif
@@ -382,7 +390,7 @@ protected:
       catch(...)
       {
          _set_end(dst);
-         _clear();
+         clear();
          throw;
       }
       src = rhs.begin();
@@ -432,7 +440,7 @@ protected:
       catch(...)
       {
          _set_end(std::max(dest, end()));
-         _clear();
+         clear();
          throw;
       }
       #endif
@@ -476,7 +484,7 @@ protected:
       catch(...)
       {
          _set_end(std::max(dest, end()));
-         _clear();
+         clear();
          throw;
       }
       #endif
@@ -493,16 +501,6 @@ protected:
    pointer _end() _sstl_noexcept_;
    void _set_end(pointer) _sstl_noexcept_;
    size_type _capacity() const _sstl_noexcept_;
-
-   void _clear() _sstl_noexcept(std::is_nothrow_destructible<value_type>::value)
-   {
-      auto b = begin();
-      auto pos = b;
-      auto e = end();
-      while(pos != e)
-         (pos++)->~value_type();
-      _set_end(b);
-   }
 
    template<bool is_copy_insertion>
    iterator _insert(iterator pos, reference value)
@@ -522,7 +520,7 @@ protected:
          }
          catch(...)
          {
-            _clear();
+            clear();
             throw;
          }
 
@@ -536,7 +534,7 @@ protected:
          catch(...)
          {
             _set_end(end()+1);
-            _clear();
+            clear();
             throw;
          }
          #endif
@@ -599,7 +597,7 @@ protected:
          if(pos != end())
          {
             _set_end(std::min(end(), dst+1));
-            _clear();
+            clear();
          }
          throw;
       }
@@ -662,7 +660,7 @@ protected:
          if(pos != end())
          {
             _set_end(std::min(end(), dst_vector+1));
-            _clear();
+            clear();
          }
          throw;
       }
@@ -699,7 +697,7 @@ protected:
       }
       catch(...)
       {
-         _clear();
+         clear();
          throw;
       }
       #endif
@@ -727,7 +725,7 @@ protected:
       }
       catch(...)
       {
-         _clear();
+         clear();
          throw;
       }
       #endif
@@ -809,8 +807,8 @@ protected:
             large->_set_end(large_end_swaps);
             small->_set_end(small_pos);
          }
-         large->_clear();
-         small->_clear();
+         large->clear();
+         small->clear();
          throw;
       }
       #endif
@@ -968,11 +966,6 @@ public:
    {
       _base::operator=(init);
       return *this;
-   }
-
-   void clear() _sstl_noexcept(noexcept(std::declval<_base>()._clear()))
-   {
-      _base::_clear();
    }
 
    iterator insert(const_iterator pos, const_reference value)
