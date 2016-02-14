@@ -83,6 +83,7 @@ protected:
    vector() = default;
    vector(const vector&) = default;
    vector(vector&&) = default;
+   ~vector() = default;
 
    void _count_constructor(size_type count, const_reference value)
       _sstl_noexcept(std::is_nothrow_copy_constructible<value_type>::value)

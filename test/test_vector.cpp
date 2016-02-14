@@ -31,6 +31,11 @@ TEST_CASE("vector")
       REQUIRE(!std::is_move_constructible<vector_int_base_t>::value);
    }
 
+   SECTION("user cannot directly destroy the base class")
+   {
+      REQUIRE(!std::is_destructible<vector_int_base_t>::value);
+   }
+
    SECTION("default constructor")
    {
       auto v = vector_int_t();
