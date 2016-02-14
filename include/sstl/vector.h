@@ -55,7 +55,7 @@ public:
    vector& operator=(const vector& rhs)
       _sstl_noexcept(noexcept(std::declval<vector>()._copy_assign(std::declval<iterator>(), std::declval<iterator>())))
    {
-      sstl_assert(rhs._size() <= _capacity());
+      sstl_assert(rhs.size() <= capacity());
       if(this != &rhs)
       {
          _copy_assign(const_cast<vector&>(rhs).begin(), const_cast<vector&>(rhs).end());
@@ -66,7 +66,7 @@ public:
    vector& operator=(vector&& rhs)
       _sstl_noexcept(noexcept(std::declval<vector>()._move_assign(std::declval<iterator>(), std::declval<iterator>())))
    {
-      sstl_assert(rhs._size() <= _capacity());
+      sstl_assert(rhs.size() <= capacity());
       if(this != &rhs)
       {
          _move_assign(rhs.begin(), rhs.end());
@@ -114,7 +114,7 @@ public:
    reference at(size_type idx) _sstl_noexcept_if_doesnt_have_exceptions_
    {
       #if _sstl_has_exceptions()
-      if(idx >= _size())
+      if(idx >= size())
       {
          throw std::out_of_range(_sstl_debug_message("vector access out of range"));
       }
@@ -145,7 +145,7 @@ public:
 
    reference front() _sstl_noexcept_
    {
-      sstl_assert(!_empty());
+      sstl_assert(!empty());
       return *begin();
    }
 
@@ -157,7 +157,7 @@ public:
 
    reference back() _sstl_noexcept_
    {
-      sstl_assert(!_empty());
+      sstl_assert(!empty());
       return *(end()-1);
    }
 
@@ -241,6 +241,28 @@ public:
       _sstl_noexcept(noexcept(std::declval<vector>().rend()))
    {
       return const_cast<vector&>(*this).rend();
+   }
+
+
+   bool empty() const _sstl_noexcept_
+   {
+      return const_cast<vector&>(*this).begin() == const_cast<vector&>(*this).end();
+   }
+
+   size_type size() const _sstl_noexcept_
+   {
+      return std::distance(const_cast<vector&>(*this).begin(),
+                           const_cast<vector&>(*this).end());
+   }
+
+   size_type max_size() const _sstl_noexcept_
+   {
+      return capacity();
+   }
+
+   size_type capacity() const _sstl_noexcept_
+   {
+      return _capacity();
    }
 
 protected:
@@ -470,18 +492,7 @@ protected:
    pointer _begin() _sstl_noexcept_;
    pointer _end() _sstl_noexcept_;
    void _set_end(pointer) _sstl_noexcept_;
-   size_type _capacity() _sstl_noexcept_;
-
-   bool _empty() const _sstl_noexcept_
-   {
-      return const_cast<vector&>(*this).begin() == const_cast<vector&>(*this).end();
-   }
-
-   size_type _size() const _sstl_noexcept_
-   {
-      return std::distance(const_cast<vector&>(*this).begin(),
-                           const_cast<vector&>(*this).end());
-   }
+   size_type _capacity() const _sstl_noexcept_;
 
    void _clear() _sstl_noexcept(std::is_nothrow_destructible<value_type>::value)
    {
@@ -741,7 +752,7 @@ protected:
 
    void _pop_back() _sstl_noexcept(std::is_nothrow_destructible<value_type>::value)
    {
-      sstl_assert(!_empty());
+      sstl_assert(!empty());
       (end()-1)->~value_type();
       _set_end(end()-1);
    }
@@ -753,7 +764,7 @@ protected:
    {
       vector *large, *small;
 
-      if(_size() < rhs._size())
+      if(size() < rhs.size())
       {
          large = &rhs;
          small = this;
@@ -765,7 +776,7 @@ protected:
       }
 
       auto large_pos = large->begin();
-      auto large_end_swaps = large->begin() + small->_size();
+      auto large_end_swaps = large->begin() + small->size();
       auto large_end = large->end();
       auto small_pos = small->begin();
 
@@ -815,7 +826,7 @@ class vector : public vector<T>
    friend T* vector<T>::_begin() _sstl_noexcept_;
    friend T* vector<T>::_end() _sstl_noexcept_;
    friend void vector<T>::_set_end(T*) _sstl_noexcept_;
-   friend size_t vector<T>::_capacity() _sstl_noexcept_;
+   friend size_t vector<T>::_capacity() const _sstl_noexcept_;
 
 private:
    using _base = vector<T>;
@@ -888,7 +899,7 @@ public:
       _sstl_noexcept(noexcept(std::declval<_base>()._range_constructor( std::declval<const_iterator>(),
                                                                         std::declval<const_iterator>())))
    {
-      sstl_assert(rhs._size() <= Capacity);
+      sstl_assert(rhs.size() <= Capacity);
       _assert_vector_derived_member_variable_access_is_valid(_type_tag<vector>{});
       _base::_range_constructor(const_cast<_base&>(rhs).begin(), const_cast<_base&>(rhs).end());
    }
@@ -902,7 +913,7 @@ public:
    vector(_base&& rhs)
       _sstl_noexcept(noexcept(std::declval<_base>()._move_constructor(std::declval<_base>())))
    {
-      sstl_assert(rhs._size() <= Capacity);
+      sstl_assert(rhs.size() <= Capacity);
       _assert_vector_derived_member_variable_access_is_valid(_type_tag<vector>{});
       _base::_move_constructor(std::move(rhs));
    }
@@ -959,11 +970,6 @@ public:
       return *this;
    }
 
-   bool empty() const _sstl_noexcept_ { return _base::_empty(); }
-   size_type size() const _sstl_noexcept_ { return _base::_size(); }
-   size_type max_size() const _sstl_noexcept_ { return Capacity; }
-   size_type capacity() const _sstl_noexcept_ { return Capacity; }
-
    void clear() _sstl_noexcept(noexcept(std::declval<_base>()._clear()))
    {
       _base::_clear();
@@ -973,7 +979,7 @@ public:
       _sstl_noexcept(noexcept(std::declval<_base>().template _insert<_base::_is_copy>( std::declval<iterator>(),
                                                                                        std::declval<reference>())))
    {
-      sstl_assert(size() < Capacity);
+      sstl_assert(_base::size() < Capacity);
       return _base::template _insert<_base::_is_copy>(const_cast<iterator>(pos), const_cast<reference>(value));
    }
 
@@ -981,7 +987,7 @@ public:
       _sstl_noexcept(noexcept(std::declval<_base>().template _insert<!_base::_is_copy>(std::declval<iterator>(),
                                                                                        std::declval<reference>())))
    {
-      sstl_assert(size() < Capacity);
+      sstl_assert(_base::size() < Capacity);
       return _base::template _insert<!_base::_is_copy>(const_cast<iterator>(pos), const_cast<reference>(value));
    }
 
@@ -990,7 +996,7 @@ public:
                                                             std::declval<size_type>(),
                                                             std::declval<const_reference>())))
    {
-      sstl_assert(size() + count <= Capacity);
+      sstl_assert(_base::size() + count <= Capacity);
       return _base::_insert(const_cast<iterator>(pos), count, value);
    }
 
@@ -1000,7 +1006,7 @@ public:
                                                             std::declval<TIterator>(),
                                                             std::declval<TIterator>())))
    {
-      sstl_assert(size() + std::distance(range_begin, range_end) <= Capacity);
+      sstl_assert(_base::size() + std::distance(range_begin, range_end) <= Capacity);
       return _base::_insert(const_cast<iterator>(pos), range_begin, range_end);
    }
 
@@ -1009,7 +1015,7 @@ public:
                                                             std::declval<std::initializer_list<value_type>>().begin(),
                                                             std::declval<std::initializer_list<value_type>>().end())))
    {
-      sstl_assert(size() + init.size() <= Capacity);
+      sstl_assert(_base::size() + init.size() <= Capacity);
       return _base::_insert(const_cast<iterator>(pos), init.begin(), init.end());
    }
 
@@ -1018,7 +1024,7 @@ public:
       _sstl_noexcept(std::is_nothrow_constructible<value_type, typename std::add_rvalue_reference<Args>::type...>::value
                      && noexcept(std::declval<_base>()._emplace(std::declval<iterator>(), std::declval<Args>()...)))
    {
-      sstl_assert(size() < Capacity);
+      sstl_assert(_base::size() < Capacity);
       return _base::_emplace(const_cast<iterator>(pos), std::forward<Args>(args)...);
    }
 
@@ -1040,14 +1046,14 @@ public:
    void push_back(const_reference value)
       _sstl_noexcept(noexcept(std::declval<_base>()._emplace_back(std::declval<const_reference>())))
    {
-      sstl_assert(size() < Capacity);
+      sstl_assert(_base::size() < Capacity);
       _base::_emplace_back(value);
    }
 
    void push_back(value_type&& value)
       _sstl_noexcept(noexcept(std::declval<_base>()._emplace_back(std::declval<value_type>())))
    {
-      sstl_assert(size() < Capacity);
+      sstl_assert(_base::size() < Capacity);
       _base::_emplace_back(std::move(value));
    }
 
@@ -1055,7 +1061,7 @@ public:
    void emplace_back(Args&&... args)
       _sstl_noexcept(noexcept(std::declval<_base>()._emplace_back(std::forward<Args>(std::declval<Args>())...)))
    {
-      sstl_assert(size() < Capacity);
+      sstl_assert(_base::size() < Capacity);
       _base::_emplace_back(std::forward<Args>(args)...);
    }
 
@@ -1069,7 +1075,7 @@ public:
       _sstl_noexcept(noexcept(std::declval<_base>()._swap(std::declval<_base&>())))
    {
       sstl_assert(rhs.size() <= Capacity);
-      sstl_assert(size() <= CapacityRhs);
+      sstl_assert(_base::size() <= CapacityRhs);
       _base::_swap(rhs);
    }
 
@@ -1101,10 +1107,10 @@ void vector<T>::_set_end(T* value) _sstl_noexcept_
 }
 
 template<class T>
-size_t vector<T>::_capacity() _sstl_noexcept_
+size_t vector<T>::_capacity() const _sstl_noexcept_
 {
    using type_for_derived_member_variable_access = typename vector<T, 1>::_type_for_derived_member_variable_access;
-   return reinterpret_cast<type_for_derived_member_variable_access&>(*this)._capacity_;
+   return reinterpret_cast<const type_for_derived_member_variable_access&>(*this)._capacity_;
 }
 
 template <class T, size_t CapacityLhs, size_t CapacityRhs>
