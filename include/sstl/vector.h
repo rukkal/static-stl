@@ -143,6 +143,31 @@ public:
       return const_cast<vector&>(*this).operator[](idx);
    }
 
+
+   reference front() _sstl_noexcept_
+   {
+      sstl_assert(!_empty());
+      return *_begin();
+   }
+
+   const_reference front() const
+      _sstl_noexcept(noexcept(std::declval<vector>().front()))
+   {
+      return const_cast<vector&>(*this).front();
+   }
+
+   reference back() _sstl_noexcept_
+   {
+      sstl_assert(!_empty());
+      return *(_end()-1);
+   }
+
+   const_reference back() const
+      _sstl_noexcept(noexcept(std::declval<vector>().back()))
+   {
+      return const_cast<vector&>(*this).back();
+   }
+
 protected:
    static const bool _is_copy = true;
 
@@ -365,17 +390,6 @@ protected:
          ++dest;
       }
       _set_end(new_end);
-   }
-
-   reference _front() _sstl_noexcept_
-   {
-      sstl_assert(!_empty());
-      return *_begin();
-   }
-   reference _back() _sstl_noexcept_
-   {
-      sstl_assert(!_empty());
-      return *(_end()-1);
    }
 
    pointer _begin() _sstl_noexcept_;
@@ -884,24 +898,6 @@ public:
    {
       _base::operator=(init);
       return *this;
-   }
-
-   reference front() _sstl_noexcept_
-   {
-      return _base::_front();
-   }
-   const_reference front() const _sstl_noexcept_
-   {
-      return const_cast<vector&>(*this)._base::_front();
-   }
-
-   reference back() _sstl_noexcept_
-   {
-      return _base::_back();
-   }
-   const_reference back() const _sstl_noexcept_
-   {
-      return const_cast<vector&>(*this)._base::_back();
    }
 
    pointer data() _sstl_noexcept_ { return _base::_begin(); }
