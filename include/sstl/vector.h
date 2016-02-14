@@ -38,8 +38,7 @@ class vector<T, static_cast<size_t>(-1)>
 template<class U, size_t S>
 friend class vector; //friend declaration required for vector's noexcept expressions
 
-//TODO: make public and remove duplication in derived class
-protected:
+public:
    using value_type = T;
    using size_type = size_t;
    using difference_type = ptrdiff_t;
