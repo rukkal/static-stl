@@ -143,7 +143,6 @@ public:
       return const_cast<vector&>(*this).operator[](idx);
    }
 
-
    reference front() _sstl_noexcept_
    {
       sstl_assert(!_empty());
@@ -166,6 +165,16 @@ public:
       _sstl_noexcept(noexcept(std::declval<vector>().back()))
    {
       return const_cast<vector&>(*this).back();
+   }
+
+   pointer data() _sstl_noexcept_
+   {
+      return _begin();
+   }
+
+   const_pointer data() const _sstl_noexcept(std::declval<vector>().data())
+   {
+      return const_cast<vector&>(this).data();
    }
 
 protected:
@@ -899,9 +908,6 @@ public:
       _base::operator=(init);
       return *this;
    }
-
-   pointer data() _sstl_noexcept_ { return _base::_begin(); }
-   const_pointer data() const _sstl_noexcept_ { return const_cast<vector&>(this)._base::_begin(); }
 
    iterator begin() _sstl_noexcept_ { return _base::_begin(); }
    const_iterator begin() const _sstl_noexcept_ { return const_cast<vector&>(*this)._base::_begin(); }
