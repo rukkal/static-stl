@@ -111,6 +111,25 @@ public:
       _copy_assign(ilist.begin(), ilist.end());
    }
 
+   reference at(size_type idx) _sstl_noexcept_if_doesnt_have_exceptions_
+   {
+      #if _sstl_has_exceptions()
+      if(idx >= _size())
+      {
+         throw std::out_of_range(_sstl_debug_message("vector access out of range"));
+      }
+      #endif
+      auto pos = _begin() + idx;
+      sstl_assert(pos < _end());
+      return *pos;
+   }
+
+   const_reference at(size_type idx) const
+      _sstl_noexcept(noexcept(std::declval<vector>().at(size_type{})))
+   {
+      return const_cast<vector&>(*this).at(idx);
+   }
+
 protected:
    static const bool _is_copy = true;
 
@@ -333,19 +352,6 @@ protected:
          ++dest;
       }
       _set_end(new_end);
-   }
-
-   reference _at(size_type idx) _sstl_noexcept_if_doesnt_have_exceptions_
-   {
-      #if _sstl_has_exceptions()
-      if(idx >= _size())
-      {
-         throw std::out_of_range(_sstl_debug_message("vector access out of range"));
-      }
-      #endif
-      auto pos = _begin() + idx;
-      sstl_assert(pos < _end());
-      return *pos;
    }
 
    reference _subscript_operator(size_type idx) _sstl_noexcept_
@@ -872,17 +878,6 @@ public:
    {
       _base::operator=(init);
       return *this;
-   }
-
-   reference at(size_type idx)
-      _sstl_noexcept(noexcept(std::declval<_base>()._at(size_type{})))
-   {
-      return _base::_at(idx);
-   }
-   const_reference at(size_type idx) const
-      _sstl_noexcept(noexcept(std::declval<_base>()._at(size_type{})))
-   {
-      return const_cast<vector&>(*this)._base::_at(idx);
    }
 
    reference operator[](size_type idx)
