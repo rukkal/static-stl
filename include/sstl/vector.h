@@ -86,6 +86,23 @@ public:
       return *this;
    }
 
+   void assign(size_type count, const_reference value)
+      _sstl_noexcept(noexcept(std::declval<vector>()._count_assign(std::declval<size_type>(), std::declval<const_reference>())))
+   {
+      sstl_assert(count <= _capacity());
+      _count_assign(count, value);
+   }
+
+   template<class TIterator,
+            class = _enable_if_input_iterator_t<TIterator>>
+   void assign(TIterator range_begin, TIterator range_end)
+      _sstl_noexcept(noexcept(std::declval<vector>()._copy_assign(std::declval<TIterator>(),
+                                                                  std::declval<TIterator>())))
+   {
+      sstl_assert(std::distance(range_begin, range_end) <= _capacity());
+      _copy_assign(range_begin, range_end);
+   }
+
 protected:
    static const bool _is_copy = true;
 
@@ -847,23 +864,6 @@ public:
    {
       _base::operator=(init);
       return *this;
-   }
-
-   void assign(size_type count, const_reference value)
-      _sstl_noexcept(noexcept(std::declval<_base>()._count_assign(std::declval<size_type>(), std::declval<const_reference>())))
-   {
-      sstl_assert(count <= Capacity);
-      _base::_count_assign(count, value);
-   }
-
-   template<class TIterator,
-            class = _enable_if_input_iterator_t<TIterator>>
-   void assign(TIterator range_begin, TIterator range_end)
-      _sstl_noexcept(noexcept(std::declval<_base>()._copy_assign( std::declval<TIterator>(),
-                                                                  std::declval<TIterator>())))
-   {
-      sstl_assert(std::distance(range_begin, range_end) <= Capacity);
-      _base::_copy_assign(range_begin, range_end);
    }
 
    reference at(size_type idx)
