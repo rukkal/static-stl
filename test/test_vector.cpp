@@ -7,6 +7,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 
 #include <catch.hpp>
 #include <type_traits>
+#include <sstl/__internal/preprocessor.h>
 #include <sstl/__internal/_except.h>
 #include <sstl/vector.h>
 
@@ -26,7 +27,9 @@ TEST_CASE("vector")
 {
    SECTION("user cannot directly construct the base class")
    {
-      REQUIRE(!std::is_default_constructible<vector_int_base_t>::value);
+      #if !_sstl_is_gcc()
+         REQUIRE(!std::is_default_constructible<vector_int_base_t>::value);
+      #endif
       REQUIRE(!std::is_copy_constructible<vector_int_base_t>::value);
       REQUIRE(!std::is_move_constructible<vector_int_base_t>::value);
    }

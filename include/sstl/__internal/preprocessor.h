@@ -25,4 +25,10 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
    #define IS_MSVC() 0
 #endif
 
+#if defined(__GNUC__)
+   #define _sstl_is_gcc() 1
+#else
+   #define _sstl_is_gcc() 0
+#endif
+
 #endif // _SSTL_PREPROCESSOR__
