@@ -273,6 +273,50 @@ public:
       _set_end(begin());
    }
 
+   iterator insert(const_iterator pos, const_reference value)
+      _sstl_noexcept(noexcept(std::declval<vector>().template _insert<_is_copy>( std::declval<iterator>(),
+                                                                                 std::declval<reference>())))
+   {
+      sstl_assert(size() < capacity());
+      return _insert<_is_copy>(const_cast<iterator>(pos), const_cast<reference>(value));
+   }
+
+   iterator insert(const_iterator pos, value_type&& value)
+      _sstl_noexcept(noexcept(std::declval<vector>().template _insert<!_is_copy>(std::declval<iterator>(),
+                                                                                 std::declval<reference>())))
+   {
+      sstl_assert(size() < capacity());
+      return _insert<!_is_copy>(const_cast<iterator>(pos), const_cast<reference>(value));
+   }
+
+   iterator insert(const_iterator pos, size_type count, const_reference value)
+      _sstl_noexcept(noexcept(std::declval<vector>()._insert(  std::declval<iterator>(),
+                                                               std::declval<size_type>(),
+                                                               std::declval<const_reference>())))
+   {
+      sstl_assert(size() + count <= capacity());
+      return _insert(const_cast<iterator>(pos), count, value);
+   }
+
+   template<class TIterator, class = _enable_if_input_iterator_t<TIterator>>
+   iterator insert(const_iterator pos, TIterator range_begin, TIterator range_end)
+      _sstl_noexcept(noexcept(std::declval<vector>()._insert(  std::declval<iterator>(),
+                                                               std::declval<TIterator>(),
+                                                               std::declval<TIterator>())))
+   {
+      sstl_assert(size() + std::distance(range_begin, range_end) <= capacity());
+      return _insert(const_cast<iterator>(pos), range_begin, range_end);
+   }
+
+   iterator insert(const_iterator pos, std::initializer_list<value_type> init)
+      _sstl_noexcept(noexcept(std::declval<vector>()._insert(  std::declval<iterator>(),
+                                                               std::declval<std::initializer_list<value_type>>().begin(),
+                                                               std::declval<std::initializer_list<value_type>>().end())))
+   {
+      sstl_assert(size() + init.size() <= capacity());
+      return _insert(const_cast<iterator>(pos), init.begin(), init.end());
+   }
+
 protected:
    static const bool _is_copy = true;
 
@@ -966,50 +1010,6 @@ public:
    {
       _base::operator=(init);
       return *this;
-   }
-
-   iterator insert(const_iterator pos, const_reference value)
-      _sstl_noexcept(noexcept(std::declval<_base>().template _insert<_base::_is_copy>( std::declval<iterator>(),
-                                                                                       std::declval<reference>())))
-   {
-      sstl_assert(_base::size() < Capacity);
-      return _base::template _insert<_base::_is_copy>(const_cast<iterator>(pos), const_cast<reference>(value));
-   }
-
-   iterator insert(const_iterator pos, value_type&& value)
-      _sstl_noexcept(noexcept(std::declval<_base>().template _insert<!_base::_is_copy>(std::declval<iterator>(),
-                                                                                       std::declval<reference>())))
-   {
-      sstl_assert(_base::size() < Capacity);
-      return _base::template _insert<!_base::_is_copy>(const_cast<iterator>(pos), const_cast<reference>(value));
-   }
-
-   iterator insert(const_iterator pos, size_type count, const_reference value)
-      _sstl_noexcept(noexcept(std::declval<_base>()._insert(std::declval<iterator>(),
-                                                            std::declval<size_type>(),
-                                                            std::declval<const_reference>())))
-   {
-      sstl_assert(_base::size() + count <= Capacity);
-      return _base::_insert(const_cast<iterator>(pos), count, value);
-   }
-
-   template<class TIterator, class = _enable_if_input_iterator_t<TIterator>>
-   iterator insert(const_iterator pos, TIterator range_begin, TIterator range_end)
-      _sstl_noexcept(noexcept(std::declval<_base>()._insert(std::declval<iterator>(),
-                                                            std::declval<TIterator>(),
-                                                            std::declval<TIterator>())))
-   {
-      sstl_assert(_base::size() + std::distance(range_begin, range_end) <= Capacity);
-      return _base::_insert(const_cast<iterator>(pos), range_begin, range_end);
-   }
-
-   iterator insert(const_iterator pos, std::initializer_list<value_type> init)
-      _sstl_noexcept(noexcept(std::declval<_base>()._insert( std::declval<iterator>(),
-                                                            std::declval<std::initializer_list<value_type>>().begin(),
-                                                            std::declval<std::initializer_list<value_type>>().end())))
-   {
-      sstl_assert(_base::size() + init.size() <= Capacity);
-      return _base::_insert(const_cast<iterator>(pos), init.begin(), init.end());
    }
 
    template<class... Args>
