@@ -277,6 +277,7 @@ public:
       _sstl_noexcept(noexcept(std::declval<vector>().template _insert<_is_copy>( std::declval<iterator>(),
                                                                                  std::declval<reference>())))
    {
+      sstl_assert(pos >= begin() && pos <= end());
       sstl_assert(size() < capacity());
       return _insert<_is_copy>(const_cast<iterator>(pos), const_cast<reference>(value));
    }
@@ -285,17 +286,70 @@ public:
       _sstl_noexcept(noexcept(std::declval<vector>().template _insert<!_is_copy>(std::declval<iterator>(),
                                                                                  std::declval<reference>())))
    {
+      sstl_assert(pos >= begin() && pos <= end());
       sstl_assert(size() < capacity());
       return _insert<!_is_copy>(const_cast<iterator>(pos), const_cast<reference>(value));
    }
 
    iterator insert(const_iterator pos, size_type count, const_reference value)
-      _sstl_noexcept(noexcept(std::declval<vector>()._insert(  std::declval<iterator>(),
-                                                               std::declval<size_type>(),
-                                                               std::declval<const_reference>())))
+      _sstl_noexcept(std::is_nothrow_move_constructible<value_type>::value
+                     && std::is_nothrow_move_assignable<value_type>::value
+                     && std::is_nothrow_copy_constructible<value_type>::value
+                     && std::is_nothrow_copy_assignable<value_type>::value)
    {
+      sstl_assert(pos >= begin() && pos <= end());
       sstl_assert(size() + count <= capacity());
-      return _insert(const_cast<iterator>(pos), count, value);
+      auto new_end = end() + count;
+      auto src = end() - 1;
+      auto dst = new_end - 1;
+
+      #if _sstl_has_exceptions()
+      try
+      {
+      #endif
+         auto end_src_move_construction = std::max(const_cast<pointer>(pos)-1, end()-count-1);
+         while(src > end_src_move_construction)
+         {
+            new(dst) value_type(std::move(*src));
+            --src; --dst;
+         }
+
+         auto end_src_move_assignment = pos - 1;
+         while(src > end_src_move_assignment)
+         {
+            *dst = std::move(*src);
+            --src; --dst;
+         }
+
+         auto end_dst_copy_construction = end() - 1;
+         while(dst > end_dst_copy_construction)
+         {
+            new(dst) value_type(value);
+            --dst;
+         }
+
+         auto end_dst_copy_assignment = pos - 1;
+         while(dst > end_dst_copy_assignment)
+         {
+            *dst = value;
+            --dst;
+         }
+      #if _sstl_has_exceptions()
+      }
+      catch(...)
+      {
+         for(auto p=new_end-1; p>dst; --p)
+            p->~value_type();
+         if(pos != end())
+         {
+            _set_end(std::min(end(), dst+1));
+            clear();
+         }
+         throw;
+      }
+      #endif
+      _set_end(new_end);
+      return const_cast<iterator>(pos);
    }
 
    template<class TIterator, class = _enable_if_input_iterator_t<TIterator>>
@@ -304,6 +358,7 @@ public:
                                                                std::declval<TIterator>(),
                                                                std::declval<TIterator>())))
    {
+      sstl_assert(pos >= begin() && pos <= end());
       sstl_assert(size() + std::distance(range_begin, range_end) <= capacity());
       return _insert(const_cast<iterator>(pos), range_begin, range_end);
    }
@@ -313,8 +368,180 @@ public:
                                                                std::declval<std::initializer_list<value_type>>().begin(),
                                                                std::declval<std::initializer_list<value_type>>().end())))
    {
+      sstl_assert(pos >= begin() && pos <= end());
       sstl_assert(size() + init.size() <= capacity());
       return _insert(const_cast<iterator>(pos), init.begin(), init.end());
+   }
+
+   template<class... Args>
+   iterator emplace(const_iterator pos, Args&&... args)
+      _sstl_noexcept(std::is_nothrow_constructible<value_type, typename std::add_rvalue_reference<Args>::type...>::value
+                     && noexcept(std::declval<vector>().template _insert<!_is_copy>(std::declval<iterator>(),
+                                                                                    std::declval<value_type&>())))
+   {
+      sstl_assert(pos >= begin() && pos <= end());
+      sstl_assert(size() < capacity());
+      value_type value(std::forward<Args>(args)...);
+      return _insert<!_is_copy>(const_cast<iterator>(pos), value);
+   }
+
+   iterator erase(const_iterator pos)
+      _sstl_noexcept(std::is_nothrow_move_assignable<value_type>::value
+                     && std::is_nothrow_destructible<value_type>::value)
+   {
+      sstl_assert(pos >= begin() && pos < end());
+      auto current = const_cast<pointer>(pos);
+      #if _sstl_has_exceptions()
+      try
+      {
+      #endif
+         while(current+1 != end())
+         {
+            *current = std::move(*(current+1));
+            ++current;
+         }
+      #if _sstl_has_exceptions()
+      }
+      catch(...)
+      {
+         clear();
+         throw;
+      }
+      #endif
+      current->~value_type();
+      _set_end(current);
+      return const_cast<iterator>(pos);
+   }
+
+   iterator erase(const_iterator range_begin, const_iterator range_end)
+      _sstl_noexcept(std::is_nothrow_move_assignable<value_type>::value && std::is_nothrow_destructible<value_type>::value)
+   {
+      sstl_assert(range_begin <= range_end);
+      sstl_assert(range_begin >= begin() && range_end <= end());
+      auto dst = const_cast<pointer>(range_begin);
+      auto src = const_cast<pointer>(range_end);
+
+      #if _sstl_has_exceptions()
+      try
+      {
+      #endif
+         while(src != end())
+         {
+            *dst = std::move(*src);
+            ++src; ++dst;
+         }
+      #if _sstl_has_exceptions()
+      }
+      catch(...)
+      {
+         clear();
+         throw;
+      }
+      #endif
+      auto new_end = dst;
+
+      while(dst != end())
+      {
+         dst->~value_type();
+         ++dst;
+      }
+      _set_end(new_end);
+      return const_cast<iterator>(range_begin);
+   }
+
+   void push_back(const_reference value)
+      _sstl_noexcept(noexcept(std::declval<vector>().emplace_back(std::declval<const_reference>())))
+   {
+      sstl_assert(size() < capacity());
+      emplace_back(value);
+   }
+
+   void push_back(value_type&& value)
+      _sstl_noexcept(noexcept(std::declval<vector>().emplace_back(std::declval<value_type>())))
+   {
+      sstl_assert(size() < capacity());
+      emplace_back(std::move(value));
+   }
+
+   template<class... Args>
+   void emplace_back(Args&&... args)
+      _sstl_noexcept(std::is_nothrow_constructible<value_type, typename std::add_rvalue_reference<Args>::type...>::value)
+   {
+      sstl_assert(size() < capacity());
+      new(end()) value_type(std::forward<Args>(args)...);
+      _set_end(end()+1);
+   }
+
+   void pop_back()
+      _sstl_noexcept(std::is_nothrow_destructible<value_type>::value)
+   {
+      sstl_assert(!empty());
+      (end()-1)->~value_type();
+      _set_end(end()-1);
+   }
+
+   void swap(vector& rhs)
+      _sstl_noexcept(std::is_nothrow_move_constructible<value_type>::value
+                     && std::is_nothrow_move_assignable<value_type>::value
+                     && std::is_nothrow_destructible<value_type>::value)
+   {
+      sstl_assert(rhs.size() <= capacity());
+      sstl_assert(size() <= rhs.capacity());
+      vector *large, *small;
+
+      if(size() < rhs.size())
+      {
+         large = &rhs;
+         small = this;
+      }
+      else
+      {
+         large = this;
+         small = &rhs;
+      }
+
+      auto large_pos = large->begin();
+      auto large_end_swaps = large->begin() + small->size();
+      auto large_end = large->end();
+      auto small_pos = small->begin();
+
+      #if _sstl_has_exceptions()
+      try
+      {
+      #endif
+         while(large_pos != large_end_swaps)
+         {
+            std::iter_swap(large_pos, small_pos);
+            ++large_pos; ++small_pos;
+         }
+         while(large_pos != large_end)
+         {
+            new(small_pos) value_type(std::move(*large_pos));
+            large_pos->~value_type();
+            ++large_pos; ++small_pos;
+         }
+      #if _sstl_has_exceptions()
+      }
+      catch(...)
+      {
+         if(large_pos >= large_end_swaps)
+         {
+            while(large_pos != large_end)
+            {
+               large_pos->~value_type();
+               ++large_pos;
+            }
+            large->_set_end(large_end_swaps);
+            small->_set_end(small_pos);
+         }
+         large->clear();
+         small->clear();
+         throw;
+      }
+      #endif
+
+      large->_set_end(large_end_swaps);
+      small->_set_end(small_pos);
    }
 
 protected:
@@ -334,7 +561,7 @@ protected:
       {
       #endif
          for(size_t i=0; i<count; ++i)
-            _emplace_back(value);
+            emplace_back(value);
       #if _sstl_has_exceptions()
       }
       catch(...)
@@ -591,66 +818,6 @@ protected:
       return pos;
    }
 
-   iterator _insert(iterator pos, size_type count, const_reference value)
-      _sstl_noexcept(std::is_nothrow_move_constructible<value_type>::value
-                     && std::is_nothrow_move_assignable<value_type>::value
-                     && std::is_nothrow_copy_constructible<value_type>::value
-                     && std::is_nothrow_copy_assignable<value_type>::value)
-   {
-      auto new_end = end() + count;
-      auto src = end() - 1;
-      auto dst = new_end - 1;
-
-      #if _sstl_has_exceptions()
-      try
-      {
-      #endif
-         auto end_src_move_construction = std::max(pos-1, end()-count-1);
-         while(src > end_src_move_construction)
-         {
-            new(dst) value_type(std::move(*src));
-            --src; --dst;
-         }
-
-         auto end_src_move_assignment = pos - 1;
-         while(src > end_src_move_assignment)
-         {
-            *dst = std::move(*src);
-            --src; --dst;
-         }
-
-         auto end_dst_copy_construction = end() - 1;
-         while(dst > end_dst_copy_construction)
-         {
-            new(dst) value_type(value);
-            --dst;
-         }
-
-         auto end_dst_copy_assignment = pos - 1;
-         while(dst > end_dst_copy_assignment)
-         {
-            *dst = value;
-            --dst;
-         }
-      #if _sstl_has_exceptions()
-      }
-      catch(...)
-      {
-         for(auto p=new_end-1; p>dst; --p)
-            p->~value_type();
-         if(pos != end())
-         {
-            _set_end(std::min(end(), dst+1));
-            clear();
-         }
-         throw;
-      }
-      #endif
-      _set_end(new_end);
-
-      return pos;
-   }
-
    template<class TIterator, class = _enable_if_input_iterator_t<TIterator>>
    iterator _insert(iterator pos, TIterator range_begin, TIterator range_end)
       _sstl_noexcept(std::is_nothrow_move_constructible<value_type>::value
@@ -712,153 +879,6 @@ protected:
       _set_end(new_end);
 
       return pos;
-   }
-
-   template<class... Args>
-   iterator _emplace(iterator pos, Args&&... args)
-      _sstl_noexcept(std::is_nothrow_constructible<value_type, typename std::add_rvalue_reference<Args>::type...>::value
-                     && noexcept(std::declval<vector>().template _insert<!_is_copy>(std::declval<iterator>(),
-                                                                                 std::declval<value_type&>())))
-   {
-      value_type value(std::forward<Args>(args)...);
-      return _insert<!_is_copy>(pos, value);
-   }
-
-   iterator _erase(iterator pos) _sstl_noexcept(std::is_nothrow_move_assignable<value_type>::value
-                                                && std::is_nothrow_destructible<value_type>::value)
-   {
-      auto current = pos;
-      #if _sstl_has_exceptions()
-      try
-      {
-      #endif
-         while(current+1 != end())
-         {
-            *current = std::move(*(current+1));
-            ++current;
-         }
-      #if _sstl_has_exceptions()
-      }
-      catch(...)
-      {
-         clear();
-         throw;
-      }
-      #endif
-      current->~value_type();
-      _set_end(current);
-      return pos;
-   }
-
-   iterator _erase(iterator range_begin, iterator range_end)
-      _sstl_noexcept(std::is_nothrow_move_assignable<value_type>::value && std::is_nothrow_destructible<value_type>::value)
-   {
-      auto dst = range_begin;
-      auto src = range_end;
-
-      #if _sstl_has_exceptions()
-      try
-      {
-      #endif
-         while(src != end())
-         {
-            *dst = std::move(*src);
-            ++src; ++dst;
-         }
-      #if _sstl_has_exceptions()
-      }
-      catch(...)
-      {
-         clear();
-         throw;
-      }
-      #endif
-      auto new_end = dst;
-
-      while(dst != end())
-      {
-         dst->~value_type();
-         ++dst;
-      }
-      _set_end(new_end);
-      return range_begin;
-   }
-
-   template<class... Args>
-   void _emplace_back(Args&&... args)
-      _sstl_noexcept(std::is_nothrow_constructible<value_type, typename std::add_rvalue_reference<Args>::type...>::value)
-   {
-      new(end()) value_type(std::forward<Args>(args)...);
-      _set_end(end()+1);
-   }
-
-   void _pop_back() _sstl_noexcept(std::is_nothrow_destructible<value_type>::value)
-   {
-      sstl_assert(!empty());
-      (end()-1)->~value_type();
-      _set_end(end()-1);
-   }
-
-   void _swap(vector& rhs)
-      _sstl_noexcept(std::is_nothrow_move_constructible<value_type>::value
-                     && std::is_nothrow_move_assignable<value_type>::value
-                     && std::is_nothrow_destructible<value_type>::value)
-   {
-      vector *large, *small;
-
-      if(size() < rhs.size())
-      {
-         large = &rhs;
-         small = this;
-      }
-      else
-      {
-         large = this;
-         small = &rhs;
-      }
-
-      auto large_pos = large->begin();
-      auto large_end_swaps = large->begin() + small->size();
-      auto large_end = large->end();
-      auto small_pos = small->begin();
-
-      #if _sstl_has_exceptions()
-      try
-      {
-      #endif
-         while(large_pos != large_end_swaps)
-         {
-            std::iter_swap(large_pos, small_pos);
-            ++large_pos; ++small_pos;
-         }
-         while(large_pos != large_end)
-         {
-            new(small_pos) value_type(std::move(*large_pos));
-            large_pos->~value_type();
-            ++large_pos; ++small_pos;
-         }
-      #if _sstl_has_exceptions()
-      }
-      catch(...)
-      {
-         if(large_pos >= large_end_swaps)
-         {
-            while(large_pos != large_end)
-            {
-               large_pos->~value_type();
-               ++large_pos;
-            }
-            large->_set_end(large_end_swaps);
-            small->_set_end(small_pos);
-         }
-         large->clear();
-         small->clear();
-         throw;
-      }
-      #endif
-
-      large->_set_end(large_end_swaps);
-      small->_set_end(small_pos);
    }
 };
 
@@ -1010,66 +1030,6 @@ public:
    {
       _base::operator=(init);
       return *this;
-   }
-
-   template<class... Args>
-   iterator emplace(const_iterator pos, Args&&... args)
-      _sstl_noexcept(std::is_nothrow_constructible<value_type, typename std::add_rvalue_reference<Args>::type...>::value
-                     && noexcept(std::declval<_base>()._emplace(std::declval<iterator>(), std::declval<Args>()...)))
-   {
-      sstl_assert(_base::size() < Capacity);
-      return _base::_emplace(const_cast<iterator>(pos), std::forward<Args>(args)...);
-   }
-
-   iterator erase(const_iterator pos)
-      _sstl_noexcept(noexcept(std::declval<_base>()._erase(std::declval<iterator>())))
-   {
-      sstl_assert(pos >= _base::begin() && pos < _base::end());
-      return _base::_erase(const_cast<iterator>(pos));
-   }
-
-   iterator erase(const_iterator range_begin, const_iterator range_end)
-      _sstl_noexcept(noexcept(std::declval<_base>()._erase(std::declval<iterator>(), std::declval<iterator>())))
-   {
-      sstl_assert(range_begin <= range_end);
-      sstl_assert(range_begin >= _base::begin() && range_end <= _base::end());
-      return _base::_erase(const_cast<iterator>(range_begin), const_cast<iterator>(range_end));
-   }
-
-   void push_back(const_reference value)
-      _sstl_noexcept(noexcept(std::declval<_base>()._emplace_back(std::declval<const_reference>())))
-   {
-      sstl_assert(_base::size() < Capacity);
-      _base::_emplace_back(value);
-   }
-
-   void push_back(value_type&& value)
-      _sstl_noexcept(noexcept(std::declval<_base>()._emplace_back(std::declval<value_type>())))
-   {
-      sstl_assert(_base::size() < Capacity);
-      _base::_emplace_back(std::move(value));
-   }
-
-   template<class... Args>
-   void emplace_back(Args&&... args)
-      _sstl_noexcept(noexcept(std::declval<_base>()._emplace_back(std::forward<Args>(std::declval<Args>())...)))
-   {
-      sstl_assert(_base::size() < Capacity);
-      _base::_emplace_back(std::forward<Args>(args)...);
-   }
-
-   void pop_back() _sstl_noexcept(noexcept(std::declval<_base>()._pop_back()))
-   {
-      _base::_pop_back();
-   }
-
-   template<size_type CapacityRhs>
-   void swap(vector<value_type, CapacityRhs>& rhs)
-      _sstl_noexcept(noexcept(std::declval<_base>()._swap(std::declval<_base&>())))
-   {
-      sstl_assert(rhs.size() <= Capacity);
-      sstl_assert(_base::size() <= CapacityRhs);
-      _base::_swap(rhs);
    }
 
 private:
