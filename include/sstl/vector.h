@@ -550,7 +550,7 @@ protected:
 protected:
    vector() = default;
    vector(const vector&) = default;
-   vector(vector&&) = default;
+   vector(vector&&) {}; //MSVC (VS2013) does not allow to default move special member functions
    ~vector() = default;
 
    void _count_constructor(size_type count, const_reference value)
