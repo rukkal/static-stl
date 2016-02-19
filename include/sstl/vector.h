@@ -34,7 +34,6 @@ class vector;
 template<class T>
 class vector<T>
 {
-//TODO: try to remove
 template<class U, size_t S>
 friend class vector; //friend declaration required for vector's noexcept expressions
 
@@ -242,7 +241,6 @@ public:
    {
       return const_cast<vector&>(*this).rend();
    }
-
 
    bool empty() const _sstl_noexcept_
    {
@@ -893,7 +891,7 @@ private:
    //on instantiated vector type in order not to generate multiple definitions
    //note: the instantiated vector type is used through a non-member function
    //(would be an incomplete type inside a member function)
-   friend void _assert_vector_derived_member_variable_access_is_valid(_type_tag<vector>)
+   friend void _assert_hacky_derived_member_variable_access_is_valid(_type_tag<vector>)
    {
       #if IS_MSVC()
       // MSVC can't compute derived-to-base pointer conversion at compile-time
@@ -928,7 +926,7 @@ public:
    vector() _sstl_noexcept_
       : _end_(_base::begin())
    {
-      _assert_vector_derived_member_variable_access_is_valid(_type_tag<vector>{});
+      _assert_hacky_derived_member_variable_access_is_valid(_type_tag<vector>{});
    }
 
    explicit vector(size_type count, const_reference value=value_type())
@@ -936,7 +934,7 @@ public:
       : _end_(_base::begin())
    {
       sstl_assert(count <= Capacity);
-      _assert_vector_derived_member_variable_access_is_valid(_type_tag<vector>{});
+      _assert_hacky_derived_member_variable_access_is_valid(_type_tag<vector>{});
       _base::_count_constructor(count, value);
    }
 
@@ -946,7 +944,7 @@ public:
                                                                         std::declval<TIterator>())))
    {
       sstl_assert(std::distance(range_begin, range_end) <= Capacity);
-      _assert_vector_derived_member_variable_access_is_valid(_type_tag<vector>{});
+      _assert_hacky_derived_member_variable_access_is_valid(_type_tag<vector>{});
       _base::_range_constructor(range_begin, range_end);
    }
 
@@ -956,7 +954,7 @@ public:
                                                                         std::declval<const_iterator>())))
    {
       sstl_assert(rhs.size() <= Capacity);
-      _assert_vector_derived_member_variable_access_is_valid(_type_tag<vector>{});
+      _assert_hacky_derived_member_variable_access_is_valid(_type_tag<vector>{});
       _base::_range_constructor(const_cast<_base&>(rhs).begin(), const_cast<_base&>(rhs).end());
    }
 
@@ -970,7 +968,7 @@ public:
       _sstl_noexcept(noexcept(std::declval<_base>()._move_constructor(std::declval<_base>())))
    {
       sstl_assert(rhs.size() <= Capacity);
-      _assert_vector_derived_member_variable_access_is_valid(_type_tag<vector>{});
+      _assert_hacky_derived_member_variable_access_is_valid(_type_tag<vector>{});
       _base::_move_constructor(std::move(rhs));
    }
 
@@ -985,7 +983,7 @@ public:
          std::declval<std::initializer_list<value_type>>().end())))
    {
       sstl_assert(init.size() <= Capacity);
-      _assert_vector_derived_member_variable_access_is_valid(_type_tag<vector>{});
+      _assert_hacky_derived_member_variable_access_is_valid(_type_tag<vector>{});
       _base::_range_constructor(init.begin(), init.end());
    }
 
