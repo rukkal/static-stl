@@ -18,12 +18,12 @@ namespace sstl
 {
 #if !IS_MSVC()
    template<size_t Len, size_t Align>
-   struct aligned_storage
+   struct _aligned_storage
    {
       using type = typename std::aligned_storage<Len, Align>::type;
    };
 #else
-   namespace detail
+   namespace _detail
    {
       template<size_t Align>
       struct invalid_alignment_value
@@ -51,18 +51,18 @@ namespace sstl
    };
 
    template<size_t Len, size_t Align>
-   struct aligned_storage
+   struct _aligned_storage
    {
-      static_assert(detail::invalid_alignment_value<Align>::error, "specified alignment is not valid");
+      static_assert(_detail::invalid_alignment_value<Align>::error, "specified alignment is not valid");
    };
 
    #define define_aligned_storage(Align) \
       template<size_t Len> \
-      struct aligned_storage<Len, Align> \
+      struct _aligned_storage<Len, Align> \
       { \
          __declspec(align(Align)) struct type \
          { \
-            uint8_t _data[detail::max<Len, Align>::value]; /* max required to avoid MSVC's warning about padding */ \
+            uint8_t _data[_detail::max<Len, Align>::value]; /* max required to avoid MSVC's warning about padding */ \
          }; \
       };
 
@@ -80,7 +80,6 @@ namespace sstl
    define_aligned_storage(2048)
    define_aligned_storage(4096)
    define_aligned_storage(8192)
-
 #endif
 }
 

@@ -12,7 +12,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include <array>
 
 #include "sstl_assert.h"
-#include "__internal/aligned_storage.h"
+#include "__internal/_aligned_storage.h"
 #include "__internal/bitset_span.h"
 #include "__internal/warnings.h"
 
@@ -106,7 +106,7 @@ private:
     static const size_t k_bitmap_size = (CAPACITY-1) / k_bits_per_block + 1;
     std::array<bitset_block_type, k_bitmap_size> bitmap;
 
-    std::array<typename aligned_storage<sizeof(T), std::alignment_of<T>::value>::type, CAPACITY> buffer;
+    std::array<typename _aligned_storage<sizeof(T), std::alignment_of<T>::value>::type, CAPACITY> buffer;
 };
 }
 

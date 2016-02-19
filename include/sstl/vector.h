@@ -22,7 +22,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include "__internal/_type_tag.h"
 #include "__internal/_utility.h"
 #include "__internal/_iterator.h"
-#include "__internal/aligned_storage.h"
+#include "__internal/_aligned_storage.h"
 #include "__internal/_debug.h"
 
 namespace sstl
@@ -1027,7 +1027,7 @@ public:
 private:
    size_type _capacity_{ Capacity };
    pointer _end_;
-   std::array<typename aligned_storage<sizeof(value_type), std::alignment_of<value_type>::value>::type, Capacity> _buffer_;
+   std::array<typename _aligned_storage<sizeof(value_type), std::alignment_of<value_type>::value>::type, Capacity> _buffer_;
 };
 
 template<class T>
