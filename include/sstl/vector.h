@@ -696,12 +696,10 @@ protected:
          while(src != rhs_end)
          {
             if(dest < end())
-               *dest = _move_assign_if_noexcept(*src);
+               *dest = std::move(*src);
             else
-               new(dest) value_type(_move_assign_if_noexcept(*src));
-            #if !_sstl_has_exceptions()
+               new(dest) value_type(std::move(*src));
             src->~value_type();
-            #endif
             ++dest; ++src;
          }
       #if _sstl_has_exceptions()
@@ -710,6 +708,11 @@ protected:
       {
          _set_end(std::max(dest, end()));
          clear();
+         while(src < rhs_end)
+         {
+            src->~value_type();
+            ++src;
+         }
          throw;
       }
       #endif
@@ -721,13 +724,6 @@ protected:
          dest->~value_type();
          ++dest;
       }
-
-      #if _sstl_has_exceptions()
-      while(src-- > rhs_begin)
-      {
-         src->~value_type();
-      }
-      #endif
    }
 
    void _count_assign(size_type count, const_reference value)

@@ -21,19 +21,6 @@ _TRet _conditional_move(T& value)
    return static_cast<_TRet>(value);
 }
 
-//returns an rvalue reference to its argument if any of the following is true:
-//- the exceptions are turned off (e.g. -fno-exceptions)
-//- the argument's move assignment operator is noexcept specified
-//- the argument cannot be copy assigned
-template<class T,
-         class _TRet = typename std::conditional<  !_sstl_has_exceptions()
-                                                   || std::is_nothrow_move_assignable<T>::value
-                                                   || !std::is_copy_assignable<T>::value, T&&, const T& >::type>
-_TRet _move_assign_if_noexcept(T& value)
-{
-   return static_cast<_TRet>(value);
-}
-
 }
 
 #endif
