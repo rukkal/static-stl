@@ -650,10 +650,8 @@ protected:
       #endif
          while(src != rhs.end())
          {
-            new(dst) value_type(_move_construct_if_noexcept(*src));
-            #if !_sstl_has_exceptions()
+            new(dst) value_type(std::move(*src));
             src->~value_type();
-            #endif
             ++src; ++dst;
          }
       #if _sstl_has_exceptions()
@@ -662,13 +660,13 @@ protected:
       {
          _set_end(dst);
          clear();
+         while(src != rhs.end())
+         {
+            src->~value_type();
+            ++src;
+         }
+         rhs._set_end(rhs.begin());
          throw;
-      }
-      src = rhs.begin();
-      while(src != rhs.end())
-      {
-         src->~value_type();
-         ++src;
       }
       #endif
       _set_end(dst);
