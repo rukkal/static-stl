@@ -110,7 +110,7 @@ public:
       _copy_assign(ilist.begin(), ilist.end());
    }
 
-   reference at(size_type idx) _sstl_noexcept_if_doesnt_have_exceptions_
+   reference at(size_type idx) _sstl_noexcept(!_sstl_has_exceptions())
    {
       #if _sstl_has_exceptions()
       if(idx >= size())
