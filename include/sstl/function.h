@@ -87,6 +87,12 @@ namespace _detail
          std::is_convertible<TResultTo, TResultFrom>::value
          && _detail::_are_convertible<std::tuple<TParamsFrom...>, std::tuple<TParamsTo...>>::value;
    };
+
+   template<class T>
+   T& _get_reference(T* p) { return *p; }
+
+   template<class T>
+   T& _get_reference(T& r) { return r; }
 }
 
 namespace _detail
@@ -96,6 +102,22 @@ namespace _detail
    {
       // FIXME: fix with "&& std::is_final<T>::value" as soon as C++14 support is available
       static const bool value = std::is_class<T>::value;
+   };
+};
+
+namespace _detail
+{
+   template<class, class>
+   struct _is_member_function_pointer_compatible;
+
+   template<class TPointerRet, class TPointerClass, class... TPointerParams,
+            class TFunctionRet, class TFirstFunctionParam, class... TOtherFunctionParams, size_t FunctionSize>
+   struct _is_member_function_pointer_compatible<
+      TPointerRet (TPointerClass::*) (TPointerParams...),
+      sstl::function<TFunctionRet(TFirstFunctionParam, TOtherFunctionParams...), FunctionSize>>
+   {
+      static const bool value =
+         std::is_same<TPointerClass*, TFirstFunctionParam>::value || std::is_same<TPointerClass&, TFirstFunctionParam>::value;
    };
 };
 
@@ -184,7 +206,7 @@ private:
    template<class, class=void>
    struct _internal_callable_imp;
 
-   // EBO template specialization
+   //EBO specialization
    template<class TTarget>
    struct _internal_callable_imp<TTarget, typename std::enable_if<_detail::_is_inheritable<TTarget>::value>::type >
       : _internal_callable, TTarget
@@ -210,8 +232,49 @@ private:
       }
    };
 
+   //member function pointer specialization
    template<class TTarget>
-   struct _internal_callable_imp<TTarget, typename std::enable_if<!_detail::_is_inheritable<TTarget>::value>::type >
+   struct _internal_callable_imp<TTarget, typename std::enable_if<std::is_member_function_pointer<TTarget>::value>::type >
+      : _internal_callable
+   {
+      template<class T>
+      _internal_callable_imp(T&& target) : target(target)
+      {
+      }
+
+      TResult _call(typename _detail::_make_const_ref_if_value<TParams>::type... params) override
+      {
+         return _call_member_function(std::forward<typename _detail::_make_const_ref_if_value<TParams>::type>(params)...);
+      }
+
+      template<class TInstance, class... TMemberFunctionParams>
+      TResult _call_member_function(TInstance instance, TMemberFunctionParams&&... params)
+      {
+         return (_detail::_get_reference(instance).*target)(std::forward<TMemberFunctionParams>(params)...);
+      }
+
+      void _copy_construct_to_buffer(void* b) const override
+      {
+         new(b) _internal_callable_imp(target);
+      }
+
+      void _move_construct_to_buffer(void* b) override
+      {
+         new(b) _internal_callable_imp(target);
+      }
+
+      TTarget target;
+
+      static_assert(_detail::_is_member_function_pointer_compatible<TTarget, function>::value,
+         "attempted to assign an incompatible member function pointer."
+         " Are the types of the first (left most) parameters compatible?");
+   };
+
+   template<class TTarget>
+   struct _internal_callable_imp<TTarget,
+                                 typename std::enable_if<
+                                    !_detail::_is_inheritable<TTarget>::value
+                                    && !std::is_member_function_pointer<TTarget>::value>::type>
       : _internal_callable
    {
       template<class T>

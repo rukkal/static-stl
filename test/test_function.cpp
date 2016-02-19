@@ -19,8 +19,6 @@ namespace sstl
 namespace test
 {
 
-         template<size_t> struct print;
-
 static const int EXPECTED_OUTPUT_PARAMETER = 101;
 
 struct callable_type
@@ -128,6 +126,24 @@ TEST_CASE("function")
          int i = 3;
          f(i);
          REQUIRE(i == EXPECTED_OUTPUT_PARAMETER);
+      }
+      SECTION("target is pointer to member function")
+      {
+         callable_type c;
+         SECTION("first parameter is 'this' pointer")
+         {
+            auto f = sstl::function<void(callable_type*, int&), 3>{ &callable_type::operation };
+            int i = 3;
+            f(&c, i);
+            REQUIRE(i == EXPECTED_OUTPUT_PARAMETER);
+         }
+         SECTION("first parameter is 'this' reference")
+         {
+            auto f = sstl::function<void(callable_type&, int&), 3>{ &callable_type::operation };
+            int i = 3;
+            f(c, i);
+            REQUIRE(i == EXPECTED_OUTPUT_PARAMETER);
+         }
       }
       SECTION("target is result of std::mem_fn")
       {
@@ -295,6 +311,15 @@ TEST_CASE("function")
          f = callable_type{};
          int i = 3;
          f(i);
+         REQUIRE(i == EXPECTED_OUTPUT_PARAMETER);
+      }
+      SECTION("target is pointer to member function")
+      {
+         auto f = sstl::function<void(callable_type&, int&), 3>{};
+         f = &callable_type::operation;
+         callable_type c;
+         int i = 3;
+         f(c, i);
          REQUIRE(i == EXPECTED_OUTPUT_PARAMETER);
       }
       SECTION("target is closure")
