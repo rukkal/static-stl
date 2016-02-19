@@ -32,7 +32,7 @@ template<class, size_t=static_cast<size_t>(-1)>
 class vector;
 
 template<class T>
-class vector<T, static_cast<size_t>(-1)>
+class vector<T>
 {
 //TODO: try to remove
 template<class U, size_t S>
