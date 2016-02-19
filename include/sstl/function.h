@@ -18,89 +18,89 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 namespace sstl
 {
 
-template<class TTarget, size_t SIZE_WORDS = 1>
+template<class TTarget, size_t SIZE_IN_WORDS = 1>
 class function;
 
-namespace detail
+namespace _detail
 {
    template<class T>
-   struct make_const_ref_if_value
+   struct _make_const_ref_if_value
    {
       using type = const T&;
    };
 
    template<class T>
-   struct make_const_ref_if_value<T&>
+   struct _make_const_ref_if_value<T&>
    {
       using type = T&;
    };
 
    template<class T>
-   struct make_const_ref_if_value<T&&>
+   struct _make_const_ref_if_value<T&&>
    {
       using type = T&&;
    };
 }
 
-namespace detail
+namespace _detail
 {
    // true if the template parameter is an instance of sstl::function
    template<class>
-   struct is_function : std::false_type {};
+   struct _is_function : std::false_type {};
 
    template<class TResult, class... TParams, size_t TARGET_SIZE>
-   struct is_function<sstl::function<TResult(TParams...), TARGET_SIZE>> : std::true_type {};
+   struct _is_function<sstl::function<TResult(TParams...), TARGET_SIZE>> : std::true_type {};
 }
 
-namespace detail
+namespace _detail
 {
    // true if types "From" are convertible to type "To"
    template<class From, class To>
-   struct are_convertible;
+   struct _are_convertible;
 
    template<>
-   struct are_convertible<std::tuple<>, std::tuple<>> : std::true_type {};
+   struct _are_convertible<std::tuple<>, std::tuple<>> : std::true_type {};
 
    template<class FromHead, class... FromTail, class ToHead, class... ToTail>
-   struct are_convertible<std::tuple<FromHead, FromTail...>, std::tuple<ToHead, ToTail...>>
+   struct _are_convertible<std::tuple<FromHead, FromTail...>, std::tuple<ToHead, ToTail...>>
    {
       static const bool value =
          std::is_convertible<FromHead, ToHead>::value
-         && are_convertible<std::tuple<FromTail...>, std::tuple<ToTail...>>::value;
+         && _are_convertible<std::tuple<FromTail...>, std::tuple<ToTail...>>::value;
    };
 }
 
-namespace detail
+namespace _detail
 {
    // true if "From" can be converted to "To",
    // i.e "To" has covariant return type and contravariant parameter types
    template<class From, class To>
-   struct is_convertible_function;
+   struct _is_convertible_function;
 
    template<class TResultFrom, class... TParamsFrom, size_t TARGET_SIZE_FROM,
             class TResultTo, class... TParamsTo, size_t TARGET_SIZE_TO>
-   struct is_convertible_function<
+   struct _is_convertible_function<
       sstl::function<TResultFrom(TParamsFrom...), TARGET_SIZE_FROM>,
       sstl::function<TResultTo(TParamsTo...), TARGET_SIZE_TO>>
    {
       static const bool value =
          std::is_convertible<TResultTo, TResultFrom>::value
-         && detail::are_convertible<std::tuple<TParamsFrom...>, std::tuple<TParamsTo...>>::value;
+         && _detail::_are_convertible<std::tuple<TParamsFrom...>, std::tuple<TParamsTo...>>::value;
    };
 }
 
-namespace detail
+namespace _detail
 {
    template<class T, class=void>
-   struct is_inheritable
+   struct _is_inheritable
    {
       // FIXME: fix with "&& std::is_final<T>::value" as soon as C++14 support is available
       static const bool value = std::is_class<T>::value;
    };
 };
 
-template<class TResult, class... TParams, size_t SIZE_WORDS>
-class function<TResult(TParams...), SIZE_WORDS> final
+template<class TResult, class... TParams, size_t SIZE_IN_WORDS>
+class function<TResult(TParams...), SIZE_IN_WORDS> final
 {
    template<class, size_t>
    friend class function;
@@ -108,130 +108,130 @@ class function<TResult(TParams...), SIZE_WORDS> final
 public:
    function() _sstl_noexcept_
    {
-      clear_internal_callable();
+      _clear_internal_callable();
    }
 
    template<
       class T,
       class TTarget = typename std::decay<T>::type,
-      class = typename std::enable_if<detail::is_function<TTarget>::value>::type>
+      class = typename std::enable_if<_detail::_is_function<TTarget>::value>::type>
    function(T&& rhs)
    {
-      static_assert( detail::is_convertible_function<function, TTarget>::value,
+      static_assert( _detail::_is_convertible_function<function, TTarget>::value,
                      "the instance of sstl::function passed as argument"
                      "must have covariant return type and contravariant"
                      "parameter types in order to be assigned");
-      construct_internal_callable(std::forward<T>(rhs));
+      _construct_internal_callable(std::forward<T>(rhs));
    }
 
    template<
       class T,
       class TTarget = typename std::decay<T>::type,
-      class = typename std::enable_if<!detail::is_function<TTarget>::value>::type>
+      class = typename std::enable_if<!_detail::_is_function<TTarget>::value>::type>
    // dummy parameter required in order not to declare an invalid overload
    function(T&& rhs, char=0) _sstl_noexcept( (std::is_lvalue_reference<T>::value && std::is_nothrow_copy_constructible<TTarget>::value)
                                              || (!std::is_lvalue_reference<T>::value && std::is_nothrow_move_constructible<TTarget>::value))
    {
-      construct_internal_callable(std::forward<T>(rhs));
+      _construct_internal_callable(std::forward<T>(rhs));
    }
 
    template<class T, class TTarget = typename std::decay<T>::type>
-   function& operator=(T&& rhs) _sstl_noexcept( !detail::is_function<TTarget>::value &&
+   function& operator=(T&& rhs) _sstl_noexcept( !_detail::_is_function<TTarget>::value &&
                                                 ((std::is_lvalue_reference<T>::value && std::is_nothrow_copy_constructible<TTarget>::value)
                                                 || (!std::is_lvalue_reference<T>::value && std::is_nothrow_move_constructible<TTarget>::value)))
    {
-      assign_internal_callable(std::forward<T>(rhs));
+      _assign_internal_callable(std::forward<T>(rhs));
       return *this;
    }
 
    ~function()
    {
-      if(!is_internal_callable_cleared())
+      if(!_is_internal_callable_cleared())
       {
-         get_internal_callable().~internal_callable();
+         _get_internal_callable().~_internal_callable();
       }
    }
 
-   TResult operator()(typename detail::make_const_ref_if_value<TParams>::type... params) const
+   TResult operator()(typename _detail::_make_const_ref_if_value<TParams>::type... params) const
    {
-      return get_internal_callable().call(std::forward<typename detail::make_const_ref_if_value<TParams>::type>(params)...);
+      return _get_internal_callable()._call(std::forward<typename _detail::_make_const_ref_if_value<TParams>::type>(params)...);
    }
 
    operator bool() const _sstl_noexcept_
    {
-      return !is_internal_callable_cleared();
+      return !_is_internal_callable_cleared();
    }
 
 private:
-   struct internal_callable
+   struct _internal_callable
    {
-      virtual ~internal_callable() {}
-      virtual TResult call(typename detail::make_const_ref_if_value<TParams>::type...) = 0;
+      virtual ~_internal_callable() {}
+      virtual TResult _call(typename _detail::_make_const_ref_if_value<TParams>::type...) = 0;
       // std::true_type -> copy construction
-      void construct_to_buffer(std::true_type, void* buffer) const
+      void _construct_to_buffer(std::true_type, void* buffer) const
       {
-         copy_construct_to_buffer(buffer);
+         _copy_construct_to_buffer(buffer);
       }
       // std::false_type -> move construction
-      void construct_to_buffer(std::false_type, void* buffer)
+      void _construct_to_buffer(std::false_type, void* buffer)
       {
-         move_construct_to_buffer(buffer);
+         _move_construct_to_buffer(buffer);
       }
-      virtual void copy_construct_to_buffer(void*) const = 0;
-      virtual void move_construct_to_buffer(void*) = 0;
+      virtual void _copy_construct_to_buffer(void*) const = 0;
+      virtual void _move_construct_to_buffer(void*) = 0;
    };
 
    template<class, class=void>
-   struct internal_callable_imp;
+   struct _internal_callable_imp;
 
-   // ebo template specialization
+   // EBO template specialization
    template<class TTarget>
-   struct internal_callable_imp<TTarget, typename std::enable_if<detail::is_inheritable<TTarget>::value>::type >
-      : internal_callable, TTarget
+   struct _internal_callable_imp<TTarget, typename std::enable_if<_detail::_is_inheritable<TTarget>::value>::type >
+      : _internal_callable, TTarget
    {
       template<class T>
-      internal_callable_imp(T&& target) : TTarget(std::forward<T>(target))
+      _internal_callable_imp(T&& target) : TTarget(std::forward<T>(target))
       {
       }
 
-      TResult call(typename detail::make_const_ref_if_value<TParams>::type... params) override
+      TResult _call(typename _detail::_make_const_ref_if_value<TParams>::type... params) override
       {
-         return (*this)(std::forward<typename detail::make_const_ref_if_value<TParams>::type>(params)...);
+         return (*this)(std::forward<typename _detail::_make_const_ref_if_value<TParams>::type>(params)...);
       }
 
-      void copy_construct_to_buffer(void* b) const override
+      void _copy_construct_to_buffer(void* b) const override
       {
-         new(b) internal_callable_imp(static_cast<const TTarget&>(*this));
+         new(b) _internal_callable_imp(static_cast<const TTarget&>(*this));
       }
 
-      void move_construct_to_buffer(void* b) override
+      void _move_construct_to_buffer(void* b) override
       {
-         new(b) internal_callable_imp(std::move(static_cast<TTarget&>(*this)));
+         new(b) _internal_callable_imp(std::move(static_cast<TTarget&>(*this)));
       }
    };
 
    template<class TTarget>
-   struct internal_callable_imp<TTarget, typename std::enable_if<!detail::is_inheritable<TTarget>::value>::type >
-      : internal_callable
+   struct _internal_callable_imp<TTarget, typename std::enable_if<!_detail::_is_inheritable<TTarget>::value>::type >
+      : _internal_callable
    {
       template<class T>
-      internal_callable_imp(T&& target) : target(std::forward<T>(target))
+      _internal_callable_imp(T&& target) : target(std::forward<T>(target))
       {
       }
 
-      TResult call(typename detail::make_const_ref_if_value<TParams>::type... params) override
+      TResult _call(typename _detail::_make_const_ref_if_value<TParams>::type... params) override
       {
-         return target(std::forward<typename detail::make_const_ref_if_value<TParams>::type>(params)...);
+         return target(std::forward<typename _detail::_make_const_ref_if_value<TParams>::type>(params)...);
       }
 
-      void copy_construct_to_buffer(void* b) const override
+      void _copy_construct_to_buffer(void* b) const override
       {
-         new(b) internal_callable_imp(target);
+         new(b) _internal_callable_imp(target);
       }
 
-      void move_construct_to_buffer(void* b) override
+      void _move_construct_to_buffer(void* b) override
       {
-         new(b) internal_callable_imp(std::move(target));
+         new(b) _internal_callable_imp(std::move(target));
       }
 
       TTarget target;
@@ -240,89 +240,87 @@ private:
 private:
    template<class T,
             class TTarget = typename std::decay<T>::type,
-            class = typename std::enable_if<detail::is_function<TTarget>::value>::type>
-   void construct_internal_callable(T&& rhs)
+            class = typename std::enable_if<_detail::_is_function<TTarget>::value>::type>
+   void _construct_internal_callable(T&& rhs)
    {
-      static_assert(detail::is_function<TTarget>::value, "");
-      if(!rhs.is_internal_callable_cleared())
+      static_assert(_detail::_is_function<TTarget>::value, "");
+      if(!rhs._is_internal_callable_cleared())
       {
          using is_copy_construction = std::is_lvalue_reference<T>;
-         rhs.get_internal_callable().construct_to_buffer(is_copy_construction{}, buffer);
+         rhs._get_internal_callable()._construct_to_buffer(is_copy_construction{}, _buffer);
       }
       else
       {
-         clear_internal_callable();
+         _clear_internal_callable();
       }
    }
 
    template<class T,
             class TTarget = typename std::decay<T>::type,
-            class = typename std::enable_if<!detail::is_function<TTarget>::value>::type>
+            class = typename std::enable_if<!_detail::_is_function<TTarget>::value>::type>
    // dummy parameter required in order not to declare an invalid overload
-   void construct_internal_callable(T&& rhs, char=0)
+   void _construct_internal_callable(T&& rhs, char=0)
    {
       static_assert(
-         sizeof(internal_callable_imp<TTarget>) <= sizeof(buffer),
+         sizeof(_internal_callable_imp<TTarget>) <= sizeof(_buffer),
          "Not enough memory available to store the wished target."
          "Hint: specify size of the target as extra template argument");
-      new(buffer)internal_callable_imp<TTarget>(std::forward<T>(rhs));
+      new(_buffer)_internal_callable_imp<TTarget>(std::forward<T>(rhs));
    }
 
    template<class T,
             class TTarget = typename std::decay<T>::type,
-            class = typename std::enable_if<detail::is_function<TTarget>::value>::type>
-   void assign_internal_callable(T&& rhs)
+            class = typename std::enable_if<_detail::_is_function<TTarget>::value>::type>
+   void _assign_internal_callable(T&& rhs)
    {
       if(static_cast<void*>(this) == static_cast<void*>(std::addressof(rhs)))
          return;
-      if(is_internal_callable_cleared())
+      if(_is_internal_callable_cleared())
       {
-         if(!rhs.is_internal_callable_cleared())
+         if(!rhs._is_internal_callable_cleared())
          {
             using is_copy_construction = std::is_lvalue_reference<T>;
-            rhs.get_internal_callable().construct_to_buffer(is_copy_construction{}, buffer);
+            rhs._get_internal_callable()._construct_to_buffer(is_copy_construction{}, _buffer);
          }
       }
       else
       {
-         get_internal_callable().~internal_callable();
-         construct_internal_callable(std::forward<T>(rhs));
+         _get_internal_callable().~_internal_callable();
+         _construct_internal_callable(std::forward<T>(rhs));
       }
    }
 
    template<class T,
             class TTarget = typename std::decay<T>::type,
-            class = typename std::enable_if<!detail::is_function<TTarget>::value>::type>
+            class = typename std::enable_if<!_detail::_is_function<TTarget>::value>::type>
    // dummy parameter required in order not to declare an invalid overload
-   void assign_internal_callable(T&& rhs, char=0)
+   void _assign_internal_callable(T&& rhs, char=0)
    {
-      if(!is_internal_callable_cleared())
+      if(!_is_internal_callable_cleared())
       {
-         get_internal_callable().~internal_callable();
+         _get_internal_callable().~_internal_callable();
       }
-      construct_internal_callable(std::forward<T>(rhs));
+      _construct_internal_callable(std::forward<T>(rhs));
    }
 
-   internal_callable& get_internal_callable() const
+   _internal_callable& _get_internal_callable() const
    {
-      return *static_cast<internal_callable*>(static_cast<void*>(buffer));
+      return *static_cast<_internal_callable*>(static_cast<void*>(_buffer));
    }
 
-   void clear_internal_callable()
+   void _clear_internal_callable()
    {
-      std::fill(std::begin(buffer), std::end(buffer), 0);
+      std::fill(std::begin(_buffer), std::end(_buffer), 0);
    }
 
-   bool is_internal_callable_cleared() const
+   bool _is_internal_callable_cleared() const
    {
-      return std::all_of(std::begin(buffer), std::end(buffer), [](uint8_t c){ return c==0; });
+      return std::all_of(std::begin(_buffer), std::end(_buffer), [](uint8_t c){ return c==0; });
    }
 
 private:
-   // the default storage size is large enough to store targets such as
-   // stateless closures, stateless function objects and function pointers
-   static const size_t BYTES_PER_WORD{ sizeof(void*) };
-   mutable uint8_t buffer[SIZE_WORDS * BYTES_PER_WORD];
+   static const size_t _BYTES_PER_WORD{ sizeof(void*) };
+   mutable uint8_t _buffer[SIZE_IN_WORDS * _BYTES_PER_WORD];
 };
 }
 
