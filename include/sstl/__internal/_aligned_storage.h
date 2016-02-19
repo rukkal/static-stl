@@ -12,11 +12,11 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include <cstdint>
 #include <type_traits>
 
-#include "preprocessor.h"
+#include "_preprocessor.h"
 
 namespace sstl
 {
-#if !IS_MSVC()
+#if !_is_msvc()
    template<size_t Len, size_t Align>
    struct _aligned_storage
    {

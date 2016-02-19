@@ -20,9 +20,9 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
    MSVC++ 6.0  _MSC_VER == 1200
    MSVC++ 5.0  _MSC_VER == 1100
    */
-   #define IS_MSVC() 1
+   #define _is_msvc() 1
 #else
-   #define IS_MSVC() 0
+   #define _is_msvc() 0
 #endif
 
 #if defined(__GNUC__)

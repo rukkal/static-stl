@@ -10,7 +10,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include <memory>
 #include <functional>
 #include <sstl/function.h>
-#include <sstl/__internal/preprocessor.h>
+#include <sstl/__internal/_preprocessor.h>
 #include "utility.h"
 #include "counted_type.h"
 
@@ -208,7 +208,7 @@ TEST_CASE("function")
          REQUIRE(lhs == true);
          REQUIRE(lhs() == 101);
       }
-      #if !IS_MSVC()
+      #if !_is_msvc()
       //note: the test breaks because MSVC elides the assignment (although the optimizer is turned off)
       //even when the sstl::function instances are escaped (compiler is forced not to optimize them)
       SECTION("number of underlying target's constructions")

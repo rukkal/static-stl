@@ -7,7 +7,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 
 #include <catch.hpp>
 #include <type_traits>
-#include <sstl/__internal/preprocessor.h>
+#include <sstl/__internal/_preprocessor.h>
 #include <sstl/__internal/_except.h>
 #include <sstl/vector.h>
 
@@ -36,7 +36,7 @@ TEST_CASE("vector")
 
    SECTION("user cannot directly destroy the base class")
    {
-      #if !IS_MSVC() //MSVC (VS2013) has a buggy implemntation of std::is_destructible
+      #if !_is_msvc() //MSVC (VS2013) has a buggy implemntation of std::is_destructible
       REQUIRE(!std::is_destructible<vector_int_base_t>::value);
       #endif
    }

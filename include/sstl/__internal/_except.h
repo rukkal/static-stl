@@ -7,11 +7,11 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 
 #ifndef _SSTL_EXCEPT__
 
-#include "preprocessor.h"
+#include "_preprocessor.h"
 
 #if defined(_SSTL_NOEXCEPTIONS_TEST)
    #define _sstl_has_exceptions() 0
-#elif IS_MSVC()
+#elif _is_msvc()
    #define _sstl_has_exceptions() 1
 #elif defined(__EXCEPTIONS)
    #define _sstl_has_exceptions() 1
@@ -19,7 +19,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
    #define _sstl_has_exceptions() 0
 #endif
 
-#if IS_MSVC() && _MSC_VER < 1900
+#if _is_msvc() && _MSC_VER < 1900
    #define _sstl_noexcept_
    #define _sstl_noexcept(...)
    #define _sstl_noexcept_if_doesnt_have_exceptions_

@@ -893,7 +893,7 @@ private:
    //(would be an incomplete type inside a member function)
    friend void _assert_hacky_derived_member_variable_access_is_valid(_type_tag<vector>)
    {
-      #if IS_MSVC()
+      #if _is_msvc()
       // MSVC can't compute derived-to-base pointer conversion at compile-time
       sstl_assert(static_cast<_base*>(static_cast<_type_for_derived_member_variable_access*>(0)) == static_cast<_base*>(0));
       sstl_assert(static_cast<_base*>(static_cast<vector*>(0)) == static_cast<_base*>(0));
