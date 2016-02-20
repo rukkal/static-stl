@@ -13,9 +13,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include <stdexcept>
 #include <sstl/__internal/_except.h>
 
-namespace sstl
-{
-namespace test
+namespace sstl_test
 {
 
 class counted_type
@@ -355,7 +353,6 @@ private:
    static const size_t invalid_count = static_cast<size_t>(-1);
 };
 
-}
 }
 
 #endif

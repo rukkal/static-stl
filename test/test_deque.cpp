@@ -77,9 +77,7 @@ std::vector<NDC> initial_data_small  = { N0, N1, N2, N3, N4, N5, N6, N7, N8, N9 
 std::vector<NDC> insert_data         = { N10, N11, N12, N13, N14 };
 std::vector<DC>  initial_data_dc     = { DC("0"), DC("1"), DC("2"), DC("3"), DC("4"), DC("5"), DC("6"), DC("7"), DC("8"), DC("9"), DC("10"), DC("11"), DC("12"), DC("13") };
 
-namespace sstl
-{
-namespace test
+namespace sstl_test
 {
 	SUITE(test_deque)
 	{
@@ -1407,5 +1405,4 @@ namespace test
       CHECK(deque1 != deque2);
     }
 	};
-}
 }

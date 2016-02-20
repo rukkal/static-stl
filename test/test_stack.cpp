@@ -8,11 +8,8 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include <catch.hpp>
 #include <sstl/stack.h>
 
-namespace sstl
+namespace sstl_test
 {
-namespace test
-{
-
 TEST_CASE("stack")
 {
    SECTION("constructors can be instantiated")
@@ -41,7 +38,5 @@ TEST_CASE("stack")
       stack.size();
       stack.swap(stack2);
    }
-}
-
 }
 }

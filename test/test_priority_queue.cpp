@@ -10,11 +10,8 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include <sstl/priority_queue.h>
 #include <sstl/vector.h>
 
-namespace sstl
+namespace sstl_test
 {
-namespace test
-{
-
 SUITE(test_priority_queue)
 {
     TEST(constructors_can_be_instantiated)
@@ -45,5 +42,4 @@ SUITE(test_priority_queue)
         priority_queue.swap(priority_queue2);
     }
 };
-}
 }

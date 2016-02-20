@@ -36,9 +36,7 @@ SOFTWARE.
 #include <list>
 #include <vector>
 
-namespace sstl
-{
-namespace test
+namespace sstl_test
 {
   SUITE(test_list)
   {
@@ -723,5 +721,4 @@ namespace test
       CHECK(are_equal);
     }
   };
-}
 }

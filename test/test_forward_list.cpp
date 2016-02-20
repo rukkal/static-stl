@@ -35,9 +35,7 @@ SOFTWARE.
 #include "data.h"
 #include <sstl/forward_list.h>
 
-namespace sstl
-{
-namespace test
+namespace sstl_test
 {
   SUITE(test_forward_list)
   {
@@ -535,5 +533,4 @@ namespace test
       CHECK(are_equal);
     }
   };
-}
 }

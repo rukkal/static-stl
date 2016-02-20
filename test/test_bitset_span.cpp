@@ -10,9 +10,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include <array>
 #include <sstl/__internal/bitset_span.h>
 
-namespace sstl
-{
-namespace test
+namespace sstl_test
 {
 
 template<class T1, class T2>
@@ -111,6 +109,5 @@ TEST_CASE("bitset_span")
       actual.set(30);
       REQUIRE(actual.all() == true);
    }
-}
 }
 }

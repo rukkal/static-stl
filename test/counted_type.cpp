@@ -7,9 +7,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 
 #include "counted_type.h"
 
-namespace sstl
-{
-namespace test
+namespace sstl_test
 {
    size_t counted_type::construction::count;
    size_t counted_type::default_construction::count;
@@ -28,5 +26,4 @@ namespace test
    size_t counted_type::destruction::throw_expected_at_count;
    size_t counted_type::copy_assignment::throw_expected_at_count;
    size_t counted_type::move_assignment::throw_expected_at_count;
-}
 }

@@ -70,9 +70,7 @@ namespace sstl
    }
 }
 
-namespace sstl
-{
-namespace test
+namespace sstl_test
 {
   SUITE(test_set)
   {
@@ -819,5 +817,4 @@ namespace test
     }
 
   };
-}
 }

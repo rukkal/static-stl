@@ -13,9 +13,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 
 #include <sstl/__internal/_aligned_storage.h>
 
-namespace sstl
-{
-namespace test
+namespace sstl_test
 {
 
 template<class TIter>
@@ -33,24 +31,24 @@ TEST_CASE("aligned_storage")
 {
    SECTION("size")
    {
-      static_assert(sizeof(_aligned_storage<1, 1>::type) == 1, "unexpected size");
-      static_assert(sizeof(_aligned_storage<1, 2>::type) == 2, "unexpected size");
-      static_assert(sizeof(_aligned_storage<1, 4>::type) == 4, "unexpected size");
+      static_assert(sizeof(sstl::_aligned_storage<1, 1>::type) == 1, "unexpected size");
+      static_assert(sizeof(sstl::_aligned_storage<1, 2>::type) == 2, "unexpected size");
+      static_assert(sizeof(sstl::_aligned_storage<1, 4>::type) == 4, "unexpected size");
 
-      static_assert(sizeof(_aligned_storage<16, 16>::type) == 16, "unexpected size");
-      static_assert(sizeof(_aligned_storage<16, 32>::type) == 32, "unexpected size");
-      static_assert(sizeof(_aligned_storage<16, 64>::type) == 64, "unexpected size");
+      static_assert(sizeof(sstl::_aligned_storage<16, 16>::type) == 16, "unexpected size");
+      static_assert(sizeof(sstl::_aligned_storage<16, 32>::type) == 32, "unexpected size");
+      static_assert(sizeof(sstl::_aligned_storage<16, 64>::type) == 64, "unexpected size");
    }
 
    SECTION("result of std::alignment_of")
    {
-      static_assert(std::alignment_of<_aligned_storage<1, 1>::type>::value == 1, "unexpected alignment");
-      static_assert(std::alignment_of<_aligned_storage<1, 2>::type>::value == 2, "unexpected alignment");
-      static_assert(std::alignment_of<_aligned_storage<1, 4>::type>::value == 4, "unexpected alignment");
+      static_assert(std::alignment_of<sstl::_aligned_storage<1, 1>::type>::value == 1, "unexpected alignment");
+      static_assert(std::alignment_of<sstl::_aligned_storage<1, 2>::type>::value == 2, "unexpected alignment");
+      static_assert(std::alignment_of<sstl::_aligned_storage<1, 4>::type>::value == 4, "unexpected alignment");
 
-      static_assert(std::alignment_of<_aligned_storage<16, 16>::type>::value == 16, "unexpected alignment");
-      static_assert(std::alignment_of<_aligned_storage<16, 32>::type>::value == 32, "unexpected alignment");
-      static_assert(std::alignment_of<_aligned_storage<16, 64>::type>::value == 64, "unexpected alignment");
+      static_assert(std::alignment_of<sstl::_aligned_storage<16, 16>::type>::value == 16, "unexpected alignment");
+      static_assert(std::alignment_of<sstl::_aligned_storage<16, 32>::type>::value == 32, "unexpected alignment");
+      static_assert(std::alignment_of<sstl::_aligned_storage<16, 64>::type>::value == 64, "unexpected alignment");
    }
 
    SECTION("alignment on stack")
@@ -58,30 +56,30 @@ TEST_CASE("aligned_storage")
       SECTION("size 1")
       {
          {
-            std::array<_aligned_storage<1, 1>::type, 10> aligned_values;
+            std::array<sstl::_aligned_storage<1, 1>::type, 10> aligned_values;
             check_alignment(aligned_values.cbegin(), aligned_values.cend(), 1);
          }
          {
-            std::array<_aligned_storage<1, 2>::type, 10> aligned_values;
+            std::array<sstl::_aligned_storage<1, 2>::type, 10> aligned_values;
             check_alignment(aligned_values.cbegin(), aligned_values.cend(), 1);
          }
          {
-            std::array<_aligned_storage<1, 4>::type, 10> aligned_values;
+            std::array<sstl::_aligned_storage<1, 4>::type, 10> aligned_values;
             check_alignment(aligned_values.cbegin(), aligned_values.cend(), 1);
          }
       }
       SECTION("size 16")
       {
          {
-            std::array<_aligned_storage<16, 16>::type, 10> aligned_values;
+            std::array<sstl::_aligned_storage<16, 16>::type, 10> aligned_values;
             check_alignment(aligned_values.cbegin(), aligned_values.cend(), 1);
          }
          {
-            std::array<_aligned_storage<16, 32>::type, 10> aligned_values;
+            std::array<sstl::_aligned_storage<16, 32>::type, 10> aligned_values;
             check_alignment(aligned_values.cbegin(), aligned_values.cend(), 1);
          }
          {
-            std::array<_aligned_storage<16, 64>::type, 10> aligned_values;
+            std::array<sstl::_aligned_storage<16, 64>::type, 10> aligned_values;
             check_alignment(aligned_values.cbegin(), aligned_values.cend(), 1);
          }
       }
@@ -92,35 +90,34 @@ TEST_CASE("aligned_storage")
       SECTION("size 1")
       {
          {
-            static std::array<_aligned_storage<1, 1>::type, 10> aligned_values;
+            static std::array<sstl::_aligned_storage<1, 1>::type, 10> aligned_values;
             check_alignment(aligned_values.cbegin(), aligned_values.cend(), 1);
          }
          {
-            static std::array<_aligned_storage<1, 2>::type, 10> aligned_values;
+            static std::array<sstl::_aligned_storage<1, 2>::type, 10> aligned_values;
             check_alignment(aligned_values.cbegin(), aligned_values.cend(), 1);
          }
          {
-            static std::array<_aligned_storage<1, 4>::type, 10> aligned_values;
+            static std::array<sstl::_aligned_storage<1, 4>::type, 10> aligned_values;
             check_alignment(aligned_values.cbegin(), aligned_values.cend(), 1);
          }
       }
       SECTION("size 16")
       {
          {
-            static std::array<_aligned_storage<16, 16>::type, 10> aligned_values;
+            static std::array<sstl::_aligned_storage<16, 16>::type, 10> aligned_values;
             check_alignment(aligned_values.cbegin(), aligned_values.cend(), 1);
          }
          {
-            static std::array<_aligned_storage<16, 32>::type, 10> aligned_values;
+            static std::array<sstl::_aligned_storage<16, 32>::type, 10> aligned_values;
             check_alignment(aligned_values.cbegin(), aligned_values.cend(), 1);
          }
          {
-            static std::array<_aligned_storage<16, 64>::type, 10> aligned_values;
+            static std::array<sstl::_aligned_storage<16, 64>::type, 10> aligned_values;
             check_alignment(aligned_values.cbegin(), aligned_values.cend(), 1);
          }
       }
    }
 }
 
-}
 }

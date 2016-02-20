@@ -30,9 +30,7 @@ SOFTWARE.
 #include <sstl/__internal/log.h>
 #include <sstl/__internal/power.h>
 
-namespace sstl
-{
-namespace test
+namespace sstl_test
 {
   SUITE(test_maths)
   {
@@ -277,5 +275,4 @@ namespace test
       CHECK_EQUAL(false, actual);
     }
   };
-}
 }

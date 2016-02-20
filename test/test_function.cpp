@@ -14,9 +14,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include "utility.h"
 #include "counted_type.h"
 
-namespace sstl
-{
-namespace test
+namespace sstl_test
 {
 
 static const int EXPECTED_OUTPUT_PARAMETER = 101;
@@ -503,5 +501,4 @@ TEST_CASE("function")
    }
 }
 
-}
 }

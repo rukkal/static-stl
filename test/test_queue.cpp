@@ -9,11 +9,8 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include <sstl/queue.h>
 #include <sstl/deque.h>
 
-namespace sstl
+namespace sstl_test
 {
-namespace test
-{
-
 TEST_CASE("queue")
 {
    SECTION("constructors can be instantiated")
@@ -43,7 +40,5 @@ TEST_CASE("queue")
       queue.size();
       queue.swap(queue2);
    }
-}
-
 }
 }

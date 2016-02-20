@@ -8,9 +8,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #ifndef _SSTL_TEST_UTILITY__
 #define _SSTL_TEST_UTILITY__
 
-namespace sstl
-{
-namespace test
+namespace sstl_test
 {
    template<class TContainerActual, class TContainerExpected>
    bool are_containers_equal(const TContainerActual& actual, const TContainerExpected& expected)
@@ -21,7 +19,6 @@ namespace test
          return false;
       return true;
    }
-}
 }
 
 #endif

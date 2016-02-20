@@ -14,14 +14,11 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include "utility.h"
 #include "counted_type.h"
 
-namespace sstl
+namespace sstl_test
 {
-namespace test
-{
-
-using vector_int_base_t = vector<int>;
-using vector_int_t = vector<int, 11>;
-using vector_counted_type_t = vector<counted_type, 11>;
+using vector_int_base_t = sstl::vector<int>;
+using vector_int_t = sstl::vector<int, 11>;
+using vector_counted_type_t = sstl::vector<counted_type, 11>;
 
 TEST_CASE("vector")
 {
@@ -87,8 +84,8 @@ TEST_CASE("vector")
          SECTION("rhs' capacity is different")
          {
             auto expected = {1, 2, 3};
-            auto rhs = vector<int, 30>{1, 2, 3};
-            auto lhs = vector<int, 10>{ rhs };
+            auto rhs = sstl::vector<int, 30>{1, 2, 3};
+            auto lhs = sstl::vector<int, 10>{ rhs };
             REQUIRE(are_containers_equal(lhs, expected));
             REQUIRE(are_containers_equal(rhs, expected));
          }
@@ -104,9 +101,9 @@ TEST_CASE("vector")
          }
          SECTION("rhs' capacity is different")
          {
-            auto rhs = vector<counted_type, 30>{1, 2, 3};
+            auto rhs = sstl::vector<counted_type, 30>{1, 2, 3};
             counted_type::reset_counts();
-            auto lhs = vector<counted_type, 10>{ rhs };
+            auto lhs = sstl::vector<counted_type, 10>{ rhs };
             REQUIRE(counted_type::check().copy_constructions(3));
          }
       }
@@ -137,8 +134,8 @@ TEST_CASE("vector")
          SECTION("rhs' capacity is different")
          {
             auto expected = {1, 2, 3};
-            auto rhs = vector<int, 30>{1, 2, 3};
-            auto lhs = vector<int, 10>{ std::move(rhs) };
+            auto rhs = sstl::vector<int, 30>{1, 2, 3};
+            auto lhs = sstl::vector<int, 10>{ std::move(rhs) };
             REQUIRE(are_containers_equal(lhs, expected));
             REQUIRE(rhs.empty());
          }
@@ -154,9 +151,9 @@ TEST_CASE("vector")
          }
          SECTION("rhs' capacity is different")
          {
-            auto rhs = vector<counted_type, 30>{1, 2, 3};
+            auto rhs = sstl::vector<counted_type, 30>{1, 2, 3};
             counted_type::reset_counts();
-            auto lhs = vector<counted_type, 10>{ std::move(rhs) };
+            auto lhs = sstl::vector<counted_type, 10>{ std::move(rhs) };
             REQUIRE(counted_type::check().move_constructions(3).destructions(3));
          }
       }
@@ -242,8 +239,8 @@ TEST_CASE("vector")
          }
          SECTION("rhs' capacity is different")
          {
-            auto rhs = vector<int, 30>{1, 2, 3};
-            auto lhs = vector<int, 10>{};
+            auto rhs = sstl::vector<int, 30>{1, 2, 3};
+            auto lhs = sstl::vector<int, 10>{};
             SECTION("through base class reference")
             {
                static_cast<vector_int_base_t&>(lhs) = rhs;
@@ -251,7 +248,7 @@ TEST_CASE("vector")
             }
             SECTION("through derived class reference")
             {
-               static_cast<vector<int, 10>&>(lhs) = rhs;
+               static_cast<sstl::vector<int, 10>&>(lhs) = rhs;
                REQUIRE(are_containers_equal(lhs, rhs));
             }
          }
@@ -268,8 +265,8 @@ TEST_CASE("vector")
          }
          SECTION("rhs' capacity is different")
          {
-            auto rhs = vector<counted_type, 30>{1, 2, 3, 4, 5};
-            auto lhs = vector<counted_type, 10>{1, 2, 3};
+            auto rhs = sstl::vector<counted_type, 30>{1, 2, 3, 4, 5};
+            auto lhs = sstl::vector<counted_type, 10>{1, 2, 3};
             counted_type::reset_counts();
             lhs = rhs;
             REQUIRE(counted_type::check().copy_assignments(3).copy_constructions(2));
@@ -287,8 +284,8 @@ TEST_CASE("vector")
          }
          SECTION("rhs' capacity is different")
          {
-            auto rhs = vector<counted_type, 30>{1, 2, 3};
-            auto lhs = vector<counted_type, 10>{1, 2, 3, 4, 5};
+            auto rhs = sstl::vector<counted_type, 30>{1, 2, 3};
+            auto lhs = sstl::vector<counted_type, 10>{1, 2, 3, 4, 5};
             counted_type::reset_counts();
             lhs = rhs;
             REQUIRE(counted_type::check().destructions(2));
@@ -333,8 +330,8 @@ TEST_CASE("vector")
          SECTION("rhs' capacity is different")
          {
             auto expected = {1, 2, 3};
-            auto rhs = vector<int, 30>{1, 2, 3};
-            auto lhs = vector<int, 10>{};
+            auto rhs = sstl::vector<int, 30>{1, 2, 3};
+            auto lhs = sstl::vector<int, 10>{};
             SECTION("through base class reference")
             {
                static_cast<vector_int_base_t&>(lhs) = std::move(rhs);
@@ -343,7 +340,7 @@ TEST_CASE("vector")
             }
             SECTION("through derived class reference")
             {
-               static_cast<vector<int, 10>&>(lhs) = std::move(rhs);
+               static_cast<sstl::vector<int, 10>&>(lhs) = std::move(rhs);
                REQUIRE(are_containers_equal(lhs, expected));
                REQUIRE(rhs.empty());
             }
@@ -361,8 +358,8 @@ TEST_CASE("vector")
          }
          SECTION("rhs' capacity is different")
          {
-            auto rhs = vector<counted_type, 30>{1, 2, 3, 4, 5};
-            auto lhs = vector<counted_type, 20>{1, 2, 3};
+            auto rhs = sstl::vector<counted_type, 30>{1, 2, 3, 4, 5};
+            auto lhs = sstl::vector<counted_type, 20>{1, 2, 3};
             counted_type::reset_counts();
             lhs = std::move(rhs);
             REQUIRE(counted_type::check().move_assignments(3).move_constructions(2));
@@ -380,8 +377,8 @@ TEST_CASE("vector")
          }
          SECTION("rhs' capacity is different")
          {
-            auto rhs = vector<counted_type, 30>{1, 2, 3};
-            auto lhs = vector<counted_type, 10>{1, 2, 3, 4, 5};
+            auto rhs = sstl::vector<counted_type, 30>{1, 2, 3};
+            auto lhs = sstl::vector<counted_type, 10>{1, 2, 3, 4, 5};
             counted_type::reset_counts();
             lhs = std::move(rhs);
             REQUIRE(counted_type::check().destructions(5));
@@ -1852,8 +1849,8 @@ TEST_CASE("vector")
          }
          SECTION("rhs' capacity is different")
          {
-            auto lhs = vector<int, 10>{expected_rhs};
-            auto rhs = vector<int, 30>{expected_lhs};
+            auto lhs = sstl::vector<int, 10>{expected_rhs};
+            auto rhs = sstl::vector<int, 30>{expected_lhs};
             swap(lhs, rhs);
             REQUIRE(are_containers_equal(lhs, expected_lhs));
             REQUIRE(are_containers_equal(rhs, expected_rhs));
@@ -1864,8 +1861,8 @@ TEST_CASE("vector")
          auto expected_lhs = std::initializer_list<counted_type>{1, 3, 5, 7, 13, 17, 19};
          auto expected_rhs = std::initializer_list<counted_type>{23, 29};
 
-         auto lhs = vector<counted_type, 10>{expected_rhs};
-         auto rhs = vector<counted_type, 30>{expected_lhs};
+         auto lhs = sstl::vector<counted_type, 10>{expected_rhs};
+         auto rhs = sstl::vector<counted_type, 30>{expected_lhs};
          counted_type::reset_counts();
          swap(lhs, rhs);
          REQUIRE(counted_type::check().move_constructions(7).move_assignments(4).destructions(7));
@@ -1873,8 +1870,8 @@ TEST_CASE("vector")
       #if _sstl_has_exceptions()
       SECTION("exception handling (basic exceptin safety)")
       {
-         auto lhs = vector<counted_type, 10>{1, 2, 3, 4, 5, 6};
-         auto rhs = vector<counted_type, 30>{1, 2, 3};
+         auto lhs = sstl::vector<counted_type, 10>{1, 2, 3, 4, 5, 6};
+         auto rhs = sstl::vector<counted_type, 30>{1, 2, 3};
          SECTION("exception thrown during first half of swap operation (while swapping lhs and rhs elements)")
          {
             counted_type::reset_counts();
@@ -1963,10 +1960,9 @@ TEST_CASE("vector")
    SECTION("memory footprint")
    {
       using word_size_t = void*;
-      REQUIRE(sizeof(vector<word_size_t, 1>) == (1+1+1)*sizeof(word_size_t));
-      REQUIRE(sizeof(vector<word_size_t, 10>) == (1+10+1)*sizeof(word_size_t));
+      REQUIRE(sizeof(sstl::vector<word_size_t, 1>) == (1+1+1)*sizeof(word_size_t));
+      REQUIRE(sizeof(sstl::vector<word_size_t, 10>) == (1+10+1)*sizeof(word_size_t));
    }
 }
 
-}
 }

@@ -12,9 +12,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 
 #include <sstl/bitmap_allocator.h>
 
-namespace sstl
-{
-namespace test
+namespace sstl_test
 {
 
 template<class Titer>
@@ -59,5 +57,4 @@ TEST_CASE("bitmap_allocator")
    }
 }
 
-}
 }

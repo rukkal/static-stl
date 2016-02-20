@@ -69,9 +69,7 @@ namespace sstl
    }
 }
 
-namespace test
-{
-namespace sstl
+namespace test_sstl
 {
   SUITE(test_multimap)
   {
@@ -917,5 +915,4 @@ namespace sstl
     }
 
   };
-}
 }

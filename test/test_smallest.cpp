@@ -31,9 +31,7 @@ SOFTWARE.
 
 #include <type_traits>
 
-namespace sstl
-{
-namespace test
+namespace sstl_test
 {
   SUITE(test_smallst)
   {
@@ -121,5 +119,4 @@ namespace test
       CHECK(type);
     }
   };
-}
 }
