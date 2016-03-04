@@ -18,7 +18,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 namespace sstl
 {
 
-template<class TTarget, size_t SIZE_IN_WORDS = 1>
+template<class TTarget, size_t BUFFER_SIZE=static_cast<size_t>(-1)>
 class function;
 
 namespace _detail
@@ -48,8 +48,8 @@ namespace _detail
    template<class>
    struct _is_function : std::false_type {};
 
-   template<class TResult, class... TParams, size_t TARGET_SIZE>
-   struct _is_function<sstl::function<TResult(TParams...), TARGET_SIZE>> : std::true_type {};
+   template<class TResult, class... TParams, size_t SIZE>
+   struct _is_function<sstl::function<TResult(TParams...), SIZE>> : std::true_type {};
 }
 
 namespace _detail
@@ -77,11 +77,11 @@ namespace _detail
    template<class From, class To>
    struct _is_convertible_function;
 
-   template<class TResultFrom, class... TParamsFrom, size_t TARGET_SIZE_FROM,
-            class TResultTo, class... TParamsTo, size_t TARGET_SIZE_TO>
+   template<class TResultFrom, class... TParamsFrom, size_t SIZE_FROM,
+            class TResultTo, class... TParamsTo, size_t SIZE_TO>
    struct _is_convertible_function<
-      sstl::function<TResultFrom(TParamsFrom...), TARGET_SIZE_FROM>,
-      sstl::function<TResultTo(TParamsTo...), TARGET_SIZE_TO>>
+      sstl::function<TResultFrom(TParamsFrom...), SIZE_FROM>,
+      sstl::function<TResultTo(TParamsTo...), SIZE_TO>>
    {
       static const bool value =
          std::is_convertible<TResultTo, TResultFrom>::value
@@ -111,18 +111,18 @@ namespace _detail
    struct _is_member_function_pointer_compatible;
 
    template<class TPointerRet, class TPointerClass, class... TPointerParams,
-            class TFunctionRet, class TFirstFunctionParam, class... TOtherFunctionParams, size_t FunctionSize>
+            class TFunctionRet, class TFirstFunctionParam, class... TOtherFunctionParams, size_t SIZE>
    struct _is_member_function_pointer_compatible<
       TPointerRet (TPointerClass::*) (TPointerParams...),
-      sstl::function<TFunctionRet(TFirstFunctionParam, TOtherFunctionParams...), FunctionSize>>
+      sstl::function<TFunctionRet(TFirstFunctionParam, TOtherFunctionParams...), SIZE>>
    {
       static const bool value =
          std::is_same<TPointerClass*, TFirstFunctionParam>::value || std::is_same<TPointerClass&, TFirstFunctionParam>::value;
    };
 };
 
-template<class TResult, class... TParams, size_t SIZE_IN_WORDS>
-class function<TResult(TParams...), SIZE_IN_WORDS> final
+template<class TResult, class... TParams, size_t BUFFER_SIZE>
+class function<TResult(TParams...), BUFFER_SIZE> final
 {
    template<class, size_t>
    friend class function;
@@ -382,8 +382,8 @@ private:
    }
 
 private:
-   static const size_t _BYTES_PER_WORD{ sizeof(void*) };
-   mutable uint8_t _buffer[SIZE_IN_WORDS * _BYTES_PER_WORD];
+   static const size_t VPTR_SIZE = sizeof(void*);
+   mutable uint8_t _buffer[VPTR_SIZE + BUFFER_SIZE];
 };
 }
 
