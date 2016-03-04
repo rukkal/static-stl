@@ -33,7 +33,7 @@ TEST_CASE("vector")
 
    SECTION("user cannot directly destroy the base class")
    {
-      #if !_is_msvc() //MSVC (VS2013) has a buggy implemntation of std::is_destructible
+      #if !_is_msvc() //MSVC (VS2013) has a buggy implementation of std::is_destructible
       REQUIRE(!std::is_destructible<vector_int_base_t>::value);
       #endif
    }
