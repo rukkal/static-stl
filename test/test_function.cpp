@@ -32,6 +32,22 @@ struct derived_type : base_type {};
 
 TEST_CASE("function")
 {
+   SECTION("user cannot directly construct the base class")
+   {
+      #if !_sstl_is_gcc()
+         REQUIRE(!std::is_default_constructible<sstl::function<void()>>::value);
+      #endif
+      REQUIRE(!std::is_copy_constructible<sstl::function<void()>>::value);
+      REQUIRE(!std::is_move_constructible<sstl::function<void()>>::value);
+   }
+
+   SECTION("user cannot directly destroy the base class")
+   {
+      #if !_is_msvc() //MSVC (VS2013) has a buggy implementation of std::is_destructible
+      REQUIRE(!std::is_destructible<sstl::function<void()>>::value);
+      #endif
+   }
+
    SECTION("default constructor")
    {
       {

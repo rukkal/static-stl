@@ -121,8 +121,18 @@ namespace _detail
    };
 };
 
+template<class TResult, class... TParams>
+class function<TResult(TParams...)>
+{
+protected:
+   function() = default;
+   function(const function&) = default;
+   function(function&&) = default;
+   ~function() = default;
+};
+
 template<class TResult, class... TParams, size_t BUFFER_SIZE>
-class function<TResult(TParams...), BUFFER_SIZE> final
+class function<TResult(TParams...), BUFFER_SIZE> final : public function<TResult(TParams...)>
 {
    template<class, size_t>
    friend class function;
@@ -368,7 +378,7 @@ private:
 
    _internal_callable& _get_internal_callable() const
    {
-      return *static_cast<_internal_callable*>(static_cast<void*>(_buffer));
+      return *static_cast<_internal_callable*>(const_cast<void*>(static_cast<const void*>(_buffer)));
    }
 
    void _clear_internal_callable()
@@ -383,7 +393,7 @@ private:
 
 private:
    static const size_t VPTR_SIZE = sizeof(void*);
-   mutable uint8_t _buffer[VPTR_SIZE + BUFFER_SIZE];
+   uint8_t _buffer[VPTR_SIZE + BUFFER_SIZE];
 };
 }
 
