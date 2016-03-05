@@ -41,6 +41,12 @@ TEST_CASE("function")
       REQUIRE(!std::is_move_constructible<sstl::function<void()>>::value);
    }
 
+   SECTION("user cannot directly assign the base class")
+   {
+      REQUIRE(!std::is_copy_assignable<sstl::function<void()>>::value);
+      REQUIRE(!std::is_move_assignable<sstl::function<void()>>::value);
+   }
+
    SECTION("user cannot directly destroy the base class")
    {
       #if !_is_msvc() //MSVC (VS2013) has a buggy implementation of std::is_destructible
