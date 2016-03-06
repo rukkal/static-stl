@@ -893,20 +893,13 @@ private:
    //(would be an incomplete type inside a member function)
    friend void _assert_hacky_derived_member_variable_access_is_valid(_type_tag<vector>)
    {
-      #if _is_msvc()
-      // MSVC can't compute derived-to-base pointer conversion at compile-time
-      sstl_assert(static_cast<_base*>(static_cast<_type_for_derived_member_variable_access*>(0)) == static_cast<_base*>(0));
-      sstl_assert(static_cast<_base*>(static_cast<vector*>(0)) == static_cast<_base*>(0));
-      #else
-      static_assert( static_cast<_base*>(static_cast<_type_for_derived_member_variable_access*>(0))
-                     == static_cast<_base*>(0),
-                     "base and derived vector classes must have the same address, such property"
-                     " is exploited by the base class to access the derived member variables");
-      static_assert( static_cast<_base*>(static_cast<vector*>(0))
-                     == static_cast<_base*>(0),
-                     "base and derived vector classes must have the same address, such property"
-                     " is exploited by the base class to access the derived member variables");
-      #endif
+      //assert that base and derived vector classes have the same address, such property
+      //is exploited by the base class to access the derived member variables (hack!)
+      //note: the address value used in the assertion cannot be null
+      //(static_cast never applies an offset to the given parameter if it is null!)
+      void* non_null_address = reinterpret_cast<void*>(size_t(1)<<(sizeof(void*)*8-1));
+      sstl_assert(static_cast<_base*>(static_cast<_type_for_derived_member_variable_access*>(non_null_address)) == static_cast<_base*>(non_null_address));
+      sstl_assert(static_cast<_base*>(static_cast<vector*>(non_null_address)) == static_cast<_base*>(non_null_address));
    }
 
 public:
