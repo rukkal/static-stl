@@ -7,6 +7,8 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #ifndef _SSTL_HACKY_DERIVED_CLASS_ACCESS
 #define _SSTL_HACKY_DERIVED_CLASS_ACCESS
 
+#include "../sstl_assert.h"
+
 template<class TBase, class TDerived, class TDerivedForHackyAccess>
 void _assert_hacky_derived_class_access_is_valid()
 {

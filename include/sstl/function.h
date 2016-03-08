@@ -14,6 +14,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include <new>
 #include <memory>
 #include "__internal/_except.h"
+#include "__internal/_hacky_derived_class_access.h"
 
 namespace sstl
 {
@@ -140,6 +141,8 @@ public:
    }
 
 protected:
+   using _type_for_derived_class_access = function<TResult(TParams...), 0>;
+
    struct _internal_callable
    {
       virtual ~_internal_callable() {}
@@ -256,12 +259,7 @@ protected:
    };
 
 private:
-   _internal_callable& _get_internal_callable() const _sstl_noexcept_
-   {
-      auto type_erased_this = const_cast<void*>(static_cast<const void*>(this));
-      auto type_erased_internal_callable = _detail::_get_internal_callable_address(type_erased_this);
-      return *static_cast<_internal_callable*>(type_erased_internal_callable);
-   }
+   _internal_callable& _get_internal_callable() const _sstl_noexcept_;
 
 protected:
    function() = default;
@@ -275,15 +273,17 @@ protected:
 template<class TResult, class... TParams, size_t BUFFER_SIZE>
 class function<TResult(TParams...), BUFFER_SIZE> final : public function<TResult(TParams...)>
 {
-   friend void* _detail::_get_internal_callable_address(void*) _sstl_noexcept_;
-   template<class, size_t > friend class function;
+   template<class, size_t >
+   friend class function;
 
 private:
    using _base_type = function<TResult(TParams...)>;
+   using _type_for_derived_class_access = typename _base_type::_type_for_derived_class_access;
 
 public:
    function() _sstl_noexcept_
    {
+      _assert_hacky_derived_class_access_is_valid<_base_type, function, _type_for_derived_class_access>();
       _clear_internal_callable();
    }
 
@@ -293,6 +293,7 @@ public:
       class = typename std::enable_if<_detail::_is_function<TTarget>::value>::type>
    function(T&& rhs)
    {
+      _assert_hacky_derived_class_access_is_valid<_base_type, function, _type_for_derived_class_access>();
       static_assert( _detail::_is_convertible_function<function, TTarget>::value,
                      "the instance of sstl::function passed as argument"
                      "must have covariant return type and contravariant"
@@ -308,6 +309,7 @@ public:
    function(T&& rhs, char=0) _sstl_noexcept( (std::is_lvalue_reference<T>::value && std::is_nothrow_copy_constructible<TTarget>::value)
                                              || (!std::is_lvalue_reference<T>::value && std::is_nothrow_move_constructible<TTarget>::value))
    {
+      _assert_hacky_derived_class_access_is_valid<_base_type, function, _type_for_derived_class_access>();
       _construct_internal_callable(std::forward<T>(rhs));
    }
 
@@ -414,13 +416,11 @@ private:
    mutable uint8_t _buffer[_VPTR_SIZE + BUFFER_SIZE];
 };
 
-namespace _detail
+template<class TResult, class... TParams>
+typename function<TResult(TParams...)>::_internal_callable& function<TResult(TParams...)>::_get_internal_callable() const _sstl_noexcept_
 {
-   void* _get_internal_callable_address(void* base_address) _sstl_noexcept_
-   {
-      using type_for_derived_member_variable_access = const function<void(), 0>;
-      return reinterpret_cast<type_for_derived_member_variable_access*>(base_address)->_buffer;
-   }
+   auto non_const_derived = reinterpret_cast<_type_for_derived_class_access*>(const_cast<function*>(this));
+   return *static_cast<_internal_callable*>(static_cast<void*>(non_const_derived->_buffer));
 }
 
 }
