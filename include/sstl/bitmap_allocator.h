@@ -95,7 +95,7 @@ public:
 private:
     void reset_bitmap()
     {
-        for(size_t i=0; i<k_bitmap_size; ++i)
+        for(size_t i=0; i<BITMAP_SIZE; ++i)
         {
             bitmap[i] = 0;
         }
@@ -103,12 +103,12 @@ private:
 
 private:
     using bitset_block_type = unsigned char;
-    static const size_t k_bits_per_block = sizeof(bitset_block_type) * 8;
-    static const size_t k_bitmap_size = (CAPACITY-1) / k_bits_per_block + 1;
-    std::array<bitset_block_type, k_bitmap_size> bitmap;
-
+    static const size_t BITS_PER_BLOCK = sizeof(bitset_block_type) * 8;
+    static const size_t BITMAP_SIZE = (CAPACITY-1) / BITS_PER_BLOCK + 1;
+    std::array<bitset_block_type, BITMAP_SIZE> bitmap;
     std::array<typename _aligned_storage<sizeof(T), std::alignment_of<T>::value>::type, CAPACITY> buffer;
 };
+
 }
 
 #endif
