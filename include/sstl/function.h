@@ -90,10 +90,10 @@ namespace _detail
    };
 
    template<class T>
-   T& _get_reference(T* p) { return *p; }
+   T& _get_reference(T* p) _sstl_noexcept_ { return *p; }
 
    template<class T>
-   T& _get_reference(T& r) { return r; }
+   T& _get_reference(T& r) _sstl_noexcept_ { return r; }
 }
 
 namespace _detail
@@ -262,7 +262,7 @@ private:
    _internal_callable& _get_internal_callable() const _sstl_noexcept_;
 
 protected:
-   function() = default;
+   function() _sstl_noexcept_ = default;
    function(const function&) = default;
    function(function&&) = default;
    ~function() = default;
@@ -284,7 +284,7 @@ public:
    function() _sstl_noexcept_
    {
       _assert_hacky_derived_class_access_is_valid<_base_type, function, _type_for_derived_class_access>();
-      _clear_internal_callable();
+      _invalidate_internal_callable();
    }
 
    template<
@@ -324,7 +324,7 @@ public:
 
    ~function()
    {
-      if(!_is_internal_callable_cleared())
+      if(_is_internal_callable_valid())
       {
          _base_type::_get_internal_callable().~_internal_callable();
       }
@@ -332,7 +332,7 @@ public:
 
    operator bool() const _sstl_noexcept_
    {
-      return !_is_internal_callable_cleared();
+      return _is_internal_callable_valid();
    }
 
 private:
@@ -342,14 +342,14 @@ private:
    void _construct_internal_callable(T&& rhs)
    {
       static_assert(_detail::_is_function<TTarget>::value, "");
-      if(!rhs._is_internal_callable_cleared())
+      if(rhs._is_internal_callable_valid())
       {
          using is_copy_construction = std::is_lvalue_reference<T>;
          rhs._get_internal_callable()._construct_to_buffer(is_copy_construction{}, _buffer);
       }
       else
       {
-         _clear_internal_callable();
+         _invalidate_internal_callable();
       }
    }
 
@@ -373,9 +373,9 @@ private:
    {
       if(static_cast<void*>(this) == static_cast<void*>(std::addressof(rhs)))
          return;
-      if(_is_internal_callable_cleared())
+      if(!_is_internal_callable_valid())
       {
-         if(!rhs._is_internal_callable_cleared())
+         if(rhs._is_internal_callable_valid())
          {
             using is_copy_construction = std::is_lvalue_reference<T>;
             rhs._get_internal_callable()._construct_to_buffer(is_copy_construction{}, _buffer);
@@ -394,21 +394,21 @@ private:
    // dummy parameter required in order not to declare an invalid overload
    void _assign_internal_callable(T&& rhs, char=0)
    {
-      if(!_is_internal_callable_cleared())
+      if(_is_internal_callable_valid())
       {
          _base_type::_get_internal_callable().~_internal_callable();
       }
       _construct_internal_callable(std::forward<T>(rhs));
    }
 
-   void _clear_internal_callable()
+   void _invalidate_internal_callable() _sstl_noexcept_
    {
       std::fill(std::begin(_buffer), std::end(_buffer), 0);
    }
 
-   bool _is_internal_callable_cleared() const
+   bool _is_internal_callable_valid() const _sstl_noexcept_
    {
-      return std::all_of(std::begin(_buffer), std::end(_buffer), [](uint8_t c){ return c==0; });
+      return std::any_of(std::begin(_buffer), std::end(_buffer), [](uint8_t c){ return c!=0; });
    }
 
 private:
