@@ -19,10 +19,10 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 
 #include "sstl_assert.h"
 #include "__internal/_except.h"
-#include "__internal/_type_tag.h"
 #include "__internal/_utility.h"
 #include "__internal/_iterator.h"
 #include "__internal/_aligned_storage.h"
+#include "__internal/_hacky_derived_class_access.h"
 #include "__internal/_debug.h"
 
 namespace sstl
@@ -886,22 +886,6 @@ private:
    using _base = vector<T>;
    using _type_for_derived_member_variable_access = vector<T, 11>;
 
-private:
-   //dummy parameter is necessary because function's signature must depend
-   //on instantiated vector type in order not to generate multiple definitions
-   //note: the instantiated vector type is used through a non-member function
-   //(would be an incomplete type inside a member function)
-   friend void _assert_hacky_derived_member_variable_access_is_valid(_type_tag<vector>)
-   {
-      //assert that base and derived vector classes have the same address, such property
-      //is exploited by the base class to access the derived member variables (hack!)
-      //note: the address value used in the assertion cannot be null
-      //(static_cast never applies an offset to the given parameter if it is null!)
-      void* non_null_address = reinterpret_cast<void*>(size_t(1)<<(sizeof(void*)*8-1));
-      sstl_assert(static_cast<_base*>(static_cast<_type_for_derived_member_variable_access*>(non_null_address)) == static_cast<_base*>(non_null_address));
-      sstl_assert(static_cast<_base*>(static_cast<vector*>(non_null_address)) == static_cast<_base*>(non_null_address));
-   }
-
 public:
    using value_type = typename _base::value_type;
    using size_type = typename _base::size_type;
@@ -919,7 +903,7 @@ public:
    vector() _sstl_noexcept_
       : _end_(_base::begin())
    {
-      _assert_hacky_derived_member_variable_access_is_valid(_type_tag<vector>{});
+      _assert_hacky_derived_class_access_is_valid<vector<value_type>, vector, _type_for_derived_member_variable_access>();
    }
 
    explicit vector(size_type count, const_reference value=value_type())
@@ -927,7 +911,7 @@ public:
       : _end_(_base::begin())
    {
       sstl_assert(count <= Capacity);
-      _assert_hacky_derived_member_variable_access_is_valid(_type_tag<vector>{});
+      _assert_hacky_derived_class_access_is_valid<vector<value_type>, vector, _type_for_derived_member_variable_access>();
       _base::_count_constructor(count, value);
    }
 
@@ -937,7 +921,7 @@ public:
                                                                         std::declval<TIterator>())))
    {
       sstl_assert(std::distance(range_begin, range_end) <= Capacity);
-      _assert_hacky_derived_member_variable_access_is_valid(_type_tag<vector>{});
+      _assert_hacky_derived_class_access_is_valid<vector<value_type>, vector, _type_for_derived_member_variable_access>();
       _base::_range_constructor(range_begin, range_end);
    }
 
@@ -947,7 +931,7 @@ public:
                                                                         std::declval<const_iterator>())))
    {
       sstl_assert(rhs.size() <= Capacity);
-      _assert_hacky_derived_member_variable_access_is_valid(_type_tag<vector>{});
+      _assert_hacky_derived_class_access_is_valid<vector<value_type>, vector, _type_for_derived_member_variable_access>();
       _base::_range_constructor(const_cast<_base&>(rhs).begin(), const_cast<_base&>(rhs).end());
    }
 
@@ -961,7 +945,7 @@ public:
       _sstl_noexcept(noexcept(std::declval<_base>()._move_constructor(std::declval<_base>())))
    {
       sstl_assert(rhs.size() <= Capacity);
-      _assert_hacky_derived_member_variable_access_is_valid(_type_tag<vector>{});
+      _assert_hacky_derived_class_access_is_valid<vector<value_type>, vector, _type_for_derived_member_variable_access>();
       _base::_move_constructor(std::move(rhs));
    }
 
@@ -976,7 +960,7 @@ public:
          std::declval<std::initializer_list<value_type>>().end())))
    {
       sstl_assert(init.size() <= Capacity);
-      _assert_hacky_derived_member_variable_access_is_valid(_type_tag<vector>{});
+      _assert_hacky_derived_class_access_is_valid<vector<value_type>, vector, _type_for_derived_member_variable_access>();
       _base::_range_constructor(init.begin(), init.end());
    }
 
