@@ -826,7 +826,7 @@ namespace sstl
     //*************************************************************************
     /// Constructor.
     //*************************************************************************
-    iforward_list(sstl::__bitmap_allocator_base<Data_Node>& node_pool, size_t max_size_)
+    iforward_list(sstl::bitmap_allocator<Data_Node>& node_pool, size_t max_size_)
       : forward_list_base(max_size_),
         p_node_pool(&node_pool)
     {
@@ -838,7 +838,7 @@ namespace sstl
   private:
 
     /// The pool of data nodes used in the list.
-    sstl::__bitmap_allocator_base<Data_Node>* p_node_pool;
+    sstl::bitmap_allocator<Data_Node>* p_node_pool;
 
     //*************************************************************************
     /// Downcast a Node* to a Data_Node*

@@ -157,7 +157,7 @@ namespace sstl
   private:
 
     /// The pool of data nodes used in the set.
-    __bitmap_allocator_base<Data_Node>* p_node_pool;
+    bitmap_allocator<Data_Node>* p_node_pool;
 
     /// The node that acts as the set root.
     Node* root_node;
@@ -779,7 +779,7 @@ namespace sstl
     //*************************************************************************
     /// Constructor.
     //*************************************************************************
-    iset(__bitmap_allocator_base<Data_Node>& node_pool, size_t max_size_)
+    iset(bitmap_allocator<Data_Node>& node_pool, size_t max_size_)
       : set_base(max_size_)
       , p_node_pool(&node_pool)
       , root_node(nullptr)

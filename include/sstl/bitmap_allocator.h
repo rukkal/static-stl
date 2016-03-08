@@ -18,10 +18,11 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 
 namespace sstl
 {
-// Base class used to factor out capacity-indepented code
-// in order to reduce code bloat
+template<class T, size_t CAPACITY=static_cast<size_t>(-1)>
+class bitmap_allocator;
+
 template<class T>
-class __bitmap_allocator_base
+class bitmap_allocator<T>
 {
 public:
     using value_type = T;
@@ -32,7 +33,7 @@ public:
     using size_type = size_t;
 
 public:
-    __bitmap_allocator_base(void* buffer, bitset_span bitmap)
+    bitmap_allocator(void* buffer, bitset_span bitmap)
         : buffer(static_cast<pointer>(buffer))
         , bitmap(bitmap)
     {
@@ -80,12 +81,12 @@ private:
 
 // An allocator that uses a bitmap to keep track of the allocated blocks
 template <class T, size_t CAPACITY>
-class bitmap_allocator : public __bitmap_allocator_base<T>
+class bitmap_allocator : public bitmap_allocator<T>
 {
 public:
     bitmap_allocator()
     warnings_clang_push_ignore("-Wuninitialized")
-    : __bitmap_allocator_base<T>(buffer.data(), bitset_span(bitmap.data(),CAPACITY))
+    : bitmap_allocator<T>(buffer.data(), bitset_span(bitmap.data(),CAPACITY))
     warnings_clang_pop_ignore()
     {
         bitmap.fill(0);

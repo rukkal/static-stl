@@ -159,7 +159,7 @@ namespace sstl
   private:
 
     /// The pool of data nodes used in the map.
-    __bitmap_allocator_base<Data_Node>* p_node_pool;
+    bitmap_allocator<Data_Node>* p_node_pool;
 
     /// The node that acts as the map root.
     Node* root_node;
@@ -832,7 +832,7 @@ namespace sstl
     //*************************************************************************
     /// Constructor.
     //*************************************************************************
-    imap(__bitmap_allocator_base<Data_Node>& node_pool, size_t max_size_)
+    imap(bitmap_allocator<Data_Node>& node_pool, size_t max_size_)
       : map_base(max_size_)
       , p_node_pool(&node_pool)
       , root_node(nullptr)
