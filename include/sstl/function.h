@@ -318,7 +318,19 @@ public:
                                                 ((std::is_lvalue_reference<T>::value && std::is_nothrow_copy_constructible<TTarget>::value)
                                                 || (!std::is_lvalue_reference<T>::value && std::is_nothrow_move_constructible<TTarget>::value)))
    {
-      _assign_internal_callable(std::forward<T>(rhs));
+      #if _sstl_has_exceptions()
+      try
+      {
+      #endif
+         _assign_internal_callable(std::forward<T>(rhs));
+      #if _sstl_has_exceptions()
+      }
+      catch(...)
+      {
+         _invalidate_internal_callable();
+         throw;
+      }
+      #endif
       return *this;
    }
 

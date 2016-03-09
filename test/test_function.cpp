@@ -11,6 +11,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include <functional>
 #include <sstl/function.h>
 #include <sstl/__internal/_preprocessor.h>
+#include <sstl/__internal/_except.h>
 #include "utility.h"
 #include "counted_type.h"
 
@@ -264,6 +265,14 @@ TEST_CASE("function")
          lhs = [](){};
          REQUIRE(counted_type::check().constructions(0).destructions(1));
       }
+      #if _sstl_has_exceptions()
+      auto rhs = sstl::function<void(), sizeof(counted_type)>{ counted_type() };
+      auto lhs = sstl::function<void(), sizeof(counted_type)>{ [](){} };
+      counted_type::reset_counts();
+      counted_type::throw_at_nth_copy_construction(1);
+      REQUIRE_THROWS_AS(lhs = rhs, counted_type::copy_construction::exception);
+      REQUIRE(static_cast<bool>(lhs)==false);
+      #endif
    }
 
    SECTION("move assignment")
@@ -314,6 +323,14 @@ TEST_CASE("function")
          lhs = std::move(rhs);
          REQUIRE(counted_type::check().destructions(1));
       }
+      #if _sstl_has_exceptions()
+      auto rhs = sstl::function<void(), sizeof(counted_type)>{ counted_type() };
+      auto lhs = sstl::function<void(), sizeof(counted_type)>{ [](){} };
+      counted_type::reset_counts();
+      counted_type::throw_at_nth_move_construction(1);
+      REQUIRE_THROWS_AS(lhs = std::move(rhs), counted_type::move_construction::exception);
+      REQUIRE(static_cast<bool>(lhs)==false);
+      #endif
    }
 
    SECTION("template assignment")
@@ -368,6 +385,14 @@ TEST_CASE("function")
             REQUIRE(counted_type::check().move_constructions(1));
          }
       }
+      #if _sstl_has_exceptions()
+      auto rhs = counted_type();
+      auto lhs = sstl::function<void(), sizeof(counted_type)>{ [](){} };
+      counted_type::reset_counts();
+      counted_type::throw_at_nth_copy_construction(1);
+      REQUIRE_THROWS_AS(lhs = rhs, counted_type::copy_construction::exception);
+      REQUIRE(static_cast<bool>(lhs)==false);
+      #endif
    }
 
    SECTION("target with covariant return type")
