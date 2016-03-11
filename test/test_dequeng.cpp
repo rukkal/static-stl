@@ -61,6 +61,24 @@ TEST_CASE("dequeng")
       }
    }
 
+   SECTION("range constructor")
+   {
+      SECTION("contained values")
+      {
+         auto init = {0, 1, 2, 3};
+         auto d = deque_int_t(init.begin(), init.end());
+         REQUIRE(are_containers_equal(d, init));
+      }
+      SECTION("exception handling")
+      {
+         auto init = std::initializer_list<counted_type>{0, 1, 2, 3};
+         counted_type::reset_counts();
+         counted_type::throw_at_nth_copy_construction(3);
+         REQUIRE_THROWS_AS(deque_counted_type_t(init.begin(), init.end()), counted_type::copy_construction::exception);
+         REQUIRE(counted_type::check{}.copy_constructions(2).destructions(2));
+      }
+   }
+
    SECTION("initializer-list constructor")
    {
       SECTION("contained values")

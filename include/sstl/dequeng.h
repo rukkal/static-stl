@@ -42,9 +42,12 @@ public:
    //using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
 public:
+   //FIXME
    iterator begin() _sstl_noexcept_ { return _begin_pointer(); }
+   const_iterator begin() const _sstl_noexcept_ { return _begin_pointer(); }
    const_iterator cbegin() const _sstl_noexcept_ { return _begin_pointer(); }
    iterator end() _sstl_noexcept_ { return _end_pointer(); }
+   const_iterator end() const _sstl_noexcept_ { return _end_pointer(); }
    const_iterator cend() const _sstl_noexcept_ { return _end_pointer(); }
 
    void clear() _sstl_noexcept(std::is_nothrow_destructible<value_type>::value)
@@ -108,13 +111,13 @@ protected:
    {
       auto src = range_begin;
       auto dst = _begin_storage();
-      _set_begin_pointer(_begin_storage());
       #if _sstl_has_exceptions()
       try
       {
       #endif
          while(src != range_end)
          {
+            sstl_assert(dst-_begin_storage() < _capacity());
             new(dst) value_type(*src);
             ++src; ++dst;
          }
@@ -178,11 +181,22 @@ public:
       _base::_count_constructor(count, value);
    }
 
+   template<class TIterator, class = _enable_if_input_iterator_t<TIterator>>
+   dequeng(TIterator range_begin, TIterator range_end)
+      _sstl_noexcept(noexcept(std::declval<_base>()._range_constructor( std::declval<TIterator>(),
+                                                                        std::declval<TIterator>())))
+      : _begin_pointer(_base::_begin_storage())
+      , _end_pointer(_base::_begin_storage())
+   {
+      _base::_range_constructor(range_begin, range_end);
+   }
+
    dequeng(std::initializer_list<value_type> init)
       _sstl_noexcept(noexcept(std::declval<_base>()._range_constructor( std::declval<std::initializer_list<value_type>>().begin(),
                                                                         std::declval<std::initializer_list<value_type>>().end())))
+      : _begin_pointer(_base::_begin_storage())
+      , _end_pointer(_base::_begin_storage())
    {
-      sstl_assert(init.size() <= _base::_capacity());
       _base::_range_constructor(init.begin(), init.end());
    }
 
