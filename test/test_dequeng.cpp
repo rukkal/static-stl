@@ -52,6 +52,7 @@ TEST_CASE("dequeng")
          auto expected = deque_int_t{0, 0, 0};
          REQUIRE(actual == expected);
       }
+      #if _sstl_has_exceptions()
       SECTION("exception handling")
       {
          counted_type::reset_counts();
@@ -59,6 +60,7 @@ TEST_CASE("dequeng")
          REQUIRE_THROWS_AS(deque_counted_type_t(4), counted_type::copy_construction::exception);
          REQUIRE(counted_type::check{}.default_constructions(1).copy_constructions(2).destructions(3));
       }
+      #endif
    }
 
    SECTION("range constructor")
@@ -69,6 +71,7 @@ TEST_CASE("dequeng")
          auto d = deque_int_t(init.begin(), init.end());
          REQUIRE(are_containers_equal(d, init));
       }
+      #if _sstl_has_exceptions()
       SECTION("exception handling")
       {
          auto init = std::initializer_list<counted_type>{0, 1, 2, 3};
@@ -77,6 +80,7 @@ TEST_CASE("dequeng")
          REQUIRE_THROWS_AS(deque_counted_type_t(init.begin(), init.end()), counted_type::copy_construction::exception);
          REQUIRE(counted_type::check{}.copy_constructions(2).destructions(2));
       }
+      #endif
    }
 
    SECTION("initializer-list constructor")
@@ -88,6 +92,7 @@ TEST_CASE("dequeng")
          REQUIRE(actual.size() == expected.size());
          REQUIRE(std::equal(actual.cbegin(), actual.cend(), expected.begin()));
       }
+      #if _sstl_has_exceptions()
       SECTION("exception handling")
       {
          auto init = std::initializer_list<counted_type>{0, 1, 2, 3};
@@ -96,6 +101,7 @@ TEST_CASE("dequeng")
          REQUIRE_THROWS_AS(deque_counted_type_t{ init }, counted_type::copy_construction::exception);
          REQUIRE(counted_type::check{}.copy_constructions(2).destructions(2));
       }
+      #endif
    }
 
    SECTION("non-member relative operators")
