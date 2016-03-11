@@ -83,6 +83,41 @@ TEST_CASE("dequeng")
       #endif
    }
 
+   SECTION("copy constructor")
+   {
+      SECTION("contained values")
+      {
+         SECTION("same capacity")
+         {
+            auto rhs = deque_int_t{0, 1, 2, 3};
+            auto lhs = rhs;
+            REQUIRE(lhs == rhs);
+         }
+         SECTION("different capacity")
+         {
+            auto rhs = sstl::dequeng<int, 7>{0, 1, 2, 3};
+            auto lhs = sstl::dequeng<int, 11>{ rhs };
+            REQUIRE(lhs == rhs);
+         }
+      }
+      SECTION("number of operations")
+      {
+         auto rhs = deque_counted_type_t{0, 1, 2, 3};
+         counted_type::reset_counts();
+         auto lhs = rhs;
+         REQUIRE(counted_type::check().copy_constructions(4));
+      }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling")
+      {
+         auto rhs = deque_counted_type_t{0, 1, 2, 3};
+         counted_type::reset_counts();
+         counted_type::throw_at_nth_copy_construction(3);
+         REQUIRE_THROWS_AS(auto lhs = rhs, counted_type::copy_construction::exception);
+      }
+      #endif
+   }
+
    SECTION("initializer-list constructor")
    {
       SECTION("contained values")

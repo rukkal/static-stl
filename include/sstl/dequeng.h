@@ -176,7 +176,6 @@ public:
    explicit dequeng(size_type count, const_reference value = value_type())
       _sstl_noexcept(noexcept(std::declval<_base>()._count_constructor(std::declval<size_type>(), std::declval<value_type>())))
       : _begin_pointer(_base::_begin_storage())
-      , _end_pointer(_base::_begin_storage())
    {
       _base::_count_constructor(count, value);
    }
@@ -186,10 +185,23 @@ public:
       _sstl_noexcept(noexcept(std::declval<_base>()._range_constructor( std::declval<TIterator>(),
                                                                         std::declval<TIterator>())))
       : _begin_pointer(_base::_begin_storage())
-      , _end_pointer(_base::_begin_storage())
    {
       _base::_range_constructor(range_begin, range_end);
    }
+
+   //copy construction from any instance with same value type (capacity doesn't matter)
+   dequeng(const _base& rhs)
+      _sstl_noexcept(noexcept(std::declval<_base>()._range_constructor( std::declval<const_iterator>(),
+                                                                        std::declval<const_iterator>())))
+      : _begin_pointer(_base::_begin_storage())
+   {
+      _base::_range_constructor(const_cast<_base&>(rhs).cbegin(), const_cast<_base&>(rhs).cend());
+   }
+
+   dequeng(const dequeng& rhs)
+      _sstl_noexcept(noexcept(dequeng(std::declval<const _base&>())))
+      : dequeng(static_cast<const _base&>(rhs))
+   {}
 
    dequeng(std::initializer_list<value_type> init)
       _sstl_noexcept(noexcept(std::declval<_base>()._range_constructor( std::declval<std::initializer_list<value_type>>().begin(),
