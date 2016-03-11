@@ -582,6 +582,7 @@ protected:
       #endif
          while(src != range_end)
          {
+            sstl_assert(dst-begin() < capacity());
             new(dst) value_type(*src);
             ++src; ++dst;
          }
@@ -920,7 +921,6 @@ public:
       _sstl_noexcept(noexcept(std::declval<_base>()._range_constructor( std::declval<TIterator>(),
                                                                         std::declval<TIterator>())))
    {
-      sstl_assert(std::distance(range_begin, range_end) <= Capacity);
       _assert_hacky_derived_class_access_is_valid<vector<value_type>, vector, _type_for_derived_member_variable_access>();
       _base::_range_constructor(range_begin, range_end);
    }
@@ -930,7 +930,6 @@ public:
       _sstl_noexcept(noexcept(std::declval<_base>()._range_constructor( std::declval<const_iterator>(),
                                                                         std::declval<const_iterator>())))
    {
-      sstl_assert(rhs.size() <= Capacity);
       _assert_hacky_derived_class_access_is_valid<vector<value_type>, vector, _type_for_derived_member_variable_access>();
       _base::_range_constructor(const_cast<_base&>(rhs).begin(), const_cast<_base&>(rhs).end());
    }
@@ -959,7 +958,6 @@ public:
          std::declval<std::initializer_list<value_type>>().begin(),
          std::declval<std::initializer_list<value_type>>().end())))
    {
-      sstl_assert(init.size() <= Capacity);
       _assert_hacky_derived_class_access_is_valid<vector<value_type>, vector, _type_for_derived_member_variable_access>();
       _base::_range_constructor(init.begin(), init.end());
    }
