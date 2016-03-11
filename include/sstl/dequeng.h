@@ -53,10 +53,10 @@ public:
       auto crt = _end_pointer();
       while(crt != _begin_pointer())
       {
-         crt->~value_type();
          --crt;
+         crt->~value_type();
       }
-      _set_end_pointer(crt);
+      _set_end_pointer(_begin_pointer());
    }
 
    bool empty() const _sstl_noexcept_ { return _begin_pointer() == _end_pointer(); }
@@ -75,6 +75,32 @@ protected:
    dequeng(const dequeng&) = default;
    dequeng(dequeng&&) {}; //MSVC (VS2013) does not allow to default move special member functions
    ~dequeng() = default;
+
+   void _count_constructor(size_type count, const_reference value)
+      _sstl_noexcept(std::is_nothrow_copy_constructible<value_type>::value)
+   {
+      sstl_assert(count <=_capacity());
+      auto pos = _begin_pointer();
+      #if _sstl_has_exceptions()
+      try
+      {
+      #endif
+         for(size_type i=0; i<count; ++i)
+         {
+            new(pos) value_type(value);
+            ++pos;
+         }
+      #if _sstl_has_exceptions()
+      }
+      catch(...)
+      {
+         _set_end_pointer(pos);
+         clear();
+         throw;
+      }
+      #endif
+      _set_end_pointer(pos);
+   }
 
    template<class TIterator, class = _enable_if_input_iterator_t<TIterator>>
    void _range_constructor(TIterator range_begin, TIterator range_end)
@@ -143,6 +169,14 @@ public:
       : _begin_pointer(_base::_begin_storage())
       , _end_pointer(_base::_begin_storage())
    {}
+
+   explicit dequeng(size_type count, const_reference value = value_type())
+      _sstl_noexcept(noexcept(std::declval<_base>()._count_constructor(std::declval<size_type>(), std::declval<value_type>())))
+      : _begin_pointer(_base::_begin_storage())
+      , _end_pointer(_base::_begin_storage())
+   {
+      _base::_count_constructor(count, value);
+   }
 
    dequeng(std::initializer_list<value_type> init)
       _sstl_noexcept(noexcept(std::declval<_base>()._range_constructor( std::declval<std::initializer_list<value_type>>().begin(),

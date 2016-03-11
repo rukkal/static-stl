@@ -44,21 +44,40 @@ TEST_CASE("dequeng")
       REQUIRE(d.empty());
    }
 
-   #if 0
    SECTION("count constructor")
    {
-      auto actual = deque_int_t(3);
-      auto expected = deque_int_t{0, 0, 0};
-      REQUIRE(actual == expected);
+      SECTION("contained values")
+      {
+         auto actual = deque_int_t(3);
+         auto expected = deque_int_t{0, 0, 0};
+         REQUIRE(actual == expected);
+      }
+      SECTION("exception handling")
+      {
+         counted_type::reset_counts();
+         counted_type::throw_at_nth_copy_construction(3);
+         REQUIRE_THROWS_AS(deque_counted_type_t(4), counted_type::copy_construction::exception);
+         REQUIRE(counted_type::check{}.default_constructions(1).copy_constructions(2).destructions(3));
+      }
    }
-   #endif
 
    SECTION("initializer-list constructor")
    {
-      auto actual = deque_int_t{0, 1, 2};
-      auto expected = {0, 1, 2};
-      REQUIRE(actual.size() == expected.size());
-      REQUIRE(std::equal(actual.cbegin(), actual.cend(), expected.begin()));
+      SECTION("contained values")
+      {
+         auto actual = deque_int_t{0, 1, 2};
+         auto expected = {0, 1, 2};
+         REQUIRE(actual.size() == expected.size());
+         REQUIRE(std::equal(actual.cbegin(), actual.cend(), expected.begin()));
+      }
+      SECTION("exception handling")
+      {
+         auto init = std::initializer_list<counted_type>{0, 1, 2, 3};
+         counted_type::reset_counts();
+         counted_type::throw_at_nth_copy_construction(3);
+         REQUIRE_THROWS_AS(deque_counted_type_t{ init }, counted_type::copy_construction::exception);
+         REQUIRE(counted_type::check{}.copy_constructions(2).destructions(2));
+      }
    }
 
    SECTION("non-member relative operators")
