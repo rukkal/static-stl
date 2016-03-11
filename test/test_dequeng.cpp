@@ -6,6 +6,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 */
 
 #include <catch.hpp>
+#include <algorithm>
 #include <sstl/__internal/_except.h>
 #include <sstl/dequeng.h>
 
@@ -39,8 +40,88 @@ TEST_CASE("dequeng")
 
    SECTION("default constructor")
    {
-      auto v = deque_int_t();
-      REQUIRE(v.empty());
+      auto d = deque_int_t();
+      REQUIRE(d.empty());
+   }
+
+   #if 0
+   SECTION("count constructor")
+   {
+      auto actual = deque_int_t(3);
+      auto expected = deque_int_t{0, 0, 0};
+      REQUIRE(actual == expected);
+   }
+   #endif
+
+   SECTION("initializer-list constructor")
+   {
+      auto actual = deque_int_t{0, 1, 2};
+      auto expected = {0, 1, 2};
+      REQUIRE(actual.size() == expected.size());
+      REQUIRE(std::equal(actual.cbegin(), actual.cend(), expected.begin()));
+   }
+
+   SECTION("non-member relative operators")
+   {
+      SECTION("lhs < rhs")
+      {
+         {
+            auto lhs = deque_int_t{0, 1, 2};
+            auto rhs = deque_int_t{0, 1, 2, 3};
+            REQUIRE(!(lhs == rhs));
+            //REQUIRE(lhs != rhs);
+            //REQUIRE(lhs < rhs);
+            //REQUIRE(lhs <= rhs);
+            //REQUIRE(!(lhs > rhs));
+            //REQUIRE(!(lhs >= rhs));
+         }
+         {
+            auto lhs = deque_int_t{0, 1, 2, 3};
+            auto rhs = deque_int_t{0, 1, 3, 3};
+            REQUIRE(!(lhs == rhs));
+            //REQUIRE(lhs != rhs);
+            //REQUIRE(lhs < rhs);
+            //REQUIRE(lhs <= rhs);
+            //REQUIRE(!(lhs > rhs));
+            //REQUIRE(!(lhs >= rhs));
+         }
+      }
+      SECTION("lhs == rhs")
+      {
+         {
+            auto lhs = deque_int_t{0, 1, 2};
+            auto rhs = deque_int_t{0, 1, 2};
+            REQUIRE(lhs == rhs);
+            //REQUIRE(!(lhs != rhs));
+            //REQUIRE(!(lhs < rhs));
+            //REQUIRE(lhs <= rhs);
+            //REQUIRE(!(lhs > rhs));
+            //REQUIRE(lhs >= rhs);
+         }
+      }
+      SECTION("lhs > rhs")
+      {
+         {
+            auto lhs = deque_int_t{0, 1, 2, 3};
+            auto rhs = deque_int_t{0, 1, 2};
+            REQUIRE(!(lhs == rhs));
+            //REQUIRE(lhs != rhs);
+            //REQUIRE(!(lhs < rhs));
+            //REQUIRE(!(lhs <= rhs));
+            //REQUIRE(lhs > rhs);
+            //REQUIRE(lhs >= rhs);
+         }
+         {
+            auto lhs = deque_int_t{0, 1, 3, 3};
+            auto rhs = deque_int_t{0, 1, 2, 3};
+            REQUIRE(!(lhs == rhs));
+            //REQUIRE(lhs != rhs);
+            //REQUIRE(!(lhs < rhs));
+            //REQUIRE(!(lhs <= rhs));
+            //REQUIRE(lhs > rhs);
+            //REQUIRE(lhs >= rhs);
+         }
+      }
    }
 }
 
