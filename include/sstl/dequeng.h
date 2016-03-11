@@ -213,7 +213,7 @@ public:
    }
 
 private:
-   size_type _capacity_{ CAPACITY };
+   size_type _capacity{ CAPACITY };
    pointer _begin_pointer;
    pointer _end_pointer;
    std::array<typename _aligned_storage<sizeof(value_type), std::alignment_of<value_type>::value>::type, CAPACITY> _buffer;
@@ -265,7 +265,7 @@ void dequeng<T>::_set_end_pointer(dequeng<T>::pointer end_pointer) _sstl_noexcep
 template<class T>
 typename dequeng<T>::size_type dequeng<T>::_capacity() const _sstl_noexcept_
 {
-   return reinterpret_cast<const _type_for_derived_class_access&>(*this)._capacity_;
+   return reinterpret_cast<const _type_for_derived_class_access&>(*this)._capacity;
 }
 
 template<class T>
