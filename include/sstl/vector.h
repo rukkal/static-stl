@@ -1035,50 +1035,44 @@ size_t vector<T>::_capacity() const _sstl_noexcept_
    return reinterpret_cast<const type_for_derived_member_variable_access&>(*this)._capacity_;
 }
 
-template <class T, size_t CapacityLhs, size_t CapacityRhs>
-inline bool operator==(const vector<T, CapacityLhs>& lhs, const vector<T, CapacityRhs>& rhs)
+template <class T>
+inline bool operator==(const vector<T>& lhs, const vector<T>& rhs)
 {
     return lhs.size() == rhs.size() && std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
 }
 
-template <class T, size_t CapacityLhs, size_t CapacityRhs>
-inline bool operator!=(const vector<T, CapacityLhs>& lhs, const vector<T, CapacityRhs>& rhs)
+template <class T>
+inline bool operator!=(const vector<T>& lhs, const vector<T>& rhs)
 {
     return !(lhs == rhs);
 }
 
-template <class T, size_t CapacityLhs, size_t CapacityRhs>
-inline bool operator<(const vector<T, CapacityLhs>& lhs, const vector<T, CapacityRhs>& rhs)
+template <class T>
+inline bool operator<(const vector<T>& lhs, const vector<T>& rhs)
 {
    return std::lexicographical_compare(lhs.cbegin(), lhs.cend(), rhs.cbegin(), rhs.cend());
 }
 
-template <class T, size_t CapacityLhs, size_t CapacityRhs>
-inline bool operator<=(const vector<T, CapacityLhs>& lhs, const vector<T, CapacityRhs>& rhs)
+template <class T>
+inline bool operator<=(const vector<T>& lhs, const vector<T>& rhs)
 {
    return !(rhs < lhs);
 }
 
-template <class T, size_t CapacityLhs, size_t CapacityRhs>
-inline bool operator>(const vector<T, CapacityLhs>& lhs, const vector<T, CapacityRhs>& rhs)
+template <class T>
+inline bool operator>(const vector<T>& lhs, const vector<T>& rhs)
 {
    return rhs < lhs;
 }
 
-template <class T, size_t CapacityLhs, size_t CapacityRhs>
-inline bool operator>=(const vector<T, CapacityLhs>& lhs, const vector<T, CapacityRhs>& rhs)
+template <class T>
+inline bool operator>=(const vector<T>& lhs, const vector<T>& rhs)
 {
    return !(lhs < rhs);
 }
 
-template<class T, size_t Capacity>
-void swap(vector<T, Capacity>& lhs, vector<T, Capacity>& rhs)
-{
-   lhs.swap(rhs);
-}
-
-template<class T, size_t CapacityLhs, size_t CapacityRhs>
-void swap(vector<T, CapacityLhs>& lhs, vector<T, CapacityRhs>& rhs)
+template<class T>
+void swap(vector<T>& lhs, vector<T>& rhs)
 {
    lhs.swap(rhs);
 }
