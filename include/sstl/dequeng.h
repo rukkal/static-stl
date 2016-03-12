@@ -53,21 +53,21 @@ public:
    void clear() _sstl_noexcept(std::is_nothrow_destructible<value_type>::value)
    {
       //FIXME
-      auto crt = _end_pointer();
-      while(crt != _begin_pointer())
+      auto crt = _begin_pointer();
+      while(crt != _end_pointer())
       {
-         --crt;
          crt->~value_type();
+         ++crt;
       }
-      _set_end_pointer(_begin_pointer());
+      _set_begin_pointer(_end_pointer());
+      _set_size(0);
    }
 
-   bool empty() const _sstl_noexcept_ { return _begin_pointer() == _end_pointer(); }
+   bool empty() const _sstl_noexcept_ { return _size() == 0; }
 
    size_t size() const _sstl_noexcept_
    {
-      //FIXME
-      return _end_pointer() - _begin_pointer();
+      return _size();
    }
 
 protected:
@@ -102,6 +102,7 @@ protected:
          throw;
       }
       #endif
+      _set_size(count);
       _set_end_pointer(pos);
    }
 
@@ -117,8 +118,9 @@ protected:
       #endif
          while(src != range_end)
          {
-            sstl_assert(dst-_begin_storage() < _capacity());
+            sstl_assert(_size() < _capacity());
             new(dst) value_type(*src);
+            _set_size(_size()+1);
             ++src; ++dst;
          }
          _set_end_pointer(dst);
@@ -134,14 +136,16 @@ protected:
    }
 
    // member functions for derived class access
-   pointer _begin_storage() _sstl_noexcept_;
+   size_type _capacity() const _sstl_noexcept_;
+   size_type _size() const _sstl_noexcept_;
+   void _set_size(size_type) _sstl_noexcept_;
    pointer _begin_pointer() _sstl_noexcept_;
    const_pointer _begin_pointer() const _sstl_noexcept_;
    void _set_begin_pointer(pointer) _sstl_noexcept_;
    pointer _end_pointer() _sstl_noexcept_;
    const_pointer _end_pointer() const _sstl_noexcept_;
    void _set_end_pointer(pointer) _sstl_noexcept_;
-   size_type _capacity() const _sstl_noexcept_;
+   pointer _begin_storage() _sstl_noexcept_;
 };
 
 template<class T, size_t CAPACITY>
@@ -169,13 +173,11 @@ public:
 
 public:
    dequeng() _sstl_noexcept_
-      : _begin_pointer(_base::_begin_storage())
-      , _end_pointer(_base::_begin_storage())
+      : _end_pointer(_base::_begin_storage())
    {}
 
    explicit dequeng(size_type count, const_reference value = value_type())
       _sstl_noexcept(noexcept(std::declval<_base>()._count_constructor(std::declval<size_type>(), std::declval<value_type>())))
-      : _begin_pointer(_base::_begin_storage())
    {
       _base::_count_constructor(count, value);
    }
@@ -184,7 +186,6 @@ public:
    dequeng(TIterator range_begin, TIterator range_end)
       _sstl_noexcept(noexcept(std::declval<_base>()._range_constructor( std::declval<TIterator>(),
                                                                         std::declval<TIterator>())))
-      : _begin_pointer(_base::_begin_storage())
    {
       _base::_range_constructor(range_begin, range_end);
    }
@@ -193,7 +194,6 @@ public:
    dequeng(const _base& rhs)
       _sstl_noexcept(noexcept(std::declval<_base>()._range_constructor( std::declval<const_iterator>(),
                                                                         std::declval<const_iterator>())))
-      : _begin_pointer(_base::_begin_storage())
    {
       _base::_range_constructor(const_cast<_base&>(rhs).cbegin(), const_cast<_base&>(rhs).cend());
    }
@@ -206,24 +206,34 @@ public:
    dequeng(std::initializer_list<value_type> init)
       _sstl_noexcept(noexcept(std::declval<_base>()._range_constructor( std::declval<std::initializer_list<value_type>>().begin(),
                                                                         std::declval<std::initializer_list<value_type>>().end())))
-      : _begin_pointer(_base::_begin_storage())
-      , _end_pointer(_base::_begin_storage())
    {
       _base::_range_constructor(init.begin(), init.end());
    }
 
 private:
    size_type _capacity{ CAPACITY };
-   pointer _begin_pointer;
+   size_type _size{ 0 };
+   pointer _begin_pointer{ _base::_begin_storage() };
    pointer _end_pointer;
    std::array<typename _aligned_storage<sizeof(value_type), std::alignment_of<value_type>::value>::type, CAPACITY> _buffer;
 };
 
 template<class T>
-typename dequeng<T>::pointer dequeng<T>::_begin_storage() _sstl_noexcept_
+typename dequeng<T>::size_type dequeng<T>::_capacity() const _sstl_noexcept_
 {
-   auto begin_storage = reinterpret_cast<_type_for_derived_class_access&>(*this)._buffer.data();
-   return static_cast<pointer>(static_cast<void*>(begin_storage));
+   return reinterpret_cast<const _type_for_derived_class_access&>(*this)._capacity;
+}
+
+template<class T>
+typename dequeng<T>::size_type dequeng<T>::_size() const _sstl_noexcept_
+{
+   return reinterpret_cast<const _type_for_derived_class_access&>(*this)._size;
+}
+
+template<class T>
+void dequeng<T>::_set_size(typename dequeng<T>::size_type size) _sstl_noexcept_
+{
+   reinterpret_cast<_type_for_derived_class_access&>(*this)._size = size;
 }
 
 template<class T>
@@ -263,15 +273,16 @@ void dequeng<T>::_set_end_pointer(dequeng<T>::pointer end_pointer) _sstl_noexcep
 }
 
 template<class T>
-typename dequeng<T>::size_type dequeng<T>::_capacity() const _sstl_noexcept_
-{
-   return reinterpret_cast<const _type_for_derived_class_access&>(*this)._capacity;
-}
-
-template<class T>
 inline bool operator==(const dequeng<T>& lhs, const dequeng<T>& rhs)
 {
    return lhs.size() == rhs.size() && std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
+}
+
+template<class T>
+typename dequeng<T>::pointer dequeng<T>::_begin_storage() _sstl_noexcept_
+{
+   auto begin_storage = reinterpret_cast<_type_for_derived_class_access&>(*this)._buffer.data();
+   return static_cast<pointer>(static_cast<void*>(begin_storage));
 }
 
 }
