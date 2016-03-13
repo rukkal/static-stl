@@ -50,39 +50,45 @@ public:
 
    _dequeng_iterator& operator++() _sstl_noexcept_
    {
-      _deque->_increment_pointer(_pos);
+      if(_pos == _deque->_last_pointer())
+         _pos = nullptr;
+      else
+         _deque->_increment_pointer(_pos);
       return *this;
    }
 
    _dequeng_iterator operator++(int) _sstl_noexcept_
    {
       _dequeng_iterator temp(*this);
-      _deque->_increment_pointer(_pos);
+      ++(*this);
       return temp;
    }
 
    _dequeng_iterator& operator--() _sstl_noexcept_
    {
-      _deque->_decrement_pointer(_pos);
+      if(_pos == nullptr)
+         _pos = _deque->_last_pointer();
+      else
+         _deque->_decrement_pointer(_pos);
       return *this;
    }
 
    _dequeng_iterator operator--(int) _sstl_noexcept_
    {
       _dequeng_iterator temp(*this);
-      _deque->_decrement_pointer(_pos);
+      --(*this);
       return temp;
    }
 
    _dequeng_iterator& operator+=(difference_type inc) _sstl_noexcept_
    {
-      _deque->_offset_pointer(_pos, inc);
+      _apply_offset_to_pos(inc);
       return *this;
    }
 
    _dequeng_iterator& operator-=(difference_type dec) _sstl_noexcept_
    {
-      _deque->_offset_pointer(_pos, -dec);
+      _apply_offset_to_pos(-dec);
       return *this;
    }
 
@@ -96,16 +102,50 @@ public:
       return !operator==(rhs);
    }
 
-   friend _dequeng_iterator operator+(const _dequeng_iterator& lhs, difference_type rhs)
+   friend _dequeng_iterator operator+(const _dequeng_iterator& lhs, difference_type rhs) _sstl_noexcept_
    {
       auto tmp = lhs;
       tmp += rhs;
       return tmp;
    }
 
-   friend _dequeng_iterator operator+(difference_type lhs, const _dequeng_iterator& rhs)
+   friend _dequeng_iterator operator+(difference_type lhs, const _dequeng_iterator& rhs) _sstl_noexcept_
    {
       return rhs+lhs;
+   }
+
+private:
+   void _apply_offset_to_pos(difference_type offset) _sstl_noexcept_
+   {
+      sstl_assert(offset >= 0 || -offset <= _deque->capacity());
+      sstl_assert(offset < 0 || offset <= _deque->capacity());
+
+      if(_pos == nullptr)
+      {
+         sstl_assert(offset <= 0);
+         _pos = _deque->_last_pointer();
+         ++offset;
+      }
+
+      _pos += offset;
+      if(_pos >= _deque->_end_storage())
+      {
+         _pos = _deque->_begin_storage() + (_pos - _deque->_end_storage());
+      }
+      else if(_pos < _deque->_begin_storage())
+      {
+         _pos = _deque->_end_storage() - (_deque->_begin_storage() - _pos);
+      }
+
+      if(_is_pos_one_past_last_pointer())
+         _pos = nullptr;
+   }
+
+   bool _is_pos_one_past_last_pointer() const _sstl_noexcept_
+   {
+      auto one_past_last_pointer = _deque->_last_pointer();
+      _deque->_increment_pointer(one_past_last_pointer);
+      return _pos == one_past_last_pointer;
    }
 
 private:
