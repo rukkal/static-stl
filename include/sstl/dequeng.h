@@ -5,16 +5,18 @@ terms of the Do What The Fuck You Want To Public License, Version 2,
 as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 */
 
-#ifndef _SSTL_DEQUE__
-#define _SSTL_DEQUE__
+#ifndef _SSTL_DEQUENG__
+#define _SSTL_DEQUENG__
 
 #include <type_traits>
+#include <iterator>
 #include <initializer_list>
 #include <array>
 
 #include "sstl_assert.h"
 #include "__internal/_aligned_storage.h"
 #include "__internal/_iterator.h"
+#include "__internal/_dequeng_iterator.h"
 
 namespace sstl
 {
@@ -28,6 +30,9 @@ class dequeng<T>
 template<class U, size_t S>
 friend class dequeng; //friend declaration required for derived class' noexcept expressions
 
+friend class _dequeng_iterator<dequeng>;
+friend class _dequeng_iterator<const dequeng>;
+
 public:
    using value_type = T;
    using size_type = size_t;
@@ -36,19 +41,56 @@ public:
    using const_reference = const value_type&;
    using pointer = value_type*;
    using const_pointer = const value_type*;
-   using iterator = value_type*;
-   using const_iterator = const value_type*;
+   using iterator = _dequeng_iterator<dequeng>;
+   using const_iterator = _dequeng_iterator<const dequeng>;
    //using reverse_iterator = std::reverse_iterator<iterator>;
    //using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
 public:
-   //FIXME
-   iterator begin() _sstl_noexcept_ { return _begin_pointer(); }
-   const_iterator begin() const _sstl_noexcept_ { return _begin_pointer(); }
-   const_iterator cbegin() const _sstl_noexcept_ { return _begin_pointer(); }
-   iterator end() _sstl_noexcept_ { return _end_pointer(); }
-   const_iterator end() const _sstl_noexcept_ { return _end_pointer(); }
-   const_iterator cend() const _sstl_noexcept_ { return _end_pointer(); }
+   iterator begin() _sstl_noexcept_
+   {
+      return iterator{ this, _begin_pointer() };
+   }
+
+   const_iterator begin() const _sstl_noexcept_
+   {
+      return const_iterator{ this, _begin_pointer() };
+   }
+
+   const_iterator cbegin() const _sstl_noexcept_
+   {
+      return const_iterator{ this, _begin_pointer() };
+   }
+
+   iterator end() _sstl_noexcept_
+   {
+      return iterator{ this, _end_pointer() };
+   }
+
+   const_iterator end() const _sstl_noexcept_
+   {
+      return const_iterator{ this, _end_pointer() };
+   }
+
+   const_iterator cend() const _sstl_noexcept_
+   {
+      return const_iterator{ this, _end_pointer() };
+   }
+
+   bool empty() const _sstl_noexcept_
+   {
+      return _size() == 0;
+   }
+
+   size_type size() const _sstl_noexcept_
+   {
+      return _size();
+   }
+
+   size_type capacity() const _sstl_noexcept_
+   {
+      return _end_storage() - _begin_storage();
+   }
 
    void clear() _sstl_noexcept(std::is_nothrow_destructible<value_type>::value)
    {
@@ -63,16 +105,22 @@ public:
       _set_size(0);
    }
 
-   bool empty() const _sstl_noexcept_ { return _size() == 0; }
-
-   size_type size() const _sstl_noexcept_
+   void push_back(const_reference value)
+      _sstl_noexcept(std::is_nothrow_constructible<value_type>::value)
    {
-      return _size();
+      sstl_assert(_size() < capacity());
+      new(_end_pointer()) value_type(value);
+      _increment_pointer(_end_pointer());
+      _increment_size();
    }
 
-   size_type capacity() const _sstl_noexcept_
+   void pop_front()
+      _sstl_noexcept(std::is_nothrow_destructible<value_type>::value)
    {
-      return _end_storage() - _begin_storage();
+      sstl_assert(!empty());
+      _begin_pointer()->~value_type();
+      _increment_pointer(_begin_pointer());
+      _decrement_size();
    }
 
 protected:
@@ -125,7 +173,7 @@ protected:
          {
             sstl_assert(_size() < capacity());
             new(dst) value_type(*src);
-            _set_size(_size()+1);
+            _increment_size();
             ++src; ++dst;
          }
          _set_end_pointer(dst);
@@ -144,11 +192,11 @@ protected:
    size_type _size() const _sstl_noexcept_;
    void _set_size(size_type) _sstl_noexcept_;
 
-   pointer _begin_pointer() _sstl_noexcept_;
+   pointer& _begin_pointer() _sstl_noexcept_;
    const_pointer _begin_pointer() const _sstl_noexcept_;
    void _set_begin_pointer(pointer) _sstl_noexcept_;
 
-   pointer _end_pointer() _sstl_noexcept_;
+   pointer& _end_pointer() _sstl_noexcept_;
    const_pointer _end_pointer() const _sstl_noexcept_;
    void _set_end_pointer(pointer) _sstl_noexcept_;
 
@@ -157,6 +205,58 @@ protected:
 
    pointer _end_storage() _sstl_noexcept_;
    const_pointer _end_storage() const _sstl_noexcept_;
+
+   // helper functions
+   void _increment_size() _sstl_noexcept_
+   {
+      _set_size(_size()+1);
+   }
+
+   void _decrement_size() _sstl_noexcept_
+   {
+      _set_size(_size()-1);
+   }
+
+   void _increment_pointer(pointer& ptr) _sstl_noexcept_
+   {
+      auto new_ptr = ptr + 1;
+      if(new_ptr == _end_storage())
+         new_ptr = _begin_storage();
+      ptr = new_ptr;
+   }
+
+   void _increment_pointer(const_pointer& ptr) const _sstl_noexcept_
+   {
+      const_cast<dequeng&>(*this)._increment_pointer(const_cast<pointer&>(ptr));
+   }
+
+   void _decrement_pointer(pointer& ptr) _sstl_noexcept_
+   {
+      ptr -= 1;
+      if(ptr < _begin_storage())
+         ptr = _end_storage() - 1;
+   }
+
+   void _decrement_pointer(const_pointer& ptr) const _sstl_noexcept_
+   {
+      const_cast<dequeng&>(*this)._decrement_pointer(const_cast<pointer&>(ptr));
+   }
+
+   void _offset_pointer(pointer& ptr, typename iterator::difference_type offset) _sstl_noexcept_
+   {
+      sstl_assert(offset >= 0 || -offset <= capacity());
+      sstl_assert(offset < 0 || offset <= capacity());
+      ptr += offset;
+      if(ptr >= _end_storage())
+         ptr = _begin_storage() + (ptr - _end_storage());
+      else if(ptr < _begin_storage())
+         ptr = _end_storage() - (_begin_storage() - ptr);
+   }
+
+   void _offset_pointer(const_pointer& ptr, typename iterator::difference_type offset) const _sstl_noexcept_
+   {
+      const_cast<dequeng&>(*this)._offset_pointer(const_cast<pointer&>(ptr), offset);
+   }
 };
 
 template<class T, size_t CAPACITY>
@@ -242,7 +342,7 @@ void dequeng<T>::_set_size(typename dequeng<T>::size_type size) _sstl_noexcept_
 }
 
 template<class T>
-typename dequeng<T>::pointer dequeng<T>::_begin_pointer() _sstl_noexcept_
+typename dequeng<T>::pointer& dequeng<T>::_begin_pointer() _sstl_noexcept_
 {
    return reinterpret_cast<_type_for_derived_class_access&>(*this)._begin_pointer;
 }
@@ -260,7 +360,7 @@ void dequeng<T>::_set_begin_pointer(dequeng<T>::pointer begin_pointer) _sstl_noe
 }
 
 template<class T>
-typename dequeng<T>::pointer dequeng<T>::_end_pointer() _sstl_noexcept_
+typename dequeng<T>::pointer& dequeng<T>::_end_pointer() _sstl_noexcept_
 {
    return reinterpret_cast<_type_for_derived_class_access&>(*this)._end_pointer;
 }
