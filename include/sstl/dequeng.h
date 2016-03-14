@@ -8,6 +8,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #ifndef _SSTL_DEQUENG__
 #define _SSTL_DEQUENG__
 
+#include <utility>
 #include <type_traits>
 #include <iterator>
 #include <initializer_list>
@@ -187,6 +188,44 @@ protected:
       #endif
    }
 
+   void _move_constructor(dequeng&& rhs)
+      _sstl_noexcept(std::is_nothrow_move_constructible<value_type>::value)
+   {
+      sstl_assert(rhs.size() <= capacity());
+      auto src = rhs.begin();
+      auto dst = _begin_storage();
+      #if _sstl_has_exceptions()
+      try
+      {
+      #endif
+         while(src != rhs.end())
+         {
+            new(dst) value_type(std::move(*src));
+            src->~value_type();
+            ++src; ++dst;
+         }
+      #if _sstl_has_exceptions()
+      }
+      catch(...)
+      {
+         while(src != rhs.end())
+         {
+            src->~value_type();
+            ++src;
+         }
+         rhs._last_pointer() = rhs._first_pointer()-1;
+         rhs._set_size(0);
+         _last_pointer() = dst-1;
+         clear();
+         throw;
+      }
+      #endif
+      _last_pointer() = dst-1;
+      _set_size(rhs.size());
+      rhs._last_pointer() = rhs._first_pointer()-1;
+      rhs._set_size(0);
+   }
+
    // member functions for derived class access
    size_type _size() const _sstl_noexcept_;
    void _set_size(size_type) _sstl_noexcept_;
@@ -293,6 +332,18 @@ public:
    dequeng(const dequeng& rhs)
       _sstl_noexcept(noexcept(dequeng(std::declval<const _base&>())))
       : dequeng(static_cast<const _base&>(rhs))
+   {}
+
+   //move construction from any instance with same value type (capacity doesn't matter)
+   dequeng(_base&& rhs)
+      _sstl_noexcept(noexcept(std::declval<_base>()._move_constructor(std::declval<_base>())))
+   {
+      _base::_move_constructor(std::move(rhs));
+   }
+
+   dequeng(dequeng&& rhs)
+      _sstl_noexcept(noexcept(dequeng(std::declval<_base>())))
+      : dequeng(static_cast<_base&&>(rhs))
    {}
 
    dequeng(std::initializer_list<value_type> init)

@@ -20,6 +20,22 @@ using deque_int_base_t = sstl::dequeng<int>;
 using deque_int_t = sstl::dequeng<int, 11>;
 using deque_counted_type_t = sstl::dequeng<counted_type, 11>;
 
+template<class T>
+sstl::dequeng<T, 11> make_noncontiguous_deque(std::initializer_list<T> init)
+{
+   auto d = sstl::dequeng<T, 11>{};
+   for(size_t i=0; i<d.capacity()-1; ++i)
+   {
+      d.push_back(0);
+      d.pop_front();
+   }
+   for(auto& value : init)
+   {
+      d.push_back(value);
+   }
+   return d;
+}
+
 TEST_CASE("dequeng")
 {
    SECTION("user cannot directly construct the base class")
@@ -99,6 +115,12 @@ TEST_CASE("dequeng")
             auto lhs = sstl::dequeng<int, 11>{ rhs };
             REQUIRE(lhs == rhs);
          }
+         SECTION("non-contiguous values")
+         {
+            auto rhs = make_noncontiguous_deque({0, 1, 2, 3});
+            auto lhs = deque_int_t{ rhs };
+            REQUIRE(lhs == rhs);
+         }
       }
       SECTION("number of operations")
       {
@@ -113,7 +135,60 @@ TEST_CASE("dequeng")
          auto rhs = deque_counted_type_t{0, 1, 2, 3};
          counted_type::reset_counts();
          counted_type::throw_at_nth_copy_construction(3);
-         REQUIRE_THROWS_AS(auto lhs = rhs, counted_type::copy_construction::exception);
+         REQUIRE_THROWS_AS(deque_counted_type_t{ rhs }, counted_type::copy_construction::exception);
+      }
+      #endif
+   }
+
+   SECTION("move constructor")
+   {
+      SECTION("contained values")
+      {
+         SECTION("same capacity")
+         {
+            auto rhs = deque_int_t{0, 1, 2, 3};
+            auto lhs = deque_int_t{ std::move(rhs) };
+            REQUIRE(lhs == (deque_int_t{0, 1, 2, 3}));
+         }
+         SECTION("different capacity")
+         {
+            auto rhs = sstl::dequeng<int, 11>{0, 1, 2, 3};
+            auto lhs = sstl::dequeng<int, 7>{ std::move(rhs) };
+            REQUIRE(lhs == (deque_int_t{0, 1, 2, 3}));
+         }
+         SECTION("non-contiguous values")
+         {
+            auto rhs = make_noncontiguous_deque({0, 1, 2, 3});
+            auto lhs = deque_int_t{ std::move(rhs) };
+            REQUIRE(lhs == (deque_int_t{0, 1, 2, 3}));
+         }
+      }
+      SECTION("number of operations")
+      {
+         auto rhs = deque_counted_type_t{0, 1, 2, 3};
+         counted_type::reset_counts();
+         auto lhs = deque_counted_type_t{ std::move(rhs) };
+         REQUIRE(counted_type::check{}.move_constructions(4).destructions(4));
+      }
+      SECTION("test moved-from state")
+      {
+         auto rhs = deque_int_t{0, 1, 2, 3};
+         auto lhs = deque_int_t{ std::move(rhs) };
+         REQUIRE(rhs.empty());
+
+         rhs.push_back(10);
+         rhs.push_back(11);
+         REQUIRE(rhs == (deque_int_t{10, 11}));
+      }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling")
+      {
+         auto rhs = deque_counted_type_t{0, 1, 2, 3};
+         counted_type::reset_counts();
+         counted_type::throw_at_nth_move_construction(3);
+         REQUIRE_THROWS_AS(deque_counted_type_t{ std::move(rhs) }, counted_type::move_construction::exception);
+         REQUIRE(counted_type::check{}.move_constructions(2).destructions(6));
+         REQUIRE(rhs.empty());
       }
       #endif
    }
