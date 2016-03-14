@@ -38,12 +38,12 @@ public:
       , _pos(pos)
    {}
 
-   reference operator*() _sstl_noexcept_
+   reference operator*() const _sstl_noexcept_
    {
       return *_pos;
    }
 
-   pointer operator->() _sstl_noexcept_
+   pointer operator->() const _sstl_noexcept_
    {
       return _pos;
    }
@@ -92,16 +92,6 @@ public:
       return *this;
    }
 
-   bool operator==(const _dequeng_iterator& rhs) const _sstl_noexcept_
-   {
-      return _pos==rhs._pos;
-   }
-
-   bool operator!=(const _dequeng_iterator& rhs) const _sstl_noexcept_
-   {
-      return !operator==(rhs);
-   }
-
    friend _dequeng_iterator operator+(const _dequeng_iterator& lhs, difference_type rhs) _sstl_noexcept_
    {
       auto tmp = lhs;
@@ -112,6 +102,54 @@ public:
    friend _dequeng_iterator operator+(difference_type lhs, const _dequeng_iterator& rhs) _sstl_noexcept_
    {
       return rhs+lhs;
+   }
+
+   _dequeng_iterator operator-(difference_type rhs) const _sstl_noexcept_
+   {
+      auto tmp = *this;
+      tmp -= rhs;
+      return tmp;
+   }
+
+   difference_type operator-(_dequeng_iterator rhs) const _sstl_noexcept_
+   {
+      sstl_assert(_deque == rhs._deque);
+      return _linearized_pos() - rhs._linearized_pos();
+   }
+
+   reference operator[](difference_type offset) const _sstl_noexcept_
+   {
+      return *(*this + offset);
+   }
+
+   bool operator==(const _dequeng_iterator& rhs) const _sstl_noexcept_
+   {
+      return _pos==rhs._pos;
+   }
+
+   bool operator!=(const _dequeng_iterator& rhs) const _sstl_noexcept_
+   {
+      return !operator==(rhs);
+   }
+
+   bool operator<(const _dequeng_iterator& rhs) const _sstl_noexcept_
+   {
+      return _linearized_pos() < rhs._linearized_pos();
+   }
+
+   bool operator>(const _dequeng_iterator& rhs) const _sstl_noexcept_
+   {
+      return _linearized_pos() > rhs._linearized_pos();
+   }
+
+   bool operator<=(const _dequeng_iterator& rhs) const _sstl_noexcept_
+   {
+      return _linearized_pos() <= rhs._linearized_pos();
+   }
+
+   bool operator>=(const _dequeng_iterator& rhs) const _sstl_noexcept_
+   {
+      return _linearized_pos() >= rhs._linearized_pos();
    }
 
 private:
@@ -148,10 +186,24 @@ private:
       return _pos == one_past_last_pointer;
    }
 
+   difference_type _linearized_pos() const _sstl_noexcept_
+   {
+      if(_pos != nullptr)
+      {
+         if(_pos >= _deque->_first_pointer())
+            return _deque->_first_pointer() - _pos;
+         else
+            return (_deque->_end_storage() - _deque->_first_pointer()) + (_pos - _deque->_begin_storage());
+      }
+      else
+      {
+         return _deque->size();
+      }
+   }
+
 private:
    TDeque* _deque;
    pointer _pos;
 };
-
 
 #endif

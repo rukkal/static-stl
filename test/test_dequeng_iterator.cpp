@@ -24,6 +24,8 @@ struct value_type
    int value;
 };
 
+using iterator_type = typename sstl::dequeng<value_type>::iterator;
+
 template<class TValue>
 sstl::dequeng<TValue, 11> make_noncontiguous_deque(std::initializer_list<TValue> init)
 {
@@ -45,27 +47,55 @@ TEST_CASE("_dequeng_iterator")
 
    SECTION("expressions required by InputIterator concept")
    {
-      REQUIRE(d.begin() != d.end());
-      REQUIRE(d.begin() == d.begin());
-
-      REQUIRE((*d.begin()).value == 0);
-
-      REQUIRE(d.begin()->value == 0);
-
+      SECTION("a!=b returns 'contextually convertible to bool'")
       {
-         auto it = d.begin();
-         auto& it_ref_1 = ++it;
+         REQUIRE(d.begin() != d.end());
+      }
+
+      SECTION("a==b returns 'contextually convertible to bool'")
+      {
+         REQUIRE(d.begin() == d.begin());
+      }
+
+      SECTION("*i returns 'reference or convertible to value_type'")
+      {
+         iterator_type it = d.begin();
+         REQUIRE((*it).value == 0);
+      }
+
+      SECTION("i->m")
+      {
+         iterator_type it = d.begin();
+         REQUIRE(it->value == 0);
+      }
+
+      SECTION("++i returns It&")
+      {
+         iterator_type it = d.begin();
+         iterator_type& it_ref_1 = ++it;
          REQUIRE(it->value == 1);
          REQUIRE(it_ref_1->value == 1);
-         auto& it_ref_2 = ++it;
+
+         iterator_type& it_ref_2 = ++it;
          REQUIRE(it->value == 2);
          REQUIRE(it_ref_2->value == 2);
       }
 
+      SECTION("(void) i++")
       {
-         auto it = d.begin();
+         iterator_type it = d.begin();
+         REQUIRE(it->value == 0);
+
+         it++;
+         REQUIRE(it->value == 1);
+      }
+
+      SECTION("*i++ returns 'convertible to value_type'")
+      {
+         iterator_type it = d.begin();
          value_type v0 = *it++;
          REQUIRE(v0.value == 0);
+
          value_type v1 = *it++;
          REQUIRE(v1.value == 1);
       }
@@ -73,91 +103,262 @@ TEST_CASE("_dequeng_iterator")
 
    SECTION("expressions required by ForwardIterator concept")
    {
+      SECTION("f++ returns It")
       {
-         auto it = d.begin();
-         auto it_0 = it++;
+         iterator_type it = d.begin();
+         iterator_type it_0 = it++;
          REQUIRE(it_0->value == 0);
          REQUIRE(it->value == 1);
 
-         auto it_1 = it++;
+         iterator_type it_1 = it++;
          REQUIRE(it_1->value == 1);
          REQUIRE(it->value == 2);
       }
 
+      SECTION("*f++ returns reference")
       {
-         auto it = d.begin();
-         auto& value0 = *it++;
+         iterator_type it = d.begin();
+         value_type& value0 = *it++;
          REQUIRE(value0.value == 0);
-         auto& value1 = *it++;
+
+         value_type& value1 = *it++;
          REQUIRE(value1.value == 1);
       }
    }
 
    SECTION("expressions required by BidirectionalIterator concept")
    {
+      SECTION("--b returns It&")
       {
-         auto it = d.end();
-         auto& it_ref_3 = --it;
+         iterator_type it = d.end();
+         iterator_type& it_ref_3 = --it;
          REQUIRE(it->value == 3);
          REQUIRE(it_ref_3->value == 3);
 
-         auto& it_ref_2 = --it;
+         iterator_type& it_ref_2 = --it;
          REQUIRE(it->value == 2);
          REQUIRE(it_ref_2->value == 2);
       }
 
+      SECTION("b-- returns 'convertible to const It&'")
       {
-         auto it = d.end();
+         iterator_type it = d.end();
          it--;
-         auto it_3 = it--;
+         const iterator_type& it_3 = it--;
          REQUIRE(it_3->value == 3);
          REQUIRE(it->value == 2);
 
-         auto it_2 = it--;
+         const iterator_type& it_2 = it--;
          REQUIRE(it_2->value == 2);
          REQUIRE(it->value == 1);
       }
 
+      SECTION("*b-- returns 'convertible to reference'")
       {
-         auto it = d.end();
+         iterator_type it = d.end();
          --it;
-         auto& value3 = *it--;
+         value_type& value3 = *it--;
          REQUIRE(value3.value == 3);
-         auto& value2 = *it++;
+
+         value_type& value2 = *it++;
          REQUIRE(value2.value == 2);
       }
    }
 
    SECTION("expressions required by RandomAccessIterator concept")
    {
+      SECTION("r+=n returns It&")
       {
-         auto it = d.begin();
-         auto& it_ref = (it+=2);
-         REQUIRE(it->value == 2);
-         REQUIRE(it_ref->value == 2);
+         {
+            iterator_type it = d.begin();
+
+            iterator_type& it_ref_2 = it+=2;
+            REQUIRE(it->value == 2);
+            REQUIRE(it_ref_2->value == 2);
+
+            iterator_type& it_ref_end = it+=2;
+            REQUIRE(it == d.end());
+            REQUIRE(it_ref_end == d.end());
+         }
+         {
+            iterator_type it = d.end();
+
+            iterator_type& it_ref_2 = it+=(-2);
+            REQUIRE(it->value == 2);
+            REQUIRE(it_ref_2->value == 2);
+
+            iterator_type& it_ref_begin = it+=(-2);
+            REQUIRE(it == d.begin());
+            REQUIRE(it_ref_begin == d.begin());
+         }
       }
 
+      SECTION("r+n / n+r returns It")
       {
-         auto it_0 = d.begin();
-         auto it_1 = it_0+1;
+         iterator_type it_0 = d.begin();
+
+         iterator_type it_1 = it_0+1;
          REQUIRE(it_1->value == 1);
-         auto it_3 = 3+it_0;
+
+         iterator_type it_end = 4+it_0;
+         REQUIRE(it_end == d.end());
+
+         iterator_type it_3 = it_end+(-1);
          REQUIRE(it_3->value == 3);
+
+         iterator_type it_begin = (-4)+it_end;
+         REQUIRE(it_begin == d.begin());
       }
 
+      SECTION("r-=n returns It&")
       {
-         auto it = d.end();
-         auto& it_ref = (it-=2);
-         REQUIRE(it->value == 2);
-         REQUIRE(it_ref->value == 2);
+         {
+            iterator_type it = d.end();
+
+            iterator_type& it_ref_2 = (it-=2);
+            REQUIRE(it->value == 2);
+            REQUIRE(it_ref_2->value == 2);
+
+            iterator_type& it_ref_begin = (it-=2);
+            REQUIRE(it == d.begin());
+            REQUIRE(it_ref_begin == d.begin());
+         }
+         {
+            iterator_type it = d.begin();
+
+            iterator_type& it_ref_2 = (it-=(-2));
+            REQUIRE(it->value == 2);
+            REQUIRE(it_ref_2->value == 2);
+
+            iterator_type& it_ref_end = (it-=(-2));
+            REQUIRE(it == d.end());
+            REQUIRE(it_ref_end == d.end());
+         }
       }
 
-      //TODO: complete
+      SECTION("r-n returns It")
+      {
+         iterator_type it_end = d.end();
+         iterator_type it_3 = it_end-1;
+         REQUIRE(it_3->value == 3);
+
+         iterator_type it_begin = it_end-4;
+         REQUIRE(it_begin == d.begin());
+
+         iterator_type it_1 = it_begin-(-1);
+         REQUIRE(it_1->value == 1);
+
+         it_end = it_begin-(-4);
+         REQUIRE(it_end == d.end());
+      }
+
+      SECTION("a-b returns difference_type")
+      {
+         REQUIRE(d.begin() - d.begin() == 0);
+         REQUIRE(d.end() - d.end() == 0);
+
+         REQUIRE(d.end() - d.begin() == 4);
+         REQUIRE(d.begin() - d.end() == -4);
+
+         REQUIRE((d.begin()+1) - d.begin() == 1);
+         REQUIRE(d.begin() - (d.begin() + 1) == -1);
+
+         REQUIRE(d.end() - (d.end()-1) == 1);
+         REQUIRE((d.end()-1) - d.end() == -1);
+      }
+
+      SECTION("r[n] returns 'convertible to reference'")
+      {
+         value_type& value_type0 = d.begin()[0];
+         value_type& value_type1 = d.begin()[1];
+         value_type& value_type2 = d.begin()[2];
+         value_type& value_type3 = d.begin()[3];
+
+         REQUIRE(value_type0.value == 0);
+         REQUIRE(value_type1.value == 1);
+         REQUIRE(value_type2.value == 2);
+         REQUIRE(value_type3.value == 3);
+
+         value_type0.value = 10;
+         value_type1.value = 11;
+         value_type2.value = 13;
+         value_type3.value = 12;
+
+         REQUIRE(value_type0.value == 10);
+         REQUIRE(value_type1.value == 11);
+         REQUIRE(value_type2.value == 13);
+         REQUIRE(value_type3.value == 12);
+      }
+
+      SECTION("a<b returns 'contextually convertible to bool'")
+      {
+         REQUIRE(d.begin() < d.begin()+1);
+         REQUIRE(!(d.begin() < d.begin()));
+         REQUIRE(!(d.begin()+1 < d.begin()));
+
+         REQUIRE(d.end()-1 < d.end());
+         REQUIRE(!(d.end() < d.end()));
+         REQUIRE(!(d.end() < d.end()-1));
+      }
+
+      SECTION("a>b returns 'contextually convertible to bool'")
+      {
+         REQUIRE(d.begin()+1 > d.begin());
+         REQUIRE(!(d.begin() > d.begin()));
+         REQUIRE(!(d.begin() > d.begin()+1));
+
+         REQUIRE(d.end() > d.end()-1);
+         REQUIRE(!(d.end() > d.end()));
+         REQUIRE(!(d.end()-1 > d.end()));
+      }
+
+      SECTION("a<=b returns 'contextually convertible to bool'")
+      {
+         REQUIRE(d.begin() <= d.begin());
+         REQUIRE(d.begin() <= d.begin()+1);
+         REQUIRE(!(d.begin()+1 <= d.begin()));
+
+         REQUIRE(d.end() <= d.end());
+         REQUIRE(d.end()-1 <= d.end());
+         REQUIRE(!(d.end() <= d.end()-1));
+      }
+
+      SECTION("a>=b returns 'contextually convertible to bool'")
+      {
+         REQUIRE(d.begin() >= d.begin());
+         REQUIRE(d.begin()+1 >= d.begin());
+         REQUIRE(!(d.begin() >= d.begin()+1));
+
+         REQUIRE(d.end() >= d.end());
+         REQUIRE(d.end() >= d.end()-1);
+         REQUIRE(!(d.end()-1 >= d.end()));
+      }
    }
 
-   SECTION("excpressions required by OutputIterator concept")
+   SECTION("expressions required by OutputIterator concept")
    {
-      //TODO: complete
+      SECTION("*o = value")
+      {
+         iterator_type it = d.begin();
+         REQUIRE(it->value == 0);
+         *it = 10;
+         REQUIRE(it->value == 10);
+      }
+
+      SECTION("*r++ = value")
+      {
+         iterator_type it = d.begin();
+
+         iterator_type it_10 = it;
+         *it++ = 10;
+         iterator_type it_11 = it;
+         *it++ = 11;
+         iterator_type it_2 = it;
+
+         REQUIRE(it_10->value == 10);
+         REQUIRE(it_11->value == 11);
+         REQUIRE(it_2->value == 2);
+      }
    }
 }
 
