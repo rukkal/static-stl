@@ -124,40 +124,43 @@ public:
 
    bool operator==(const _dequeng_iterator& rhs) const _sstl_noexcept_
    {
+      sstl_assert(_deque == rhs._deque);
       return _pos==rhs._pos;
    }
 
    bool operator!=(const _dequeng_iterator& rhs) const _sstl_noexcept_
    {
+      sstl_assert(_deque == rhs._deque);
       return !operator==(rhs);
    }
 
    bool operator<(const _dequeng_iterator& rhs) const _sstl_noexcept_
    {
+      sstl_assert(_deque == rhs._deque);
       return _linearized_pos() < rhs._linearized_pos();
    }
 
    bool operator>(const _dequeng_iterator& rhs) const _sstl_noexcept_
    {
+      sstl_assert(_deque == rhs._deque);
       return _linearized_pos() > rhs._linearized_pos();
    }
 
    bool operator<=(const _dequeng_iterator& rhs) const _sstl_noexcept_
    {
+      sstl_assert(_deque == rhs._deque);
       return _linearized_pos() <= rhs._linearized_pos();
    }
 
    bool operator>=(const _dequeng_iterator& rhs) const _sstl_noexcept_
    {
+      sstl_assert(_deque == rhs._deque);
       return _linearized_pos() >= rhs._linearized_pos();
    }
 
 private:
    void _apply_offset_to_pos(difference_type offset) _sstl_noexcept_
    {
-      sstl_assert(offset >= 0 || -offset <= _deque->capacity());
-      sstl_assert(offset < 0 || offset <= _deque->capacity());
-
       if(_pos == nullptr)
       {
          sstl_assert(offset <= 0);
@@ -169,10 +172,12 @@ private:
       if(_pos >= _deque->_end_storage())
       {
          _pos = _deque->_begin_storage() + (_pos - _deque->_end_storage());
+         sstl_assert(_pos <= _deque->_last_pointer()+1);
       }
       else if(_pos < _deque->_begin_storage())
       {
          _pos = _deque->_end_storage() - (_deque->_begin_storage() - _pos);
+         sstl_assert(_pos >= _deque->_first_pointer());
       }
 
       if(_is_pos_one_past_last_pointer())
