@@ -353,6 +353,11 @@ public:
       _base::_range_constructor(init.begin(), init.end());
    }
 
+   ~dequeng()
+   {
+      _base::clear();
+   }
+
 private:
    size_type _size{ 0 };
    pointer _first_pointer{ _base::_begin_storage() };

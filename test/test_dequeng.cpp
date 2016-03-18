@@ -214,6 +214,15 @@ TEST_CASE("dequeng")
       #endif
    }
 
+   SECTION("destructor")
+   {
+      {
+         auto d = deque_counted_type_t{0, 1, 2, 3};
+         counted_type::reset_counts();
+      }
+      REQUIRE(counted_type::check().destructions(4));
+   }
+
    SECTION("non-member relative operators")
    {
       SECTION("lhs < rhs")
