@@ -423,10 +423,17 @@ public:
       _base::clear();
    }
 
-   dequeng& operator=(const dequeng& rhs)
+   //assignment from any instance with same value type (capacity doesn't matter)
+   dequeng& operator=(const _base& rhs)
       _sstl_noexcept(noexcept(std::declval<_base>().operator=(std::declval<_base>())))
    {
       return reinterpret_cast<dequeng&>(_base::operator=(rhs));
+   }
+
+   dequeng& operator=(const dequeng& rhs)
+      _sstl_noexcept(noexcept(std::declval<dequeng>().operator=(std::declval<_base>())))
+   {
+      return reinterpret_cast<dequeng&>(operator=(static_cast<const _base&>(rhs)));
    }
 
 private:

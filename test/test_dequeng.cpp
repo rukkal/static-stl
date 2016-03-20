@@ -101,33 +101,32 @@ TEST_CASE("dequeng")
 
    SECTION("copy constructor")
    {
-      SECTION("contained values")
+      SECTION("contained values + number of operations")
       {
          SECTION("same capacity")
          {
-            auto rhs = deque_int_t{0, 1, 2, 3};
+            auto rhs = deque_counted_type_t{0, 1, 2, 3};
+            counted_type::reset_counts();
             auto lhs = rhs;
             REQUIRE(lhs == rhs);
+            REQUIRE(counted_type::check().copy_constructions(4));
          }
          SECTION("different capacity")
          {
-            auto rhs = sstl::dequeng<int, 7>{0, 1, 2, 3};
-            auto lhs = sstl::dequeng<int, 11>{ rhs };
+            auto rhs = sstl::dequeng<counted_type, 7>{0, 1, 2, 3};
+            counted_type::reset_counts();
+            auto lhs = sstl::dequeng<counted_type, 11>{ rhs };
             REQUIRE(lhs == rhs);
+            REQUIRE(counted_type::check().copy_constructions(4));
          }
          SECTION("non-contiguous values")
          {
-            auto rhs = make_noncontiguous_deque({0, 1, 2, 3});
-            auto lhs = deque_int_t{ rhs };
+            auto rhs = make_noncontiguous_deque<counted_type>({0, 1, 2, 3});
+            counted_type::reset_counts();
+            auto lhs = deque_counted_type_t{ rhs };
             REQUIRE(lhs == rhs);
+            REQUIRE(counted_type::check().copy_constructions(4));
          }
-      }
-      SECTION("number of operations")
-      {
-         auto rhs = deque_counted_type_t{0, 1, 2, 3};
-         counted_type::reset_counts();
-         auto lhs = rhs;
-         REQUIRE(counted_type::check().copy_constructions(4));
       }
       #if _sstl_has_exceptions()
       SECTION("exception handling")
@@ -142,33 +141,33 @@ TEST_CASE("dequeng")
 
    SECTION("move constructor")
    {
-      SECTION("contained values")
+      SECTION("contained values + number of operations")
       {
+         auto expected_lhs = deque_counted_type_t{0, 1, 2, 3};
          SECTION("same capacity")
          {
-            auto rhs = deque_int_t{0, 1, 2, 3};
-            auto lhs = deque_int_t{ std::move(rhs) };
-            REQUIRE(lhs == (deque_int_t{0, 1, 2, 3}));
+            auto rhs = deque_counted_type_t{0, 1, 2, 3};
+            counted_type::reset_counts();
+            auto lhs = deque_counted_type_t{ std::move(rhs) };
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(counted_type::check().move_constructions(4).destructions(4));
          }
          SECTION("different capacity")
          {
-            auto rhs = sstl::dequeng<int, 11>{0, 1, 2, 3};
-            auto lhs = sstl::dequeng<int, 7>{ std::move(rhs) };
-            REQUIRE(lhs == (deque_int_t{0, 1, 2, 3}));
+            auto rhs = sstl::dequeng<counted_type, 7>{0, 1, 2, 3};
+            counted_type::reset_counts();
+            auto lhs = sstl::dequeng<counted_type, 11>{ std::move(rhs) };
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(counted_type::check().move_constructions(4).destructions(4));
          }
          SECTION("non-contiguous values")
          {
-            auto rhs = make_noncontiguous_deque({0, 1, 2, 3});
-            auto lhs = deque_int_t{ std::move(rhs) };
-            REQUIRE(lhs == (deque_int_t{0, 1, 2, 3}));
+            auto rhs = make_noncontiguous_deque<counted_type>({0, 1, 2, 3});
+            counted_type::reset_counts();
+            auto lhs = deque_counted_type_t{ std::move(rhs) };
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(counted_type::check().move_constructions(4).destructions(4));
          }
-      }
-      SECTION("number of operations")
-      {
-         auto rhs = deque_counted_type_t{0, 1, 2, 3};
-         counted_type::reset_counts();
-         auto lhs = deque_counted_type_t{ std::move(rhs) };
-         REQUIRE(counted_type::check{}.move_constructions(4).destructions(4));
       }
       SECTION("test moved-from state")
       {
@@ -226,7 +225,7 @@ TEST_CASE("dequeng")
    SECTION("copy assignment operator")
    {
       auto rhs = deque_counted_type_t{0, 1, 2, 3, 4};
-      auto expected_lhs = std::initializer_list<counted_type>{0, 1, 2, 3, 4};
+      auto expected_lhs = deque_counted_type_t{0, 1, 2, 3, 4};
 
       SECTION("contained values + number of operations")
       {
@@ -235,7 +234,7 @@ TEST_CASE("dequeng")
             auto lhs = deque_counted_type_t{};
             counted_type::reset_counts();
             lhs = rhs;
-            REQUIRE(are_containers_equal(lhs, expected_lhs));
+            REQUIRE(lhs == expected_lhs);
             REQUIRE(counted_type::check{}.copy_constructions(5));
          }
          SECTION("lhs.size() < rhs.size()")
@@ -243,7 +242,7 @@ TEST_CASE("dequeng")
             auto lhs = deque_counted_type_t{10, 11};
             counted_type::reset_counts();
             lhs = rhs;
-            REQUIRE(are_containers_equal(lhs, expected_lhs));
+            REQUIRE(lhs == expected_lhs);
             REQUIRE(counted_type::check{}.copy_assignments(2).copy_constructions(3));
          }
          SECTION("lhs.size() == rhs.size()")
@@ -251,7 +250,7 @@ TEST_CASE("dequeng")
             auto lhs = deque_counted_type_t{10, 11, 12, 13, 14};
             counted_type::reset_counts();
             lhs = rhs;
-            REQUIRE(are_containers_equal(lhs, expected_lhs));
+            REQUIRE(lhs == expected_lhs);
             REQUIRE(counted_type::check{}.copy_assignments(5));
          }
          SECTION("lhs.size() > rhs.size()")
@@ -259,8 +258,28 @@ TEST_CASE("dequeng")
             auto lhs = deque_counted_type_t{10, 11, 12, 13, 14, 15, 16};
             counted_type::reset_counts();
             lhs = rhs;
-            REQUIRE(are_containers_equal(lhs, expected_lhs));
+            REQUIRE(lhs == expected_lhs);
             REQUIRE(counted_type::check{}.copy_assignments(5).destructions(2));
+         }
+         SECTION("different capacities")
+         {
+            auto rhs = sstl::dequeng<counted_type, 11>{0, 1, 2, 3};
+            auto expected_lhs = deque_counted_type_t{0, 1, 2, 3};
+            auto lhs = sstl::dequeng<counted_type, 7>{};
+            counted_type::reset_counts();
+            lhs = rhs;
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(counted_type::check().copy_constructions(4));
+         }
+         SECTION("non-contiguous values")
+         {
+            auto rhs = make_noncontiguous_deque<counted_type>({0, 1, 2, 3});
+            auto expected_lhs = deque_counted_type_t{0, 1, 2, 3};
+            auto lhs = deque_counted_type_t{};
+            counted_type::reset_counts();
+            lhs = rhs;
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(counted_type::check().copy_constructions(4));
          }
       }
       #if _sstl_has_exceptions()
