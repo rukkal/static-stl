@@ -12,6 +12,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 
 #include "utility.h"
 #include "counted_type.h"
+#include "test_dequeng_utility.h"
 
 namespace sstl_test
 {
@@ -19,22 +20,6 @@ namespace sstl_test
 using deque_int_base_t = sstl::dequeng<int>;
 using deque_int_t = sstl::dequeng<int, 11>;
 using deque_counted_type_t = sstl::dequeng<counted_type, 11>;
-
-template<class T>
-sstl::dequeng<T, 11> make_noncontiguous_deque(std::initializer_list<T> init)
-{
-   auto d = sstl::dequeng<T, 11>{};
-   for(size_t i=0; i<d.capacity()-1; ++i)
-   {
-      d.push_back(0);
-      d.pop_front();
-   }
-   for(auto& value : init)
-   {
-      d.push_back(value);
-   }
-   return d;
-}
 
 TEST_CASE("dequeng")
 {

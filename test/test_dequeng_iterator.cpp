@@ -11,6 +11,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include <sstl/dequeng.h>
 #include "utility.h"
 #include "counted_type.h"
+#include "test_dequeng_utility.h"
 
 namespace sstl_test
 {
@@ -25,21 +26,6 @@ struct value_type
 };
 
 using iterator_type = typename sstl::dequeng<value_type>::iterator;
-
-template<class TValue>
-sstl::dequeng<TValue, 11> make_noncontiguous_deque(std::initializer_list<TValue> init)
-{
-   auto d = sstl::dequeng<TValue, 11>(10);
-   for(size_t i=0; i<10; ++i)
-   {
-      d.pop_front();
-   }
-   for(auto value : init)
-   {
-      d.push_back(value);
-   }
-   return d;
-}
 
 TEST_CASE("_dequeng_iterator")
 {
