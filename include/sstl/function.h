@@ -19,7 +19,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 namespace sstl
 {
 
-template<class TTarget, size_t BUFFER_SIZE=static_cast<size_t>(-1)>
+template<class TTarget, size_t CALLABLE_SIZE=static_cast<size_t>(-1)>
 class function;
 
 namespace _detail
@@ -270,8 +270,8 @@ protected:
    function& operator=(function&&) = default;
 };
 
-template<class TResult, class... TParams, size_t BUFFER_SIZE>
-class function<TResult(TParams...), BUFFER_SIZE> final : public function<TResult(TParams...)>
+template<class TResult, class... TParams, size_t CALLABLE_SIZE>
+class function<TResult(TParams...), CALLABLE_SIZE> final : public function<TResult(TParams...)>
 {
    template<class, size_t >
    friend class function;
@@ -425,7 +425,7 @@ private:
 
 private:
    static const size_t _VPTR_SIZE = sizeof(void*);
-   mutable uint8_t _buffer[_VPTR_SIZE + BUFFER_SIZE];
+   mutable uint8_t _buffer[_VPTR_SIZE + CALLABLE_SIZE];
 };
 
 template<class TResult, class... TParams>
