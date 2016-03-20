@@ -154,14 +154,13 @@ TEST_CASE("dequeng")
             REQUIRE(counted_type::check().move_constructions(4).destructions(4));
          }
       }
-      SECTION("test moved-from state")
+      SECTION("moved-from state")
       {
          auto rhs = deque_int_t{0, 1, 2, 3};
          auto lhs = deque_int_t{ std::move(rhs) };
          REQUIRE(rhs.empty());
 
-         rhs.push_back(10);
-         rhs.push_back(11);
+         rhs.push_back(10); rhs.push_back(11);
          REQUIRE(rhs == (deque_int_t{10, 11}));
       }
       #if _sstl_has_exceptions()
@@ -285,6 +284,109 @@ TEST_CASE("dequeng")
             counted_type::throw_at_nth_copy_construction(2);
             REQUIRE_THROWS_AS(lhs = rhs, counted_type::copy_construction::exception);
             REQUIRE(counted_type::check().copy_assignments(2).copy_constructions(1).destructions(3));
+         }
+      }
+      #endif
+   }
+
+   SECTION("move assignment operator")
+   {
+      auto rhs = deque_counted_type_t{0, 1, 2, 3, 4};
+      auto expected_lhs = deque_counted_type_t{0, 1, 2, 3, 4};
+
+      SECTION("contained values + number of operations")
+      {
+         SECTION("lhs is empty")
+         {
+            auto lhs = deque_counted_type_t{};
+            counted_type::reset_counts();
+            lhs = std::move(rhs);
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(rhs.empty());
+            REQUIRE(counted_type::check{}.move_constructions(5).destructions(5));
+         }
+         SECTION("lhs.size() < rhs.size()")
+         {
+            auto lhs = deque_counted_type_t{10, 11};
+            counted_type::reset_counts();
+            lhs = std::move(rhs);
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(rhs.empty());
+            REQUIRE(counted_type::check{}.move_assignments(2).move_constructions(3).destructions(5));
+         }
+         SECTION("lhs.size() == rhs.size()")
+         {
+            auto lhs = deque_counted_type_t{10, 11, 12, 13, 14};
+            counted_type::reset_counts();
+            lhs = std::move(rhs);
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(rhs.empty());
+            REQUIRE(counted_type::check{}.move_assignments(5).destructions(5));
+         }
+         SECTION("lhs.size() > rhs.size()")
+         {
+            auto lhs = deque_counted_type_t{10, 11, 12, 13, 14, 15, 16};
+            counted_type::reset_counts();
+            lhs = std::move(rhs);
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(rhs.empty());
+            REQUIRE(counted_type::check{}.move_assignments(5).destructions(7));
+         }
+         SECTION("different capacities")
+         {
+            auto rhs = sstl::dequeng<counted_type, 11>{0, 1, 2, 3};
+            auto expected_lhs = deque_counted_type_t{0, 1, 2, 3};
+            auto lhs = sstl::dequeng<counted_type, 7>{};
+            counted_type::reset_counts();
+            lhs = std::move(rhs);
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(rhs.empty());
+            REQUIRE(counted_type::check().move_constructions(4).destructions(4));
+         }
+         SECTION("non-contiguous values")
+         {
+            auto rhs = make_noncontiguous_deque<counted_type>({0, 1, 2, 3});
+            auto expected_lhs = deque_counted_type_t{0, 1, 2, 3};
+            auto lhs = deque_counted_type_t{};
+            counted_type::reset_counts();
+            lhs = std::move(rhs);
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(rhs.empty());
+            REQUIRE(counted_type::check().move_constructions(4).destructions(4));
+         }
+      }
+      SECTION("moved-from state")
+      {
+         auto rhs = deque_int_t{0, 1, 2, 3};
+         auto lhs = deque_int_t{ };
+         lhs = std::move(rhs);
+         REQUIRE(rhs.empty());
+
+         rhs.push_back(10); rhs.push_back(11);
+         REQUIRE(rhs == (deque_int_t{10, 11}));
+      }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling")
+      {
+         SECTION("move assignment throws")
+         {
+            auto lhs = deque_counted_type_t{10, 11, 12};
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_move_assignment(2);
+            REQUIRE_THROWS_AS(lhs = std::move(rhs), counted_type::move_assignment::exception);
+            REQUIRE(lhs.empty());
+            REQUIRE(rhs.empty());
+            REQUIRE(counted_type::check().move_assignments(1).destructions(8));
+         }
+         SECTION("move constructor throws")
+         {
+            auto lhs = deque_counted_type_t{10, 11};
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_move_construction(2);
+            REQUIRE_THROWS_AS(lhs = std::move(rhs), counted_type::move_construction::exception);
+            REQUIRE(lhs.empty());
+            REQUIRE(rhs.empty());
+            REQUIRE(counted_type::check().move_assignments(2).move_constructions(1).destructions(8));
          }
       }
       #endif

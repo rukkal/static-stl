@@ -56,9 +56,9 @@ public:
       sstl_assert(rhs.size() <= capacity());
       auto copy_assignments = std::min(size(), rhs.size());
       auto copy_constructions = rhs.size() - copy_assignments;
-      auto destructions =
-         copy_assignments + copy_constructions < size() ?
-         size() - copy_assignments - copy_constructions : 0;
+      auto destructions =  copy_assignments + copy_constructions < size()
+                           ? size() - copy_assignments - copy_constructions
+                           : 0;
       auto src = rhs._first_pointer();
       auto dst = _first_pointer();
 
@@ -110,6 +110,88 @@ public:
          _increment_pointer(dst);
       }
       _set_size(rhs.size());
+      return *this;
+   }
+
+   dequeng& operator=(dequeng&& rhs)
+      _sstl_noexcept(std::is_nothrow_move_assignable<value_type>::value
+                     && std::is_nothrow_move_constructible<value_type>::value)
+   {
+      sstl_assert(rhs.size() <= capacity());
+      auto move_assignments = std::min(size(), rhs.size());
+      auto move_constructions = rhs.size() - move_assignments;
+      auto destructions =  move_assignments + move_constructions < size()
+                           ? size() - move_assignments - move_constructions
+                           : 0;
+      auto src = rhs._first_pointer();
+      auto dst = _first_pointer();
+
+      #if _sstl_has_exceptions()
+      try
+      {
+      #endif
+         for(auto i=move_assignments; i!=0; --i)
+         {
+            *dst = std::move(*src);
+            src->~value_type();
+            rhs._increment_pointer(src);
+            _increment_pointer(dst);
+         }
+      #if _sstl_has_exceptions()
+      }
+      catch(...)
+      {
+         clear();
+
+         rhs._first_pointer() = src;
+         rhs.clear();
+
+         throw;
+      }
+      #endif
+
+      #if _sstl_has_exceptions()
+      try
+      {
+      #endif
+         for(auto i=move_constructions; i!=0; --i)
+         {
+            new(dst) value_type(std::move(*src));
+            src->~value_type();
+            rhs._increment_pointer(src);
+            _increment_pointer(dst);
+         }
+      #if _sstl_has_exceptions()
+      }
+      catch(...)
+      {
+         auto new_lhs_last = dst;
+         _decrement_pointer(new_lhs_last);
+         _last_pointer() = new_lhs_last;
+         clear();
+
+         rhs._first_pointer() = src;
+         rhs.clear();
+
+         throw;
+      }
+      #endif
+
+      auto new_lhs_last = dst;
+      _decrement_pointer(new_lhs_last);
+      _last_pointer() = new_lhs_last;
+      for(auto i=destructions; i!=0; --i)
+      {
+         dst->~value_type();
+         _increment_pointer(dst);
+      }
+      _set_size(rhs.size());
+
+      auto new_rhs_last = rhs._first_pointer();
+      rhs._decrement_pointer(new_rhs_last);
+      rhs._last_pointer() = new_rhs_last;
+      rhs._set_size(0);
+
       return *this;
    }
 
@@ -423,17 +505,30 @@ public:
       _base::clear();
    }
 
-   //assignment from any instance with same value type (capacity doesn't matter)
+   //copy assignment from any instance with same value type (capacity doesn't matter)
    dequeng& operator=(const _base& rhs)
-      _sstl_noexcept(noexcept(std::declval<_base>().operator=(std::declval<_base>())))
+      _sstl_noexcept(noexcept(std::declval<_base>().operator=(std::declval<const _base&>())))
    {
       return reinterpret_cast<dequeng&>(_base::operator=(rhs));
    }
 
    dequeng& operator=(const dequeng& rhs)
-      _sstl_noexcept(noexcept(std::declval<dequeng>().operator=(std::declval<_base>())))
+      _sstl_noexcept(noexcept(std::declval<dequeng>().operator=(std::declval<const _base&>())))
    {
       return reinterpret_cast<dequeng&>(operator=(static_cast<const _base&>(rhs)));
+   }
+
+   //move assignment from any instance with same value type (capacity doesn't matter)
+   dequeng& operator=(_base&& rhs)
+      _sstl_noexcept(noexcept(std::declval<_base>().operator=(std::declval<_base&&>())))
+   {
+      return reinterpret_cast<dequeng&>(_base::operator=(std::move(rhs)));
+   }
+
+   dequeng& operator=(dequeng&& rhs)
+      _sstl_noexcept(noexcept(std::declval<dequeng>().operator=(std::declval<_base&&>())))
+   {
+      return reinterpret_cast<dequeng&>(operator=(static_cast<_base&&>(rhs)));
    }
 
 private:
