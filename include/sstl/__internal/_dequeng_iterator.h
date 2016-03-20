@@ -50,7 +50,7 @@ public:
 
    _dequeng_iterator& operator++() _sstl_noexcept_
    {
-      if(_pos == _deque->_last_pointer())
+      if(_pos == _deque->_derived()._last_pointer)
          _pos = nullptr;
       else
          _deque->_increment_pointer(_pos);
@@ -67,7 +67,7 @@ public:
    _dequeng_iterator& operator--() _sstl_noexcept_
    {
       if(_pos == nullptr)
-         _pos = _deque->_last_pointer();
+         _pos = _deque->_derived()._last_pointer;
       else
          _deque->_decrement_pointer(_pos);
       return *this;
@@ -164,7 +164,7 @@ private:
       if(_pos == nullptr)
       {
          sstl_assert(offset <= 0);
-         _pos = _deque->_last_pointer();
+         _pos = _deque->_derived()._last_pointer;
          ++offset;
       }
 
@@ -172,12 +172,12 @@ private:
       if(_pos >= _deque->_end_storage())
       {
          _pos = _deque->_begin_storage() + (_pos - _deque->_end_storage());
-         sstl_assert(_pos <= _deque->_last_pointer()+1);
+         sstl_assert(_pos <= _deque->_derived()._last_pointer+1);
       }
       else if(_pos < _deque->_begin_storage())
       {
          _pos = _deque->_end_storage() - (_deque->_begin_storage() - _pos);
-         sstl_assert(_pos >= _deque->_first_pointer());
+         sstl_assert(_pos >= _deque->_derived()._first_pointer);
       }
 
       if(_is_pos_one_past_last_pointer())
@@ -186,7 +186,7 @@ private:
 
    bool _is_pos_one_past_last_pointer() const _sstl_noexcept_
    {
-      auto one_past_last_pointer = _deque->_last_pointer();
+      auto one_past_last_pointer = _deque->_derived()._last_pointer;
       _deque->_increment_pointer(one_past_last_pointer);
       return _pos == one_past_last_pointer;
    }
@@ -195,10 +195,10 @@ private:
    {
       if(_pos != nullptr)
       {
-         if(_pos >= _deque->_first_pointer())
-            return _deque->_first_pointer() - _pos;
+         if(_pos >= _deque->_derived()._first_pointer)
+            return _deque->_derived()._first_pointer - _pos;
          else
-            return (_deque->_end_storage() - _deque->_first_pointer()) + (_pos - _deque->_begin_storage());
+            return (_deque->_end_storage() - _deque->_derived()._first_pointer) + (_pos - _deque->_begin_storage());
       }
       else
       {

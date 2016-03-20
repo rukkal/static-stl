@@ -59,8 +59,8 @@ public:
       auto destructions =  copy_assignments + copy_constructions < size()
                            ? size() - copy_assignments - copy_constructions
                            : 0;
-      auto src = rhs._first_pointer();
-      auto dst = _first_pointer();
+      auto src = rhs._derived()._first_pointer;
+      auto dst = _derived()._first_pointer;
 
       #if _sstl_has_exceptions()
       try
@@ -96,20 +96,20 @@ public:
       catch(...)
       {
          _decrement_pointer(dst);
-         _last_pointer() = dst;
+         _derived()._last_pointer = dst;
          clear();
          throw;
       }
       #endif
       auto new_last = dst;
       _decrement_pointer(new_last);
-      _last_pointer() = new_last;
+      _derived()._last_pointer = new_last;
       for(auto i=destructions; i!=0; --i)
       {
          dst->~value_type();
          _increment_pointer(dst);
       }
-      _set_size(rhs.size());
+      _derived()._size = rhs.size();
       return *this;
    }
 
@@ -123,8 +123,8 @@ public:
       auto destructions =  move_assignments + move_constructions < size()
                            ? size() - move_assignments - move_constructions
                            : 0;
-      auto src = rhs._first_pointer();
-      auto dst = _first_pointer();
+      auto src = rhs._derived()._first_pointer;
+      auto dst = _derived()._first_pointer;
 
       #if _sstl_has_exceptions()
       try
@@ -143,7 +143,7 @@ public:
       {
          clear();
 
-         rhs._first_pointer() = src;
+         rhs._derived()._first_pointer = src;
          rhs.clear();
 
          throw;
@@ -167,10 +167,10 @@ public:
       {
          auto new_lhs_last = dst;
          _decrement_pointer(new_lhs_last);
-         _last_pointer() = new_lhs_last;
+         _derived()._last_pointer = new_lhs_last;
          clear();
 
-         rhs._first_pointer() = src;
+         rhs._derived()._first_pointer = src;
          rhs.clear();
 
          throw;
@@ -179,35 +179,35 @@ public:
 
       auto new_lhs_last = dst;
       _decrement_pointer(new_lhs_last);
-      _last_pointer() = new_lhs_last;
+      _derived()._last_pointer = new_lhs_last;
       for(auto i=destructions; i!=0; --i)
       {
          dst->~value_type();
          _increment_pointer(dst);
       }
-      _set_size(rhs.size());
+      _derived()._size = rhs.size();
 
-      auto new_rhs_last = rhs._first_pointer();
+      auto new_rhs_last = rhs._derived()._first_pointer;
       rhs._decrement_pointer(new_rhs_last);
-      rhs._last_pointer() = new_rhs_last;
-      rhs._set_size(0);
+      rhs._derived()._last_pointer = new_rhs_last;
+      rhs._derived()._size = 0;
 
       return *this;
    }
 
    iterator begin() _sstl_noexcept_
    {
-      return iterator{ this, empty() ? nullptr : _first_pointer() };
+      return iterator{ this, empty() ? nullptr : _derived()._first_pointer };
    }
 
    const_iterator begin() const _sstl_noexcept_
    {
-      return const_iterator{ this, empty() ? nullptr : _first_pointer() };
+      return const_iterator{ this, empty() ? nullptr : _derived()._first_pointer };
    }
 
    const_iterator cbegin() const _sstl_noexcept_
    {
-      return const_iterator{ this, empty() ? nullptr : _first_pointer() };
+      return const_iterator{ this, empty() ? nullptr : _derived()._first_pointer };
    }
 
    iterator end() _sstl_noexcept_
@@ -227,12 +227,12 @@ public:
 
    bool empty() const _sstl_noexcept_
    {
-      return _size() == 0;
+      return _derived()._size == 0;
    }
 
    size_type size() const _sstl_noexcept_
    {
-      return _size();
+      return _derived()._size;
    }
 
    size_type capacity() const _sstl_noexcept_
@@ -243,32 +243,32 @@ public:
    void clear() _sstl_noexcept(std::is_nothrow_destructible<value_type>::value)
    {
       //FIXME
-      auto crt = _first_pointer();
-      while(crt <= _last_pointer())
+      auto crt = _derived()._first_pointer;
+      while(crt <= _derived()._last_pointer)
       {
          crt->~value_type();
          ++crt;
       }
-      _first_pointer() = crt;
-      _set_size(0);
+      _derived()._first_pointer = crt;
+      _derived()._size = 0;
    }
 
    void push_back(const_reference value)
       _sstl_noexcept(std::is_nothrow_constructible<value_type>::value)
    {
-      sstl_assert(_size() < capacity());
-      _increment_pointer(_last_pointer());
-      new(_last_pointer()) value_type(value);
-      _increment_size();
+      sstl_assert(size() < capacity());
+      _increment_pointer(_derived()._last_pointer);
+      new(_derived()._last_pointer) value_type(value);
+      ++_derived()._size;
    }
 
    void pop_front()
       _sstl_noexcept(std::is_nothrow_destructible<value_type>::value)
    {
       sstl_assert(!empty());
-      _first_pointer()->~value_type();
-      _increment_pointer(_first_pointer());
-      _decrement_size();
+      _derived()._first_pointer->~value_type();
+      _increment_pointer(_derived()._first_pointer);
+      --_derived()._size;
    }
 
 protected:
@@ -284,7 +284,7 @@ protected:
       _sstl_noexcept(std::is_nothrow_copy_constructible<value_type>::value)
    {
       sstl_assert(count <= capacity());
-      auto pos = _first_pointer()-1;
+      auto pos = _derived()._first_pointer-1;
       #if _sstl_has_exceptions()
       try
       {
@@ -297,13 +297,13 @@ protected:
       }
       catch(...)
       {
-         _last_pointer() = pos-1;
+         _derived()._last_pointer = pos-1;
          clear();
          throw;
       }
       #endif
-      _set_size(count);
-      _last_pointer() = pos;
+      _derived()._size = count;
+      _derived()._last_pointer = pos;
    }
 
    template<class TIterator, class = _enable_if_input_iterator_t<TIterator>>
@@ -318,17 +318,17 @@ protected:
       #endif
          while(src != range_end)
          {
-            sstl_assert(_size() < capacity());
+            sstl_assert(size() < capacity());
             new(++dst) value_type(*src);
-            _increment_size();
+            ++_derived()._size;
             ++src;
          }
-         _last_pointer() = dst;
+         _derived()._last_pointer = dst;
       #if _sstl_has_exceptions()
       }
       catch(...)
       {
-         _last_pointer() = dst-1;
+         _derived()._last_pointer = dst-1;
          clear();
          throw;
       }
@@ -360,45 +360,30 @@ protected:
             src->~value_type();
             ++src;
          }
-         rhs._last_pointer() = rhs._first_pointer()-1;
-         rhs._set_size(0);
-         _last_pointer() = dst-1;
+         rhs._derived()._last_pointer = rhs._derived()._first_pointer-1;
+         rhs._derived()._size = 0;
+         _derived()._last_pointer = dst-1;
          clear();
          throw;
       }
       #endif
-      _last_pointer() = dst-1;
-      _set_size(rhs.size());
-      rhs._last_pointer() = rhs._first_pointer()-1;
-      rhs._set_size(0);
+      _derived()._last_pointer = dst-1;
+      _derived()._size = rhs.size();
+      rhs._derived()._last_pointer = rhs._derived()._first_pointer-1;
+      rhs._derived()._size = 0;
    }
 
    // member functions for derived class access
-   size_type _size() const _sstl_noexcept_;
-   void _set_size(size_type) _sstl_noexcept_;
-
-   pointer& _first_pointer() _sstl_noexcept_;
-   const_pointer _first_pointer() const _sstl_noexcept_;
-
-   pointer& _last_pointer() _sstl_noexcept_;
-   const_pointer _last_pointer() const _sstl_noexcept_;
-
    pointer _begin_storage() _sstl_noexcept_;
    const_pointer _begin_storage() const _sstl_noexcept_;
 
    pointer _end_storage() _sstl_noexcept_;
    const_pointer _end_storage() const _sstl_noexcept_;
 
-   // helper functions
-   void _increment_size() _sstl_noexcept_
-   {
-      _set_size(_size()+1);
-   }
+   _type_for_derived_class_access& _derived() _sstl_noexcept_;
+   const _type_for_derived_class_access& _derived() const _sstl_noexcept_;
 
-   void _decrement_size() _sstl_noexcept_
-   {
-      _set_size(_size()-1);
-   }
+   // helper functions
 
    void _increment_pointer(pointer& ptr) _sstl_noexcept_
    {
@@ -413,6 +398,11 @@ protected:
       const_cast<dequeng&>(*this)._increment_pointer(const_cast<pointer&>(ptr));
    }
 
+   void _increment_pointer(pointer& ptr) const _sstl_noexcept_
+   {
+      const_cast<dequeng&>(*this)._increment_pointer(ptr);
+   }
+
    void _decrement_pointer(pointer& ptr) _sstl_noexcept_
    {
       ptr -= 1;
@@ -424,17 +414,25 @@ protected:
    {
       const_cast<dequeng&>(*this)._decrement_pointer(const_cast<pointer&>(ptr));
    }
+
+   void _decrement_pointer(pointer& ptr) const _sstl_noexcept_
+   {
+      const_cast<dequeng&>(*this)._decrement_pointer(ptr);
+   }
 };
 
 template<class T, size_t CAPACITY>
 class dequeng : public dequeng<T>
 {
-   template<class, size_t>
-   friend class dequeng;
-
 private:
    using _base = dequeng<T>;
    using _type_for_derived_class_access = typename _base::_type_for_derived_class_access;
+
+   template<class, size_t>
+   friend class dequeng;
+
+   friend class _dequeng_iterator<_base>;
+   friend class _dequeng_iterator<const _base>;
 
 public:
    using value_type = typename _base::value_type;
@@ -540,42 +538,6 @@ private:
 };
 
 template<class T>
-typename dequeng<T>::size_type dequeng<T>::_size() const _sstl_noexcept_
-{
-   return reinterpret_cast<const _type_for_derived_class_access&>(*this)._size;
-}
-
-template<class T>
-void dequeng<T>::_set_size(typename dequeng<T>::size_type size) _sstl_noexcept_
-{
-   reinterpret_cast<_type_for_derived_class_access&>(*this)._size = size;
-}
-
-template<class T>
-typename dequeng<T>::pointer& dequeng<T>::_first_pointer() _sstl_noexcept_
-{
-   return reinterpret_cast<_type_for_derived_class_access&>(*this)._first_pointer;
-}
-
-template<class T>
-typename dequeng<T>::const_pointer dequeng<T>::_first_pointer() const _sstl_noexcept_
-{
-   return const_cast<dequeng<T>*>(this)->_first_pointer();
-}
-
-template<class T>
-typename dequeng<T>::pointer& dequeng<T>::_last_pointer() _sstl_noexcept_
-{
-   return reinterpret_cast<_type_for_derived_class_access&>(*this)._last_pointer;
-}
-
-template<class T>
-typename dequeng<T>::const_pointer dequeng<T>::_last_pointer() const _sstl_noexcept_
-{
-   return const_cast<dequeng<T>*>(this)->_last_pointer();
-}
-
-template<class T>
 inline bool operator==(const dequeng<T>& lhs, const dequeng<T>& rhs)
 {
    return lhs.size() == rhs.size() && std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
@@ -605,6 +567,18 @@ template<class T>
 typename dequeng<T>::const_pointer dequeng<T>::_end_storage() const _sstl_noexcept_
 {
    return reinterpret_cast<const _type_for_derived_class_access&>(*this)._end_storage;
+}
+
+template<class T>
+typename dequeng<T>::_type_for_derived_class_access& dequeng<T>::_derived() _sstl_noexcept_
+{
+   return reinterpret_cast<_type_for_derived_class_access&>(*this);
+}
+
+template<class T>
+const typename dequeng<T>::_type_for_derived_class_access& dequeng<T>::_derived() const _sstl_noexcept_
+{
+   return reinterpret_cast<const _type_for_derived_class_access&>(*this);
 }
 
 }
