@@ -169,14 +169,14 @@ private:
       }
 
       _pos += offset;
-      if(_pos >= _deque->_end_storage())
+      if(_pos >= _deque->_derived()._end_storage)
       {
-         _pos = _deque->_begin_storage() + (_pos - _deque->_end_storage());
+         _pos = _deque->_derived()._begin_storage() + (_pos - _deque->_derived()._end_storage);
          sstl_assert(_pos <= _deque->_derived()._last_pointer+1);
       }
-      else if(_pos < _deque->_begin_storage())
+      else if(_pos < _deque->_derived()._begin_storage())
       {
-         _pos = _deque->_end_storage() - (_deque->_begin_storage() - _pos);
+         _pos = _deque->_derived()._end_storage - (_deque->_derived()._begin_storage() - _pos);
          sstl_assert(_pos >= _deque->_derived()._first_pointer);
       }
 
@@ -198,7 +198,7 @@ private:
          if(_pos >= _deque->_derived()._first_pointer)
             return _deque->_derived()._first_pointer - _pos;
          else
-            return (_deque->_end_storage() - _deque->_derived()._first_pointer) + (_pos - _deque->_begin_storage());
+            return (_deque->_derived()._end_storage - _deque->_derived()._first_pointer) + (_pos - _deque->_derived()._begin_storage());
       }
       else
       {
