@@ -223,6 +223,69 @@ TEST_CASE("dequeng")
       REQUIRE(counted_type::check().destructions(4));
    }
 
+   SECTION("copy assignment operator")
+   {
+      auto rhs = deque_counted_type_t{0, 1, 2, 3, 4};
+      auto expected_lhs = std::initializer_list<counted_type>{0, 1, 2, 3, 4};
+
+      SECTION("contained values + number of operations")
+      {
+         SECTION("lhs is empty")
+         {
+            auto lhs = deque_counted_type_t{};
+            counted_type::reset_counts();
+            lhs = rhs;
+            REQUIRE(are_containers_equal(lhs, expected_lhs));
+            REQUIRE(counted_type::check{}.copy_constructions(5));
+         }
+         SECTION("lhs.size() < rhs.size()")
+         {
+            auto lhs = deque_counted_type_t{10, 11};
+            counted_type::reset_counts();
+            lhs = rhs;
+            REQUIRE(are_containers_equal(lhs, expected_lhs));
+            REQUIRE(counted_type::check{}.copy_assignments(2).copy_constructions(3));
+         }
+         SECTION("lhs.size() == rhs.size()")
+         {
+            auto lhs = deque_counted_type_t{10, 11, 12, 13, 14};
+            counted_type::reset_counts();
+            lhs = rhs;
+            REQUIRE(are_containers_equal(lhs, expected_lhs));
+            REQUIRE(counted_type::check{}.copy_assignments(5));
+         }
+         SECTION("lhs.size() > rhs.size()")
+         {
+            auto lhs = deque_counted_type_t{10, 11, 12, 13, 14, 15, 16};
+            counted_type::reset_counts();
+            lhs = rhs;
+            REQUIRE(are_containers_equal(lhs, expected_lhs));
+            REQUIRE(counted_type::check{}.copy_assignments(5).destructions(2));
+         }
+      }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling")
+      {
+         SECTION("copy assignment throws")
+         {
+            auto lhs = deque_counted_type_t{10, 11, 12};
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_copy_assignment(2);
+            REQUIRE_THROWS_AS(lhs = rhs, counted_type::copy_assignment::exception);
+            REQUIRE(counted_type::check().copy_assignments(1).destructions(3));
+         }
+         SECTION("copy constructor throws")
+         {
+            auto lhs = deque_counted_type_t{10, 11};
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_copy_construction(2);
+            REQUIRE_THROWS_AS(lhs = rhs, counted_type::copy_construction::exception);
+            REQUIRE(counted_type::check().copy_assignments(2).copy_constructions(1).destructions(3));
+         }
+      }
+      #endif
+   }
+
    SECTION("non-member relative operators")
    {
       SECTION("lhs < rhs")

@@ -9,6 +9,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #define _SSTL_DEQUENG__
 
 #include <utility>
+#include <algorithm>
 #include <type_traits>
 #include <iterator>
 #include <initializer_list>
@@ -48,6 +49,70 @@ public:
    //using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
 public:
+   dequeng& operator=(const dequeng& rhs)
+      _sstl_noexcept_(  std::is_nothrow_copy_assignable<value_type>::value
+                        && std::is_nothrow_copy_constructible<value_type>::value)
+   {
+      sstl_assert(rhs.size() <= capacity());
+      auto copy_assignments = std::min(size(), rhs.size());
+      auto copy_constructions = rhs.size() - copy_assignments;
+      auto destructions =
+         copy_assignments + copy_constructions < size() ?
+         size() - copy_assignments - copy_constructions : 0;
+      auto src = rhs._first_pointer();
+      auto dst = _first_pointer();
+
+      #if _sstl_has_exceptions()
+      try
+      {
+      #endif
+         for(auto i=copy_assignments; i!=0; --i)
+         {
+            *dst = *src;
+            rhs._increment_pointer(src);
+            _increment_pointer(dst);
+         }
+      #if _sstl_has_exceptions()
+      }
+      catch(...)
+      {
+         clear();
+         throw;
+      }
+      #endif
+
+      #if _sstl_has_exceptions()
+      try
+      {
+      #endif
+         for(auto i=copy_constructions; i!=0; --i)
+         {
+            new(dst) value_type(*src);
+            rhs._increment_pointer(src);
+            _increment_pointer(dst);
+         }
+      #if _sstl_has_exceptions()
+      }
+      catch(...)
+      {
+         _decrement_pointer(dst);
+         _last_pointer() = dst;
+         clear();
+         throw;
+      }
+      #endif
+      auto new_last = dst;
+      _decrement_pointer(new_last);
+      _last_pointer() = new_last;
+      for(auto i=destructions; i!=0; --i)
+      {
+         dst->~value_type();
+         _increment_pointer(dst);
+      }
+      _set_size(rhs.size());
+      return *this;
+   }
+
    iterator begin() _sstl_noexcept_
    {
       return iterator{ this, empty() ? nullptr : _first_pointer() };
@@ -356,6 +421,12 @@ public:
    ~dequeng()
    {
       _base::clear();
+   }
+
+   dequeng& operator=(const dequeng& rhs)
+      _sstl_noexcept(noexcept(std::declval<_base>().operator=(std::declval<_base>())))
+   {
+      return reinterpret_cast<dequeng&>(_base::operator=(rhs));
    }
 
 private:
