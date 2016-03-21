@@ -221,6 +221,17 @@ TEST_CASE("dequeng")
             REQUIRE(lhs == expected_lhs);
             REQUIRE(counted_type::check{}.copy_constructions(5));
          }
+         SECTION("rhs is empty")
+         {
+            auto rhs = deque_counted_type_t{};
+            auto lhs = deque_counted_type_t{0, 1};
+            auto expected_lhs = deque_counted_type_t{};
+            counted_type::reset_counts();
+            lhs = rhs;
+            REQUIRE(lhs.empty());
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(counted_type::check{}.destructions(2));
+         }
          SECTION("lhs.size() < rhs.size()")
          {
             auto lhs = deque_counted_type_t{10, 11};
@@ -304,6 +315,17 @@ TEST_CASE("dequeng")
             REQUIRE(lhs == expected_lhs);
             REQUIRE(rhs.empty());
             REQUIRE(counted_type::check{}.move_constructions(5).destructions(5));
+         }
+         SECTION("rhs is empty")
+         {
+            auto rhs = deque_counted_type_t{};
+            auto lhs = deque_counted_type_t{0, 1};
+            auto expected_lhs = deque_counted_type_t{};
+            counted_type::reset_counts();
+            lhs = std::move(rhs);
+            REQUIRE(lhs.empty());
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(counted_type::check{}.destructions(2));
          }
          SECTION("lhs.size() < rhs.size()")
          {
