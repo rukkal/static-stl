@@ -49,6 +49,8 @@ public:
    //using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
 public:
+
+
    dequeng& operator=(const dequeng& rhs)
       _sstl_noexcept_(  std::is_nothrow_copy_assignable<value_type>::value
                         && std::is_nothrow_copy_constructible<value_type>::value)
@@ -57,62 +59,8 @@ public:
          return *this;
 
       sstl_assert(rhs.size() <= capacity());
-      auto copy_assignments = std::min(size(), rhs.size());
-      auto copy_constructions = rhs.size() - copy_assignments;
-      auto destructions =  copy_assignments + copy_constructions < size()
-                           ? size() - copy_assignments - copy_constructions
-                           : 0;
-      auto src = rhs._derived()._first_pointer;
-      auto dst = _derived()._first_pointer;
+      _copy_assign(rhs.cbegin(), rhs.cend());
 
-      #if _sstl_has_exceptions()
-      try
-      {
-      #endif
-         for(auto i=copy_assignments; i!=0; --i)
-         {
-            *dst = *src;
-            rhs._increment_pointer(src);
-            _increment_pointer(dst);
-         }
-      #if _sstl_has_exceptions()
-      }
-      catch(...)
-      {
-         clear();
-         throw;
-      }
-      #endif
-
-      #if _sstl_has_exceptions()
-      try
-      {
-      #endif
-         for(auto i=copy_constructions; i!=0; --i)
-         {
-            new(dst) value_type(*src);
-            rhs._increment_pointer(src);
-            _increment_pointer(dst);
-         }
-      #if _sstl_has_exceptions()
-      }
-      catch(...)
-      {
-         _decrement_pointer(dst);
-         _derived()._last_pointer = dst;
-         clear();
-         throw;
-      }
-      #endif
-      auto new_last = dst;
-      _decrement_pointer(new_last);
-      _derived()._last_pointer = new_last;
-      for(auto i=destructions; i!=0; --i)
-      {
-         dst->~value_type();
-         _increment_pointer(dst);
-      }
-      _derived()._size = rhs.size();
       return *this;
    }
 
@@ -377,6 +325,75 @@ protected:
       _derived()._size = rhs.size();
       rhs._derived()._last_pointer = rhs._derived()._first_pointer-1;
       rhs._derived()._size = 0;
+   }
+
+   template<class TIterator, class = _enable_if_input_iterator_t<TIterator>>
+   void _copy_assign(TIterator range_begin, TIterator range_end)
+      _sstl_noexcept(std::is_nothrow_copy_assignable<value_type>::value
+                     && std::is_nothrow_copy_constructible<value_type>::value)
+   {
+      auto src = range_begin;
+      auto dst = _derived()._first_pointer;
+      size_type assignments = 0;
+
+      #if _sstl_has_exceptions()
+      try
+      {
+      #endif
+         while(src != range_end && assignments < size())
+         {
+            *dst = *src;
+            _increment_pointer(dst);
+            ++src;
+            ++assignments;
+         }
+      #if _sstl_has_exceptions()
+      }
+      catch(...)
+      {
+         clear();
+         throw;
+      }
+      #endif
+
+      size_type new_size = assignments;
+
+      #if _sstl_has_exceptions()
+      try
+      {
+      #endif
+         while(src != range_end)
+         {
+            sstl_assert(new_size < capacity());
+            new(dst) value_type(*src);
+            _increment_pointer(dst);
+            ++src;
+            ++new_size;
+         }
+      #if _sstl_has_exceptions()
+      }
+      catch(...)
+      {
+         _decrement_pointer(dst);
+         _derived()._last_pointer = dst;
+         clear();
+         throw;
+      }
+      #endif
+
+      auto new_last_pointer = dst;
+      _decrement_pointer(new_last_pointer);
+
+      size_type destructions = new_size < size() ? size() - new_size : 0;
+      while(destructions > 0)
+      {
+         dst->~value_type();
+         _increment_pointer(dst);
+         --destructions;
+      }
+
+      _derived()._last_pointer = new_last_pointer;
+      _derived()._size = new_size;
    }
 
    _type_for_derived_class_access& _derived() _sstl_noexcept_;
