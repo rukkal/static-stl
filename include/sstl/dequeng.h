@@ -59,7 +59,7 @@ public:
          return *this;
 
       sstl_assert(rhs.size() <= capacity());
-      _copy_assign(rhs.cbegin(), rhs.cend());
+      _range_assignment(rhs.cbegin(), rhs.cend());
 
       return *this;
    }
@@ -150,10 +150,10 @@ public:
    }
 
    dequeng& operator=(std::initializer_list<value_type> ilist)
-      _sstl_noexcept(noexcept(_copy_assign(  std::declval<std::initializer_list<value_type>>().begin(),
-                                             std::declval<std::initializer_list<value_type>>().end())))
+      _sstl_noexcept(noexcept(_range_assignment(std::declval<std::initializer_list<value_type>>().begin(),
+                                                std::declval<std::initializer_list<value_type>>().end())))
    {
-      _copy_assign(ilist.begin(), ilist.end());
+      _range_assignment(ilist.begin(), ilist.end());
       return *this;
    }
 
@@ -336,7 +336,7 @@ protected:
    }
 
    template<class TIterator, class = _enable_if_input_iterator_t<TIterator>>
-   void _copy_assign(TIterator range_begin, TIterator range_end)
+   void _range_assignment(TIterator range_begin, TIterator range_end)
       _sstl_noexcept(std::is_nothrow_copy_assignable<value_type>::value
                      && std::is_nothrow_copy_constructible<value_type>::value)
    {
@@ -533,9 +533,9 @@ public:
    }
 
    dequeng& operator=(const dequeng& rhs)
-      _sstl_noexcept(noexcept(std::declval<dequeng>().operator=(std::declval<const _base&>())))
+      _sstl_noexcept(noexcept(std::declval<_base>().operator=(std::declval<const _base&>())))
    {
-      return reinterpret_cast<dequeng&>(operator=(static_cast<const _base&>(rhs)));
+      return reinterpret_cast<dequeng&>(_base::operator=(rhs));
    }
 
    //move assignment from any instance with same value type (capacity doesn't matter)
@@ -546,15 +546,15 @@ public:
    }
 
    dequeng& operator=(dequeng&& rhs)
-      _sstl_noexcept(noexcept(std::declval<dequeng>().operator=(std::declval<_base&&>())))
+      _sstl_noexcept(noexcept(std::declval<_base>().operator=(std::declval<_base&&>())))
    {
-      return reinterpret_cast<dequeng&>(operator=(static_cast<_base&&>(rhs)));
+      return reinterpret_cast<dequeng&>(_base::operator=(std::move(rhs)));
    }
 
    dequeng& operator=(std::initializer_list<value_type> ilist)
       _sstl_noexcept(noexcept(std::declval<_base>().operator=(std::declval<std::initializer_list<value_type>>())))
    {
-      return reinterpret_cast<dequeng&>(static_cast<_base&>(*this).operator=(ilist));
+      return reinterpret_cast<dequeng&>(_base::operator=(ilist));
    }
 
 private:
