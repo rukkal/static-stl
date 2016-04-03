@@ -149,6 +149,14 @@ public:
       return *this;
    }
 
+   dequeng& operator=(std::initializer_list<value_type> ilist)
+      _sstl_noexcept(noexcept(_copy_assign(  std::declval<std::initializer_list<value_type>>().begin(),
+                                             std::declval<std::initializer_list<value_type>>().end())))
+   {
+      _copy_assign(ilist.begin(), ilist.end());
+      return *this;
+   }
+
    iterator begin() _sstl_noexcept_
    {
       return iterator{ this, empty() ? nullptr : _derived()._first_pointer };
@@ -541,6 +549,12 @@ public:
       _sstl_noexcept(noexcept(std::declval<dequeng>().operator=(std::declval<_base&&>())))
    {
       return reinterpret_cast<dequeng&>(operator=(static_cast<_base&&>(rhs)));
+   }
+
+   dequeng& operator=(std::initializer_list<value_type> ilist)
+      _sstl_noexcept(noexcept(std::declval<_base>().operator=(std::declval<std::initializer_list<value_type>>())))
+   {
+      return reinterpret_cast<dequeng&>(static_cast<_base&>(*this).operator=(ilist));
    }
 
 private:
