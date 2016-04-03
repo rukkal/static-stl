@@ -157,6 +157,56 @@ public:
       return *this;
    }
 
+   void assign(size_type count, const_reference value)
+      _sstl_noexcept(std::is_nothrow_copy_assignable<value_type>::value
+                     && std::is_nothrow_copy_constructible<value_type>())
+   {
+      sstl_assert(count <= capacity());
+      auto dst = _derived()._first_pointer;
+
+      auto assignments = std::min(size(), count);
+      for(size_type i=0; i<assignments; ++i)
+      {
+         *dst = value;
+         _increment_pointer(dst);
+      }
+
+      auto constructions = count - assignments;
+      size_type constructions_done;
+      #if _sstl_has_exceptions()
+      try
+      {
+      #endif
+         for(constructions_done=0; constructions_done<constructions; ++constructions_done)
+         {
+            new(dst) value_type(value);
+            _increment_pointer(dst);
+         }
+      #if _sstl_has_exceptions()
+      }
+      catch(...)
+      {
+         _decrement_pointer(dst);
+         _derived()._last_pointer = dst;
+         _derived()._size += constructions_done;
+         throw;
+      }
+      #endif
+
+      auto new_last = dst;
+      _decrement_pointer(new_last);
+
+      auto destructions = size() < count ? 0 : size() - count;
+      for(size_type i=0; i<destructions; ++i)
+      {
+         dst->~value_type();
+         _increment_pointer(dst);
+      }
+
+      _derived()._last_pointer = new_last;
+      _derived()._size = count;
+   }
+
    iterator begin() _sstl_noexcept_
    {
       return iterator{ this, empty() ? nullptr : _derived()._first_pointer };
@@ -555,6 +605,12 @@ public:
       _sstl_noexcept(noexcept(std::declval<_base>().operator=(std::declval<std::initializer_list<value_type>>())))
    {
       return reinterpret_cast<dequeng&>(_base::operator=(ilist));
+   }
+
+   void assign(size_type count, const_reference value)
+      _sstl_noexcept(noexcept(std::declval<_base>().assign(std::declval<size_type>(), std::declval<const_reference>())))
+   {
+      _base::assign(count, value);
    }
 
 private:

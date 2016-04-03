@@ -270,11 +270,11 @@ TEST_CASE("dequeng")
          {
             auto rhs = make_noncontiguous_deque<counted_type>({0, 1, 2, 3});
             auto expected_lhs = deque_counted_type_t{0, 1, 2, 3};
-            auto lhs = deque_counted_type_t{};
+            auto lhs = make_noncontiguous_deque<counted_type>({10, 11, 12, 13});
             counted_type::reset_counts();
             lhs = rhs;
             REQUIRE(lhs == expected_lhs);
-            REQUIRE(counted_type::check().copy_constructions(4));
+            REQUIRE(counted_type::check().copy_assignments(4));
          }
       }
       #if _sstl_has_exceptions()
@@ -491,6 +491,90 @@ TEST_CASE("dequeng")
             counted_type::throw_at_nth_copy_construction(2);
             REQUIRE_THROWS_AS(lhs = rhs, counted_type::copy_construction::exception);
             REQUIRE(counted_type::check().copy_assignments(2).copy_constructions(1).destructions(3));
+         }
+      }
+      #endif
+   }
+
+   SECTION("count assign")
+   {
+      auto count = typename deque_counted_type_t::size_type{ 5 };
+      auto value = counted_type{ 3 };
+      auto expected_lhs = deque_counted_type_t{3, 3, 3, 3, 3};
+
+      SECTION("contained values + number of operations")
+      {
+         SECTION("lhs is empty")
+         {
+            auto lhs = deque_counted_type_t{};
+            counted_type::reset_counts();
+            lhs.assign(count, value);
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(counted_type::check{}.copy_constructions(5));
+         }
+         SECTION("count == 0")
+         {
+            auto lhs = deque_counted_type_t{0, 1};
+            auto expected_lhs = deque_counted_type_t{};
+            counted_type::reset_counts();
+            lhs.assign(0, value);
+            REQUIRE(lhs.empty());
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(counted_type::check{}.destructions(2));
+         }
+         SECTION("lhs.size() < count")
+         {
+            auto lhs = deque_counted_type_t{10, 11};
+            counted_type::reset_counts();
+            lhs.assign(count, value);
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(counted_type::check{}.copy_assignments(2).copy_constructions(3));
+         }
+         SECTION("lhs.size() == count")
+         {
+            auto lhs = deque_counted_type_t{10, 11, 12, 13, 14};
+            counted_type::reset_counts();
+            lhs.assign(count, value);
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(counted_type::check{}.copy_assignments(5));
+         }
+         SECTION("lhs.size() > count")
+         {
+            auto lhs = deque_counted_type_t{10, 11, 12, 13, 14, 15, 16};
+            counted_type::reset_counts();
+            lhs.assign(count, value);
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(counted_type::check{}.copy_assignments(5).destructions(2));
+         }
+         SECTION("non-contiguous values")
+         {
+            auto lhs = make_noncontiguous_deque<counted_type>({10, 11, 12, 13});
+            counted_type::reset_counts();
+            lhs.assign(count, value);
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(counted_type::check().copy_assignments(4).copy_constructions(1));
+         }
+      }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling")
+      {
+         SECTION("copy assignment throws")
+         {
+            auto lhs = deque_counted_type_t{10, 11, 12};
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_copy_assignment(2);
+            REQUIRE_THROWS_AS(lhs.assign(count, value), counted_type::copy_assignment::exception);
+            REQUIRE(counted_type::check().copy_assignments(1));
+            REQUIRE(lhs.size() == 3);
+         }
+         SECTION("copy constructor throws")
+         {
+            auto lhs = deque_counted_type_t{10, 11};
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_copy_construction(2);
+            REQUIRE_THROWS_AS(lhs.assign(count, value), counted_type::copy_construction::exception);
+            REQUIRE(counted_type::check().copy_assignments(2).copy_constructions(1));
+            REQUIRE(lhs.size() == 3);
          }
       }
       #endif
