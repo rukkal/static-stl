@@ -150,8 +150,9 @@ public:
    }
 
    dequeng& operator=(std::initializer_list<value_type> ilist)
-      _sstl_noexcept(noexcept(_range_assignment(std::declval<std::initializer_list<value_type>>().begin(),
-                                                std::declval<std::initializer_list<value_type>>().end())))
+      _sstl_noexcept(noexcept(std::declval<dequeng>()._range_assignment(
+         std::declval<std::initializer_list<value_type>>().begin(),
+         std::declval<std::initializer_list<value_type>>().end())))
    {
       _range_assignment(ilist.begin(), ilist.end());
       return *this;
