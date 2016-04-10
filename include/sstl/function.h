@@ -122,11 +122,6 @@ namespace _detail
    };
 };
 
-namespace _detail
-{
-   void* _get_internal_callable_address(void*) _sstl_noexcept_;
-};
-
 template<class TResult, class... TParams>
 class function<TResult(TParams...)>
 {
@@ -137,11 +132,14 @@ class function<TResult(TParams...)>
 public:
    TResult operator()(typename _detail::_make_const_ref_if_value<TParams>::type... params) const
    {
-      return _get_internal_callable()._call(std::forward<typename _detail::_make_const_ref_if_value<TParams>::type>(params)...);
+      return _derived()._get_internal_callable()._call(std::forward<typename _detail::_make_const_ref_if_value<TParams>::type>(params)...);
    }
 
 protected:
    using _type_for_derived_class_access = function<TResult(TParams...), 0>;
+
+   _type_for_derived_class_access& _derived() _sstl_noexcept_;
+   const _type_for_derived_class_access& _derived() const _sstl_noexcept_;
 
    struct _internal_callable
    {
@@ -258,9 +256,6 @@ protected:
       TTarget target;
    };
 
-private:
-   _internal_callable& _get_internal_callable() const _sstl_noexcept_;
-
 protected:
    function() _sstl_noexcept_ = default;
    function(const function&) = default;
@@ -277,13 +272,14 @@ class function<TResult(TParams...), CALLABLE_SIZE> final : public function<TResu
    friend class function;
 
 private:
-   using _base_type = function<TResult(TParams...)>;
-   using _type_for_derived_class_access = typename _base_type::_type_for_derived_class_access;
+   using _base = function<TResult(TParams...)>;
+   using _type_for_derived_class_access = typename _base::_type_for_derived_class_access;
+   using _internal_callable = typename _base::_internal_callable;
 
 public:
    function() _sstl_noexcept_
    {
-      _assert_hacky_derived_class_access_is_valid<_base_type, function, _type_for_derived_class_access>();
+      _assert_hacky_derived_class_access_is_valid<_base, function, _type_for_derived_class_access>();
       _invalidate_internal_callable();
    }
 
@@ -293,7 +289,7 @@ public:
       class = typename std::enable_if<_detail::_is_function<TTarget>::value>::type>
    function(T&& rhs)
    {
-      _assert_hacky_derived_class_access_is_valid<_base_type, function, _type_for_derived_class_access>();
+      _assert_hacky_derived_class_access_is_valid<_base, function, _type_for_derived_class_access>();
       static_assert( _detail::_is_convertible_function<function, TTarget>::value,
                      "the instance of sstl::function passed as argument"
                      "must have covariant return type and contravariant"
@@ -309,7 +305,7 @@ public:
    function(T&& rhs, char=0) _sstl_noexcept( (std::is_lvalue_reference<T>::value && std::is_nothrow_copy_constructible<TTarget>::value)
                                              || (!std::is_lvalue_reference<T>::value && std::is_nothrow_move_constructible<TTarget>::value))
    {
-      _assert_hacky_derived_class_access_is_valid<_base_type, function, _type_for_derived_class_access>();
+      _assert_hacky_derived_class_access_is_valid<_base, function, _type_for_derived_class_access>();
       _construct_internal_callable(std::forward<T>(rhs));
    }
 
@@ -338,7 +334,7 @@ public:
    {
       if(_is_internal_callable_valid())
       {
-         _base_type::_get_internal_callable().~_internal_callable();
+         _get_internal_callable().~_internal_callable();
       }
    }
 
@@ -348,6 +344,12 @@ public:
    }
 
 private:
+   _internal_callable& _get_internal_callable() const _sstl_noexcept_
+   {
+      auto non_const_buffer = const_cast<void*>(static_cast<const void*>(_buffer));
+      return *static_cast<_internal_callable*>(non_const_buffer);
+   }
+
    template<class T,
             class TTarget = typename std::decay<T>::type,
             class = typename std::enable_if<_detail::_is_function<TTarget>::value>::type>
@@ -357,7 +359,7 @@ private:
       if(rhs._is_internal_callable_valid())
       {
          using is_copy_construction = std::is_lvalue_reference<T>;
-         rhs._get_internal_callable()._construct_to_buffer(is_copy_construction{}, _buffer);
+         rhs._derived()._get_internal_callable()._construct_to_buffer(is_copy_construction{}, _buffer);
       }
       else
       {
@@ -372,10 +374,10 @@ private:
    void _construct_internal_callable(T&& rhs, char=0)
    {
       static_assert(
-         sizeof(typename _base_type::template _internal_callable_imp<TTarget>) <= sizeof(_buffer),
+         sizeof(typename _base::template _internal_callable_imp<TTarget>) <= sizeof(_buffer),
          "Not enough memory available to store the wished target."
          "Hint: specify size of the target as extra template argument");
-      new(_buffer) typename _base_type::template _internal_callable_imp<TTarget>(std::forward<T>(rhs));
+      new(_buffer) typename _base::template _internal_callable_imp<TTarget>(std::forward<T>(rhs));
    }
 
    template<class T,
@@ -390,12 +392,12 @@ private:
          if(rhs._is_internal_callable_valid())
          {
             using is_copy_construction = std::is_lvalue_reference<T>;
-            rhs._get_internal_callable()._construct_to_buffer(is_copy_construction{}, _buffer);
+            rhs._derived()._get_internal_callable()._construct_to_buffer(is_copy_construction{}, _buffer);
          }
       }
       else
       {
-         _base_type::_get_internal_callable().~_internal_callable();
+         _get_internal_callable().~_internal_callable();
          _construct_internal_callable(std::forward<T>(rhs));
       }
    }
@@ -408,7 +410,7 @@ private:
    {
       if(_is_internal_callable_valid())
       {
-         _base_type::_get_internal_callable().~_internal_callable();
+         _get_internal_callable().~_internal_callable();
       }
       _construct_internal_callable(std::forward<T>(rhs));
    }
@@ -429,10 +431,15 @@ private:
 };
 
 template<class TResult, class... TParams>
-typename function<TResult(TParams...)>::_internal_callable& function<TResult(TParams...)>::_get_internal_callable() const _sstl_noexcept_
+typename function<TResult(TParams...)>::_type_for_derived_class_access& function<TResult(TParams...)>::_derived() _sstl_noexcept_
 {
-   auto non_const_derived = reinterpret_cast<_type_for_derived_class_access*>(const_cast<function*>(this));
-   return *static_cast<_internal_callable*>(static_cast<void*>(non_const_derived->_buffer));
+   return reinterpret_cast<_type_for_derived_class_access&>(*this);
+}
+
+template<class TResult, class... TParams>
+const typename function<TResult(TParams...)>::_type_for_derived_class_access& function<TResult(TParams...)>::_derived() const _sstl_noexcept_
+{
+   return reinterpret_cast<const _type_for_derived_class_access&>(*this);
 }
 
 }
