@@ -9,6 +9,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #define _SSTL_DEQUENG__
 
 #include <utility>
+#include <memory>
 #include <algorithm>
 #include <type_traits>
 #include <iterator>
@@ -80,11 +81,12 @@ public:
       auto src = rhs._derived()._first_pointer;
       auto dst = _derived()._first_pointer;
 
+      size_type i;
       #if _sstl_has_exceptions()
       try
       {
       #endif
-         for(auto i=move_assignments; i!=0; --i)
+         for(i=0; i!=move_assignments; ++i)
          {
             *dst = std::move(*src);
             src->~value_type();
@@ -95,11 +97,8 @@ public:
       }
       catch(...)
       {
-         clear();
-
          rhs._derived()._first_pointer = src;
-         rhs.clear();
-
+         rhs._derived()._size -= i;
          throw;
       }
       #endif
@@ -108,7 +107,7 @@ public:
       try
       {
       #endif
-         for(auto i=move_constructions; i!=0; --i)
+         for(i=0; i!=move_constructions; ++i)
          {
             new(dst) value_type(std::move(*src));
             src->~value_type();
@@ -122,10 +121,10 @@ public:
          auto new_lhs_last = dst;
          _decrement_pointer(new_lhs_last);
          _derived()._last_pointer = new_lhs_last;
-         clear();
+         _derived()._size += i;
 
          rhs._derived()._first_pointer = src;
-         rhs.clear();
+         rhs._derived()._size -= (move_assignments + i);
 
          throw;
       }
@@ -368,13 +367,9 @@ protected:
       }
       catch(...)
       {
-         while(src != rhs.end())
-         {
-            src->~value_type();
-            ++src;
-         }
-         rhs._derived()._last_pointer = rhs._derived()._first_pointer-1;
-         rhs._derived()._size = 0;
+         auto number_of_move_constructions = dst - _derived()._begin_storage();
+         rhs._derived()._first_pointer = std::addressof(*src);
+         rhs._derived()._size -= number_of_move_constructions;
          _derived()._last_pointer = dst-1;
          clear();
          throw;
@@ -393,27 +388,15 @@ protected:
    {
       auto src = range_begin;
       auto dst = _derived()._first_pointer;
-      size_type assignments = 0;
 
-      #if _sstl_has_exceptions()
-      try
+      size_type assignments = 0;
+      while(src != range_end && assignments < size())
       {
-      #endif
-         while(src != range_end && assignments < size())
-         {
-            *dst = *src;
-            _increment_pointer(dst);
-            ++src;
-            ++assignments;
-         }
-      #if _sstl_has_exceptions()
+         *dst = *src;
+         _increment_pointer(dst);
+         ++src;
+         ++assignments;
       }
-      catch(...)
-      {
-         clear();
-         throw;
-      }
-      #endif
 
       size_type new_size = assignments;
 
@@ -435,7 +418,7 @@ protected:
       {
          _decrement_pointer(dst);
          _derived()._last_pointer = dst;
-         clear();
+         _derived()._size = new_size;
          throw;
       }
       #endif

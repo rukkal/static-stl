@@ -170,8 +170,8 @@ TEST_CASE("dequeng")
          counted_type::reset_counts();
          counted_type::throw_at_nth_move_construction(3);
          REQUIRE_THROWS_AS(deque_counted_type_t{ std::move(rhs) }, counted_type::move_construction::exception);
-         REQUIRE(counted_type::check{}.move_constructions(2).destructions(6));
-         REQUIRE(rhs.empty());
+         REQUIRE(counted_type::check{}.move_constructions(2).destructions(4));
+         REQUIRE((rhs == deque_counted_type_t{2, 3}));
       }
       #endif
    }
@@ -286,7 +286,8 @@ TEST_CASE("dequeng")
             counted_type::reset_counts();
             counted_type::throw_at_nth_copy_assignment(2);
             REQUIRE_THROWS_AS(lhs = rhs, counted_type::copy_assignment::exception);
-            REQUIRE(counted_type::check().copy_assignments(1).destructions(3));
+            REQUIRE(counted_type::check().copy_assignments(1));
+            REQUIRE((lhs == deque_counted_type_t{0, 11, 12}));
          }
          SECTION("copy constructor throws")
          {
@@ -294,7 +295,8 @@ TEST_CASE("dequeng")
             counted_type::reset_counts();
             counted_type::throw_at_nth_copy_construction(2);
             REQUIRE_THROWS_AS(lhs = rhs, counted_type::copy_construction::exception);
-            REQUIRE(counted_type::check().copy_assignments(2).copy_constructions(1).destructions(3));
+            REQUIRE(counted_type::check().copy_assignments(2).copy_constructions(1));
+            REQUIRE((lhs == deque_counted_type_t{0, 1, 2}));
          }
       }
       #endif
@@ -396,9 +398,9 @@ TEST_CASE("dequeng")
             counted_type::reset_counts();
             counted_type::throw_at_nth_move_assignment(2);
             REQUIRE_THROWS_AS(lhs = std::move(rhs), counted_type::move_assignment::exception);
-            REQUIRE(lhs.empty());
-            REQUIRE(rhs.empty());
-            REQUIRE(counted_type::check().move_assignments(1).destructions(8));
+            REQUIRE(counted_type::check().move_assignments(1).destructions(1));
+            REQUIRE((lhs == deque_counted_type_t{0, 11, 12}));
+            REQUIRE((rhs == deque_counted_type_t{1, 2, 3, 4}));
          }
          SECTION("move constructor throws")
          {
@@ -406,9 +408,9 @@ TEST_CASE("dequeng")
             counted_type::reset_counts();
             counted_type::throw_at_nth_move_construction(2);
             REQUIRE_THROWS_AS(lhs = std::move(rhs), counted_type::move_construction::exception);
-            REQUIRE(lhs.empty());
-            REQUIRE(rhs.empty());
-            REQUIRE(counted_type::check().move_assignments(2).move_constructions(1).destructions(8));
+            REQUIRE(counted_type::check().move_assignments(2).move_constructions(1).destructions(3));
+            REQUIRE((lhs == deque_counted_type_t{0, 1, 2}));
+            REQUIRE((rhs == deque_counted_type_t{3, 4}));
          }
       }
       #endif
@@ -482,7 +484,8 @@ TEST_CASE("dequeng")
             counted_type::reset_counts();
             counted_type::throw_at_nth_copy_assignment(2);
             REQUIRE_THROWS_AS(lhs = rhs, counted_type::copy_assignment::exception);
-            REQUIRE(counted_type::check().copy_assignments(1).destructions(3));
+            REQUIRE(counted_type::check().copy_assignments(1));
+            REQUIRE((lhs == deque_counted_type_t{0, 11, 12}));
          }
          SECTION("copy constructor throws")
          {
@@ -490,7 +493,8 @@ TEST_CASE("dequeng")
             counted_type::reset_counts();
             counted_type::throw_at_nth_copy_construction(2);
             REQUIRE_THROWS_AS(lhs = rhs, counted_type::copy_construction::exception);
-            REQUIRE(counted_type::check().copy_assignments(2).copy_constructions(1).destructions(3));
+            REQUIRE(counted_type::check().copy_assignments(2).copy_constructions(1));
+            REQUIRE((lhs == deque_counted_type_t{0, 1, 2}));
          }
       }
       #endif
@@ -565,7 +569,7 @@ TEST_CASE("dequeng")
             counted_type::throw_at_nth_copy_assignment(2);
             REQUIRE_THROWS_AS(lhs.assign(count, value), counted_type::copy_assignment::exception);
             REQUIRE(counted_type::check().copy_assignments(1));
-            REQUIRE(lhs.size() == 3);
+            REQUIRE((lhs == deque_counted_type_t{value, 11, 12}));
          }
          SECTION("copy constructor throws")
          {
@@ -574,7 +578,7 @@ TEST_CASE("dequeng")
             counted_type::throw_at_nth_copy_construction(2);
             REQUIRE_THROWS_AS(lhs.assign(count, value), counted_type::copy_construction::exception);
             REQUIRE(counted_type::check().copy_assignments(2).copy_constructions(1));
-            REQUIRE(lhs.size() == 3);
+            REQUIRE((lhs == deque_counted_type_t{value, value, value}));
          }
       }
       #endif
