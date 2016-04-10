@@ -20,6 +20,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include "__internal/_aligned_storage.h"
 #include "__internal/_iterator.h"
 #include "__internal/_dequeng_iterator.h"
+#include "__internal/_hacky_derived_class_access.h"
 
 namespace sstl
 {
@@ -506,11 +507,14 @@ public:
 public:
    dequeng() _sstl_noexcept_
       : _last_pointer(_begin_storage()-1)
-   {}
+   {
+      _assert_hacky_derived_class_access_is_valid<dequeng<value_type>, dequeng, _type_for_derived_class_access>();
+   }
 
    explicit dequeng(size_type count, const_reference value = value_type())
       _sstl_noexcept(noexcept(std::declval<_base>()._count_constructor(std::declval<size_type>(), std::declval<value_type>())))
    {
+      _assert_hacky_derived_class_access_is_valid<dequeng<value_type>, dequeng, _type_for_derived_class_access>();
       _base::_count_constructor(count, value);
    }
 
@@ -519,6 +523,7 @@ public:
       _sstl_noexcept(noexcept(std::declval<_base>()._range_constructor( std::declval<TIterator>(),
                                                                         std::declval<TIterator>())))
    {
+      _assert_hacky_derived_class_access_is_valid<dequeng<value_type>, dequeng, _type_for_derived_class_access>();
       _base::_range_constructor(range_begin, range_end);
    }
 
@@ -527,30 +532,37 @@ public:
       _sstl_noexcept(noexcept(std::declval<_base>()._range_constructor( std::declval<const_iterator>(),
                                                                         std::declval<const_iterator>())))
    {
+      _assert_hacky_derived_class_access_is_valid<dequeng<value_type>, dequeng, _type_for_derived_class_access>();
       _base::_range_constructor(const_cast<_base&>(rhs).cbegin(), const_cast<_base&>(rhs).cend());
    }
 
    dequeng(const dequeng& rhs)
       _sstl_noexcept(noexcept(dequeng(std::declval<const _base&>())))
       : dequeng(static_cast<const _base&>(rhs))
-   {}
+   {
+      _assert_hacky_derived_class_access_is_valid<dequeng<value_type>, dequeng, _type_for_derived_class_access>();
+   }
 
    //move construction from any instance with same value type (capacity doesn't matter)
    dequeng(_base&& rhs)
       _sstl_noexcept(noexcept(std::declval<_base>()._move_constructor(std::declval<_base>())))
    {
+      _assert_hacky_derived_class_access_is_valid<dequeng<value_type>, dequeng, _type_for_derived_class_access>();
       _base::_move_constructor(std::move(rhs));
    }
 
    dequeng(dequeng&& rhs)
       _sstl_noexcept(noexcept(dequeng(std::declval<_base>())))
       : dequeng(static_cast<_base&&>(rhs))
-   {}
+   {
+      _assert_hacky_derived_class_access_is_valid<dequeng<value_type>, dequeng, _type_for_derived_class_access>();
+   }
 
    dequeng(std::initializer_list<value_type> init)
       _sstl_noexcept(noexcept(std::declval<_base>()._range_constructor( std::declval<std::initializer_list<value_type>>().begin(),
                                                                         std::declval<std::initializer_list<value_type>>().end())))
    {
+      _assert_hacky_derived_class_access_is_valid<dequeng<value_type>, dequeng, _type_for_derived_class_access>();
       _base::_range_constructor(init.begin(), init.end());
    }
 
