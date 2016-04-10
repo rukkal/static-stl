@@ -544,8 +544,9 @@ TEST_CASE("function")
 
    SECTION("size (let's keep it under control)")
    {
+      static const size_t WORD_SIZE = sizeof(void*);
       using function_type = sstl::function<void(), 0>;
-      REQUIRE(sizeof(function_type) == sizeof(void*));
+      REQUIRE(sizeof(function_type) == WORD_SIZE);
    }
 }
 

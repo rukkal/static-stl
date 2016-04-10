@@ -21,6 +21,12 @@ _TRet _conditional_move(T& value)
    return static_cast<_TRet>(value);
 }
 
+template<class T>
+struct _type_tag
+{
+   using type = T;
+};
+
 }
 
 #endif

@@ -13,6 +13,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include <algorithm>
 #include <new>
 #include <memory>
+#include "__internal/_utility.h"
 #include "__internal/_except.h"
 #include "__internal/_hacky_derived_class_access.h"
 
@@ -289,11 +290,8 @@ public:
       class = typename std::enable_if<_detail::_is_function<TTarget>::value>::type>
    function(T&& rhs)
    {
+      _static_assert_buffer_can_contain_target(_type_tag<TTarget>{});
       _assert_hacky_derived_class_access_is_valid<_base, function, _type_for_derived_class_access>();
-      static_assert( _detail::_is_convertible_function<function, TTarget>::value,
-                     "the instance of sstl::function passed as argument"
-                     "must have covariant return type and contravariant"
-                     "parameter types in order to be assigned");
       _construct_internal_callable(std::forward<T>(rhs));
    }
 
@@ -302,31 +300,23 @@ public:
       class TTarget = typename std::decay<T>::type,
       class = typename std::enable_if<!_detail::_is_function<TTarget>::value>::type>
    // dummy parameter required in order not to declare an invalid overload
-   function(T&& rhs, char=0) _sstl_noexcept( (std::is_lvalue_reference<T>::value && std::is_nothrow_copy_constructible<TTarget>::value)
-                                             || (!std::is_lvalue_reference<T>::value && std::is_nothrow_move_constructible<TTarget>::value))
+   function(T&& rhs, char=0)
+      _sstl_noexcept((std::is_lvalue_reference<T>::value && std::is_nothrow_copy_constructible<TTarget>::value)
+                     || (!std::is_lvalue_reference<T>::value && std::is_nothrow_move_constructible<TTarget>::value))
    {
+      _static_assert_buffer_can_contain_target(_type_tag<TTarget>{});
       _assert_hacky_derived_class_access_is_valid<_base, function, _type_for_derived_class_access>();
       _construct_internal_callable(std::forward<T>(rhs));
    }
 
    template<class T, class TTarget = typename std::decay<T>::type>
-   function& operator=(T&& rhs) _sstl_noexcept( !_detail::_is_function<TTarget>::value &&
-                                                ((std::is_lvalue_reference<T>::value && std::is_nothrow_copy_constructible<TTarget>::value)
-                                                || (!std::is_lvalue_reference<T>::value && std::is_nothrow_move_constructible<TTarget>::value)))
+   function& operator=(T&& rhs)
+      _sstl_noexcept(!_detail::_is_function<TTarget>::value &&
+                     ((std::is_lvalue_reference<T>::value && std::is_nothrow_copy_constructible<TTarget>::value)
+                     || (!std::is_lvalue_reference<T>::value && std::is_nothrow_move_constructible<TTarget>::value)))
    {
-      #if _sstl_has_exceptions()
-      try
-      {
-      #endif
-         _assign_internal_callable(std::forward<T>(rhs));
-      #if _sstl_has_exceptions()
-      }
-      catch(...)
-      {
-         _invalidate_internal_callable();
-         throw;
-      }
-      #endif
+      _static_assert_buffer_can_contain_target(_type_tag<TTarget>{});
+      _assign_internal_callable(std::forward<T>(rhs));
       return *this;
    }
 
@@ -373,46 +363,29 @@ private:
    // dummy parameter required in order not to declare an invalid overload
    void _construct_internal_callable(T&& rhs, char=0)
    {
-      static_assert(
-         sizeof(typename _base::template _internal_callable_imp<TTarget>) <= sizeof(_buffer),
-         "Not enough memory available to store the wished target."
-         "Hint: specify size of the target as extra template argument");
       new(_buffer) typename _base::template _internal_callable_imp<TTarget>(std::forward<T>(rhs));
    }
 
-   template<class T,
-            class TTarget = typename std::decay<T>::type,
-            class = typename std::enable_if<_detail::_is_function<TTarget>::value>::type>
+   template<class T>
    void _assign_internal_callable(T&& rhs)
    {
-      if(static_cast<void*>(this) == static_cast<void*>(std::addressof(rhs)))
+      if(static_cast<void*>(this) == reinterpret_cast<void*>(std::addressof(rhs)))
          return;
-      if(!_is_internal_callable_valid())
-      {
-         if(rhs._is_internal_callable_valid())
-         {
-            using is_copy_construction = std::is_lvalue_reference<T>;
-            rhs._derived()._get_internal_callable()._construct_to_buffer(is_copy_construction{}, _buffer);
-         }
-      }
-      else
-      {
-         _get_internal_callable().~_internal_callable();
-         _construct_internal_callable(std::forward<T>(rhs));
-      }
-   }
-
-   template<class T,
-            class TTarget = typename std::decay<T>::type,
-            class = typename std::enable_if<!_detail::_is_function<TTarget>::value>::type>
-   // dummy parameter required in order not to declare an invalid overload
-   void _assign_internal_callable(T&& rhs, char=0)
-   {
       if(_is_internal_callable_valid())
-      {
          _get_internal_callable().~_internal_callable();
+      #if _sstl_has_exceptions()
+      try
+      {
+      #endif
+         _construct_internal_callable(std::forward<T>(rhs));
+      #if _sstl_has_exceptions()
       }
-      _construct_internal_callable(std::forward<T>(rhs));
+      catch(...)
+      {
+         _invalidate_internal_callable();
+         throw;
+      }
+      #endif
    }
 
    void _invalidate_internal_callable() _sstl_noexcept_
@@ -423,6 +396,22 @@ private:
    bool _is_internal_callable_valid() const _sstl_noexcept_
    {
       return std::any_of(std::begin(_buffer), std::end(_buffer), [](uint8_t c){ return c!=0; });
+   }
+
+   template<class TTarget,
+            class = typename std::enable_if<!_detail::_is_function<TTarget>::value>::type>
+   void _static_assert_buffer_can_contain_target(_type_tag<TTarget>)
+   {
+      static_assert( sizeof(typename _base::template _internal_callable_imp<TTarget>) <= sizeof(_buffer),
+                     "Not enough memory available to store the wished target."
+                     "Hint: specify size of the target as extra template argument");
+   }
+
+   void _static_assert_buffer_can_contain_target(...)
+   {
+      //fallback overload (if target is an instance of sstl::function the size
+      //of the target's internal callable cannot be determined at compile time,
+      //alas the assertion cannot be performed)
    }
 
 private:
