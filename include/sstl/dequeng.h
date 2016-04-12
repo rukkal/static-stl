@@ -247,6 +247,18 @@ public:
       return *begin();
    }
 
+   const_reference back() const _sstl_noexcept_
+   {
+      sstl_assert(!empty());
+      return *(cend()-1);
+   }
+
+   reference back() _sstl_noexcept_
+   {
+      sstl_assert(!empty());
+      return *(end()-1);
+   }
+
    iterator begin() _sstl_noexcept_
    {
       return iterator{ this, empty() ? nullptr : _derived()._first_pointer };
