@@ -147,6 +147,11 @@ public:
       return _derived()._get_internal_callable()._call(std::forward<typename _detail::_make_const_ref_if_value<TParams>::type>(params)...);
    }
 
+   operator bool() const _sstl_noexcept_
+   {
+      return _derived()._is_internal_callable_valid();
+   }
+
 protected:
    using _type_for_derived_class_access = function<TResult(TParams...), 0>;
 
@@ -351,11 +356,6 @@ public:
       {
          _get_internal_callable().~_internal_callable();
       }
-   }
-
-   operator bool() const _sstl_noexcept_
-   {
-      return _is_internal_callable_valid();
    }
 
 private:
