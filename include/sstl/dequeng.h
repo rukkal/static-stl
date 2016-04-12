@@ -21,6 +21,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include "__internal/_iterator.h"
 #include "__internal/_dequeng_iterator.h"
 #include "__internal/_hacky_derived_class_access.h"
+#include "__internal/_debug.h"
 
 namespace sstl
 {
@@ -206,6 +207,24 @@ public:
 
       _derived()._last_pointer = new_last;
       _derived()._size = count;
+   }
+
+   reference at(size_type idx) _sstl_noexcept(!_sstl_has_exceptions())
+   {
+      #if _sstl_has_exceptions()
+      if(idx >= size())
+      {
+         throw std::out_of_range(_sstl_debug_message("access out of range"));
+      }
+      #endif
+      sstl_assert(idx < size());
+      return begin()[idx];
+   }
+
+   const_reference at(size_type idx) const
+      _sstl_noexcept(noexcept(std::declval<dequeng>().at(size_type{})))
+   {
+      return const_cast<dequeng&>(*this).at(idx);
    }
 
    iterator begin() _sstl_noexcept_

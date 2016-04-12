@@ -584,6 +584,33 @@ TEST_CASE("dequeng")
       #endif
    }
 
+   SECTION("at")
+   {
+      auto d = deque_counted_type_t{1, 2, 3, 4, 5};
+      SECTION("read access")
+      {
+         const auto& cd = d;
+         REQUIRE(d.at(0) == 1);
+         REQUIRE(d.at(2) == 3);
+         REQUIRE(d.at(4) == 5);
+      }
+      SECTION("write access")
+      {
+         d.at(0) = 10;
+         d.at(2) = 30;
+         d.at(4) = 50;
+         REQUIRE(d.at(0) == 10);
+         REQUIRE(d.at(2) == 30);
+         REQUIRE(d.at(4) == 50);
+      }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling")
+      {
+         REQUIRE_THROWS_AS(d.at(5), std::out_of_range);
+      }
+      #endif
+   }
+
    SECTION("non-member relative operators")
    {
       SECTION("lhs < rhs")
