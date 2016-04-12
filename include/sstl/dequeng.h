@@ -52,8 +52,6 @@ public:
    //using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
 public:
-
-
    dequeng& operator=(const dequeng& rhs)
       _sstl_noexcept_(  std::is_nothrow_copy_assignable<value_type>::value
                         && std::is_nothrow_copy_constructible<value_type>::value)
@@ -225,6 +223,16 @@ public:
       _sstl_noexcept(noexcept(std::declval<dequeng>().at(size_type{})))
    {
       return const_cast<dequeng&>(*this).at(idx);
+   }
+
+   reference operator[](size_type idx) _sstl_noexcept_
+   {
+      return begin()[idx];
+   }
+
+   const_reference operator[](size_type idx) const _sstl_noexcept_
+   {
+      return cbegin()[idx];
    }
 
    iterator begin() _sstl_noexcept_

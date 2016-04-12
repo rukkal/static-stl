@@ -586,22 +586,22 @@ TEST_CASE("dequeng")
 
    SECTION("at")
    {
-      auto d = deque_counted_type_t{1, 2, 3, 4, 5};
+      auto d = deque_counted_type_t{0, 1, 2, 3, 4};
       SECTION("read access")
       {
          const auto& cd = d;
-         REQUIRE(d.at(0) == 1);
-         REQUIRE(d.at(2) == 3);
-         REQUIRE(d.at(4) == 5);
+         REQUIRE(d.at(0) == 0);
+         REQUIRE(d.at(2) == 2);
+         REQUIRE(d.at(4) == 4);
       }
       SECTION("write access")
       {
          d.at(0) = 10;
-         d.at(2) = 30;
-         d.at(4) = 50;
+         d.at(2) = 12;
+         d.at(4) = 14;
          REQUIRE(d.at(0) == 10);
-         REQUIRE(d.at(2) == 30);
-         REQUIRE(d.at(4) == 50);
+         REQUIRE(d.at(2) == 12);
+         REQUIRE(d.at(4) == 14);
       }
       #if _sstl_has_exceptions()
       SECTION("exception handling")
@@ -609,6 +609,25 @@ TEST_CASE("dequeng")
          REQUIRE_THROWS_AS(d.at(5), std::out_of_range);
       }
       #endif
+   }
+
+   SECTION("operator[]")
+   {
+      auto d = deque_counted_type_t{0, 1, 2, 3, 4};
+      SECTION("read access")
+      {
+         const auto& cd = d;
+         REQUIRE(d[0]==0);
+         REQUIRE(d[2]==2);
+         REQUIRE(d[4]==4);
+      }
+      SECTION("write")
+      {
+         d[0] = 10;
+         d[2] = 12;
+         d[4] = 14;
+         REQUIRE((d == deque_counted_type_t{10, 1, 12, 3, 14}));
+      }
    }
 
    SECTION("non-member relative operators")
