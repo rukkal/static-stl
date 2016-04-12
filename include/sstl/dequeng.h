@@ -235,6 +235,18 @@ public:
       return cbegin()[idx];
    }
 
+   const_reference front() const _sstl_noexcept_
+   {
+      sstl_assert(!empty());
+      return *cbegin();
+   }
+
+   reference front() _sstl_noexcept_
+   {
+      sstl_assert(!empty());
+      return *begin();
+   }
+
    iterator begin() _sstl_noexcept_
    {
       return iterator{ this, empty() ? nullptr : _derived()._first_pointer };

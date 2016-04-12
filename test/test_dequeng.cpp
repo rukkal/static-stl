@@ -630,6 +630,22 @@ TEST_CASE("dequeng")
       }
    }
 
+   SECTION("front")
+   {
+      auto d = deque_counted_type_t{0, 1, 2};
+      SECTION("read access")
+      {
+         const auto& cd = d;
+         REQUIRE(cd.front() == 0);
+      }
+      SECTION("write access")
+      {
+         d.front() = 10;
+         REQUIRE(d.front() == 10);
+         REQUIRE((d == deque_counted_type_t{10, 1, 2}));
+      }
+   }
+
    SECTION("non-member relative operators")
    {
       SECTION("lhs < rhs")
