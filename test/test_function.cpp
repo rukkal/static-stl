@@ -42,12 +42,6 @@ TEST_CASE("function")
       REQUIRE(!std::is_move_constructible<sstl::function<void()>>::value);
    }
 
-   SECTION("user cannot directly assign the base class")
-   {
-      REQUIRE(!std::is_copy_assignable<sstl::function<void()>>::value);
-      REQUIRE(!std::is_move_assignable<sstl::function<void()>>::value);
-   }
-
    SECTION("user cannot directly destroy the base class")
    {
       #if !_is_msvc() //MSVC (VS2013) has a buggy implementation of std::is_destructible
@@ -243,6 +237,15 @@ TEST_CASE("function")
          auto rhs = sstl::function<int(), 0>{ [](){ return 101; } };
          auto lhs = sstl::function<int(), 0>{ [](){ return 0; } };
          lhs = rhs;
+         REQUIRE(lhs == true);
+         REQUIRE(lhs() == 101);
+      }
+      SECTION("lhs is base class reference")
+      {
+         auto rhs = sstl::function<int(), 0>{ [](){ return 101; } };
+         auto lhs = sstl::function<int(), 0>{ [](){ return 0; } };
+         sstl::function<int()>& lhs_base_class_ref = lhs;
+         lhs_base_class_ref = rhs;
          REQUIRE(lhs == true);
          REQUIRE(lhs() == 101);
       }
@@ -546,7 +549,7 @@ TEST_CASE("function")
    {
       static const size_t WORD_SIZE = sizeof(void*);
       using function_type = sstl::function<void(), 0>;
-      REQUIRE(sizeof(function_type) == WORD_SIZE);
+      REQUIRE(sizeof(function_type) == 2*WORD_SIZE);
    }
 }
 

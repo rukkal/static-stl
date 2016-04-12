@@ -131,6 +131,17 @@ class function<TResult(TParams...)>
    friend class function;
 
 public:
+   template<class T, class TTarget = typename std::decay<T>::type>
+   function& operator=(T&& rhs)
+      _sstl_noexcept(!_detail::_is_function<TTarget>::value &&
+                     ((std::is_lvalue_reference<T>::value && std::is_nothrow_copy_constructible<TTarget>::value)
+                     || (!std::is_lvalue_reference<T>::value && std::is_nothrow_move_constructible<TTarget>::value)))
+   {
+      _derived()._runtime_assert_buffer_can_contain_target(rhs);
+      _derived()._assign_internal_callable(std::forward<T>(rhs));
+      return *this;
+   }
+
    TResult operator()(typename _detail::_make_const_ref_if_value<TParams>::type... params) const
    {
       return _derived()._get_internal_callable()._call(std::forward<typename _detail::_make_const_ref_if_value<TParams>::type>(params)...);
@@ -158,6 +169,7 @@ protected:
       }
       virtual void _copy_construct_to_buffer(void*) const = 0;
       virtual void _move_construct_to_buffer(void*) = 0;
+      virtual size_t _size() = 0;
    };
 
    template<class, class=void>
@@ -186,6 +198,11 @@ protected:
       void _move_construct_to_buffer(void* b) override
       {
          new(b) _internal_callable_imp(std::move(static_cast<TTarget&>(*this)));
+      }
+
+      size_t _size() override
+      {
+         return sizeof(_internal_callable_imp);
       }
    };
 
@@ -218,6 +235,11 @@ protected:
       void _move_construct_to_buffer(void* b) override
       {
          new(b) _internal_callable_imp(target);
+      }
+
+      size_t _size() override
+      {
+         return sizeof(_internal_callable_imp);
       }
 
       TTarget target;
@@ -254,6 +276,11 @@ protected:
          new(b) _internal_callable_imp(std::move(target));
       }
 
+      size_t _size() override
+      {
+         return sizeof(_internal_callable_imp);
+      }
+
       TTarget target;
    };
 
@@ -262,8 +289,6 @@ protected:
    function(const function&) = default;
    function(function&&) = default;
    ~function() = default;
-   function& operator=(const function&) = default;
-   function& operator=(function&&) = default;
 };
 
 template<class TResult, class... TParams, size_t CALLABLE_SIZE>
@@ -345,7 +370,6 @@ private:
             class = typename std::enable_if<_detail::_is_function<TTarget>::value>::type>
    void _construct_internal_callable(T&& rhs)
    {
-      static_assert(_detail::_is_function<TTarget>::value, "");
       if(rhs._is_internal_callable_valid())
       {
          using is_copy_construction = std::is_lvalue_reference<T>;
@@ -414,8 +438,26 @@ private:
       //alas the assertion cannot be performed)
    }
 
+   template<class T,
+            class TTarget = typename std::decay<T>::type,
+            class = typename std::enable_if<_detail::_is_function<TTarget>::value>::type>
+   void _runtime_assert_buffer_can_contain_target(const T& rhs)
+   {
+      sstl_assert(rhs._derived()._get_internal_callable()._size() <= _buffer_size);
+   }
+
+   template<class T,
+            class TTarget = typename std::decay<T>::type,
+            class = typename std::enable_if<!_detail::_is_function<TTarget>::value>::type>
+   // dummy parameter required in order not to declare an invalid overload
+   void _runtime_assert_buffer_can_contain_target(const T&, char=0)
+   {
+      sstl_assert(sizeof(_base::template _internal_callable_imp<TTarget>) <= _buffer_size);
+   }
+
 private:
    static const size_t _VPTR_SIZE = sizeof(void*);
+   size_t _buffer_size{ sizeof(_buffer) };
    mutable uint8_t _buffer[_VPTR_SIZE + CALLABLE_SIZE];
 };
 
