@@ -722,6 +722,16 @@ TEST_CASE("dequeng")
       REQUIRE(d.empty());
    }
 
+   SECTION("full")
+   {
+      auto d = sstl::dequeng<counted_type, 3>{0, 1, 2};
+      REQUIRE(d.full());
+      d.pop_back();
+      REQUIRE(!d.full());
+      d.push_back(0);
+      REQUIRE(d.full());
+   }
+
    SECTION("non-member relative operators")
    {
       SECTION("lhs < rhs")

@@ -321,7 +321,12 @@ public:
 
    bool empty() const _sstl_noexcept_
    {
-      return _derived()._size == 0;
+      return size() == 0;
+   }
+
+   bool full() const _sstl_noexcept_
+   {
+      return size() == capacity();
    }
 
    size_type size() const _sstl_noexcept_
@@ -350,10 +355,18 @@ public:
    void push_back(const_reference value)
       _sstl_noexcept(std::is_nothrow_constructible<value_type>::value)
    {
-      sstl_assert(size() < capacity());
+      sstl_assert(!full());
       _increment_pointer(_derived()._last_pointer);
       new(_derived()._last_pointer) value_type(value);
       ++_derived()._size;
+   }
+
+   void pop_back() _sstl_noexcept_
+   {
+      sstl_assert(!empty());
+      _derived()._last_pointer->~value_type();
+      _decrement_pointer(_derived()._last_pointer);
+      --_derived()._size;
    }
 
    void pop_front()
