@@ -754,6 +754,26 @@ TEST_CASE("dequeng")
       }
    }
 
+   SECTION("clear")
+   {
+      SECTION("contiguous values")
+      {
+         auto d = deque_counted_type_t{0, 1, 2, 3};
+         counted_type::reset_counts();
+         d.clear();
+         REQUIRE(counted_type::check().destructions(4));
+         REQUIRE(d.empty());
+      }
+      SECTION("non-contiguous values")
+      {
+         auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3});
+         counted_type::reset_counts();
+         d.clear();
+         REQUIRE(counted_type::check().destructions(4));
+         REQUIRE(d.empty());
+      }
+   }
+
    SECTION("non-member relative operators")
    {
       SECTION("lhs < rhs")

@@ -346,15 +346,12 @@ public:
 
    void clear() _sstl_noexcept(std::is_nothrow_destructible<value_type>::value)
    {
-      //FIXME
-      auto crt = _derived()._first_pointer;
-      while(crt <= _derived()._last_pointer)
+      while(_derived()._size > 0)
       {
-         crt->~value_type();
-         ++crt;
+         _derived()._last_pointer->~value_type();
+         _decrement_pointer(_derived()._last_pointer);
+         --_derived()._size;
       }
-      _derived()._first_pointer = crt;
-      _derived()._size = 0;
    }
 
    void push_back(const_reference value)
@@ -396,26 +393,29 @@ protected:
       _sstl_noexcept(std::is_nothrow_copy_constructible<value_type>::value)
    {
       sstl_assert(count <= capacity());
-      auto pos = _derived()._first_pointer-1;
+      auto pos = _derived()._first_pointer;
+      auto last_pos = pos+count;
       #if _sstl_has_exceptions()
       try
       {
       #endif
-         for(size_type i=0; i<count; ++i)
+         while(pos != last_pos)
          {
-            new(++pos) value_type(value);
+            new(pos) value_type(value);
+            ++pos;
          }
       #if _sstl_has_exceptions()
       }
       catch(...)
       {
          _derived()._last_pointer = pos-1;
+         _derived()._size = pos - _derived()._first_pointer;
          clear();
          throw;
       }
       #endif
       _derived()._size = count;
-      _derived()._last_pointer = pos;
+      _derived()._last_pointer = pos-1;
    }
 
    template<class TIterator, class = _enable_if_input_iterator_t<TIterator>>
@@ -471,6 +471,7 @@ protected:
          rhs._derived()._first_pointer = std::addressof(*src);
          rhs._derived()._size -= number_of_move_constructions;
          _derived()._last_pointer = dst-1;
+         _derived()._size = number_of_move_constructions;
          clear();
          throw;
       }
