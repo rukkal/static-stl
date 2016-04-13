@@ -41,15 +41,15 @@ friend class _dequeng_iterator<const dequeng>;
 public:
    using value_type = T;
    using size_type = size_t;
-   //using difference_type = ptrdiff_t;
    using reference = value_type&;
    using const_reference = const value_type&;
    using pointer = value_type*;
    using const_pointer = const value_type*;
    using iterator = _dequeng_iterator<dequeng>;
    using const_iterator = _dequeng_iterator<const dequeng>;
-   //using reverse_iterator = std::reverse_iterator<iterator>;
-   //using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+   using reverse_iterator = std::reverse_iterator<iterator>;
+   using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+   using difference_type = typename iterator::difference_type;
 
 public:
    dequeng& operator=(const dequeng& rhs)
@@ -287,6 +287,36 @@ public:
    const_iterator cend() const _sstl_noexcept_
    {
       return const_iterator{ this, nullptr };
+   }
+
+   reverse_iterator rbegin() _sstl_noexcept_
+   {
+      return reverse_iterator{ end() };
+   }
+
+   const_reverse_iterator rbegin() const _sstl_noexcept_
+   {
+      return crbegin();
+   }
+
+   const_reverse_iterator crbegin() const _sstl_noexcept_
+   {
+      return const_reverse_iterator{ cend() };
+   }
+
+   reverse_iterator rend() _sstl_noexcept_
+   {
+      return reverse_iterator{ begin() };
+   }
+
+   const_reverse_iterator rend() const _sstl_noexcept_
+   {
+      return crend();
+   }
+
+   const_reverse_iterator crend() const _sstl_noexcept_
+   {
+      return const_reverse_iterator{ cbegin() };
    }
 
    bool empty() const _sstl_noexcept_

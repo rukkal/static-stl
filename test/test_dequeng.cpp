@@ -662,6 +662,56 @@ TEST_CASE("dequeng")
       }
    }
 
+   SECTION("iterators")
+   {
+      SECTION("zero elements")
+      {
+         auto d = deque_counted_type_t{};
+         const auto& cd = d;
+
+         REQUIRE(d.begin() == d.end());
+         REQUIRE(cd.cbegin() == cd.cend());
+         REQUIRE(d.rbegin() == d.rend());
+         REQUIRE(cd.crbegin() == cd.crend());
+      }
+      SECTION("one elements")
+      {
+         auto d = deque_counted_type_t{1};
+         const auto& cd = d;
+
+         REQUIRE(std::distance(d.begin(), d.end()) == 1);
+         REQUIRE(std::distance(cd.cbegin(), cd.cend()) == 1);
+         REQUIRE(std::distance(d.rbegin(), d.rend()) == 1);
+         REQUIRE(std::distance(cd.crbegin(), cd.crend()) == 1);
+
+         REQUIRE(*d.begin() == 1);
+         REQUIRE(*cd.cbegin() == 1);
+         REQUIRE(*d.rbegin() == 1);
+         REQUIRE(*cd.crbegin() == 1);
+      }
+      SECTION("many elements")
+      {
+         auto l = std::initializer_list<counted_type>{1, 2, 3, 4, 5};
+         auto lbegin = l.begin();
+         auto lend = l.end();
+         auto lrbegin = std::reverse_iterator<decltype(lend)>{ lend };
+         auto lrend = std::reverse_iterator<decltype(lbegin)>{ lbegin };
+
+         auto d = deque_counted_type_t{ l };
+         const auto& cd = d;
+
+         REQUIRE(std::distance(d.begin(), d.end()) == 5);
+         REQUIRE(std::distance(cd.cbegin(), cd.cend()) == 5);
+         REQUIRE(std::distance(d.rbegin(), d.rend()) == 5);
+         REQUIRE(std::distance(cd.crbegin(), cd.crend()) == 5);
+
+         REQUIRE(std::equal(lbegin, lend, d.begin()));
+         REQUIRE(std::equal(lbegin, lend, cd.cbegin()));
+         REQUIRE(std::equal(lrbegin, lrend, d.rbegin()));
+         REQUIRE(std::equal(lrbegin, lrend, cd.crbegin()));
+      }
+   }
+
    SECTION("non-member relative operators")
    {
       SECTION("lhs < rhs")
