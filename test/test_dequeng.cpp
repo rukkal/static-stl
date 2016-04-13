@@ -742,6 +742,18 @@ TEST_CASE("dequeng")
       REQUIRE(d.size() == 0);
    }
 
+   SECTION("max_size")
+   {
+      {
+         auto d = sstl::dequeng<counted_type, 1>{};
+         REQUIRE(d.max_size() == 1);
+      }
+      {
+         auto d = sstl::dequeng<counted_type, 11>{};
+         REQUIRE(d.max_size() == 11);
+      }
+   }
+
    SECTION("non-member relative operators")
    {
       SECTION("lhs < rhs")

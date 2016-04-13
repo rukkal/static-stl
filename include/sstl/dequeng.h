@@ -334,6 +334,11 @@ public:
       return _derived()._size;
    }
 
+   size_type max_size() const _sstl_noexcept_
+   {
+      return capacity();
+   }
+
    size_type capacity() const _sstl_noexcept_
    {
       return _derived()._end_storage - _derived()._begin_storage();
