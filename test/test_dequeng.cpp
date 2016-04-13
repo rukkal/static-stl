@@ -732,6 +732,16 @@ TEST_CASE("dequeng")
       REQUIRE(d.full());
    }
 
+   SECTION("size")
+   {
+      auto d = deque_counted_type_t{};
+      REQUIRE(d.size() == 0);
+      d.push_back(0);
+      REQUIRE(d.size() == 1);
+      d.clear();
+      REQUIRE(d.size() == 0);
+   }
+
    SECTION("non-member relative operators")
    {
       SECTION("lhs < rhs")
