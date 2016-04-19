@@ -703,12 +703,6 @@ public:
       return reinterpret_cast<dequeng&>(_base::operator=(ilist));
    }
 
-   void assign(size_type count, const_reference value)
-      _sstl_noexcept(noexcept(std::declval<_base>().assign(std::declval<size_type>(), std::declval<const_reference>())))
-   {
-      _base::assign(count, value);
-   }
-
 private:
    pointer _begin_storage() _sstl_noexcept_
    {
