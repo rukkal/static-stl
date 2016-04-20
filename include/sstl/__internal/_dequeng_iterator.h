@@ -33,10 +33,17 @@ public:
       typename TDeque::reference>::type;
 
 public:
+   _dequeng_iterator() = default;
+
    _dequeng_iterator(TDeque* deque, pointer pos) _sstl_noexcept_
       : _deque(deque)
       , _pos(pos)
    {}
+
+   operator _dequeng_iterator<typename std::add_const<TDeque>::type>()
+   {
+      return _dequeng_iterator<typename std::add_const<TDeque>::type>{ _deque, _pos};
+   }
 
    reference operator*() const _sstl_noexcept_
    {
@@ -207,8 +214,8 @@ private:
    }
 
 private:
-   TDeque* _deque;
-   pointer _pos;
+   TDeque* _deque{ nullptr };
+   pointer _pos{ nullptr };
 };
 
 #endif

@@ -26,10 +26,23 @@ struct value_type
 };
 
 using iterator_type = typename sstl::dequeng<value_type>::iterator;
+using const_iterator_type = typename sstl::dequeng<value_type>::const_iterator;
 
 TEST_CASE("_dequeng_iterator")
 {
    auto d = make_noncontiguous_deque<value_type>({0, 1, 2, 3});
+
+   SECTION("default constructor")
+   {
+      iterator_type nonconst_it;
+      const_iterator_type const_it;
+   }
+
+   SECTION("non-const iterator to const iterator conversion")
+   {
+      iterator_type nonconst_it;
+      const_iterator_type const_it = nonconst_it;
+   }
 
    SECTION("expressions required by InputIterator concept")
    {
