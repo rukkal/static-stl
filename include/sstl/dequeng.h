@@ -216,7 +216,7 @@ public:
       }
       #endif
       sstl_assert(idx < size());
-      return begin()[idx];
+      return *_apply_offset_to_pointer(_derived()._first_pointer, idx);
    }
 
    const_reference at(size_type idx) const
@@ -227,36 +227,35 @@ public:
 
    reference operator[](size_type idx) _sstl_noexcept_
    {
-      return begin()[idx];
+      return *_apply_offset_to_pointer(_derived()._first_pointer, idx);
    }
 
    const_reference operator[](size_type idx) const _sstl_noexcept_
    {
-      return cbegin()[idx];
-   }
-
-   const_reference front() const _sstl_noexcept_
-   {
-      sstl_assert(!empty());
-      return *cbegin();
+      return const_cast<dequeng&>(*this)[idx];
    }
 
    reference front() _sstl_noexcept_
    {
       sstl_assert(!empty());
-      return *begin();
+      return *_derived()._first_pointer;
    }
 
-   const_reference back() const _sstl_noexcept_
+   const_reference front() const _sstl_noexcept_
    {
       sstl_assert(!empty());
-      return *(cend()-1);
+      return const_cast<dequeng&>(*this).front();
    }
 
    reference back() _sstl_noexcept_
    {
       sstl_assert(!empty());
-      return *(end()-1);
+      return *(_derived()._last_pointer);
+   }
+
+   const_reference back() const _sstl_noexcept_
+   {
+      return const_cast<dequeng&>(*this).back();
    }
 
    iterator begin() _sstl_noexcept_
@@ -451,23 +450,26 @@ protected:
       _sstl_noexcept(std::is_nothrow_move_constructible<value_type>::value)
    {
       sstl_assert(rhs.size() <= capacity());
-      auto src = rhs.begin();
+      auto src = rhs._derived()._first_pointer;
       auto dst = _derived()._begin_storage();
+      auto remaining_move_constructions = rhs.size();
       #if _sstl_has_exceptions()
       try
       {
       #endif
-         while(src != rhs.end())
+         while(remaining_move_constructions > 0)
          {
             new(dst) value_type(std::move(*src));
             src->~value_type();
-            ++src; ++dst;
+            src = rhs._inc_pointer(src);
+            ++dst;
+            --remaining_move_constructions;
          }
       #if _sstl_has_exceptions()
       }
       catch(...)
       {
-         auto number_of_move_constructions = dst - _derived()._begin_storage();
+         auto number_of_move_constructions = rhs.size() - remaining_move_constructions;
          rhs._derived()._first_pointer = std::addressof(*src);
          rhs._derived()._size -= number_of_move_constructions;
          _derived()._last_pointer = dst-1;
