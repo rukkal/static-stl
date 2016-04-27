@@ -60,7 +60,7 @@ public:
       if(_pos == _deque->_derived()._last_pointer)
          _pos = nullptr;
       else
-         _deque->_increment_pointer(_pos);
+         _pos = _deque->_inc_pointer(_pos);
       return *this;
    }
 
@@ -76,7 +76,7 @@ public:
       if(_pos == nullptr)
          _pos = _deque->_derived()._last_pointer;
       else
-         _deque->_decrement_pointer(_pos);
+         _pos = _deque->_dec_pointer(_pos);
       return *this;
    }
 
@@ -194,7 +194,7 @@ private:
    bool _is_pos_one_past_last_pointer() const _sstl_noexcept_
    {
       auto one_past_last_pointer = _deque->_derived()._last_pointer;
-      _deque->_increment_pointer(one_past_last_pointer);
+      one_past_last_pointer = _deque->_inc_pointer(one_past_last_pointer);
       return _pos == one_past_last_pointer;
    }
 
