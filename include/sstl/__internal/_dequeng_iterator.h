@@ -89,13 +89,13 @@ public:
 
    _dequeng_iterator& operator+=(difference_type inc) _sstl_noexcept_
    {
-      _apply_offset_to_pos(inc);
+      _pos = _deque->_apply_offset_to_pointer(_pos, inc);
       return *this;
    }
 
    _dequeng_iterator& operator-=(difference_type dec) _sstl_noexcept_
    {
-      _apply_offset_to_pos(-dec);
+      _pos = _deque->_apply_offset_to_pointer(_pos, -dec);
       return *this;
    }
 
@@ -166,38 +166,6 @@ public:
    }
 
 private:
-   void _apply_offset_to_pos(difference_type offset) _sstl_noexcept_
-   {
-      if(_pos == nullptr)
-      {
-         sstl_assert(offset <= 0);
-         _pos = _deque->_derived()._last_pointer;
-         ++offset;
-      }
-
-      _pos += offset;
-      if(_pos >= _deque->_derived()._end_storage)
-      {
-         _pos = _deque->_derived()._begin_storage() + (_pos - _deque->_derived()._end_storage);
-         sstl_assert(_pos <= _deque->_derived()._last_pointer+1);
-      }
-      else if(_pos < _deque->_derived()._begin_storage())
-      {
-         _pos = _deque->_derived()._end_storage - (_deque->_derived()._begin_storage() - _pos);
-         sstl_assert(_pos >= _deque->_derived()._first_pointer);
-      }
-
-      if(_is_pos_one_past_last_pointer())
-         _pos = nullptr;
-   }
-
-   bool _is_pos_one_past_last_pointer() const _sstl_noexcept_
-   {
-      auto one_past_last_pointer = _deque->_derived()._last_pointer;
-      one_past_last_pointer = _deque->_inc_pointer(one_past_last_pointer);
-      return _pos == one_past_last_pointer;
-   }
-
    difference_type _linearized_pos() const _sstl_noexcept_
    {
       if(_pos != nullptr)

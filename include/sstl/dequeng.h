@@ -567,6 +567,50 @@ protected:
    {
       return _dec_pointer(const_cast<pointer&>(ptr));
    }
+
+   pointer _apply_offset_to_pointer(pointer ptr, difference_type offset) const _sstl_noexcept_
+   {
+      auto first_pointer = const_cast<pointer>(_derived()._first_pointer);
+      auto last_pointer = const_cast<pointer>(_derived()._last_pointer);
+      auto begin_storage = const_cast<pointer>(_derived()._begin_storage());
+      auto end_storage = const_cast<pointer>(_derived()._end_storage);
+
+      if(ptr == nullptr)
+      {
+         sstl_assert(offset <= 0);
+         ptr = last_pointer;
+         ++offset;
+      }
+
+      ptr += offset;
+      if(ptr >= end_storage)
+      {
+         ptr = begin_storage + (ptr - end_storage);
+         sstl_assert(ptr <= last_pointer+1);
+      }
+      else if(ptr < begin_storage)
+      {
+         ptr = end_storage - (begin_storage - ptr);
+         sstl_assert(ptr >= first_pointer);
+      }
+
+      if(_is_pointer_one_past_last_pointer(ptr))
+         ptr = nullptr;
+
+      return ptr;
+   }
+
+   const_pointer _apply_offset_to_pointer(const_pointer ptr, difference_type offset) const _sstl_noexcept_
+   {
+      return _apply_offset_to_pointer(const_cast<pointer>(ptr), offset);
+   }
+
+   bool _is_pointer_one_past_last_pointer(const_pointer ptr) const _sstl_noexcept_
+   {
+      auto one_past_last_pointer = _derived()._last_pointer;
+      one_past_last_pointer = _inc_pointer(one_past_last_pointer);
+      return ptr == one_past_last_pointer;
+   }
 };
 
 template<class T, size_t CAPACITY>
