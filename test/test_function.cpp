@@ -147,14 +147,16 @@ TEST_CASE("function")
          callable_type c;
          SECTION("first parameter is 'this' pointer")
          {
-            auto f = sstl::function<void(callable_type*, int&), sizeof(&callable_type::operation)>{ &callable_type::operation };
+            static const auto callable_size = sizeof(&callable_type::operation);
+            auto f = sstl::function<void(callable_type*, int&), callable_size>{ &callable_type::operation };
             int i = 3;
             f(&c, i);
             REQUIRE(i == EXPECTED_OUTPUT_PARAMETER);
          }
          SECTION("first parameter is 'this' reference")
          {
-            auto f = sstl::function<void(callable_type&, int&), sizeof(&callable_type::operation)>{ &callable_type::operation };
+            static const auto callable_size = sizeof(&callable_type::operation);
+            auto f = sstl::function<void(callable_type&, int&), callable_size>{ &callable_type::operation };
             int i = 3;
             f(c, i);
             REQUIRE(i == EXPECTED_OUTPUT_PARAMETER);
@@ -269,12 +271,16 @@ TEST_CASE("function")
          REQUIRE(counted_type::check().constructions(0).destructions(1));
       }
       #if _sstl_has_exceptions()
+      #if !_is_msvc()
+      //note: the test breaks because MSVC elides the copy construction (although the optimizer is turned off)
+      //even when the sstl::function instances are escaped (compiler is forced not to optimize them)
       auto rhs = sstl::function<void(), sizeof(counted_type)>{ counted_type() };
       auto lhs = sstl::function<void(), sizeof(counted_type)>{ [](){} };
       counted_type::reset_counts();
       counted_type::throw_at_nth_copy_construction(1);
       REQUIRE_THROWS_AS(lhs = rhs, counted_type::copy_construction::exception);
       REQUIRE(static_cast<bool>(lhs)==false);
+      #endif
       #endif
    }
 
@@ -356,7 +362,8 @@ TEST_CASE("function")
       }
       SECTION("target is pointer to member function")
       {
-         auto f = sstl::function<void(callable_type&, int&), sizeof(&callable_type::operation)>{};
+         static const auto callable_size = sizeof(&callable_type::operation);
+         auto f = sstl::function<void(callable_type&, int&), callable_size>{};
          f = &callable_type::operation;
          callable_type c;
          int i = 3;

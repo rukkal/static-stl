@@ -292,7 +292,11 @@ protected:
 protected:
    function() _sstl_noexcept_ = default;
    function(const function&) = default;
+   #if _is_msvc()
+   function(function&&) {}
+   #else
    function(function&&) = default;
+   #endif
    ~function() = default;
 };
 
