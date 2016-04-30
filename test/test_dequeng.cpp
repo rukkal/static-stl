@@ -844,8 +844,8 @@ TEST_CASE("dequeng")
                counted_type::reset_counts();
                counted_type::throw_at_nth_move_assignment(1);
                REQUIRE_THROWS_AS(d.insert(d.end()-2, value), counted_type::move_assignment::exception);
-               REQUIRE(counted_type::check{}.move_constructions(1).move_assignments(0).destructions(0));
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4, 4}));
+               REQUIRE(counted_type::check{}.move_constructions(1).move_assignments(0).destructions(1));
+               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
             }
             SECTION("begin region")
             {
@@ -853,8 +853,8 @@ TEST_CASE("dequeng")
                counted_type::reset_counts();
                counted_type::throw_at_nth_move_assignment(1);
                REQUIRE_THROWS_AS(d.insert(d.begin()+2, value), counted_type::move_assignment::exception);
-               REQUIRE(counted_type::check{}.move_constructions(1).move_assignments(0).destructions(0));
-               REQUIRE((d == deque_counted_type_t{0, 0, 1, 2, 3, 4, 5}));
+               REQUIRE(counted_type::check{}.move_constructions(1).move_assignments(0).destructions(1));
+               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4, 5}));
             }
          }
          SECTION("copy assignment throws")

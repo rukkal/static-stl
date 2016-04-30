@@ -630,9 +630,9 @@ protected:
                      && std::is_nothrow_move_assignable<value_type>::value)
    {
       auto number_of_constructions = std::min(n, static_cast<size_type>(pos-begin()));
-      auto number_of_assignments = pos - begin() - number_of_constructions;
 
-      auto dst = _subtract_offset_to_pointer(_derived()._first_pointer, number_of_constructions);
+      auto dst_first = _subtract_offset_to_pointer(_derived()._first_pointer, number_of_constructions);
+      auto dst = dst_first;
       auto src = _derived()._first_pointer;
 
       size_type remaining_constructions;
@@ -646,15 +646,24 @@ protected:
             src = _inc_pointer(src);
             dst = _inc_pointer(dst);
          }
+
+         auto number_of_assignments = pos - begin() - number_of_constructions;
+         for(size_type i=number_of_assignments; i>0; i--)
+         {
+            *dst = std::move(*src);
+            src = _inc_pointer(src);
+            dst = _inc_pointer(dst);
+         }
       #if _sstl_has_exceptions()
       }
       catch(...)
       {
          auto destructions = number_of_constructions - remaining_constructions;
+         auto ptr = dst_first;
          for(size_type i=destructions; i>0; --i)
          {
-            dst = _dec_pointer(dst);
-            dst->~value_type();
+            ptr->~value_type();
+            ptr = _inc_pointer(ptr);
          }
          throw;
       }
@@ -662,13 +671,6 @@ protected:
 
       _derived()._first_pointer = _subtract_offset_to_pointer(_derived()._first_pointer, n);
       _derived()._size += n;
-
-      for(size_type i=number_of_assignments; i>0; i--)
-      {
-         *dst = std::move(*src);
-         src = _inc_pointer(src);
-         dst = _inc_pointer(dst);
-      }
    }
 
    void _shift_from_pos_to_end_by_n_positions(iterator pos, size_type n)
@@ -678,7 +680,8 @@ protected:
       auto number_of_constructions = std::min(n, static_cast<size_type>(end()-pos));
       auto number_of_assignments = static_cast<size_type>(end()-pos) - number_of_constructions;
 
-      auto dst = _add_offset_to_pointer(_derived()._last_pointer, number_of_constructions);
+      auto dst_first = _add_offset_to_pointer(_derived()._last_pointer, number_of_constructions);
+      auto dst = dst_first;
       auto src = _derived()._last_pointer;
 
       size_type remaining_constructions;
@@ -692,15 +695,23 @@ protected:
             src = _dec_pointer(src);
             dst = _dec_pointer(dst);
          }
+
+         for(size_type i=0; i<number_of_assignments; ++i)
+         {
+            *dst = std::move(*src);
+            src = _dec_pointer(src);
+            dst = _dec_pointer(dst);
+         }
       #if _sstl_has_exceptions()
       }
       catch(...)
       {
          auto destructions = number_of_constructions - remaining_constructions;
+         auto ptr = dst_first;
          for(size_type i=0; i<destructions; ++i)
          {
-            dst = _inc_pointer(dst);
-            dst->~value_type();
+            ptr->~value_type();
+            ptr = _dec_pointer(ptr);
          }
          throw;
       }
@@ -708,13 +719,6 @@ protected:
 
       _derived()._last_pointer = _add_offset_to_pointer(_derived()._last_pointer, n);
       _derived()._size += n;
-
-      for(size_type i=0; i<number_of_assignments; ++i)
-      {
-         *dst = std::move(*src);
-         src = _dec_pointer(src);
-         dst = _dec_pointer(dst);
-      }
    }
 
    _type_for_derived_class_access& _derived() _sstl_noexcept_;
