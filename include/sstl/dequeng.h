@@ -216,7 +216,7 @@ public:
       }
       #endif
       sstl_assert(idx < size());
-      return *_apply_offset_to_pointer(_derived()._first_pointer, idx);
+      return *_add_offset_to_pointer(_derived()._first_pointer, idx);
    }
 
    const_reference at(size_type idx) const
@@ -227,7 +227,7 @@ public:
 
    reference operator[](size_type idx) _sstl_noexcept_
    {
-      return *_apply_offset_to_pointer(_derived()._first_pointer, idx);
+      return *_add_offset_to_pointer(_derived()._first_pointer, idx);
    }
 
    const_reference operator[](size_type idx) const _sstl_noexcept_
@@ -351,6 +351,53 @@ public:
          _derived()._last_pointer = _dec_pointer(_derived()._last_pointer);
          --_derived()._size;
       }
+   }
+
+   iterator insert(const_iterator pos, const value_type& value)
+   {
+      sstl_assert(!full());
+      auto distance_to_begin = std::distance(cbegin(), pos);
+      auto distance_to_end = std::distance(pos, cend());
+      if(distance_to_begin < distance_to_end)
+      {
+         if(distance_to_begin > 0)
+         {
+            auto nonconst_pos = iterator{ this, const_cast<pointer>(std::addressof(*pos)) };
+            _shift_from_begin_to_pos_by_n_positions(nonconst_pos, 1);
+            --nonconst_pos;
+            *nonconst_pos = value;
+            return nonconst_pos;
+         }
+         else
+         {
+            push_front(value);
+            return begin();
+         }
+      }
+      else
+      {
+         if(distance_to_end > 0)
+         {
+            auto nonconst_pos = iterator{this, const_cast<pointer>(std::addressof(*pos))};
+            _shift_from_pos_to_end_by_n_positions(nonconst_pos, 1);
+            *nonconst_pos = value;
+            return nonconst_pos;
+         }
+         else
+         {
+            push_back(value);
+            return end()-1;
+         }
+      }
+   }
+
+   void push_front(const_reference value)
+      _sstl_noexcept(std::is_nothrow_constructible<value_type>::value)
+   {
+      sstl_assert(!full());
+      _derived()._first_pointer = _dec_pointer(_derived()._first_pointer);
+      new(_derived()._first_pointer) value_type(value);
+      ++_derived()._size;
    }
 
    void push_back(const_reference value)
@@ -541,6 +588,98 @@ protected:
       _derived()._size = new_size;
    }
 
+   void _shift_from_begin_to_pos_by_n_positions(iterator pos, size_type n)
+      _sstl_noexcept(   std::is_nothrow_move_constructible<value_type>::value
+                     && std::is_nothrow_move_assignable<value_type>::value)
+   {
+      auto number_of_constructions = std::min(n, static_cast<size_type>(pos-begin()));
+      auto number_of_assignments = pos - begin() - number_of_constructions;
+
+      auto dst = _subtract_offset_to_pointer(_derived()._first_pointer, number_of_constructions);
+      auto src = _derived()._first_pointer;
+
+      size_type remaining_constructions;
+      #if _sstl_has_exceptions()
+      try
+      {
+      #endif
+         for(remaining_constructions=number_of_constructions; remaining_constructions>0; --remaining_constructions)
+         {
+            new(dst) value_type(std::move(*src));
+            src = _inc_pointer(src);
+            dst = _inc_pointer(dst);
+         }
+      #if _sstl_has_exceptions()
+      }
+      catch(...)
+      {
+         auto destructions = number_of_constructions - remaining_constructions;
+         for(size_type i=destructions; i>0; --i)
+         {
+            dst = _dec_pointer(dst);
+            dst->~value_type();
+         }
+         throw;
+      }
+      #endif
+
+      _derived()._first_pointer = _subtract_offset_to_pointer(_derived()._first_pointer, n);
+      _derived()._size += n;
+
+      for(size_type i=number_of_assignments; i>0; i--)
+      {
+         *dst = std::move(*src);
+         src = _inc_pointer(src);
+         dst = _inc_pointer(dst);
+      }
+   }
+
+   void _shift_from_pos_to_end_by_n_positions(iterator pos, size_type n)
+      _sstl_noexcept(   std::is_nothrow_move_constructible<value_type>::value
+                     && std::is_nothrow_move_assignable<value_type>::value)
+   {
+      auto number_of_constructions = std::min(n, static_cast<size_type>(end()-pos));
+      auto number_of_assignments = static_cast<size_type>(end()-pos) - number_of_constructions;
+
+      auto dst = _add_offset_to_pointer(_derived()._last_pointer, number_of_constructions);
+      auto src = _derived()._last_pointer;
+
+      size_type remaining_constructions;
+      #if _sstl_has_exceptions()
+      try
+      {
+      #endif
+         for(remaining_constructions=number_of_constructions; remaining_constructions>0; --remaining_constructions)
+         {
+            new(dst) value_type(std::move(*src));
+            src = _dec_pointer(src);
+            dst = _dec_pointer(dst);
+         }
+      #if _sstl_has_exceptions()
+      }
+      catch(...)
+      {
+         auto destructions = number_of_constructions - remaining_constructions;
+         for(size_type i=0; i<destructions; ++i)
+         {
+            dst = _inc_pointer(dst);
+            dst->~value_type();
+         }
+         throw;
+      }
+      #endif
+
+      _derived()._last_pointer = _add_offset_to_pointer(_derived()._last_pointer, n);
+      _derived()._size += n;
+
+      for(size_type i=0; i<number_of_assignments; ++i)
+      {
+         *dst = std::move(*src);
+         src = _dec_pointer(src);
+         dst = _dec_pointer(dst);
+      }
+   }
+
    _type_for_derived_class_access& _derived() _sstl_noexcept_;
    const _type_for_derived_class_access& _derived() const _sstl_noexcept_;
 
@@ -552,12 +691,12 @@ protected:
       return ptr;
    }
 
-   const_pointer _inc_pointer(const_pointer& ptr) const _sstl_noexcept_
+   const_pointer _inc_pointer(const_pointer ptr) const _sstl_noexcept_
    {
-      return _inc_pointer(const_cast<pointer&>(ptr));
+      return _inc_pointer(const_cast<pointer>(ptr));
    }
 
-   pointer _dec_pointer(pointer& ptr) const _sstl_noexcept_
+   pointer _dec_pointer(pointer ptr) const _sstl_noexcept_
    {
       ptr -= 1;
       if(ptr < _derived()._begin_storage())
@@ -565,39 +704,50 @@ protected:
       return ptr;
    }
 
-   const_pointer _dec_pointer(const_pointer& ptr) const _sstl_noexcept_
+   const_pointer _dec_pointer(const_pointer ptr) const _sstl_noexcept_
    {
-      return _dec_pointer(const_cast<pointer&>(ptr));
+      return _dec_pointer(const_cast<pointer>(ptr));
+   }
+
+   pointer _add_offset_to_pointer(pointer ptr, size_type offset) const _sstl_noexcept_
+   {
+      auto begin_storage = const_cast<pointer>(_derived()._begin_storage());
+      auto end_storage = const_cast<pointer>(_derived()._end_storage);
+
+      ptr += offset;
+      if(ptr >= end_storage)
+      {
+         ptr = begin_storage + (ptr - end_storage);
+      }
+      return ptr;
+   }
+
+   pointer _subtract_offset_to_pointer(pointer ptr, size_type offset) const _sstl_noexcept_
+   {
+      auto begin_storage = const_cast<pointer>(_derived()._begin_storage());
+      auto end_storage = const_cast<pointer>(_derived()._end_storage);
+
+      ptr -= offset;
+      if(ptr < begin_storage)
+      {
+         ptr = end_storage - (begin_storage - ptr);
+      }
+      return ptr;
    }
 
    pointer _apply_offset_to_pointer(pointer ptr, difference_type offset) const _sstl_noexcept_
    {
       auto first_pointer = const_cast<pointer>(_derived()._first_pointer);
       auto last_pointer = const_cast<pointer>(_derived()._last_pointer);
-      auto begin_storage = const_cast<pointer>(_derived()._begin_storage());
-      auto end_storage = const_cast<pointer>(_derived()._end_storage);
 
-      if(ptr == nullptr)
+      if(offset > 0)
       {
-         sstl_assert(offset <= 0);
-         ptr = last_pointer;
-         ++offset;
+         ptr = _add_offset_to_pointer(ptr, offset);
       }
-
-      ptr += offset;
-      if(ptr >= end_storage)
+      else
       {
-         ptr = begin_storage + (ptr - end_storage);
-         sstl_assert(ptr <= last_pointer+1);
+         ptr = _subtract_offset_to_pointer(ptr, -offset);
       }
-      else if(ptr < begin_storage)
-      {
-         ptr = end_storage - (begin_storage - ptr);
-         sstl_assert(ptr >= first_pointer);
-      }
-
-      if(_is_pointer_one_past_last_pointer(ptr))
-         ptr = nullptr;
 
       return ptr;
    }

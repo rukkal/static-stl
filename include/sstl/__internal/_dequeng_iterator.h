@@ -89,13 +89,29 @@ public:
 
    _dequeng_iterator& operator+=(difference_type inc) _sstl_noexcept_
    {
+      if(_pos == nullptr)
+      {
+         sstl_assert(inc <= 0);
+         _pos = _deque->_derived()._last_pointer;
+         ++inc;
+      }
       _pos = _deque->_apply_offset_to_pointer(_pos, inc);
+      if(_deque->_is_pointer_one_past_last_pointer(_pos))
+         _pos = nullptr;
       return *this;
    }
 
    _dequeng_iterator& operator-=(difference_type dec) _sstl_noexcept_
    {
+      if(_pos == nullptr)
+      {
+         sstl_assert(dec >= 0);
+         _pos = _deque->_derived()._last_pointer;
+         --dec;
+      }
       _pos = _deque->_apply_offset_to_pointer(_pos, -dec);
+      if(_deque->_is_pointer_one_past_last_pointer(_pos))
+         _pos = nullptr;
       return *this;
    }
 
