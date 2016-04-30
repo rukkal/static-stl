@@ -355,57 +355,55 @@ public:
 
    iterator insert(const_iterator pos, const value_type& value)
    {
-      sstl_assert(!full());
-      auto distance_to_begin = std::distance(cbegin(), pos);
-      auto distance_to_end = std::distance(pos, cend());
-      if(distance_to_begin < distance_to_end)
-      {
-         if(distance_to_begin > 0)
-         {
-            auto nonconst_pos = iterator{ this, const_cast<pointer>(std::addressof(*pos)) };
-            _shift_from_begin_to_pos_by_n_positions(nonconst_pos, 1);
-            --nonconst_pos;
-            *nonconst_pos = value;
-            return nonconst_pos;
-         }
-         else
-         {
-            push_front(value);
-            return begin();
-         }
-      }
-      else
-      {
-         if(distance_to_end > 0)
-         {
-            auto nonconst_pos = iterator{this, const_cast<pointer>(std::addressof(*pos))};
-            _shift_from_pos_to_end_by_n_positions(nonconst_pos, 1);
-            *nonconst_pos = value;
-            return nonconst_pos;
-         }
-         else
-         {
-            push_back(value);
-            return end()-1;
-         }
-      }
+      return _emplace_value(pos, value);
+   }
+
+   iterator insert(const_iterator pos, value_type&& value)
+   {
+      return _emplace_value(pos, std::move(value));
    }
 
    void push_front(const_reference value)
-      _sstl_noexcept(std::is_nothrow_constructible<value_type>::value)
+      _sstl_noexcept(noexcept(std::declval<dequeng>().emplace_front(std::declval<const_reference>())))
+   {
+      emplace_front(value);
+   }
+
+   void push_front(value_type&& value)
+      _sstl_noexcept(noexcept(std::declval<dequeng>().emplace_front(std::declval<value_type&&>())))
+   {
+      emplace_front(std::move(value));
+   }
+
+   template<class... Args>
+   void emplace_front(Args&&... value)
+      _sstl_noexcept(std::is_nothrow_constructible<value_type, typename std::add_rvalue_reference<Args>::type...>::value)
    {
       sstl_assert(!full());
       _derived()._first_pointer = _dec_pointer(_derived()._first_pointer);
-      new(_derived()._first_pointer) value_type(value);
+      new(_derived()._first_pointer) value_type(std::forward<Args>(value)...);
       ++_derived()._size;
    }
 
    void push_back(const_reference value)
-      _sstl_noexcept(std::is_nothrow_constructible<value_type>::value)
+      _sstl_noexcept(noexcept(std::declval<dequeng>().emplace_back(std::declval<const_reference>())))
+   {
+      emplace_back(value);
+   }
+
+   void push_back(value_type&& value)
+      _sstl_noexcept(noexcept(std::declval<dequeng>().emplace_back(std::declval<value_type&&>())))
+   {
+      emplace_back(std::move(value));
+   }
+
+   template<class... Args>
+   void emplace_back(Args&&... args)
+      _sstl_noexcept(std::is_nothrow_constructible<value_type, typename std::add_rvalue_reference<Args>::type...>::value)
    {
       sstl_assert(!full());
       _derived()._last_pointer = _inc_pointer(_derived()._last_pointer);
-      new(_derived()._last_pointer) value_type(value);
+      new(_derived()._last_pointer) value_type(std::forward<Args>(args)...);
       ++_derived()._size;
    }
 
@@ -586,6 +584,45 @@ protected:
 
       _derived()._last_pointer = new_last_pointer;
       _derived()._size = new_size;
+   }
+
+   template<class TValue>
+   iterator _emplace_value(const_iterator pos, TValue&& value)
+   {
+      sstl_assert(!full());
+      auto distance_to_begin = std::distance(cbegin(), pos);
+      auto distance_to_end = std::distance(pos, cend());
+      if(distance_to_begin < distance_to_end)
+      {
+         if(distance_to_begin > 0)
+         {
+            auto nonconst_pos = iterator{ this, const_cast<pointer>(std::addressof(*pos)) };
+            _shift_from_begin_to_pos_by_n_positions(nonconst_pos, 1);
+            --nonconst_pos;
+            *nonconst_pos = std::forward<TValue>(value);
+            return nonconst_pos;
+         }
+         else
+         {
+            push_front(std::forward<TValue>(value));
+            return begin();
+         }
+      }
+      else
+      {
+         if(distance_to_end > 0)
+         {
+            auto nonconst_pos = iterator{this, const_cast<pointer>(std::addressof(*pos))};
+            _shift_from_pos_to_end_by_n_positions(nonconst_pos, 1);
+            *nonconst_pos = std::forward<TValue>(value);
+            return nonconst_pos;
+         }
+         else
+         {
+            push_back(std::forward<TValue>(value));
+            return end()-1;
+         }
+      }
    }
 
    void _shift_from_begin_to_pos_by_n_positions(iterator pos, size_type n)

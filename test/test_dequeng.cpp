@@ -869,6 +869,61 @@ TEST_CASE("dequeng")
       #endif
    }
 
+   SECTION("insert (by rvalue reference)")
+   {
+      auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+      auto value = counted_type{ 10 };
+      SECTION("begin")
+      {
+         counted_type::reset_counts();
+         deque_counted_type_t::iterator it = d.insert(d.cbegin(), std::move(value));
+         REQUIRE(counted_type::check().move_constructions(1));
+         REQUIRE((d == deque_counted_type_t{10, 0, 1, 2, 3, 4}));
+      }
+      SECTION("begin+1")
+      {
+         counted_type::reset_counts();
+         deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, std::move(value));
+         REQUIRE(counted_type::check().move_constructions(1).move_assignments(1));
+         REQUIRE((d == deque_counted_type_t{0, 10, 1, 2, 3, 4}));
+      }
+      SECTION("begin+2")
+      {
+         counted_type::reset_counts();
+         deque_counted_type_t::iterator it = d.insert(d.cbegin()+2, std::move(value));
+         REQUIRE(counted_type::check().move_constructions(1).move_assignments(2));
+         REQUIRE((d == deque_counted_type_t{0, 1, 10, 2, 3, 4}));
+      }
+      SECTION("end")
+      {
+         counted_type::reset_counts();
+         deque_counted_type_t::iterator it = d.insert(d.cend(), std::move(value));
+         REQUIRE(counted_type::check().move_constructions(1));
+         REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4, 10}));
+      }
+      SECTION("end-1")
+      {
+         counted_type::reset_counts();
+         deque_counted_type_t::iterator it = d.insert(d.cend()-1, std::move(value));
+         REQUIRE(counted_type::check().move_constructions(1).move_assignments(1));
+         REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 10, 4}));
+      }
+      SECTION("end-2")
+      {
+         counted_type::reset_counts();
+         deque_counted_type_t::iterator it = d.insert(d.cend()-2, std::move(value));
+         REQUIRE(counted_type::check().move_constructions(1).move_assignments(2));
+         REQUIRE((d == deque_counted_type_t{0, 1, 2, 10, 3, 4}));
+      }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling")
+      {
+         //exception handling already tested in the by-lvalue version
+         //(same exceptin handling code)
+      }
+      #endif
+   }
+
    SECTION("non-member relative operators")
    {
       SECTION("lhs < rhs")
