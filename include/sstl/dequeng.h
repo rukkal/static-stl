@@ -462,7 +462,7 @@ protected:
       _derived()._last_pointer = pos-1;
    }
 
-   template<class TIterator, class = _enable_if_input_iterator_t<TIterator>>
+   template<class TIterator, class = typename std::enable_if<_is_input_iterator<TIterator>::value>::type>
    void _range_constructor(TIterator range_begin, TIterator range_end)
       _sstl_noexcept(std::is_nothrow_copy_constructible<value_type>::value)
    {
@@ -529,7 +529,7 @@ protected:
       rhs._derived()._size = 0;
    }
 
-   template<class TIterator, class = _enable_if_input_iterator_t<TIterator>>
+   template<class TIterator, class = typename std::enable_if<_is_input_iterator<TIterator>::value>::type>
    void _range_assignment(TIterator range_begin, TIterator range_end)
       _sstl_noexcept(std::is_nothrow_copy_assignable<value_type>::value
                      && std::is_nothrow_copy_constructible<value_type>::value)
@@ -846,7 +846,7 @@ public:
       _base::_count_constructor(count, value);
    }
 
-   template<class TIterator, class = _enable_if_input_iterator_t<TIterator>>
+   template<class TIterator, class = typename std::enable_if<_is_input_iterator<TIterator>::value>::type>
    dequeng(TIterator range_begin, TIterator range_end)
       _sstl_noexcept(noexcept(std::declval<_base>()._range_constructor( std::declval<TIterator>(),
                                                                         std::declval<TIterator>())))

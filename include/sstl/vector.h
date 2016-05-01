@@ -92,7 +92,7 @@ public:
    }
 
    template<class TIterator,
-            class = _enable_if_input_iterator_t<TIterator>>
+            class = typename std::enable_if<_is_input_iterator<TIterator>::value>::type>
    void assign(TIterator range_begin, TIterator range_end)
       _sstl_noexcept(noexcept(std::declval<vector>()._copy_assign(std::declval<TIterator>(),
                                                                   std::declval<TIterator>())))
@@ -350,7 +350,7 @@ public:
       return const_cast<iterator>(pos);
    }
 
-   template<class TIterator, class = _enable_if_input_iterator_t<TIterator>>
+   template<class TIterator, class = typename std::enable_if<_is_input_iterator<TIterator>::value>::type>
    iterator insert(const_iterator pos, TIterator range_begin, TIterator range_end)
       _sstl_noexcept(noexcept(std::declval<vector>()._insert(  std::declval<iterator>(),
                                                                std::declval<TIterator>(),
@@ -570,7 +570,7 @@ protected:
       #endif
    }
 
-   template<class TIterator, class = _enable_if_input_iterator_t<TIterator>>
+   template<class TIterator, class = typename std::enable_if<_is_input_iterator<TIterator>::value>::type>
    void _range_constructor(TIterator range_begin, TIterator range_end)
       _sstl_noexcept(std::is_nothrow_copy_constructible<value_type>::value)
    {
@@ -811,7 +811,7 @@ protected:
       return pos;
    }
 
-   template<class TIterator, class = _enable_if_input_iterator_t<TIterator>>
+   template<class TIterator, class = typename std::enable_if<_is_input_iterator<TIterator>::value>::type>
    iterator _insert(iterator pos, TIterator range_begin, TIterator range_end)
       _sstl_noexcept(std::is_nothrow_move_constructible<value_type>::value
                      && std::is_nothrow_move_assignable<value_type>::value
@@ -916,7 +916,7 @@ public:
       _base::_count_constructor(count, value);
    }
 
-   template<class TIterator, class = _enable_if_input_iterator_t<TIterator>>
+   template<class TIterator, class = typename std::enable_if<_is_input_iterator<TIterator>::value>::type>
    vector(TIterator range_begin, TIterator range_end)
       _sstl_noexcept(noexcept(std::declval<_base>()._range_constructor( std::declval<TIterator>(),
                                                                         std::declval<TIterator>())))
