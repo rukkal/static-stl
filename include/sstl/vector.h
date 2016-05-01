@@ -97,7 +97,6 @@ public:
       _sstl_noexcept(noexcept(std::declval<vector>()._copy_assign(std::declval<TIterator>(),
                                                                   std::declval<TIterator>())))
    {
-      sstl_assert(std::distance(range_begin, range_end) <= _capacity());
       _copy_assign(range_begin, range_end);
    }
 
@@ -350,8 +349,11 @@ public:
       return const_cast<iterator>(pos);
    }
 
-   template<class TIterator, class = typename std::enable_if<_is_input_iterator<TIterator>::value>::type>
-   iterator insert(const_iterator pos, TIterator range_begin, TIterator range_end)
+   template<class TIterator>
+   iterator insert(  const_iterator pos,
+                     TIterator range_begin,
+                     TIterator range_end,
+                     typename std::enable_if<_is_forward_iterator<TIterator>::value>::type* = 0)
       _sstl_noexcept(noexcept(std::declval<vector>()._insert(  std::declval<iterator>(),
                                                                std::declval<TIterator>(),
                                                                std::declval<TIterator>())))
@@ -359,6 +361,42 @@ public:
       sstl_assert(pos >= begin() && pos <= end());
       sstl_assert(size() + std::distance(range_begin, range_end) <= capacity());
       return _insert(const_cast<iterator>(pos), range_begin, range_end);
+   }
+
+   template<class TIterator>
+   iterator insert(  const_iterator pos,
+                     TIterator range_begin,
+                     TIterator range_end,
+                     typename std::enable_if< _is_input_iterator<TIterator>::value
+                                          && !_is_forward_iterator<TIterator>::value>::type* = 0)
+      _sstl_noexcept(std::is_nothrow_copy_constructible<value_type>::value
+                  && noexcept(std::rotate(std::declval<iterator>(),
+                                          std::declval<iterator>(),
+                                          std::declval<iterator>())))
+   {
+      auto nonconst_pos = const_cast<iterator>(pos);
+      auto old_end = end();
+
+      #if _sstl_has_exceptions()
+      try
+      {
+      #endif
+         std::copy(range_begin, range_end, std::back_inserter(*this));
+      #if _sstl_has_exceptions()
+      }
+      catch(...)
+      {
+         while(end() > old_end)
+         {
+            (end()-1)->~value_type();
+            _set_end(end()-1);
+         }
+         throw;
+      }
+      #endif
+
+      std::rotate(nonconst_pos, old_end, end());
+      return nonconst_pos;
    }
 
    iterator insert(const_iterator pos, std::initializer_list<value_type> init)
@@ -811,7 +849,7 @@ protected:
       return pos;
    }
 
-   template<class TIterator, class = typename std::enable_if<_is_input_iterator<TIterator>::value>::type>
+   template<class TIterator, class = typename std::enable_if<_is_bidirectional_iterator<TIterator>::value>::type>
    iterator _insert(iterator pos, TIterator range_begin, TIterator range_end)
       _sstl_noexcept(std::is_nothrow_move_constructible<value_type>::value
                      && std::is_nothrow_move_assignable<value_type>::value

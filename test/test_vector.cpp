@@ -13,6 +13,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 
 #include "utility.h"
 #include "counted_type.h"
+#include "counted_type_stream_iterator.h"
 
 namespace sstl_test
 {
@@ -1084,7 +1085,7 @@ TEST_CASE("vector")
       #endif
    }
 
-   SECTION("range + initializer-list insert")
+   SECTION("range (input iterator + forward iterator) + initializer-list insert")
    {
       auto v = vector_counted_type_t{3, 3, 3, 3, 3};
 
@@ -1095,7 +1096,13 @@ TEST_CASE("vector")
             auto expected = std::initializer_list<counted_type>{3, 3, 3, 3, 3};
             auto values = std::initializer_list<counted_type>{};
             counted_type::reset_counts();
-            SECTION("range")
+            SECTION("range (input iterator)")
+            {
+               auto pos = v.insert(v.begin(), counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(pos == v.begin());
+               REQUIRE(are_containers_equal(v, expected));
+            }
+            SECTION("range (forward iterator)")
             {
                auto pos = v.insert(v.begin(), values.begin(), values.end());
                REQUIRE(pos == v.begin());
@@ -1115,7 +1122,13 @@ TEST_CASE("vector")
             auto expected = std::initializer_list<counted_type>{7, 3, 3, 3, 3, 3};
             auto values = std::initializer_list<counted_type>{7};
             counted_type::reset_counts();
-            SECTION("range")
+            SECTION("range (input iterator)")
+            {
+               auto pos = v.insert(v.begin(), counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(pos == v.begin());
+               REQUIRE(are_containers_equal(v, expected));
+            }
+            SECTION("range (forward iterator)")
             {
                auto pos = v.insert(v.begin(), values.begin(), values.end());
                REQUIRE(pos == v.begin());
@@ -1135,7 +1148,13 @@ TEST_CASE("vector")
             auto expected = std::initializer_list<counted_type>{7, 11, 3, 3, 3, 3, 3};
             auto values = std::initializer_list<counted_type>{7, 11};
             counted_type::reset_counts();
-            SECTION("range")
+            SECTION("range (input iterator)")
+            {
+               auto pos = v.insert(v.begin(), counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(pos == v.begin());
+               REQUIRE(are_containers_equal(v, expected));
+            }
+            SECTION("range (forward iterator)")
             {
                auto pos = v.insert(v.begin(), values.begin(), values.end());
                REQUIRE(pos == v.begin());
@@ -1155,7 +1174,13 @@ TEST_CASE("vector")
             auto expected = std::initializer_list<counted_type>{7, 11, 13, 17, 3, 3, 3, 3, 3};
             auto values = std::initializer_list<counted_type>{7, 11, 13, 17};
             counted_type::reset_counts();
-            SECTION("range")
+            SECTION("range (input iterator)")
+            {
+               auto pos = v.insert(v.begin(), counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(pos == v.begin());
+               REQUIRE(are_containers_equal(v, expected));
+            }
+            SECTION("range (forward iterator)")
             {
                auto pos = v.insert(v.begin(), values.begin(), values.end());
                REQUIRE(pos == v.begin());
@@ -1178,7 +1203,13 @@ TEST_CASE("vector")
             auto expected = std::initializer_list<counted_type>{3, 3, 3, 3, 3};
             auto values = std::initializer_list<counted_type>{};
             counted_type::reset_counts();
-            SECTION("range")
+            SECTION("range (input iterator)")
+            {
+               auto pos = v.insert(v.begin(), counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(pos == v.begin());
+               REQUIRE(are_containers_equal(v, expected));
+            }
+            SECTION("range (forward iterator)")
             {
                auto pos = v.insert(v.end(), values.begin(), values.end());
                REQUIRE(pos == v.begin()+5);
@@ -1198,7 +1229,13 @@ TEST_CASE("vector")
             auto expected = std::initializer_list<counted_type>{3, 3, 3, 3, 3, 7};
             auto values = std::initializer_list<counted_type>{7};
             counted_type::reset_counts();
-            SECTION("range")
+            SECTION("range (input iterator)")
+            {
+               auto pos = v.insert(v.end(), counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(pos == v.begin()+5);
+               REQUIRE(are_containers_equal(v, expected));
+            }
+            SECTION("range (forward iterator)")
             {
                auto pos = v.insert(v.end(), values.begin(), values.end());
                REQUIRE(pos == v.begin()+5);
@@ -1218,7 +1255,13 @@ TEST_CASE("vector")
             auto expected = std::initializer_list<counted_type>{3, 3, 3, 3, 3, 7, 11};
             auto values = std::initializer_list<counted_type>{7, 11};
             counted_type::reset_counts();
-            SECTION("range")
+            SECTION("range (input iterator)")
+            {
+               auto pos = v.insert(v.end(), counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(pos == v.begin()+5);
+               REQUIRE(are_containers_equal(v, expected));
+            }
+            SECTION("range (forward iterator)")
             {
                auto pos = v.insert(v.end(), values.begin(), values.end());
                REQUIRE(pos == v.begin()+5);
@@ -1238,7 +1281,13 @@ TEST_CASE("vector")
             auto expected = std::initializer_list<counted_type>{3, 3, 3, 3, 3, 7, 11, 13, 17};
             auto values = std::initializer_list<counted_type>{7, 11, 13, 17};
             counted_type::reset_counts();
-            SECTION("range")
+            SECTION("range (input iterator)")
+            {
+               auto pos = v.insert(v.end(), counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(pos == v.begin()+5);
+               REQUIRE(are_containers_equal(v, expected));
+            }
+            SECTION("range (forward iterator)")
             {
                auto pos = v.insert(v.end(), values.begin(), values.end());
                REQUIRE(pos == v.begin()+5);
@@ -1261,7 +1310,13 @@ TEST_CASE("vector")
             auto expected = std::initializer_list<counted_type>{3, 3, 3, 3, 3};
             auto values = std::initializer_list<counted_type>{};
             counted_type::reset_counts();
-            SECTION("range")
+            SECTION("range (input iterator)")
+            {
+               auto pos = v.insert(v.begin()+2, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(pos == v.begin()+2);
+               REQUIRE(are_containers_equal(v, expected));
+            }
+            SECTION("range (forward iterator)")
             {
                auto pos = v.insert(v.begin()+2, values.begin(), values.end());
                REQUIRE(pos == v.begin()+2);
@@ -1281,7 +1336,13 @@ TEST_CASE("vector")
             auto expected = std::initializer_list<counted_type>{3, 3, 7, 3, 3, 3};
             auto values = std::initializer_list<counted_type>{7};
             counted_type::reset_counts();
-            SECTION("range")
+            SECTION("range (input iterator)")
+            {
+               auto pos = v.insert(v.begin()+2, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(pos == v.begin()+2);
+               REQUIRE(are_containers_equal(v, expected));
+            }
+            SECTION("range (forward iterator)")
             {
                auto pos = v.insert(v.begin()+2, values.begin(), values.end());
                REQUIRE(pos == v.begin()+2);
@@ -1301,7 +1362,13 @@ TEST_CASE("vector")
             auto expected = std::initializer_list<counted_type>{3, 3, 7, 11, 3, 3, 3};
             auto values = std::initializer_list<counted_type>{7, 11};
             counted_type::reset_counts();
-            SECTION("range")
+            SECTION("range (input iterator)")
+            {
+               auto pos = v.insert(v.begin()+2, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(pos == v.begin()+2);
+               REQUIRE(are_containers_equal(v, expected));
+            }
+            SECTION("range (forward iterator)")
             {
                auto pos = v.insert(v.begin()+2, values.begin(), values.end());
                REQUIRE(pos == v.begin()+2);
@@ -1321,7 +1388,13 @@ TEST_CASE("vector")
             auto expected = std::initializer_list<counted_type>{3, 3, 7, 11, 13, 3, 3, 3};
             auto values = std::initializer_list<counted_type>{7, 11, 13};
             counted_type::reset_counts();
-            SECTION("range")
+            SECTION("range (input iterator)")
+            {
+               auto pos = v.insert(v.begin()+2, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(pos == v.begin()+2);
+               REQUIRE(are_containers_equal(v, expected));
+            }
+            SECTION("range (forward iterator)")
             {
                auto pos = v.insert(v.begin()+2, values.begin(), values.end());
                REQUIRE(pos == v.begin()+2);
@@ -1341,7 +1414,13 @@ TEST_CASE("vector")
             auto expected = std::initializer_list<counted_type>{3, 3, 7, 11, 13, 17, 3, 3, 3};
             auto values = std::initializer_list<counted_type>{7, 11, 13, 17};
             counted_type::reset_counts();
-            SECTION("range")
+            SECTION("range (input iterator)")
+            {
+               auto pos = v.insert(v.begin()+2, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(pos == v.begin()+2);
+               REQUIRE(are_containers_equal(v, expected));
+            }
+            SECTION("range (forward iterator)")
             {
                auto pos = v.insert(v.begin()+2, values.begin(), values.end());
                REQUIRE(pos == v.begin()+2);
@@ -1361,7 +1440,13 @@ TEST_CASE("vector")
             auto expected = std::initializer_list<counted_type>{3, 3, 7, 11, 13, 17, 23, 3, 3, 3};
             auto values = std::initializer_list<counted_type>{7, 11, 13, 17, 23};
             counted_type::reset_counts();
-            SECTION("range")
+            SECTION("range (input iterator)")
+            {
+               auto pos = v.insert(v.begin()+2, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(pos == v.begin()+2);
+               REQUIRE(are_containers_equal(v, expected));
+            }
+            SECTION("range (forward iterator)")
             {
                auto pos = v.insert(v.begin()+2, values.begin(), values.end());
                REQUIRE(pos == v.begin()+2);
@@ -1384,7 +1469,15 @@ TEST_CASE("vector")
          SECTION("end (strong exception safety)")
          {
             auto expected = v;
-            SECTION("range")
+            SECTION("range (input iterator)")
+            {
+               counted_type::reset_counts();
+               counted_type::throw_at_nth_copy_construction(3);
+               REQUIRE_THROWS_AS(v.insert(v.end(), counted_type_stream_iterator{values}, counted_type_stream_iterator{}), counted_type::copy_construction::exception);
+               REQUIRE(counted_type::check().copy_constructions(2).destructions(2));
+               REQUIRE(are_containers_equal(v, expected));
+            }
+            SECTION("range (forward iterator)")
             {
                counted_type::reset_counts();
                counted_type::throw_at_nth_copy_construction(3);
@@ -1403,7 +1496,17 @@ TEST_CASE("vector")
          }
          SECTION("middle (basic exception safety)")
          {
-            SECTION("range")
+            SECTION("range (input iterator)")
+            {
+               auto expected = v;
+               std::copy(values.begin(), values.end(), std::back_inserter(expected));
+               counted_type::reset_counts();
+               counted_type::throw_at_nth_move_construction(1);
+               REQUIRE_THROWS_AS(v.insert(v.begin()+2, counted_type_stream_iterator{values}, counted_type_stream_iterator{}), counted_type::move_construction::exception);
+               REQUIRE(counted_type::check().copy_constructions(3).destructions(0));
+               REQUIRE(are_containers_equal(v, expected));
+            }
+            SECTION("range (forward iterator)")
             {
                counted_type::reset_counts();
                counted_type::throw_at_nth_copy_assignment(3);
