@@ -594,42 +594,37 @@ protected:
       auto distance_to_end = std::distance(pos, cend());
       if(distance_to_begin < distance_to_end)
       {
-         if(distance_to_begin > 0)
+         auto pos_pointer = _shift_from_begin_to_pos_by_n_positions(pos, 1, distance_to_begin);
+         if(pos_pointer == _derived()._first_pointer)
          {
-            auto nonconst_pos = iterator{ this, const_cast<pointer>(std::addressof(*pos)) };
-            _shift_from_begin_to_pos_by_n_positions(nonconst_pos, 1);
-            --nonconst_pos;
-            *nonconst_pos = std::forward<TValue>(value);
-            return nonconst_pos;
+            new(pos_pointer) value_type(std::forward<TValue>(value));
          }
          else
          {
-            push_front(std::forward<TValue>(value));
-            return begin();
+            *pos_pointer = std::forward<TValue>(value);
          }
+         return iterator{this, pos_pointer};
       }
       else
       {
-         if(distance_to_end > 0)
+         auto pos_pointer = _shift_from_pos_to_end_by_n_positions(pos, 1, distance_to_end);
+         if(pos_pointer == _derived()._last_pointer)
          {
-            auto nonconst_pos = iterator{this, const_cast<pointer>(std::addressof(*pos))};
-            _shift_from_pos_to_end_by_n_positions(nonconst_pos, 1);
-            *nonconst_pos = std::forward<TValue>(value);
-            return nonconst_pos;
+            new(pos_pointer) value_type(std::forward<TValue>(value));
          }
          else
          {
-            push_back(std::forward<TValue>(value));
-            return end()-1;
+            *pos_pointer = std::forward<TValue>(value);
          }
+         return iterator{this, pos_pointer};
       }
    }
 
-   void _shift_from_begin_to_pos_by_n_positions(iterator pos, size_type n)
+   pointer _shift_from_begin_to_pos_by_n_positions(const_iterator pos, size_type n, size_type distance_to_begin)
       _sstl_noexcept(   std::is_nothrow_move_constructible<value_type>::value
                      && std::is_nothrow_move_assignable<value_type>::value)
    {
-      auto number_of_constructions = std::min(n, static_cast<size_type>(pos-begin()));
+      auto number_of_constructions = std::min(n, distance_to_begin);
 
       auto dst_first = _subtract_offset_to_pointer(_derived()._first_pointer, number_of_constructions);
       auto dst = dst_first;
@@ -671,14 +666,16 @@ protected:
 
       _derived()._first_pointer = _subtract_offset_to_pointer(_derived()._first_pointer, n);
       _derived()._size += n;
+
+      return _add_offset_to_pointer(_derived()._first_pointer, distance_to_begin);
    }
 
-   void _shift_from_pos_to_end_by_n_positions(iterator pos, size_type n)
+   pointer _shift_from_pos_to_end_by_n_positions(const_iterator pos, size_type n, size_type distance_to_end)
       _sstl_noexcept(   std::is_nothrow_move_constructible<value_type>::value
                      && std::is_nothrow_move_assignable<value_type>::value)
    {
-      auto number_of_constructions = std::min(n, static_cast<size_type>(end()-pos));
-      auto number_of_assignments = static_cast<size_type>(end()-pos) - number_of_constructions;
+      auto number_of_constructions = std::min(n, distance_to_end);
+      auto number_of_assignments = static_cast<size_type>(distance_to_end) - number_of_constructions;
 
       auto dst_first = _add_offset_to_pointer(_derived()._last_pointer, number_of_constructions);
       auto dst = dst_first;
@@ -696,7 +693,7 @@ protected:
             dst = _dec_pointer(dst);
          }
 
-         for(size_type i=0; i<number_of_assignments; ++i)
+         for(size_type i=number_of_assignments; i>0; --i)
          {
             *dst = std::move(*src);
             src = _dec_pointer(src);
@@ -719,6 +716,8 @@ protected:
 
       _derived()._last_pointer = _add_offset_to_pointer(_derived()._last_pointer, n);
       _derived()._size += n;
+
+      return _subtract_offset_to_pointer(_derived()._last_pointer, distance_to_end);
    }
 
    _type_for_derived_class_access& _derived() _sstl_noexcept_;
