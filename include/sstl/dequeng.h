@@ -625,8 +625,9 @@ protected:
                      && std::is_nothrow_move_assignable<value_type>::value)
    {
       auto number_of_constructions = std::min(n, distance_to_begin);
+      auto number_of_assignments = distance_to_begin - number_of_constructions;
 
-      auto dst_first = _subtract_offset_to_pointer(_derived()._first_pointer, number_of_constructions);
+      auto dst_first = _subtract_offset_to_pointer(_derived()._first_pointer, n);
       auto dst = dst_first;
       auto src = _derived()._first_pointer;
 
@@ -642,7 +643,6 @@ protected:
             dst = _inc_pointer(dst);
          }
 
-         auto number_of_assignments = pos - begin() - number_of_constructions;
          for(size_type i=number_of_assignments; i>0; i--)
          {
             *dst = std::move(*src);
@@ -675,9 +675,9 @@ protected:
                      && std::is_nothrow_move_assignable<value_type>::value)
    {
       auto number_of_constructions = std::min(n, distance_to_end);
-      auto number_of_assignments = static_cast<size_type>(distance_to_end) - number_of_constructions;
+      auto number_of_assignments = distance_to_end - number_of_constructions;
 
-      auto dst_first = _add_offset_to_pointer(_derived()._last_pointer, number_of_constructions);
+      auto dst_first = _add_offset_to_pointer(_derived()._last_pointer, n);
       auto dst = dst_first;
       auto src = _derived()._last_pointer;
 
