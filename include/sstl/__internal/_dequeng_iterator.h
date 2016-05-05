@@ -16,6 +16,8 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 template<class TDeque>
 class _dequeng_iterator
 {
+   friend TDeque;
+
 private:
    static const bool is_const = std::is_const<TDeque>::value;
 

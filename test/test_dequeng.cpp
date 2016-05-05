@@ -930,6 +930,227 @@ TEST_CASE("dequeng")
       #endif
    }
 
+   SECTION("insert (count)")
+   {
+      auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+      auto value = counted_type{ 10 };
+      SECTION("begin")
+      {
+         SECTION("count=0")
+         {
+            counted_type::reset_counts();
+            deque_counted_type_t::iterator it = d.insert(d.cbegin(), 0, value);
+            REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+            REQUIRE(it == d.begin());
+            REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
+         }
+         SECTION("count=1")
+         {
+            counted_type::reset_counts();
+            deque_counted_type_t::iterator it = d.insert(d.cbegin(), 1, value);
+            REQUIRE(counted_type::check{}.copy_constructions(1));
+            REQUIRE(it == d.begin());
+            REQUIRE((d == deque_counted_type_t{10, 0, 1, 2, 3, 4}));
+         }
+         SECTION("count=2")
+         {
+            counted_type::reset_counts();
+            deque_counted_type_t::iterator it = d.insert(d.cbegin(), 2, value);
+            REQUIRE(counted_type::check{}.copy_constructions(2));
+            REQUIRE(it == d.begin());
+            REQUIRE((d == deque_counted_type_t{10, 10, 0, 1, 2, 3, 4}));
+         }
+      }
+      SECTION("begin+1")
+      {
+         SECTION("count=0")
+         {
+            counted_type::reset_counts();
+            deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, 0, value);
+            REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+            REQUIRE(it == d.begin()+1);
+            REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
+         }
+         SECTION("count=1")
+         {
+            counted_type::reset_counts();
+            deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, 1, value);
+            REQUIRE(counted_type::check{}.move_constructions(1).copy_assignments(1));
+            REQUIRE(it == d.begin()+1);
+            REQUIRE((d == deque_counted_type_t{0, 10, 1, 2, 3, 4}));
+         }
+         SECTION("count=2")
+         {
+            counted_type::reset_counts();
+            deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, 2, value);
+            REQUIRE(counted_type::check{}.move_constructions(1).copy_constructions(1).copy_assignments(1));
+            REQUIRE(it == d.begin()+1);
+            REQUIRE((d == deque_counted_type_t{0, 10, 10, 1, 2, 3, 4}));
+         }
+         SECTION("count=3")
+         {
+            counted_type::reset_counts();
+            deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, 3, value);
+            REQUIRE(counted_type::check{}.move_constructions(1).copy_constructions(2).copy_assignments(1));
+            REQUIRE(it == d.begin()+1);
+            REQUIRE((d == deque_counted_type_t{0, 10, 10, 10, 1, 2, 3, 4}));
+         }
+      }
+      SECTION("begin+2")
+      {
+         SECTION("count=0")
+         {
+            counted_type::reset_counts();
+            deque_counted_type_t::iterator it = d.insert(d.cbegin()+2, 0, value);
+            REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+            REQUIRE(it == d.begin()+2);
+            REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
+         }
+         SECTION("count=1")
+         {
+            counted_type::reset_counts();
+            deque_counted_type_t::iterator it = d.insert(d.cbegin()+2, 1, value);
+            REQUIRE(counted_type::check{}.move_constructions(1).move_assignments(1).copy_assignments(1));
+            REQUIRE(it == d.begin()+2);
+            REQUIRE((d == deque_counted_type_t{0, 1, 10, 2, 3, 4}));
+         }
+         SECTION("count=2")
+         {
+            counted_type::reset_counts();
+            deque_counted_type_t::iterator it = d.insert(d.cbegin()+2, 2, value);
+            REQUIRE(counted_type::check{}.move_constructions(2).copy_assignments(2));
+            REQUIRE(it == d.begin()+2);
+            REQUIRE((d == deque_counted_type_t{0, 1, 10, 10, 2, 3, 4}));
+         }
+         SECTION("count=3")
+         {
+            counted_type::reset_counts();
+            deque_counted_type_t::iterator it = d.insert(d.cbegin()+2, 3, value);
+            REQUIRE(counted_type::check{}.move_constructions(2).copy_constructions(1).copy_assignments(2));
+            REQUIRE(it == d.begin()+2);
+            REQUIRE((d == deque_counted_type_t{0, 1, 10, 10, 10, 2, 3, 4}));
+         }
+      }
+      SECTION("end")
+      {
+         SECTION("count=0")
+         {
+            counted_type::reset_counts();
+            deque_counted_type_t::iterator it = d.insert(d.end(), 0, value);
+            REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+            REQUIRE(it == d.end());
+            REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
+         }
+         SECTION("count=1")
+         {
+            counted_type::reset_counts();
+            deque_counted_type_t::iterator it = d.insert(d.end(), 1, value);
+            REQUIRE(counted_type::check{}.copy_constructions(1));
+            REQUIRE(it == d.end()-1);
+            REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4, 10}));
+         }
+         SECTION("count=2")
+         {
+            counted_type::reset_counts();
+            deque_counted_type_t::iterator it = d.insert(d.end(), 2, value);
+            REQUIRE(counted_type::check{}.copy_constructions(2));
+            REQUIRE(it == d.end()-2);
+            REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4, 10, 10}));
+         }
+      }
+      SECTION("end-1")
+      {
+         SECTION("count=0")
+         {
+            counted_type::reset_counts();
+            deque_counted_type_t::iterator it = d.insert(d.end()-1, 0, value);
+            REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+            REQUIRE(it == d.end()-1);
+            REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
+         }
+         SECTION("count=1")
+         {
+            counted_type::reset_counts();
+            deque_counted_type_t::iterator it = d.insert(d.end()-1, 1, value);
+            REQUIRE(counted_type::check{}.move_constructions(1).copy_assignments(1));
+            REQUIRE(it == d.end()-2);
+            REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 10, 4}));
+         }
+         SECTION("count=2")
+         {
+            counted_type::reset_counts();
+            deque_counted_type_t::iterator it = d.insert(d.end()-1, 2, value);
+            REQUIRE(counted_type::check{}.move_constructions(1).copy_constructions(1).copy_assignments(1));
+            REQUIRE(it == d.end()-3);
+            REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 10, 10, 4}));
+         }
+         SECTION("count=3")
+         {
+            counted_type::reset_counts();
+            deque_counted_type_t::iterator it = d.insert(d.end()-1, 3, value);
+            REQUIRE(counted_type::check{}.move_constructions(1).copy_constructions(2).copy_assignments(1));
+            REQUIRE(it == d.end()-4);
+            REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 10, 10, 10, 4}));
+         }
+      }
+      SECTION("end-2")
+      {
+         SECTION("count=0")
+         {
+            counted_type::reset_counts();
+            deque_counted_type_t::iterator it = d.insert(d.end()-2, 0, value);
+            REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+            REQUIRE(it == d.end()-2);
+            REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
+         }
+         SECTION("count=1")
+         {
+            counted_type::reset_counts();
+            deque_counted_type_t::iterator it = d.insert(d.end()-2, 1, value);
+            REQUIRE(counted_type::check{}.move_constructions(1).move_assignments(1).copy_assignments(1));
+            REQUIRE(it == d.end()-3);
+            REQUIRE((d == deque_counted_type_t{0, 1, 2, 10, 3, 4}));
+         }
+         SECTION("count=2")
+         {
+            counted_type::reset_counts();
+            deque_counted_type_t::iterator it = d.insert(d.end()-2, 2, value);
+            REQUIRE(counted_type::check{}.move_constructions(2).copy_assignments(2));
+            REQUIRE(it == d.end()-4);
+            REQUIRE((d == deque_counted_type_t{0, 1, 2, 10, 10, 3, 4}));
+         }
+         SECTION("count=3")
+         {
+            counted_type::reset_counts();
+            deque_counted_type_t::iterator it = d.insert(d.end()-2, 3, value);
+            REQUIRE(counted_type::check{}.move_constructions(2).copy_constructions(1).copy_assignments(2));
+            REQUIRE(it == d.end()-5);
+            REQUIRE((d == deque_counted_type_t{0, 1, 2, 10, 10, 10, 3, 4}));
+         }
+      }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling (copy construction throws)")
+      {
+         SECTION("begin region")
+         {
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_copy_construction(2);
+            REQUIRE_THROWS_AS(d.insert(d.begin()+2, 5, value), counted_type::copy_construction::exception);
+            REQUIRE(counted_type::check{}.move_constructions(2).copy_constructions(1).destructions(3));
+            REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
+         }
+         SECTION("end region")
+         {
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_copy_construction(2);
+            REQUIRE_THROWS_AS(d.insert(d.end()-2, 5, value), counted_type::copy_construction::exception);
+            REQUIRE(counted_type::check{}.move_constructions(2).copy_constructions(1).destructions(3));
+            REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
+         }
+      }
+      #endif
+   }
+
    SECTION("non-member relative operators")
    {
       SECTION("lhs < rhs")

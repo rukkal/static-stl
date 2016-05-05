@@ -363,6 +363,95 @@ public:
       return _emplace_value(pos, std::move(value));
    }
 
+   iterator insert(const_iterator pos, size_type count, const_reference value)
+   {
+      if(count==0)
+         return iterator{ this, const_cast<pointer>(pos._pos) };
+
+      sstl_assert(size()+count <= capacity());
+      auto distance_to_begin = std::distance(cbegin(), pos);
+      auto distance_to_end = std::distance(pos, cend());
+
+      if(distance_to_begin < distance_to_end)
+      {
+         auto new_region_first_pointer = _shift_from_begin_to_pos_by_n_positions(pos, count, distance_to_begin);
+         auto dst = new_region_first_pointer;
+         auto number_of_constructions = count > distance_to_begin ? count-distance_to_begin : 0;
+         size_type remaining_constructions;
+         #if _sstl_has_exceptions()
+         try
+         {
+         #endif
+            for(remaining_constructions=number_of_constructions; remaining_constructions>0; --remaining_constructions)
+            {
+               new(dst) value_type(value);
+               dst = _inc_pointer(dst);
+            }
+         #if _sstl_has_exceptions()
+         }
+         catch(...)
+         {
+            auto crt = _derived()._first_pointer;
+            while(crt != dst)
+            {
+               crt->~value_type();
+               crt = _inc_pointer(crt);
+            }
+            for(size_t i=0; i<remaining_constructions; ++i)
+            {
+               crt = _inc_pointer(crt);
+            }
+            _derived()._first_pointer = crt;
+            _derived()._size -= count;
+            throw;
+         }
+         #endif
+         auto number_of_assignments = count-number_of_constructions;
+         for(size_type i=number_of_assignments; i>0; --i)
+         {
+            *dst = value;
+            dst = _inc_pointer(dst);
+         }
+         return iterator{ this, new_region_first_pointer };
+      }
+      else
+      {
+         auto new_region_last_pointer = _shift_from_pos_to_end_by_n_positions(pos, count, distance_to_end);
+         auto dst = new_region_last_pointer;
+         auto number_of_constructions = count > distance_to_end ? count-distance_to_end : 0;
+         #if _sstl_has_exceptions()
+         try
+         {
+         #endif
+            for(size_type i=number_of_constructions; i>0; --i)
+            {
+               new(dst) value_type(value);
+               dst = _dec_pointer(dst);
+            }
+         #if _sstl_has_exceptions()
+         }
+         catch(...)
+         {
+            while(dst != _derived()._last_pointer)
+            {
+               dst = _inc_pointer(dst);
+               dst->~value_type();
+            }
+            _derived()._last_pointer = _subtract_offset_to_pointer(_derived()._last_pointer, count);
+            _derived()._size -= count;
+            throw;
+         }
+         #endif
+         auto number_of_assignments = count - number_of_constructions;
+         for(size_type i=number_of_assignments; i>0; --i)
+         {
+            *dst = value;
+            dst = _dec_pointer(dst);
+         }
+         return iterator{ this, _inc_pointer(dst) };
+      }
+   }
+
    void push_front(const_reference value)
       _sstl_noexcept(noexcept(std::declval<dequeng>().emplace_front(std::declval<const_reference>())))
    {
