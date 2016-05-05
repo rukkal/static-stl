@@ -42,6 +42,17 @@ TEST_CASE("_dequeng_iterator")
    {
       iterator_type nonconst_it;
       const_iterator_type const_it = nonconst_it;
+      (void) const_it;
+   }
+
+   SECTION("non-const iterator and const iterator comparison")
+   {
+      REQUIRE(d.cbegin() == d.begin());
+      REQUIRE(d.cbegin() != d.end());
+      REQUIRE(d.cbegin() < d.end());
+      REQUIRE(d.cend() > d.begin());
+      REQUIRE(d.cbegin() <= d.end());
+      REQUIRE(d.cend() >= d.begin());
    }
 
    SECTION("expressions required by InputIterator concept")

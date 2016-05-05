@@ -18,6 +18,9 @@ class _dequeng_iterator
 {
    friend TDeque;
 
+   friend _dequeng_iterator<typename std::add_const<TDeque>::type>;
+   friend _dequeng_iterator<typename std::remove_const<TDeque>::type>;
+
 private:
    static const bool is_const = std::is_const<TDeque>::value;
 
@@ -42,7 +45,7 @@ public:
       , _pos(pos)
    {}
 
-   operator _dequeng_iterator<typename std::add_const<TDeque>::type>()
+   operator _dequeng_iterator<typename std::add_const<TDeque>::type>() const
    {
       return _dequeng_iterator<typename std::add_const<TDeque>::type>{ _deque, _pos};
    }
@@ -147,37 +150,37 @@ public:
       return *(*this + offset);
    }
 
-   bool operator==(const _dequeng_iterator& rhs) const _sstl_noexcept_
+   bool operator==(const _dequeng_iterator<typename std::add_const<TDeque>::type>& rhs) const _sstl_noexcept_
    {
       sstl_assert(_deque == rhs._deque);
       return _pos==rhs._pos;
    }
 
-   bool operator!=(const _dequeng_iterator& rhs) const _sstl_noexcept_
+   bool operator!=(const _dequeng_iterator<typename std::add_const<TDeque>::type>& rhs) const _sstl_noexcept_
    {
       sstl_assert(_deque == rhs._deque);
       return !operator==(rhs);
    }
 
-   bool operator<(const _dequeng_iterator& rhs) const _sstl_noexcept_
+   bool operator<(const _dequeng_iterator<typename std::add_const<TDeque>::type>& rhs) const _sstl_noexcept_
    {
       sstl_assert(_deque == rhs._deque);
       return _linearized_pos() < rhs._linearized_pos();
    }
 
-   bool operator>(const _dequeng_iterator& rhs) const _sstl_noexcept_
+   bool operator>(const _dequeng_iterator<typename std::add_const<TDeque>::type>& rhs) const _sstl_noexcept_
    {
       sstl_assert(_deque == rhs._deque);
       return _linearized_pos() > rhs._linearized_pos();
    }
 
-   bool operator<=(const _dequeng_iterator& rhs) const _sstl_noexcept_
+   bool operator<=(const _dequeng_iterator<typename std::add_const<TDeque>::type>& rhs) const _sstl_noexcept_
    {
       sstl_assert(_deque == rhs._deque);
       return _linearized_pos() <= rhs._linearized_pos();
    }
 
-   bool operator>=(const _dequeng_iterator& rhs) const _sstl_noexcept_
+   bool operator>=(const _dequeng_iterator<typename std::add_const<TDeque>::type>& rhs) const _sstl_noexcept_
    {
       sstl_assert(_deque == rhs._deque);
       return _linearized_pos() >= rhs._linearized_pos();
