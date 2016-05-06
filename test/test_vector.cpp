@@ -919,7 +919,7 @@ TEST_CASE("vector")
       #endif
    }
 
-   SECTION("count insert")
+   SECTION("insert (count)")
    {
       auto v = vector_counted_type_t{3, 3, 3, 3, 3};
       auto value = counted_type{ 7 };
@@ -1085,7 +1085,7 @@ TEST_CASE("vector")
       #endif
    }
 
-   SECTION("range (input iterator + forward iterator) + initializer-list insert")
+   SECTION("insert (input iterators + forward iterators + initializer-list)")
    {
       auto v = vector_counted_type_t{3, 3, 3, 3, 3};
 
