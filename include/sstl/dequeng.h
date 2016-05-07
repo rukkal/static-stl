@@ -370,11 +370,9 @@ public:
 
    iterator insert(const_iterator pos, size_type count, const_reference value)
       _sstl_noexcept(
-            noexcept(std::declval<dequeng>()._shift_from_begin_to_pos_by_n_positions(  std::declval<const_iterator>(),
-                                                                                       std::declval<size_type>(),
+            noexcept(std::declval<dequeng>()._shift_from_begin_to_pos_by_n_positions(  std::declval<size_type>(),
                                                                                        std::declval<difference_type>()))
-         && noexcept(std::declval<dequeng>()._shift_from_pos_to_end_by_n_positions( std::declval<const_iterator>(),
-                                                                                    std::declval<size_type>(),
+         && noexcept(std::declval<dequeng>()._shift_from_pos_to_end_by_n_positions( std::declval<size_type>(),
                                                                                     std::declval<difference_type>()))
          && std::is_nothrow_copy_constructible<value_type>::value
          && std::is_nothrow_copy_assignable<value_type>::value)
@@ -388,7 +386,7 @@ public:
 
       if(distance_to_begin < distance_to_end)
       {
-         auto new_region_first_pointer = _shift_from_begin_to_pos_by_n_positions(pos, count, distance_to_begin);
+         auto new_region_first_pointer = _shift_from_begin_to_pos_by_n_positions(count, distance_to_begin);
          auto dst = new_region_first_pointer;
          auto number_of_constructions = count > distance_to_begin ? count-distance_to_begin : 0;
          size_type remaining_constructions;
@@ -430,7 +428,7 @@ public:
       }
       else
       {
-         auto new_region_last_pointer = _shift_from_pos_to_end_by_n_positions(pos, count, distance_to_end);
+         auto new_region_last_pointer = _shift_from_pos_to_end_by_n_positions(count, distance_to_end);
          auto dst = new_region_last_pointer;
          auto number_of_constructions = count > distance_to_end ? count-distance_to_end : 0;
          #if _sstl_has_exceptions()
@@ -504,11 +502,9 @@ public:
                      TIterator range_end,
                      typename std::enable_if<_is_forward_iterator<TIterator>::value>::type* = nullptr)
       _sstl_noexcept(
-            noexcept(std::declval<dequeng>()._shift_from_begin_to_pos_by_n_positions(  std::declval<const_iterator>(),
-                                                                                       std::declval<size_type>(),
+            noexcept(std::declval<dequeng>()._shift_from_begin_to_pos_by_n_positions(  std::declval<size_type>(),
                                                                                        std::declval<difference_type>()))
-         && noexcept(std::declval<dequeng>()._shift_from_pos_to_end_by_n_positions( std::declval<const_iterator>(),
-                                                                                    std::declval<size_type>(),
+         && noexcept(std::declval<dequeng>()._shift_from_pos_to_end_by_n_positions( std::declval<size_type>(),
                                                                                     std::declval<difference_type>()))
          && std::is_nothrow_copy_constructible<value_type>::value
          && std::is_nothrow_copy_assignable<value_type>::value)
@@ -524,7 +520,7 @@ public:
 
       if(distance_to_begin < distance_to_end)
       {
-         auto new_region_first_pointer = _shift_from_begin_to_pos_by_n_positions(pos, count, distance_to_begin);
+         auto new_region_first_pointer = _shift_from_begin_to_pos_by_n_positions(count, distance_to_begin);
          auto dst = new_region_first_pointer;
          auto number_of_constructions = count > distance_to_begin ? count-distance_to_begin : 0;
          size_type remaining_constructions;
@@ -568,7 +564,7 @@ public:
       }
       else
       {
-         auto new_region_last_pointer = _shift_from_pos_to_end_by_n_positions(pos, count, distance_to_end);
+         auto new_region_last_pointer = _shift_from_pos_to_end_by_n_positions(count, distance_to_end);
          auto new_region_first_pointer = _subtract_offset_to_pointer(new_region_last_pointer, count > 0 ? count-1 : 0);
          auto dst = new_region_first_pointer;
          auto number_of_constructions = count > distance_to_end ? count-distance_to_end : 0;
@@ -912,7 +908,7 @@ protected:
       }
    }
 
-   pointer _shift_from_begin_to_pos_by_n_positions(const_iterator pos, size_type n, size_type distance_to_begin)
+   pointer _shift_from_begin_to_pos_by_n_positions(size_type n, size_type distance_to_begin)
       _sstl_noexcept(   std::is_nothrow_move_constructible<value_type>::value
                      && std::is_nothrow_move_assignable<value_type>::value)
    {
@@ -962,7 +958,7 @@ protected:
       return _add_offset_to_pointer(_derived()._first_pointer, distance_to_begin);
    }
 
-   pointer _shift_from_pos_to_end_by_n_positions(const_iterator pos, size_type n, size_type distance_to_end)
+   pointer _shift_from_pos_to_end_by_n_positions(size_type n, size_type distance_to_end)
       _sstl_noexcept(   std::is_nothrow_move_constructible<value_type>::value
                      && std::is_nothrow_move_assignable<value_type>::value)
    {
