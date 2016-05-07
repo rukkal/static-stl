@@ -41,7 +41,8 @@ SOFTWARE.
 #include <algorithm>
 #include <functional>
 
-#include "sstl_assert.h"
+#include <sstl_assert.h>
+
 #include "forward_list_base.h"
 #include "bitmap_allocator.h"
 #include "__internal/parameter_type.h"

@@ -18,6 +18,7 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 include_directories("include")
 include_directories("unittest-cpp")
 include_directories("Catch/include")
+include_directories("test")
 
 if (${UNIX})
     file(GLOB unittestcpp_srcs   "unittest-cpp/UnitTest++/*.cpp"

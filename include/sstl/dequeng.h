@@ -16,7 +16,8 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include <initializer_list>
 #include <array>
 
-#include "sstl_assert.h"
+#include <sstl_assert.h>
+
 #include "__internal/_aligned_storage.h"
 #include "__internal/_iterator.h"
 #include "__internal/_dequeng_iterator.h"

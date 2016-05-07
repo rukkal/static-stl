@@ -17,7 +17,8 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include <array>
 #include <stdexcept>
 
-#include "sstl_assert.h"
+#include <sstl_assert.h>
+
 #include "__internal/_except.h"
 #include "__internal/_utility.h"
 #include "__internal/_iterator.h"

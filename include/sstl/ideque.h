@@ -37,7 +37,8 @@ SOFTWARE.
 #include <algorithm>
 #include <utility>
 
-#include "sstl_assert.h"
+#include <sstl_assert.h>
+
 #include "deque_base.h"
 #include "__internal/parameter_type.h"
 

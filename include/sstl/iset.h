@@ -37,7 +37,8 @@ SOFTWARE.
 #include <algorithm>
 #include <functional>
 
-#include "sstl_assert.h"
+#include <sstl_assert.h>
+
 #include "set_base.h"
 #include "bitmap_allocator.h"
 #include "__internal/parameter_type.h"

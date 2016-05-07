@@ -37,7 +37,8 @@ SOFTWARE.
 #include <cstddef>
 #include <cstdint>
 
-#include "sstl_assert.h"
+#include <sstl_assert.h>
+
 #include "map_base.h"
 #include "bitmap_allocator.h"
 #include "__internal/parameter_type.h"
