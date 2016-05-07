@@ -369,6 +369,15 @@ public:
    }
 
    iterator insert(const_iterator pos, size_type count, const_reference value)
+      _sstl_noexcept(
+            noexcept(std::declval<dequeng>()._shift_from_begin_to_pos_by_n_positions(  std::declval<const_iterator>(),
+                                                                                       std::declval<size_type>(),
+                                                                                       std::declval<difference_type>()))
+         && noexcept(std::declval<dequeng>()._shift_from_pos_to_end_by_n_positions( std::declval<const_iterator>(),
+                                                                                    std::declval<size_type>(),
+                                                                                    std::declval<difference_type>()))
+         && std::is_nothrow_copy_constructible<value_type>::value
+         && std::is_nothrow_copy_assignable<value_type>::value)
    {
       if(count==0)
          return iterator{ this, const_cast<pointer>(pos._pos) };
@@ -463,6 +472,11 @@ public:
                      TIterator range_end,
                      typename std::enable_if<_is_input_iterator<TIterator>::value
                                           && !_is_forward_iterator<TIterator>::value>::type* = nullptr)
+      _sstl_noexcept(std::is_nothrow_copy_constructible<value_type>::value
+                  && noexcept(std::reverse(std::declval<iterator>(), std::declval<iterator>()))
+                  && noexcept(std::rotate(std::declval<iterator>(),
+                                          std::declval<iterator>(),
+                                          std::declval<iterator>())))
    {
       auto old_size = size();
       auto distance_to_begin = std::distance(cbegin(), pos);
@@ -489,6 +503,15 @@ public:
                      TIterator range_begin,
                      TIterator range_end,
                      typename std::enable_if<_is_forward_iterator<TIterator>::value>::type* = nullptr)
+      _sstl_noexcept(
+            noexcept(std::declval<dequeng>()._shift_from_begin_to_pos_by_n_positions(  std::declval<const_iterator>(),
+                                                                                       std::declval<size_type>(),
+                                                                                       std::declval<difference_type>()))
+         && noexcept(std::declval<dequeng>()._shift_from_pos_to_end_by_n_positions( std::declval<const_iterator>(),
+                                                                                    std::declval<size_type>(),
+                                                                                    std::declval<difference_type>()))
+         && std::is_nothrow_copy_constructible<value_type>::value
+         && std::is_nothrow_copy_assignable<value_type>::value)
    {
       auto count = std::distance(range_begin, range_end);
       if(count==0)
@@ -1221,7 +1244,7 @@ private:
 };
 
 template<class T>
-inline bool operator==(const dequeng<T>& lhs, const dequeng<T>& rhs)
+inline bool operator==(const dequeng<T>& lhs, const dequeng<T>& rhs) _sstl_noexcept_
 {
    return lhs.size() == rhs.size() && std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
 }
