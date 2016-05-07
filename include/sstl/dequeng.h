@@ -355,11 +355,15 @@ public:
    }
 
    iterator insert(const_iterator pos, const value_type& value)
+      _sstl_noexcept(noexcept(std::declval<dequeng>()._emplace_value(std::declval<const_iterator>(),
+                                                                     std::declval<const value_type&>())))
    {
       return _emplace_value(pos, value);
    }
 
    iterator insert(const_iterator pos, value_type&& value)
+      _sstl_noexcept(noexcept(std::declval<dequeng>()._emplace_value(std::declval<const_iterator>(),
+                                                                     std::declval<value_type&&>())))
    {
       return _emplace_value(pos, std::move(value));
    }
@@ -813,35 +817,75 @@ protected:
 
    template<class TValue>
    iterator _emplace_value(const_iterator pos, TValue&& value)
+      _sstl_noexcept(std::is_nothrow_move_constructible<value_type>()
+                  && std::is_nothrow_move_assignable<value_type>())
    {
       sstl_assert(!full());
       auto distance_to_begin = std::distance(cbegin(), pos);
       auto distance_to_end = std::distance(pos, cend());
       if(distance_to_begin < distance_to_end)
       {
-         auto pos_pointer = _shift_from_begin_to_pos_by_n_positions(pos, 1, distance_to_begin);
-         if(pos_pointer == _derived()._first_pointer)
+         auto src = _derived()._first_pointer;
+         auto dst = _dec_pointer(_derived()._first_pointer);
+         auto dst_end = _add_offset_to_pointer(dst, distance_to_begin);
+         
+         if(distance_to_begin > 0)
          {
-            new(pos_pointer) value_type(std::forward<TValue>(value));
+            new(dst) value_type(std::move(*src));
+            _derived()._first_pointer = dst;
+            ++_derived()._size;
+            
+            src = _inc_pointer(src);
+            dst = _inc_pointer(dst);
+            
+            while(dst != dst_end)
+            {
+               *dst = std::move(*src);
+               src = _inc_pointer(src);
+               dst = _inc_pointer(dst);
+            }
+            *dst_end = std::forward<TValue>(value);
          }
          else
          {
-            *pos_pointer = std::forward<TValue>(value);
+            _derived()._first_pointer = dst;
+            ++_derived()._size;
+            new(dst_end) value_type(std::forward<TValue>(value));
          }
-         return iterator{this, pos_pointer};
+         
+         return iterator{this, dst_end};
       }
       else
       {
-         auto pos_pointer = _shift_from_pos_to_end_by_n_positions(pos, 1, distance_to_end);
-         if(pos_pointer == _derived()._last_pointer)
+         auto src = _derived()._last_pointer;
+         auto dst = _inc_pointer(_derived()._last_pointer);
+         auto dst_end = _subtract_offset_to_pointer(dst, distance_to_end);
+         
+         if(distance_to_end > 0)
          {
-            new(pos_pointer) value_type(std::forward<TValue>(value));
+            new(dst) value_type(std::move(*src));
+            _derived()._last_pointer = dst;
+            ++_derived()._size;
+            
+            src = _dec_pointer(src);
+            dst = _dec_pointer(dst);
+            
+            while(dst != dst_end)
+            {
+               *dst = std::move(*src);
+               src = _dec_pointer(src);
+               dst = _dec_pointer(dst);
+            }
+            *dst_end = std::forward<TValue>(value);
          }
          else
          {
-            *pos_pointer = std::forward<TValue>(value);
+            _derived()._last_pointer = dst;
+            ++_derived()._size;
+            new(dst_end) value_type(std::forward<TValue>(value));
          }
-         return iterator{this, pos_pointer};
+         
+         return iterator{this, dst_end};
       }
    }
 
