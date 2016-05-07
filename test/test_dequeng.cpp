@@ -12,6 +12,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 
 #include "utility.h"
 #include "counted_type.h"
+#include "counted_type_stream_iterator.h"
 #include "test_dequeng_utility.h"
 
 namespace sstl_test
@@ -950,7 +951,9 @@ TEST_CASE("dequeng")
             }
             SECTION("range (input iterator)")
             {
-               //TODO
+               deque_counted_type_t::iterator it = d.insert(d.cbegin(), counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.begin());
+               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
             }
             SECTION("range (forward iterator)")
             {
@@ -973,7 +976,9 @@ TEST_CASE("dequeng")
             }
             SECTION("range (input iterator)")
             {
-               //TODO
+               deque_counted_type_t::iterator it = d.insert(d.cbegin(), counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.begin());
+               REQUIRE((d == deque_counted_type_t{10, 0, 1, 2, 3, 4}));
             }
             SECTION("range (forward iterator)")
             {
@@ -996,7 +1001,9 @@ TEST_CASE("dequeng")
             }
             SECTION("range (input iterator)")
             {
-               //TODO
+               deque_counted_type_t::iterator it = d.insert(d.cbegin(), counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.begin());
+               REQUIRE((d == deque_counted_type_t{10, 11, 0, 1, 2, 3, 4}));
             }
             SECTION("range (forward iterator)")
             {
@@ -1022,7 +1029,9 @@ TEST_CASE("dequeng")
             }
             SECTION("input iterator")
             {
-               //TODO
+               deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.begin()+1);
+               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
             }
             SECTION("forward iterator")
             {
@@ -1045,7 +1054,9 @@ TEST_CASE("dequeng")
             }
             SECTION("input iterator")
             {
-               //TODO
+               deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.begin()+1);
+               REQUIRE((d == deque_counted_type_t{0, 10, 1, 2, 3, 4}));
             }
             SECTION("forward iterator")
             {
@@ -1068,7 +1079,9 @@ TEST_CASE("dequeng")
             }
             SECTION("input iterator")
             {
-               //TODO
+               deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.begin()+1);
+               REQUIRE((d == deque_counted_type_t{0, 10, 11, 1, 2, 3, 4}));
             }
             SECTION("forward iterator")
             {
@@ -1091,7 +1104,9 @@ TEST_CASE("dequeng")
             }
             SECTION("input iterator")
             {
-               //TODO
+               deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.begin()+1);
+               REQUIRE((d == deque_counted_type_t{0, 10, 11, 12, 1, 2, 3, 4}));
             }
             SECTION("forward iterator")
             {
@@ -1117,7 +1132,9 @@ TEST_CASE("dequeng")
             }
             SECTION("input iterator")
             {
-               //TODO
+               deque_counted_type_t::iterator it = d.insert(d.cbegin()+2, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.begin()+2);
+               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
             }
             SECTION("forward iterator")
             {
@@ -1141,7 +1158,9 @@ TEST_CASE("dequeng")
             }
             SECTION("input iterator")
             {
-               //TODO
+               deque_counted_type_t::iterator it = d.insert(d.cbegin()+2, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.begin()+2);
+               REQUIRE((d == deque_counted_type_t{0, 1, 10, 2, 3, 4}));
             }
             SECTION("forward iterator")
             {
@@ -1164,7 +1183,9 @@ TEST_CASE("dequeng")
             }
             SECTION("input iterator")
             {
-               //TODO
+               deque_counted_type_t::iterator it = d.insert(d.cbegin()+2, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.begin()+2);
+               REQUIRE((d == deque_counted_type_t{0, 1, 10, 11, 2, 3, 4}));
             }
             SECTION("forward iterator")
             {
@@ -1187,7 +1208,9 @@ TEST_CASE("dequeng")
             }
             SECTION("input iterator")
             {
-               //TODO
+               deque_counted_type_t::iterator it = d.insert(d.cbegin()+2, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.begin()+2);
+               REQUIRE((d == deque_counted_type_t{0, 1, 10, 11, 12, 2, 3, 4}));
             }
             SECTION("forward iterator")
             {
@@ -1213,7 +1236,9 @@ TEST_CASE("dequeng")
             }
             SECTION("input iterator")
             {
-               //TODO
+               deque_counted_type_t::iterator it = d.insert(d.cend(), counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.end());
+               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
             }
             SECTION("forward iterator")
             {
@@ -1236,7 +1261,9 @@ TEST_CASE("dequeng")
             }
             SECTION("input iterator")
             {
-               //TODO
+               deque_counted_type_t::iterator it = d.insert(d.cend(), counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.end()-1);
+               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4, 10}));
             }
             SECTION("forward iterator")
             {
@@ -1259,7 +1286,9 @@ TEST_CASE("dequeng")
             }
             SECTION("input iterator")
             {
-               //TODO
+               deque_counted_type_t::iterator it = d.insert(d.cend(), counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.end()-2);
+               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4, 10, 11}));
             }
             SECTION("forward iterator")
             {
@@ -1286,7 +1315,9 @@ TEST_CASE("dequeng")
             }
             SECTION("range (input iterator)")
             {
-               //TODO
+               deque_counted_type_t::iterator it = d.insert(d.cend()-1, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.cend()-1);
+               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
             }
             SECTION("range (forward iterator)")
             {
@@ -1309,7 +1340,9 @@ TEST_CASE("dequeng")
             }
             SECTION("range (input iterator)")
             {
-               //TODO
+               deque_counted_type_t::iterator it = d.insert(d.cend()-1, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.cend()-2);
+               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 10, 4}));
             }
             SECTION("range (forward iterator)")
             {
@@ -1332,7 +1365,9 @@ TEST_CASE("dequeng")
             }
             SECTION("range (input iterator)")
             {
-               //TODO
+               deque_counted_type_t::iterator it = d.insert(d.cend()-1, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.cend()-3);
+               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 10, 11, 4}));
             }
             SECTION("range (forward iterator)")
             {
@@ -1355,7 +1390,9 @@ TEST_CASE("dequeng")
             }
             SECTION("range (input iterator)")
             {
-               //TODO
+               deque_counted_type_t::iterator it = d.insert(d.cend()-1, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.cend()-4);
+               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 10, 11, 12, 4}));
             }
             SECTION("range (forward iterator)")
             {
@@ -1381,7 +1418,9 @@ TEST_CASE("dequeng")
             }
             SECTION("range (input iterator)")
             {
-               //TODO
+               deque_counted_type_t::iterator it = d.insert(d.cend()-2, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.cend()-2);
+               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
             }
             SECTION("range (forward iterator)")
             {
@@ -1404,7 +1443,9 @@ TEST_CASE("dequeng")
             }
             SECTION("range (input iterator)")
             {
-               //TODO
+               deque_counted_type_t::iterator it = d.insert(d.cend()-2, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.cend()-3);
+               REQUIRE((d == deque_counted_type_t{0, 1, 2, 10, 3, 4}));
             }
             SECTION("range (forward iterator)")
             {
@@ -1427,7 +1468,9 @@ TEST_CASE("dequeng")
             }
             SECTION("range (input iterator)")
             {
-               //TODO
+               deque_counted_type_t::iterator it = d.insert(d.cend()-2, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.cend()-4);
+               REQUIRE((d == deque_counted_type_t{0, 1, 2, 10, 11, 3, 4}));
             }
             SECTION("range (forward iterator)")
             {
@@ -1451,7 +1494,9 @@ TEST_CASE("dequeng")
             }
             SECTION("range (input iterator)")
             {
-               //TODO
+               deque_counted_type_t::iterator it = d.insert(d.cend()-2, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.cend()-5);
+               REQUIRE((d == deque_counted_type_t{0, 1, 2, 10, 11, 12, 3, 4}));
             }
             SECTION("range (forward iterator)")
             {
@@ -1473,18 +1518,22 @@ TEST_CASE("dequeng")
             SECTION("count")
             {
                counted_type::throw_at_nth_copy_construction(2);
-               REQUIRE_THROWS_AS(d.insert(d.begin()+2, 5, value), counted_type::copy_construction::exception);
+               REQUIRE_THROWS_AS(d.insert(d.cbegin()+2, 5, value), counted_type::copy_construction::exception);
                REQUIRE(counted_type::check{}.move_constructions(2).copy_constructions(1).destructions(3));
                REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
             }
             SECTION("range (input iterator)")
             {
-               //TODO
+               counted_type::throw_at_nth_copy_construction(4);
+               REQUIRE_THROWS_AS(d.insert(d.cbegin()+2, counted_type_stream_iterator{values}, counted_type_stream_iterator{})
+                                 , counted_type::copy_construction::exception);
+               REQUIRE(counted_type::check{}.copy_constructions(3).destructions(0));
+               REQUIRE((d == deque_counted_type_t{12, 11, 10, 0, 1, 2, 3, 4}));
             }
             SECTION("range (forward iterator)")
             {
                counted_type::throw_at_nth_copy_construction(2);
-               REQUIRE_THROWS_AS(d.insert(d.begin()+2, values.begin(), values.begin()+5), counted_type::copy_construction::exception);
+               REQUIRE_THROWS_AS(d.insert(d.cbegin()+2, values.begin(), values.begin()+5), counted_type::copy_construction::exception);
                REQUIRE(counted_type::check{}.move_constructions(2).copy_constructions(1).destructions(3));
                REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
             }
@@ -1494,18 +1543,22 @@ TEST_CASE("dequeng")
             SECTION("count")
             {
                counted_type::throw_at_nth_copy_construction(2);
-               REQUIRE_THROWS_AS(d.insert(d.end()-2, 5, value), counted_type::copy_construction::exception);
+               REQUIRE_THROWS_AS(d.insert(d.cend()-2, 5, value), counted_type::copy_construction::exception);
                REQUIRE(counted_type::check{}.move_constructions(2).copy_constructions(1).destructions(3));
                REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));  
             }
             SECTION("range (input iterator)")
             {
-               //TODO
+               counted_type::throw_at_nth_copy_construction(4);
+               REQUIRE_THROWS_AS(d.insert(d.cend()-2, counted_type_stream_iterator{values}, counted_type_stream_iterator{})
+                                 , counted_type::copy_construction::exception);
+               REQUIRE(counted_type::check{}.copy_constructions(3).destructions(0));
+               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4, 10, 11, 12}));
             }
             SECTION("range (forward iterator)")
             {             
                counted_type::throw_at_nth_copy_construction(2);
-               REQUIRE_THROWS_AS(d.insert(d.end()-2, 5, value), counted_type::copy_construction::exception);
+               REQUIRE_THROWS_AS(d.insert(d.cend()-2, 5, value), counted_type::copy_construction::exception);
                REQUIRE(counted_type::check{}.move_constructions(2).copy_constructions(1).destructions(3));
                REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));  
             }

@@ -456,6 +456,33 @@ public:
    iterator insert(  const_iterator pos,
                      TIterator range_begin,
                      TIterator range_end,
+                     typename std::enable_if<_is_input_iterator<TIterator>::value
+                                          && !_is_forward_iterator<TIterator>::value>::type* = nullptr)
+   {
+      auto old_size = size();
+      auto distance_to_begin = std::distance(cbegin(), pos);
+      auto distance_to_end = std::distance(pos, cend());
+      if(distance_to_begin < distance_to_end)
+      {
+         std::copy(range_begin, range_end, std::front_inserter(*this));
+         auto range_size = size() - old_size;
+         std::reverse(begin(), begin()+range_size);
+         std::rotate(begin(), begin()+range_size, begin()+range_size+distance_to_begin);
+         return begin()+distance_to_begin;
+      }
+      else
+      {
+         std::copy(range_begin, range_end, std::back_inserter(*this));
+         auto range_size = size() - old_size;
+         std::rotate(end()-range_size-distance_to_end, end()-range_size, end());
+         return end()-range_size-distance_to_end;
+      }
+   }
+   
+   template<class TIterator>
+   iterator insert(  const_iterator pos,
+                     TIterator range_begin,
+                     TIterator range_end,
                      typename std::enable_if<_is_forward_iterator<TIterator>::value>::type* = nullptr)
    {
       auto count = std::distance(range_begin, range_end);
@@ -575,8 +602,9 @@ public:
       _sstl_noexcept(std::is_nothrow_constructible<value_type, typename std::add_rvalue_reference<Args>::type...>::value)
    {
       sstl_assert(!full());
-      _derived()._first_pointer = _dec_pointer(_derived()._first_pointer);
-      new(_derived()._first_pointer) value_type(std::forward<Args>(value)...);
+      auto new_first_pointer = _dec_pointer(_derived()._first_pointer);
+      new(new_first_pointer) value_type(std::forward<Args>(value)...);
+      _derived()._first_pointer = new_first_pointer;
       ++_derived()._size;
    }
 
@@ -597,8 +625,9 @@ public:
       _sstl_noexcept(std::is_nothrow_constructible<value_type, typename std::add_rvalue_reference<Args>::type...>::value)
    {
       sstl_assert(!full());
-      _derived()._last_pointer = _inc_pointer(_derived()._last_pointer);
-      new(_derived()._last_pointer) value_type(std::forward<Args>(args)...);
+      auto new_last_pointer = _inc_pointer(_derived()._last_pointer);
+      new(new_last_pointer) value_type(std::forward<Args>(args)...);
+      _derived()._last_pointer = new_last_pointer;
       ++_derived()._size;
    }
 
