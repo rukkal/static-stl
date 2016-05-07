@@ -15,7 +15,7 @@ template<class T>
 sstl::dequeng<T, 11> make_noncontiguous_deque(std::initializer_list<T> init)
 {
    auto d = sstl::dequeng<T, 11>{};
-   for(size_t i=0; i<d.capacity()-1; ++i)
+   for(size_t i=0; i<d.capacity()-(init.size()/2)-1; ++i)
    {
       d.push_back(0);
       d.pop_front();

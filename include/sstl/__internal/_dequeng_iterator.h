@@ -192,7 +192,7 @@ private:
       if(_pos != nullptr)
       {
          if(_pos >= _deque->_derived()._first_pointer)
-            return _deque->_derived()._first_pointer - _pos;
+            return _pos - _deque->_derived()._first_pointer;
          else
             return (_deque->_derived()._end_storage - _deque->_derived()._first_pointer) + (_pos - _deque->_derived()._begin_storage());
       }
