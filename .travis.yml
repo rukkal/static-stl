@@ -27,7 +27,10 @@ install:
 
 script:
   - cmake --version
-  - mkdir build
-  - cd build
-  - cmake -G "Unix Makefiles" .. && make && ./test-sstl && ./test-sstl-noexceptions
+  - mkdir build_debug
+  - mkdir build_release
+  - cd build_debug
+  - cmake -DCMAKE_BUILD_TYPE=Debug -G"Unix Makefiles" .. && make && ./test-sstl && ./test-sstl-noexceptions
+  - cd ../build_release
+  - cmake -DCMAKE_BUILD_TYPE=Release -G"Unix Makefiles" .. && make && ./test-sstl && ./test-sstl-noexceptions
 
