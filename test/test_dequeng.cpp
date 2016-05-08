@@ -775,7 +775,7 @@ TEST_CASE("dequeng")
       }
    }
 
-   SECTION("insert (lvalue reference + rvalue reference)")
+   SECTION("insert (lvalue reference + rvalue reference) + emplace")
    {
       auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
       auto value = counted_type{ 10 };
@@ -796,6 +796,13 @@ TEST_CASE("dequeng")
             REQUIRE(it == d.begin());
             REQUIRE((d == deque_counted_type_t{10, 0, 1, 2, 3, 4}));
          }
+         SECTION("emplace")
+         {
+            deque_counted_type_t::iterator it = d.emplace(d.cbegin(), 10);
+            REQUIRE(counted_type::check().parameter_constructions(1).move_constructions(1));
+            REQUIRE(it == d.begin());
+            REQUIRE((d == deque_counted_type_t{10, 0, 1, 2, 3, 4}));
+         }
       }
       SECTION("begin+1")
       {
@@ -810,6 +817,13 @@ TEST_CASE("dequeng")
          {
             deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, std::move(value));
             REQUIRE(counted_type::check().move_constructions(1).move_assignments(1));
+            REQUIRE(it == d.begin()+1);
+            REQUIRE((d == deque_counted_type_t{0, 10, 1, 2, 3, 4}));
+         }
+         SECTION("emplace")
+         {
+            deque_counted_type_t::iterator it = d.emplace(d.cbegin()+1, 10);
+            REQUIRE(counted_type::check().parameter_constructions(1).move_constructions(1).move_assignments(1));
             REQUIRE(it == d.begin()+1);
             REQUIRE((d == deque_counted_type_t{0, 10, 1, 2, 3, 4}));
          }
@@ -830,6 +844,13 @@ TEST_CASE("dequeng")
             REQUIRE(it == d.begin()+2);
             REQUIRE((d == deque_counted_type_t{0, 1, 10, 2, 3, 4}));
          }
+         SECTION("emplace")
+         {
+            deque_counted_type_t::iterator it = d.emplace(d.cbegin()+2, 10);
+            REQUIRE(counted_type::check().parameter_constructions(1).move_constructions(1).move_assignments(2));
+            REQUIRE(it == d.begin()+2);
+            REQUIRE((d == deque_counted_type_t{0, 1, 10, 2, 3, 4}));
+         }
       }
       SECTION("end")
       {
@@ -844,6 +865,13 @@ TEST_CASE("dequeng")
          {
             deque_counted_type_t::iterator it = d.insert(d.cend(), std::move(value));
             REQUIRE(counted_type::check().move_constructions(1));
+            REQUIRE(it == d.end()-1);
+            REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4, 10}));
+         }
+         SECTION("emplace")
+         {
+            deque_counted_type_t::iterator it = d.emplace(d.cend(), 10);
+            REQUIRE(counted_type::check().parameter_constructions(1).move_constructions(1));
             REQUIRE(it == d.end()-1);
             REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4, 10}));
          }
@@ -864,6 +892,13 @@ TEST_CASE("dequeng")
             REQUIRE(it == d.end()-2);
             REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 10, 4}));
          }
+         SECTION("emplace")
+         {
+            deque_counted_type_t::iterator it = d.emplace(d.cend()-1, 10);
+            REQUIRE(counted_type::check().parameter_constructions(1).move_constructions(1).move_assignments(1));
+            REQUIRE(it == d.end()-2);
+            REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 10, 4}));
+         }
       }
       SECTION("end-2")
       {
@@ -881,10 +916,17 @@ TEST_CASE("dequeng")
             REQUIRE(it == d.end()-3);
             REQUIRE((d == deque_counted_type_t{0, 1, 2, 10, 3, 4}));
          }
+         SECTION("emplace")
+         {
+            deque_counted_type_t::iterator it = d.emplace(d.cend()-2, 10);
+            REQUIRE(counted_type::check().parameter_constructions(1).move_constructions(1).move_assignments(2));
+            REQUIRE(it == d.end()-3);
+            REQUIRE((d == deque_counted_type_t{0, 1, 2, 10, 3, 4}));
+         }
       }
       #if _sstl_has_exceptions()
       //note only the lvalue-reference version is tested here, because the rvalue-version
-      //shares the same exception handling code
+      //and emplace share the same exception handling code
       SECTION("exception handling")
       {
          SECTION("construction of new element throws")

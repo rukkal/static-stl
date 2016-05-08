@@ -609,6 +609,15 @@ public:
       }
    }
 
+   template<class... Args>
+   iterator emplace(const_iterator pos, Args&&... args)
+      _sstl_noexcept(noexcept(std::declval<dequeng>()._emplace_value(std::declval<const_iterator>(),
+                                                                     std::declval<value_type&&>())))
+   {
+      value_type value(std::forward<Args>(args)...);
+      return _emplace_value(pos, std::move(value));
+   }
+
    void push_front(const_reference value)
       _sstl_noexcept(noexcept(std::declval<dequeng>().emplace_front(std::declval<const_reference>())))
    {
