@@ -19,6 +19,7 @@ void _assert_hacky_derived_class_access_is_valid()
    //note: the address value used in the assertion cannot be null, because
    //static_cast never applies an offset to a given pointer if it is null!
    void* non_null_address = reinterpret_cast<void*>(size_t(1)<<(sizeof(void*)*8-1));
+   (void) non_null_address;
    sstl_assert(static_cast<TBase*>(static_cast<TDerived*>(non_null_address)) == static_cast<TBase*>(non_null_address));
    sstl_assert(static_cast<TBase*>(static_cast<TDerivedForHackyAccess*>(non_null_address)) == static_cast<TBase*>(non_null_address));
 }

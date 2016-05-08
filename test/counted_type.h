@@ -172,16 +172,19 @@ public:
             is_valid_count(expected_default_constructions) == is_valid_count(expected_parameter_constructions)
             && is_valid_count(expected_default_constructions) == is_valid_count(expected_copy_constructions)
             && is_valid_count(expected_default_constructions) == is_valid_count(expected_move_constructions);
+         (void) detailed_construction_checks_are_either_all_valid_or_all_invalid;
          assert(detailed_construction_checks_are_either_all_valid_or_all_invalid);
 
          bool if_any_construction_check_is_performed_it_is_either_a_detailed_one_or_a_general_one =
             (!is_valid_count(expected_default_constructions) && !is_valid_count(expected_constructions))
             || (is_valid_count(expected_default_constructions) && !is_valid_count(expected_constructions))
             || (!is_valid_count(expected_default_constructions) && is_valid_count(expected_constructions));
+         (void) if_any_construction_check_is_performed_it_is_either_a_detailed_one_or_a_general_one;
          assert(if_any_construction_check_is_performed_it_is_either_a_detailed_one_or_a_general_one);
 
          bool assignment_checks_are_either_all_valid_or_all_invalid =
             is_valid_count(expected_copy_assignments) == is_valid_count(expected_move_assignments);
+         (void) assignment_checks_are_either_all_valid_or_all_invalid;
          assert(assignment_checks_are_either_all_valid_or_all_invalid);
 
          return check_value(counted_type::construction::count, expected_constructions)
