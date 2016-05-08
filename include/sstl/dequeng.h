@@ -381,8 +381,8 @@ public:
          return iterator{ this, const_cast<pointer>(pos._pos) };
 
       sstl_assert(size()+count <= capacity());
-      auto distance_to_begin = std::distance(cbegin(), pos);
-      auto distance_to_end = std::distance(pos, cend());
+      auto distance_to_begin = static_cast<size_type>(std::distance(cbegin(), pos));
+      auto distance_to_end = static_cast<size_type>(std::distance(pos, cend()));
 
       if(distance_to_begin < distance_to_end)
       {
@@ -463,7 +463,7 @@ public:
          return iterator{ this, _inc_pointer(dst) };
       }
    }
-   
+
    template<class TIterator>
    iterator insert(  const_iterator pos,
                      TIterator range_begin,
@@ -495,7 +495,7 @@ public:
          return end()-range_size-distance_to_end;
       }
    }
-   
+
    template<class TIterator>
    iterator insert(  const_iterator pos,
                      TIterator range_begin,
@@ -509,13 +509,13 @@ public:
          && std::is_nothrow_copy_constructible<value_type>::value
          && std::is_nothrow_copy_assignable<value_type>::value)
    {
-      auto count = std::distance(range_begin, range_end);
+      auto count = static_cast<size_type>(std::distance(range_begin, range_end));
       if(count==0)
          return iterator{ this, const_cast<pointer>(pos._pos) };
 
       sstl_assert(size()+count <= capacity());
-      auto distance_to_begin = std::distance(cbegin(), pos);
-      auto distance_to_end = std::distance(pos, cend());
+      auto distance_to_begin = static_cast<size_type>(std::distance(cbegin(), pos));
+      auto distance_to_end = static_cast<size_type>(std::distance(pos, cend()));
       auto range_pos = range_begin;
 
       if(distance_to_begin < distance_to_end)
@@ -569,7 +569,7 @@ public:
          auto dst = new_region_first_pointer;
          auto number_of_constructions = count > distance_to_end ? count-distance_to_end : 0;
          auto number_of_assignments = count - number_of_constructions;
-         
+
          for(size_type i=number_of_assignments; i>0; --i)
          {
             *dst = *range_pos;
@@ -847,16 +847,16 @@ protected:
          auto src = _derived()._first_pointer;
          auto dst = _dec_pointer(_derived()._first_pointer);
          auto dst_end = _add_offset_to_pointer(dst, distance_to_begin);
-         
+
          if(distance_to_begin > 0)
          {
             new(dst) value_type(std::move(*src));
             _derived()._first_pointer = dst;
             ++_derived()._size;
-            
+
             src = _inc_pointer(src);
             dst = _inc_pointer(dst);
-            
+
             while(dst != dst_end)
             {
                *dst = std::move(*src);
@@ -871,7 +871,7 @@ protected:
             ++_derived()._size;
             new(dst_end) value_type(std::forward<TValue>(value));
          }
-         
+
          return iterator{this, dst_end};
       }
       else
@@ -879,16 +879,16 @@ protected:
          auto src = _derived()._last_pointer;
          auto dst = _inc_pointer(_derived()._last_pointer);
          auto dst_end = _subtract_offset_to_pointer(dst, distance_to_end);
-         
+
          if(distance_to_end > 0)
          {
             new(dst) value_type(std::move(*src));
             _derived()._last_pointer = dst;
             ++_derived()._size;
-            
+
             src = _dec_pointer(src);
             dst = _dec_pointer(dst);
-            
+
             while(dst != dst_end)
             {
                *dst = std::move(*src);
@@ -903,7 +903,7 @@ protected:
             ++_derived()._size;
             new(dst_end) value_type(std::forward<TValue>(value));
          }
-         
+
          return iterator{this, dst_end};
       }
    }
