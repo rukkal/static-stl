@@ -54,7 +54,7 @@ sstl::vector<int, MAX_ELEMENTS> vec{};
 sstl::vector<int>& ref = vec;
 ref.push_back(0);
 ```
-The elements are stored into an internal buffer whose capacity is specified by the extra template argument. Note that this template argument is required only for the creation of the container. The created instance can then be used and passed around as a reference to a capacity-agnostic type (e.g. sstl::vector<int>).
+The elements are stored into an internal buffer whose capacity is specified by the extra template argument. Note that this template argument is required only for the creation of the container. The created instance can then be used and passed around as a reference to a capacity-agnostic type (e.g. sstl::vector&lt;int&gt;).
 
 **How was SSTL born?**
 
