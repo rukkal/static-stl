@@ -867,9 +867,9 @@ protected:
          }
          else
          {
+            new(dst_end) value_type(std::forward<TValue>(value));
             _derived()._first_pointer = dst;
             ++_derived()._size;
-            new(dst_end) value_type(std::forward<TValue>(value));
          }
 
          return iterator{this, dst_end};
@@ -899,9 +899,9 @@ protected:
          }
          else
          {
+            new(dst_end) value_type(std::forward<TValue>(value));
             _derived()._last_pointer = dst;
             ++_derived()._size;
-            new(dst_end) value_type(std::forward<TValue>(value));
          }
 
          return iterator{this, dst_end};

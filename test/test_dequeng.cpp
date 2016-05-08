@@ -775,74 +775,163 @@ TEST_CASE("dequeng")
       }
    }
 
-   SECTION("insert (by lvalue reference)")
+   SECTION("insert (lvalue reference + rvalue reference)")
    {
       auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
       auto value = counted_type{ 10 };
+      counted_type::reset_counts();
       SECTION("begin")
       {
-         counted_type::reset_counts();
-         deque_counted_type_t::iterator it = d.insert(d.cbegin(), value);
-         REQUIRE(counted_type::check().copy_constructions(1));
-         REQUIRE(it == d.begin());
-         REQUIRE((d == deque_counted_type_t{10, 0, 1, 2, 3, 4}));
+         SECTION("lvalue reference")
+         {
+            deque_counted_type_t::iterator it = d.insert(d.cbegin(), value);
+            REQUIRE(counted_type::check().copy_constructions(1));
+            REQUIRE(it == d.begin());
+            REQUIRE((d == deque_counted_type_t{10, 0, 1, 2, 3, 4}));         
+         }
+         SECTION("rvalue reference")
+         {
+            deque_counted_type_t::iterator it = d.insert(d.cbegin(), std::move(value));
+            REQUIRE(counted_type::check().move_constructions(1));
+            REQUIRE(it == d.begin());
+            REQUIRE((d == deque_counted_type_t{10, 0, 1, 2, 3, 4}));
+         }
       }
       SECTION("begin+1")
       {
-         counted_type::reset_counts();
-         deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, value);
-         REQUIRE(counted_type::check().move_constructions(1).copy_assignments(1));
-         REQUIRE(it == d.begin()+1);
-         REQUIRE((d == deque_counted_type_t{0, 10, 1, 2, 3, 4}));
+         SECTION("lvalue reference")
+         {
+            deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, value);
+            REQUIRE(counted_type::check().move_constructions(1).copy_assignments(1));
+            REQUIRE(it == d.begin()+1);
+            REQUIRE((d == deque_counted_type_t{0, 10, 1, 2, 3, 4}));
+         }
+         SECTION("rvalue reference")
+         {
+            deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, std::move(value));
+            REQUIRE(counted_type::check().move_constructions(1).move_assignments(1));
+            REQUIRE(it == d.begin()+1);
+            REQUIRE((d == deque_counted_type_t{0, 10, 1, 2, 3, 4}));
+         }
       }
       SECTION("begin+2")
       {
-         counted_type::reset_counts();
-         deque_counted_type_t::iterator it = d.insert(d.cbegin()+2, value);
-         REQUIRE(counted_type::check().move_constructions(1).move_assignments(1).copy_assignments(1));
-         REQUIRE(it == d.begin()+2);
-         REQUIRE((d == deque_counted_type_t{0, 1, 10, 2, 3, 4}));
+         SECTION("lvalue reference")
+         {
+            deque_counted_type_t::iterator it = d.insert(d.cbegin()+2, value);
+            REQUIRE(counted_type::check().move_constructions(1).move_assignments(1).copy_assignments(1));
+            REQUIRE(it == d.begin()+2);
+            REQUIRE((d == deque_counted_type_t{0, 1, 10, 2, 3, 4}));
+         }
+         SECTION("rvalue reference")
+         {
+            deque_counted_type_t::iterator it = d.insert(d.cbegin()+2, std::move(value));
+            REQUIRE(counted_type::check().move_constructions(1).move_assignments(2));
+            REQUIRE(it == d.begin()+2);
+            REQUIRE((d == deque_counted_type_t{0, 1, 10, 2, 3, 4}));
+         }
       }
       SECTION("end")
       {
-         counted_type::reset_counts();
-         deque_counted_type_t::iterator it = d.insert(d.cend(), value);
-         REQUIRE(counted_type::check().copy_constructions(1));
-         REQUIRE(it == d.end()-1);
-         REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4, 10}));
+         SECTION("lvalue reference")
+         {
+            deque_counted_type_t::iterator it = d.insert(d.cend(), value);
+            REQUIRE(counted_type::check().copy_constructions(1));
+            REQUIRE(it == d.end()-1);
+            REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4, 10}));
+         }
+         SECTION("rvalue reference")
+         {
+            deque_counted_type_t::iterator it = d.insert(d.cend(), std::move(value));
+            REQUIRE(counted_type::check().move_constructions(1));
+            REQUIRE(it == d.end()-1);
+            REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4, 10}));
+         }
       }
       SECTION("end-1")
       {
-         counted_type::reset_counts();
-         deque_counted_type_t::iterator it = d.insert(d.cend()-1, value);
-         REQUIRE(counted_type::check().move_constructions(1).copy_assignments(1));
-         REQUIRE(it == d.end()-2);
-         REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 10, 4}));
+         SECTION("lvalue_reference")
+         {
+            deque_counted_type_t::iterator it = d.insert(d.cend()-1, value);
+            REQUIRE(counted_type::check().move_constructions(1).copy_assignments(1));
+            REQUIRE(it == d.end()-2);
+            REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 10, 4}));
+         }
+         SECTION("rvalue reference")
+         {
+            deque_counted_type_t::iterator it = d.insert(d.cend()-1, std::move(value));
+            REQUIRE(counted_type::check().move_constructions(1).move_assignments(1));
+            REQUIRE(it == d.end()-2);
+            REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 10, 4}));
+         }
       }
       SECTION("end-2")
       {
-         counted_type::reset_counts();
-         deque_counted_type_t::iterator it = d.insert(d.cend()-2, value);
-         REQUIRE(counted_type::check().move_constructions(1).move_assignments(1).copy_assignments(1));
-         REQUIRE(it == d.end()-3);
-         REQUIRE((d == deque_counted_type_t{0, 1, 2, 10, 3, 4}));
+         SECTION("lvalue reference")
+         {
+            deque_counted_type_t::iterator it = d.insert(d.cend()-2, value);
+            REQUIRE(counted_type::check().move_constructions(1).move_assignments(1).copy_assignments(1));
+            REQUIRE(it == d.end()-3);
+            REQUIRE((d == deque_counted_type_t{0, 1, 2, 10, 3, 4}));
+         }
+         SECTION("rvalue reference")
+         {
+            deque_counted_type_t::iterator it = d.insert(d.cend()-2, std::move(value));
+            REQUIRE(counted_type::check().move_constructions(1).move_assignments(2));
+            REQUIRE(it == d.end()-3);
+            REQUIRE((d == deque_counted_type_t{0, 1, 2, 10, 3, 4}));
+         }
       }
       #if _sstl_has_exceptions()
+      //note only the lvalue-reference version is tested here, because the rvalue-version
+      //shares the same exception handling code
       SECTION("exception handling")
       {
-         SECTION("move construction throws")
+         SECTION("construction of new element throws")
          {
-            counted_type::reset_counts();
-            counted_type::throw_at_nth_move_construction(1);
-            REQUIRE_THROWS_AS(d.insert(d.end()-1, value), counted_type::move_construction::exception);
-            REQUIRE(counted_type::check{}.constructions(0).destructions(0));
-            REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
+            SECTION("begin")
+            {
+               counted_type::throw_at_nth_copy_construction(1);
+               REQUIRE_THROWS_AS(d.insert(d.begin(), value), counted_type::copy_construction::exception);
+               REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
+            }
+            SECTION("end")
+            {
+               counted_type::throw_at_nth_copy_construction(1);
+               REQUIRE_THROWS_AS(d.insert(d.end(), value), counted_type::copy_construction::exception);
+               REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
+            }
          }
-         SECTION("move assignment throws")
+         SECTION("assignment of new element throws")
+         {
+            counted_type::throw_at_nth_copy_assignment(1);
+            REQUIRE_THROWS_AS(d.insert(d.end()-2, value), counted_type::copy_assignment::exception);
+            REQUIRE(counted_type::check{}.move_constructions(1).move_assignments(1).copy_assignments(0).destructions(0));
+            REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 3, 4}));
+         }
+         SECTION("move construction throws (during internal shift)")
+         {
+            SECTION("begin region")
+            {
+               counted_type::throw_at_nth_move_construction(1);
+               REQUIRE_THROWS_AS(d.insert(d.begin()+1, value), counted_type::move_construction::exception);
+               REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
+            }
+            SECTION("end region")
+            {
+               counted_type::throw_at_nth_move_construction(1);
+               REQUIRE_THROWS_AS(d.insert(d.end()-1, value), counted_type::move_construction::exception);
+               REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
+            }
+         }
+         SECTION("move assignment throws (during internal shift)")
          {
             SECTION("end region")
             {
-               counted_type::reset_counts();
                counted_type::throw_at_nth_move_assignment(1);
                REQUIRE_THROWS_AS(d.insert(d.end()-2, value), counted_type::move_assignment::exception);
                REQUIRE(counted_type::check{}.move_constructions(1).move_assignments(0).destructions(0));
@@ -858,75 +947,6 @@ TEST_CASE("dequeng")
                REQUIRE((d == deque_counted_type_t{0, 0, 1, 2, 3, 4, 5}));
             }
          }
-         SECTION("copy assignment throws")
-         {
-            counted_type::reset_counts();
-            counted_type::throw_at_nth_copy_assignment(1);
-            REQUIRE_THROWS_AS(d.insert(d.end()-2, value), counted_type::copy_assignment::exception);
-            REQUIRE(counted_type::check{}.move_constructions(1).move_assignments(1).copy_assignments(0).destructions(0));
-            REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 3, 4}));
-         }
-      }
-      #endif
-   }
-
-   SECTION("insert (by rvalue reference)")
-   {
-      auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
-      auto value = counted_type{ 10 };
-      SECTION("begin")
-      {
-         counted_type::reset_counts();
-         deque_counted_type_t::iterator it = d.insert(d.cbegin(), std::move(value));
-         REQUIRE(counted_type::check().move_constructions(1));
-         REQUIRE(it == d.begin());
-         REQUIRE((d == deque_counted_type_t{10, 0, 1, 2, 3, 4}));
-      }
-      SECTION("begin+1")
-      {
-         counted_type::reset_counts();
-         deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, std::move(value));
-         REQUIRE(counted_type::check().move_constructions(1).move_assignments(1));
-         REQUIRE(it == d.begin()+1);
-         REQUIRE((d == deque_counted_type_t{0, 10, 1, 2, 3, 4}));
-      }
-      SECTION("begin+2")
-      {
-         counted_type::reset_counts();
-         deque_counted_type_t::iterator it = d.insert(d.cbegin()+2, std::move(value));
-         REQUIRE(counted_type::check().move_constructions(1).move_assignments(2));
-         REQUIRE(it == d.begin()+2);
-         REQUIRE((d == deque_counted_type_t{0, 1, 10, 2, 3, 4}));
-      }
-      SECTION("end")
-      {
-         counted_type::reset_counts();
-         deque_counted_type_t::iterator it = d.insert(d.cend(), std::move(value));
-         REQUIRE(counted_type::check().move_constructions(1));
-         REQUIRE(it == d.end()-1);
-         REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4, 10}));
-      }
-      SECTION("end-1")
-      {
-         counted_type::reset_counts();
-         deque_counted_type_t::iterator it = d.insert(d.cend()-1, std::move(value));
-         REQUIRE(counted_type::check().move_constructions(1).move_assignments(1));
-         REQUIRE(it == d.end()-2);
-         REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 10, 4}));
-      }
-      SECTION("end-2")
-      {
-         counted_type::reset_counts();
-         deque_counted_type_t::iterator it = d.insert(d.cend()-2, std::move(value));
-         REQUIRE(counted_type::check().move_constructions(1).move_assignments(2));
-         REQUIRE(it == d.end()-3);
-         REQUIRE((d == deque_counted_type_t{0, 1, 2, 10, 3, 4}));
-      }
-      #if _sstl_has_exceptions()
-      SECTION("exception handling")
-      {
-         //exception handling already tested in the by-lvalue version
-         //(same exceptin handling code)
       }
       #endif
    }
