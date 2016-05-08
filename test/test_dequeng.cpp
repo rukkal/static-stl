@@ -17,9 +17,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 
 namespace sstl_test
 {
-
-using deque_int_base_t = sstl::dequeng<int>;
-using deque_int_t = sstl::dequeng<int, 11>;
+using deque_counted_type_base_t = sstl::dequeng<counted_type>;
 using deque_counted_type_t = sstl::dequeng<counted_type, 11>;
 
 TEST_CASE("dequeng")
@@ -27,22 +25,24 @@ TEST_CASE("dequeng")
    SECTION("user cannot directly construct the base class")
    {
       #if !_sstl_is_gcc()
-         REQUIRE(!std::is_default_constructible<deque_int_base_t>::value);
+         REQUIRE(!std::is_default_constructible<deque_counted_type_base_t>::value);
       #endif
-      REQUIRE(!std::is_copy_constructible<deque_int_base_t>::value);
-      REQUIRE(!std::is_move_constructible<deque_int_base_t>::value);
+      REQUIRE(!std::is_copy_constructible<deque_counted_type_base_t>::value);
+      REQUIRE(!std::is_move_constructible<deque_counted_type_base_t>::value);
    }
 
    SECTION("user cannot directly destroy the base class")
    {
       #if !_is_msvc() //MSVC (VS2013) has a buggy implementation of std::is_destructible
-      REQUIRE(!std::is_destructible<deque_int_base_t>::value);
+      REQUIRE(!std::is_destructible<deque_counted_type_base_t>::value);
       #endif
    }
 
    SECTION("default constructor")
    {
-      auto d = deque_int_t();
+      counted_type::reset_counts();
+      auto d = deque_counted_type_t();
+      REQUIRE(counted_type::check{}.constructions(0));
       REQUIRE(d.empty());
    }
 
@@ -50,8 +50,10 @@ TEST_CASE("dequeng")
    {
       SECTION("contained values")
       {
-         auto actual = deque_int_t(3);
-         auto expected = deque_int_t{0, 0, 0};
+         auto expected = deque_counted_type_t{counted_type(), counted_type(), counted_type()};
+         counted_type::reset_counts();
+         auto actual = deque_counted_type_t(3);
+         REQUIRE(counted_type::check{}.default_constructions(1).copy_constructions(3));
          REQUIRE(actual == expected);
       }
       #if _sstl_has_exceptions()
@@ -67,19 +69,18 @@ TEST_CASE("dequeng")
 
    SECTION("range constructor")
    {
+      auto values = std::initializer_list<counted_type>{0, 1, 2, 3};
+      counted_type::reset_counts();
       SECTION("contained values")
       {
-         auto init = {0, 1, 2, 3};
-         auto d = deque_int_t(init.begin(), init.end());
-         REQUIRE(are_containers_equal(d, init));
+         auto d = deque_counted_type_t(values.begin(), values.end());
+         REQUIRE(are_containers_equal(d, values));
       }
       #if _sstl_has_exceptions()
       SECTION("exception handling")
       {
-         auto init = std::initializer_list<counted_type>{0, 1, 2, 3};
-         counted_type::reset_counts();
          counted_type::throw_at_nth_copy_construction(3);
-         REQUIRE_THROWS_AS(deque_counted_type_t(init.begin(), init.end()), counted_type::copy_construction::exception);
+         REQUIRE_THROWS_AS(deque_counted_type_t(values.begin(), values.end()), counted_type::copy_construction::exception);
          REQUIRE(counted_type::check{}.copy_constructions(2).destructions(2));
       }
       #endif
@@ -135,34 +136,34 @@ TEST_CASE("dequeng")
             auto rhs = deque_counted_type_t{0, 1, 2, 3};
             counted_type::reset_counts();
             auto lhs = deque_counted_type_t{ std::move(rhs) };
-            REQUIRE(lhs == expected_lhs);
             REQUIRE(counted_type::check().move_constructions(4).destructions(4));
+            REQUIRE(lhs == expected_lhs);
          }
          SECTION("different capacity")
          {
             auto rhs = sstl::dequeng<counted_type, 7>{0, 1, 2, 3};
             counted_type::reset_counts();
             auto lhs = sstl::dequeng<counted_type, 11>{ std::move(rhs) };
-            REQUIRE(lhs == expected_lhs);
             REQUIRE(counted_type::check().move_constructions(4).destructions(4));
+            REQUIRE(lhs == expected_lhs);
          }
          SECTION("non-contiguous values")
          {
             auto rhs = make_noncontiguous_deque<counted_type>({0, 1, 2, 3});
             counted_type::reset_counts();
             auto lhs = deque_counted_type_t{ std::move(rhs) };
-            REQUIRE(lhs == expected_lhs);
             REQUIRE(counted_type::check().move_constructions(4).destructions(4));
+            REQUIRE(lhs == expected_lhs);
          }
       }
       SECTION("moved-from state")
       {
-         auto rhs = deque_int_t{0, 1, 2, 3};
-         auto lhs = deque_int_t{ std::move(rhs) };
+         auto rhs = deque_counted_type_t{0, 1, 2, 3};
+         auto lhs = deque_counted_type_t{ std::move(rhs) };
          REQUIRE(rhs.empty());
 
          rhs.push_back(10); rhs.push_back(11);
-         REQUIRE(rhs == (deque_int_t{10, 11}));
+         REQUIRE(rhs == (deque_counted_type_t{10, 11}));
       }
       #if _sstl_has_exceptions()
       SECTION("exception handling")
@@ -172,25 +173,24 @@ TEST_CASE("dequeng")
          counted_type::throw_at_nth_move_construction(3);
          REQUIRE_THROWS_AS(deque_counted_type_t{ std::move(rhs) }, counted_type::move_construction::exception);
          REQUIRE(counted_type::check{}.move_constructions(2).destructions(4));
-         REQUIRE((rhs == deque_counted_type_t{2, 3}));
+         REQUIRE(rhs == (deque_counted_type_t{2, 3}));
       }
       #endif
    }
 
    SECTION("initializer-list constructor")
    {
+      auto init = std::initializer_list<counted_type>{0, 1, 2, 3};
+      counted_type::reset_counts();
       SECTION("contained values")
       {
-         auto actual = deque_int_t{0, 1, 2};
-         auto expected = {0, 1, 2};
-         REQUIRE(actual.size() == expected.size());
-         REQUIRE(std::equal(actual.cbegin(), actual.cend(), expected.begin()));
+         auto d = deque_counted_type_t{0, 1, 2, 3};
+         REQUIRE(counted_type::check{}.parameter_constructions(4).copy_constructions(4));
+         REQUIRE(are_containers_equal(d, init));
       }
       #if _sstl_has_exceptions()
       SECTION("exception handling")
       {
-         auto init = std::initializer_list<counted_type>{0, 1, 2, 3};
-         counted_type::reset_counts();
          counted_type::throw_at_nth_copy_construction(3);
          REQUIRE_THROWS_AS(deque_counted_type_t{ init }, counted_type::copy_construction::exception);
          REQUIRE(counted_type::check{}.copy_constructions(2).destructions(2));
@@ -288,7 +288,7 @@ TEST_CASE("dequeng")
             counted_type::throw_at_nth_copy_assignment(2);
             REQUIRE_THROWS_AS(lhs = rhs, counted_type::copy_assignment::exception);
             REQUIRE(counted_type::check().copy_assignments(1));
-            REQUIRE((lhs == deque_counted_type_t{0, 11, 12}));
+            REQUIRE(lhs == deque_counted_type_t({0, 11, 12}));
          }
          SECTION("copy constructor throws")
          {
@@ -297,7 +297,7 @@ TEST_CASE("dequeng")
             counted_type::throw_at_nth_copy_construction(2);
             REQUIRE_THROWS_AS(lhs = rhs, counted_type::copy_construction::exception);
             REQUIRE(counted_type::check().copy_assignments(2).copy_constructions(1));
-            REQUIRE((lhs == deque_counted_type_t{0, 1, 2}));
+            REQUIRE(lhs == (deque_counted_type_t{0, 1, 2}));
          }
       }
       #endif
@@ -382,13 +382,13 @@ TEST_CASE("dequeng")
       }
       SECTION("moved-from state")
       {
-         auto rhs = deque_int_t{0, 1, 2, 3};
-         auto lhs = deque_int_t{ };
+         auto rhs = deque_counted_type_t{0, 1, 2, 3};
+         auto lhs = deque_counted_type_t{ };
          lhs = std::move(rhs);
          REQUIRE(rhs.empty());
 
          rhs.push_back(10); rhs.push_back(11);
-         REQUIRE(rhs == (deque_int_t{10, 11}));
+         REQUIRE(rhs == (deque_counted_type_t{10, 11}));
       }
       #if _sstl_has_exceptions()
       SECTION("exception handling")
@@ -400,8 +400,8 @@ TEST_CASE("dequeng")
             counted_type::throw_at_nth_move_assignment(2);
             REQUIRE_THROWS_AS(lhs = std::move(rhs), counted_type::move_assignment::exception);
             REQUIRE(counted_type::check().move_assignments(1).destructions(1));
-            REQUIRE((lhs == deque_counted_type_t{0, 11, 12}));
-            REQUIRE((rhs == deque_counted_type_t{1, 2, 3, 4}));
+            REQUIRE(lhs == (deque_counted_type_t{0, 11, 12}));
+            REQUIRE(rhs == (deque_counted_type_t{1, 2, 3, 4}));
          }
          SECTION("move constructor throws")
          {
@@ -410,8 +410,8 @@ TEST_CASE("dequeng")
             counted_type::throw_at_nth_move_construction(2);
             REQUIRE_THROWS_AS(lhs = std::move(rhs), counted_type::move_construction::exception);
             REQUIRE(counted_type::check().move_assignments(2).move_constructions(1).destructions(3));
-            REQUIRE((lhs == deque_counted_type_t{0, 1, 2}));
-            REQUIRE((rhs == deque_counted_type_t{3, 4}));
+            REQUIRE(lhs == (deque_counted_type_t{0, 1, 2}));
+            REQUIRE(rhs == (deque_counted_type_t{3, 4}));
          }
       }
       #endif
@@ -486,7 +486,7 @@ TEST_CASE("dequeng")
             counted_type::throw_at_nth_copy_assignment(2);
             REQUIRE_THROWS_AS(lhs = rhs, counted_type::copy_assignment::exception);
             REQUIRE(counted_type::check().copy_assignments(1));
-            REQUIRE((lhs == deque_counted_type_t{0, 11, 12}));
+            REQUIRE(lhs == (deque_counted_type_t{0, 11, 12}));
          }
          SECTION("copy constructor throws")
          {
@@ -495,7 +495,7 @@ TEST_CASE("dequeng")
             counted_type::throw_at_nth_copy_construction(2);
             REQUIRE_THROWS_AS(lhs = rhs, counted_type::copy_construction::exception);
             REQUIRE(counted_type::check().copy_assignments(2).copy_constructions(1));
-            REQUIRE((lhs == deque_counted_type_t{0, 1, 2}));
+            REQUIRE(lhs == (deque_counted_type_t{0, 1, 2}));
          }
       }
       #endif
@@ -570,7 +570,7 @@ TEST_CASE("dequeng")
             counted_type::throw_at_nth_copy_assignment(2);
             REQUIRE_THROWS_AS(lhs.assign(count, value), counted_type::copy_assignment::exception);
             REQUIRE(counted_type::check().copy_assignments(1));
-            REQUIRE((lhs == deque_counted_type_t{value, 11, 12}));
+            REQUIRE(lhs == (deque_counted_type_t{value, 11, 12}));
          }
          SECTION("copy constructor throws")
          {
@@ -579,7 +579,7 @@ TEST_CASE("dequeng")
             counted_type::throw_at_nth_copy_construction(2);
             REQUIRE_THROWS_AS(lhs.assign(count, value), counted_type::copy_construction::exception);
             REQUIRE(counted_type::check().copy_assignments(2).copy_constructions(1));
-            REQUIRE((lhs == deque_counted_type_t{value, value, value}));
+            REQUIRE(lhs == (deque_counted_type_t{value, value, value}));
          }
       }
       #endif
@@ -627,7 +627,7 @@ TEST_CASE("dequeng")
          d[0] = 10;
          d[2] = 12;
          d[4] = 14;
-         REQUIRE((d == deque_counted_type_t{10, 1, 12, 3, 14}));
+         REQUIRE(d == (deque_counted_type_t{10, 1, 12, 3, 14}));
       }
    }
 
@@ -643,7 +643,7 @@ TEST_CASE("dequeng")
       {
          d.front() = 10;
          REQUIRE(d.front() == 10);
-         REQUIRE((d == deque_counted_type_t{10, 1, 2}));
+         REQUIRE(d == (deque_counted_type_t{10, 1, 2}));
       }
    }
 
@@ -659,7 +659,7 @@ TEST_CASE("dequeng")
       {
          d.back() = 12;
          REQUIRE(d.back() == 12);
-         REQUIRE((d == deque_counted_type_t{0, 1, 12}));
+         REQUIRE(d == (deque_counted_type_t{0, 1, 12}));
       }
    }
 
@@ -787,21 +787,21 @@ TEST_CASE("dequeng")
             deque_counted_type_t::iterator it = d.insert(d.cbegin(), value);
             REQUIRE(counted_type::check().copy_constructions(1));
             REQUIRE(it == d.begin());
-            REQUIRE((d == deque_counted_type_t{10, 0, 1, 2, 3, 4}));         
+            REQUIRE(d == (deque_counted_type_t{10, 0, 1, 2, 3, 4}));         
          }
          SECTION("rvalue reference")
          {
             deque_counted_type_t::iterator it = d.insert(d.cbegin(), std::move(value));
             REQUIRE(counted_type::check().move_constructions(1));
             REQUIRE(it == d.begin());
-            REQUIRE((d == deque_counted_type_t{10, 0, 1, 2, 3, 4}));
+            REQUIRE(d == (deque_counted_type_t{10, 0, 1, 2, 3, 4}));
          }
          SECTION("emplace")
          {
             deque_counted_type_t::iterator it = d.emplace(d.cbegin(), 10);
             REQUIRE(counted_type::check().parameter_constructions(1).move_constructions(1));
             REQUIRE(it == d.begin());
-            REQUIRE((d == deque_counted_type_t{10, 0, 1, 2, 3, 4}));
+            REQUIRE(d == (deque_counted_type_t{10, 0, 1, 2, 3, 4}));
          }
       }
       SECTION("begin+1")
@@ -811,21 +811,21 @@ TEST_CASE("dequeng")
             deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, value);
             REQUIRE(counted_type::check().move_constructions(1).copy_assignments(1));
             REQUIRE(it == d.begin()+1);
-            REQUIRE((d == deque_counted_type_t{0, 10, 1, 2, 3, 4}));
+            REQUIRE(d == (deque_counted_type_t{0, 10, 1, 2, 3, 4}));
          }
          SECTION("rvalue reference")
          {
             deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, std::move(value));
             REQUIRE(counted_type::check().move_constructions(1).move_assignments(1));
             REQUIRE(it == d.begin()+1);
-            REQUIRE((d == deque_counted_type_t{0, 10, 1, 2, 3, 4}));
+            REQUIRE(d == (deque_counted_type_t{0, 10, 1, 2, 3, 4}));
          }
          SECTION("emplace")
          {
             deque_counted_type_t::iterator it = d.emplace(d.cbegin()+1, 10);
             REQUIRE(counted_type::check().parameter_constructions(1).move_constructions(1).move_assignments(1));
             REQUIRE(it == d.begin()+1);
-            REQUIRE((d == deque_counted_type_t{0, 10, 1, 2, 3, 4}));
+            REQUIRE(d == (deque_counted_type_t{0, 10, 1, 2, 3, 4}));
          }
       }
       SECTION("begin+2")
@@ -835,21 +835,21 @@ TEST_CASE("dequeng")
             deque_counted_type_t::iterator it = d.insert(d.cbegin()+2, value);
             REQUIRE(counted_type::check().move_constructions(1).move_assignments(1).copy_assignments(1));
             REQUIRE(it == d.begin()+2);
-            REQUIRE((d == deque_counted_type_t{0, 1, 10, 2, 3, 4}));
+            REQUIRE(d == (deque_counted_type_t{0, 1, 10, 2, 3, 4}));
          }
          SECTION("rvalue reference")
          {
             deque_counted_type_t::iterator it = d.insert(d.cbegin()+2, std::move(value));
             REQUIRE(counted_type::check().move_constructions(1).move_assignments(2));
             REQUIRE(it == d.begin()+2);
-            REQUIRE((d == deque_counted_type_t{0, 1, 10, 2, 3, 4}));
+            REQUIRE(d == (deque_counted_type_t{0, 1, 10, 2, 3, 4}));
          }
          SECTION("emplace")
          {
             deque_counted_type_t::iterator it = d.emplace(d.cbegin()+2, 10);
             REQUIRE(counted_type::check().parameter_constructions(1).move_constructions(1).move_assignments(2));
             REQUIRE(it == d.begin()+2);
-            REQUIRE((d == deque_counted_type_t{0, 1, 10, 2, 3, 4}));
+            REQUIRE(d == (deque_counted_type_t{0, 1, 10, 2, 3, 4}));
          }
       }
       SECTION("end")
@@ -859,21 +859,21 @@ TEST_CASE("dequeng")
             deque_counted_type_t::iterator it = d.insert(d.cend(), value);
             REQUIRE(counted_type::check().copy_constructions(1));
             REQUIRE(it == d.end()-1);
-            REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4, 10}));
+            REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4, 10}));
          }
          SECTION("rvalue reference")
          {
             deque_counted_type_t::iterator it = d.insert(d.cend(), std::move(value));
             REQUIRE(counted_type::check().move_constructions(1));
             REQUIRE(it == d.end()-1);
-            REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4, 10}));
+            REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4, 10}));
          }
          SECTION("emplace")
          {
             deque_counted_type_t::iterator it = d.emplace(d.cend(), 10);
             REQUIRE(counted_type::check().parameter_constructions(1).move_constructions(1));
             REQUIRE(it == d.end()-1);
-            REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4, 10}));
+            REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4, 10}));
          }
       }
       SECTION("end-1")
@@ -883,21 +883,21 @@ TEST_CASE("dequeng")
             deque_counted_type_t::iterator it = d.insert(d.cend()-1, value);
             REQUIRE(counted_type::check().move_constructions(1).copy_assignments(1));
             REQUIRE(it == d.end()-2);
-            REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 10, 4}));
+            REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 10, 4}));
          }
          SECTION("rvalue reference")
          {
             deque_counted_type_t::iterator it = d.insert(d.cend()-1, std::move(value));
             REQUIRE(counted_type::check().move_constructions(1).move_assignments(1));
             REQUIRE(it == d.end()-2);
-            REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 10, 4}));
+            REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 10, 4}));
          }
          SECTION("emplace")
          {
             deque_counted_type_t::iterator it = d.emplace(d.cend()-1, 10);
             REQUIRE(counted_type::check().parameter_constructions(1).move_constructions(1).move_assignments(1));
             REQUIRE(it == d.end()-2);
-            REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 10, 4}));
+            REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 10, 4}));
          }
       }
       SECTION("end-2")
@@ -907,21 +907,21 @@ TEST_CASE("dequeng")
             deque_counted_type_t::iterator it = d.insert(d.cend()-2, value);
             REQUIRE(counted_type::check().move_constructions(1).move_assignments(1).copy_assignments(1));
             REQUIRE(it == d.end()-3);
-            REQUIRE((d == deque_counted_type_t{0, 1, 2, 10, 3, 4}));
+            REQUIRE(d == (deque_counted_type_t{0, 1, 2, 10, 3, 4}));
          }
          SECTION("rvalue reference")
          {
             deque_counted_type_t::iterator it = d.insert(d.cend()-2, std::move(value));
             REQUIRE(counted_type::check().move_constructions(1).move_assignments(2));
             REQUIRE(it == d.end()-3);
-            REQUIRE((d == deque_counted_type_t{0, 1, 2, 10, 3, 4}));
+            REQUIRE(d == (deque_counted_type_t{0, 1, 2, 10, 3, 4}));
          }
          SECTION("emplace")
          {
             deque_counted_type_t::iterator it = d.emplace(d.cend()-2, 10);
             REQUIRE(counted_type::check().parameter_constructions(1).move_constructions(1).move_assignments(2));
             REQUIRE(it == d.end()-3);
-            REQUIRE((d == deque_counted_type_t{0, 1, 2, 10, 3, 4}));
+            REQUIRE(d == (deque_counted_type_t{0, 1, 2, 10, 3, 4}));
          }
       }
       #if _sstl_has_exceptions()
@@ -936,14 +936,14 @@ TEST_CASE("dequeng")
                counted_type::throw_at_nth_copy_construction(1);
                REQUIRE_THROWS_AS(d.insert(d.begin(), value), counted_type::copy_construction::exception);
                REQUIRE(counted_type::check{}.constructions(0).destructions(0));
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
             }
             SECTION("end")
             {
                counted_type::throw_at_nth_copy_construction(1);
                REQUIRE_THROWS_AS(d.insert(d.end(), value), counted_type::copy_construction::exception);
                REQUIRE(counted_type::check{}.constructions(0).destructions(0));
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
             }
          }
          SECTION("assignment of new element throws")
@@ -951,7 +951,7 @@ TEST_CASE("dequeng")
             counted_type::throw_at_nth_copy_assignment(1);
             REQUIRE_THROWS_AS(d.insert(d.end()-2, value), counted_type::copy_assignment::exception);
             REQUIRE(counted_type::check{}.move_constructions(1).move_assignments(1).copy_assignments(0).destructions(0));
-            REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 3, 4}));
+            REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 3, 4}));
          }
          SECTION("move construction throws (during internal shift)")
          {
@@ -960,14 +960,14 @@ TEST_CASE("dequeng")
                counted_type::throw_at_nth_move_construction(1);
                REQUIRE_THROWS_AS(d.insert(d.begin()+1, value), counted_type::move_construction::exception);
                REQUIRE(counted_type::check{}.constructions(0).destructions(0));
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
             }
             SECTION("end region")
             {
                counted_type::throw_at_nth_move_construction(1);
                REQUIRE_THROWS_AS(d.insert(d.end()-1, value), counted_type::move_construction::exception);
                REQUIRE(counted_type::check{}.constructions(0).destructions(0));
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
             }
          }
          SECTION("move assignment throws (during internal shift)")
@@ -977,7 +977,7 @@ TEST_CASE("dequeng")
                counted_type::throw_at_nth_move_assignment(1);
                REQUIRE_THROWS_AS(d.insert(d.end()-2, value), counted_type::move_assignment::exception);
                REQUIRE(counted_type::check{}.move_constructions(1).move_assignments(0).destructions(0));
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4, 4}));
             }
             SECTION("begin region")
             {
@@ -986,7 +986,7 @@ TEST_CASE("dequeng")
                counted_type::throw_at_nth_move_assignment(1);
                REQUIRE_THROWS_AS(d.insert(d.begin()+2, value), counted_type::move_assignment::exception);
                REQUIRE(counted_type::check{}.move_constructions(1).move_assignments(0).destructions(0));
-               REQUIRE((d == deque_counted_type_t{0, 0, 1, 2, 3, 4, 5}));
+               REQUIRE(d == (deque_counted_type_t{0, 0, 1, 2, 3, 4, 5}));
             }
          }
       }
@@ -1009,20 +1009,20 @@ TEST_CASE("dequeng")
                deque_counted_type_t::iterator it = d.insert(d.cbegin(), 0, value);
                REQUIRE(counted_type::check{}.constructions(0).destructions(0));
                REQUIRE(it == d.begin());
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
             }
             SECTION("range (input iterator)")
             {
                deque_counted_type_t::iterator it = d.insert(d.cbegin(), counted_type_stream_iterator{values}, counted_type_stream_iterator{});
                REQUIRE(it == d.begin());
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
             }
             SECTION("range (forward iterator)")
             {
                deque_counted_type_t::iterator it = d.insert(d.cbegin(), values.begin(), values.end());
                REQUIRE(counted_type::check{}.constructions(0).destructions(0));
                REQUIRE(it == d.begin());
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
             }
          }
          SECTION("number of new elements=1")
@@ -1034,20 +1034,20 @@ TEST_CASE("dequeng")
                deque_counted_type_t::iterator it = d.insert(d.cbegin(), 1, value);
                REQUIRE(counted_type::check{}.copy_constructions(1));
                REQUIRE(it == d.begin());
-               REQUIRE((d == deque_counted_type_t{10, 0, 1, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{10, 0, 1, 2, 3, 4}));
             }
             SECTION("range (input iterator)")
             {
                deque_counted_type_t::iterator it = d.insert(d.cbegin(), counted_type_stream_iterator{values}, counted_type_stream_iterator{});
                REQUIRE(it == d.begin());
-               REQUIRE((d == deque_counted_type_t{10, 0, 1, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{10, 0, 1, 2, 3, 4}));
             }
             SECTION("range (forward iterator)")
             {
                deque_counted_type_t::iterator it = d.insert(d.cbegin(), values.begin(), values.end());
                REQUIRE(counted_type::check{}.copy_constructions(1));
                REQUIRE(it == d.begin());
-               REQUIRE((d == deque_counted_type_t{10, 0, 1, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{10, 0, 1, 2, 3, 4}));
             }
          }
          SECTION("number of new elements=2")
@@ -1059,20 +1059,20 @@ TEST_CASE("dequeng")
                deque_counted_type_t::iterator it = d.insert(d.cbegin(), 2, value);
                REQUIRE(counted_type::check{}.copy_constructions(2));
                REQUIRE(it == d.begin());
-               REQUIRE((d == deque_counted_type_t{10, 10, 0, 1, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{10, 10, 0, 1, 2, 3, 4}));
             }
             SECTION("range (input iterator)")
             {
                deque_counted_type_t::iterator it = d.insert(d.cbegin(), counted_type_stream_iterator{values}, counted_type_stream_iterator{});
                REQUIRE(it == d.begin());
-               REQUIRE((d == deque_counted_type_t{10, 11, 0, 1, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{10, 11, 0, 1, 2, 3, 4}));
             }
             SECTION("range (forward iterator)")
             {
                deque_counted_type_t::iterator it = d.insert(d.cbegin(), values.begin(), values.end());
                REQUIRE(counted_type::check{}.copy_constructions(2));
                REQUIRE(it == d.begin());
-               REQUIRE((d == deque_counted_type_t{10, 11, 0, 1, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{10, 11, 0, 1, 2, 3, 4}));
             }
          }
       }
@@ -1087,20 +1087,20 @@ TEST_CASE("dequeng")
                deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, 0, value);
                REQUIRE(counted_type::check{}.constructions(0).destructions(0));
                REQUIRE(it == d.begin()+1);
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
             }
             SECTION("input iterator")
             {
                deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
                REQUIRE(it == d.begin()+1);
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
             }
             SECTION("forward iterator")
             {
                deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, values.begin(), values.end());
                REQUIRE(counted_type::check{}.constructions(0).destructions(0));
                REQUIRE(it == d.begin()+1);
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
             }
          }
          SECTION("number of new elements=1")
@@ -1112,20 +1112,20 @@ TEST_CASE("dequeng")
                deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, 1, value);
                REQUIRE(counted_type::check{}.move_constructions(1).copy_assignments(1));
                REQUIRE(it == d.begin()+1);
-               REQUIRE((d == deque_counted_type_t{0, 10, 1, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 10, 1, 2, 3, 4}));
             }
             SECTION("input iterator")
             {
                deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
                REQUIRE(it == d.begin()+1);
-               REQUIRE((d == deque_counted_type_t{0, 10, 1, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 10, 1, 2, 3, 4}));
             }
             SECTION("forward iterator")
             {
                deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, values.begin(), values.end());
                REQUIRE(counted_type::check{}.move_constructions(1).copy_assignments(1));
                REQUIRE(it == d.begin()+1);
-               REQUIRE((d == deque_counted_type_t{0, 10, 1, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 10, 1, 2, 3, 4}));
             }
          }
          SECTION("number of new elements=2")
@@ -1137,20 +1137,20 @@ TEST_CASE("dequeng")
                deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, 2, value);
                REQUIRE(counted_type::check{}.move_constructions(1).copy_constructions(1).copy_assignments(1));
                REQUIRE(it == d.begin()+1);
-               REQUIRE((d == deque_counted_type_t{0, 10, 10, 1, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 10, 10, 1, 2, 3, 4}));
             }
             SECTION("input iterator")
             {
                deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
                REQUIRE(it == d.begin()+1);
-               REQUIRE((d == deque_counted_type_t{0, 10, 11, 1, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 10, 11, 1, 2, 3, 4}));
             }
             SECTION("forward iterator")
             {
                deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, values.begin(), values.end());
                REQUIRE(counted_type::check{}.move_constructions(1).copy_constructions(1).copy_assignments(1));
                REQUIRE(it == d.begin()+1);
-               REQUIRE((d == deque_counted_type_t{0, 10, 11, 1, 2, 3, 4}));            
+               REQUIRE(d == (deque_counted_type_t{0, 10, 11, 1, 2, 3, 4}));            
             }
          }
          SECTION("number of new elements=3")
@@ -1162,20 +1162,20 @@ TEST_CASE("dequeng")
                deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, 3, value);
                REQUIRE(counted_type::check{}.move_constructions(1).copy_constructions(2).copy_assignments(1));
                REQUIRE(it == d.begin()+1);
-               REQUIRE((d == deque_counted_type_t{0, 10, 10, 10, 1, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 10, 10, 10, 1, 2, 3, 4}));
             }
             SECTION("input iterator")
             {
                deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
                REQUIRE(it == d.begin()+1);
-               REQUIRE((d == deque_counted_type_t{0, 10, 11, 12, 1, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 10, 11, 12, 1, 2, 3, 4}));
             }
             SECTION("forward iterator")
             {
                deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, values.begin(), values.end());
                REQUIRE(counted_type::check{}.move_constructions(1).copy_constructions(2).copy_assignments(1));
                REQUIRE(it == d.begin()+1);
-               REQUIRE((d == deque_counted_type_t{0, 10, 11, 12, 1, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 10, 11, 12, 1, 2, 3, 4}));
             }
          }
       }
@@ -1190,20 +1190,20 @@ TEST_CASE("dequeng")
                deque_counted_type_t::iterator it = d.insert(d.cbegin()+2, 0, value);
                REQUIRE(counted_type::check{}.constructions(0).destructions(0));
                REQUIRE(it == d.begin()+2);
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
             }
             SECTION("input iterator")
             {
                deque_counted_type_t::iterator it = d.insert(d.cbegin()+2, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
                REQUIRE(it == d.begin()+2);
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
             }
             SECTION("forward iterator")
             {
                deque_counted_type_t::iterator it = d.insert(d.cbegin()+2, values.begin(), values.end());
                REQUIRE(counted_type::check{}.constructions(0).destructions(0));
                REQUIRE(it == d.begin()+2);
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
             }
          }
          SECTION("number of new elements=1")
@@ -1215,21 +1215,21 @@ TEST_CASE("dequeng")
                deque_counted_type_t::iterator it = d.insert(d.cbegin()+2, 1, value);
                REQUIRE(counted_type::check{}.move_constructions(1).move_assignments(1).copy_assignments(1));
                REQUIRE(it == d.begin()+2);
-               REQUIRE((d == deque_counted_type_t{0, 1, 10, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 10, 2, 3, 4}));
             
             }
             SECTION("input iterator")
             {
                deque_counted_type_t::iterator it = d.insert(d.cbegin()+2, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
                REQUIRE(it == d.begin()+2);
-               REQUIRE((d == deque_counted_type_t{0, 1, 10, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 10, 2, 3, 4}));
             }
             SECTION("forward iterator")
             {
                deque_counted_type_t::iterator it = d.insert(d.cbegin()+2, values.begin(), values.end());
                REQUIRE(counted_type::check{}.move_constructions(1).move_assignments(1).copy_assignments(1));
                REQUIRE(it == d.begin()+2);
-               REQUIRE((d == deque_counted_type_t{0, 1, 10, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 10, 2, 3, 4}));
             }
          }
          SECTION("number of new elements=2")
@@ -1241,20 +1241,20 @@ TEST_CASE("dequeng")
                deque_counted_type_t::iterator it = d.insert(d.cbegin()+2, 2, value);
                REQUIRE(counted_type::check{}.move_constructions(2).copy_assignments(2));
                REQUIRE(it == d.begin()+2);
-               REQUIRE((d == deque_counted_type_t{0, 1, 10, 10, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 10, 10, 2, 3, 4}));
             }
             SECTION("input iterator")
             {
                deque_counted_type_t::iterator it = d.insert(d.cbegin()+2, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
                REQUIRE(it == d.begin()+2);
-               REQUIRE((d == deque_counted_type_t{0, 1, 10, 11, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 10, 11, 2, 3, 4}));
             }
             SECTION("forward iterator")
             {
                deque_counted_type_t::iterator it = d.insert(d.cbegin()+2, values.begin(), values.end());
                REQUIRE(counted_type::check{}.move_constructions(2).copy_assignments(2));
                REQUIRE(it == d.begin()+2);
-               REQUIRE((d == deque_counted_type_t{0, 1, 10, 11, 2, 3, 4}));            
+               REQUIRE(d == (deque_counted_type_t{0, 1, 10, 11, 2, 3, 4}));            
             }
          }
          SECTION("number of new elements=3")
@@ -1266,20 +1266,20 @@ TEST_CASE("dequeng")
                deque_counted_type_t::iterator it = d.insert(d.cbegin()+2, 3, value);
                REQUIRE(counted_type::check{}.move_constructions(2).copy_constructions(1).copy_assignments(2));
                REQUIRE(it == d.begin()+2);
-               REQUIRE((d == deque_counted_type_t{0, 1, 10, 10, 10, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 10, 10, 10, 2, 3, 4}));
             }
             SECTION("input iterator")
             {
                deque_counted_type_t::iterator it = d.insert(d.cbegin()+2, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
                REQUIRE(it == d.begin()+2);
-               REQUIRE((d == deque_counted_type_t{0, 1, 10, 11, 12, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 10, 11, 12, 2, 3, 4}));
             }
             SECTION("forward iterator")
             {
                deque_counted_type_t::iterator it = d.insert(d.cbegin()+2, values.begin(), values.end());
                REQUIRE(counted_type::check{}.move_constructions(2).copy_constructions(1).copy_assignments(2));
                REQUIRE(it == d.begin()+2);
-               REQUIRE((d == deque_counted_type_t{0, 1, 10, 11, 12, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 10, 11, 12, 2, 3, 4}));
             }
          }
       }
@@ -1294,20 +1294,20 @@ TEST_CASE("dequeng")
                deque_counted_type_t::iterator it = d.insert(d.end(), 0, value);
                REQUIRE(counted_type::check{}.constructions(0).destructions(0));
                REQUIRE(it == d.end());
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
             }
             SECTION("input iterator")
             {
                deque_counted_type_t::iterator it = d.insert(d.cend(), counted_type_stream_iterator{values}, counted_type_stream_iterator{});
                REQUIRE(it == d.end());
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
             }
             SECTION("forward iterator")
             {
                deque_counted_type_t::iterator it = d.insert(d.end(), values.begin(), values.end());
                REQUIRE(counted_type::check{}.constructions(0).destructions(0));
                REQUIRE(it == d.end());
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
             }
          }
          SECTION("number of new elements=1")
@@ -1319,20 +1319,20 @@ TEST_CASE("dequeng")
                deque_counted_type_t::iterator it = d.insert(d.end(), 1, value);
                REQUIRE(counted_type::check{}.copy_constructions(1));
                REQUIRE(it == d.end()-1);
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4, 10}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4, 10}));
             }
             SECTION("input iterator")
             {
                deque_counted_type_t::iterator it = d.insert(d.cend(), counted_type_stream_iterator{values}, counted_type_stream_iterator{});
                REQUIRE(it == d.end()-1);
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4, 10}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4, 10}));
             }
             SECTION("forward iterator")
             {
                deque_counted_type_t::iterator it = d.insert(d.end(), values.begin(), values.end());
                REQUIRE(counted_type::check{}.copy_constructions(1));
                REQUIRE(it == d.end()-1);
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4, 10}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4, 10}));
             }
          }
          SECTION("number of new elements=2")
@@ -1344,13 +1344,13 @@ TEST_CASE("dequeng")
                deque_counted_type_t::iterator it = d.insert(d.end(), 2, value);
                REQUIRE(counted_type::check{}.copy_constructions(2));
                REQUIRE(it == d.end()-2);
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4, 10, 10}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4, 10, 10}));
             }
             SECTION("input iterator")
             {
                deque_counted_type_t::iterator it = d.insert(d.cend(), counted_type_stream_iterator{values}, counted_type_stream_iterator{});
                REQUIRE(it == d.end()-2);
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4, 10, 11}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4, 10, 11}));
             }
             SECTION("forward iterator")
             {
@@ -1358,7 +1358,7 @@ TEST_CASE("dequeng")
                REQUIRE(counted_type::check{}.copy_constructions(2));
                REQUIRE(it == d.end()-2);
                counted_type v2;
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4, 10, 11}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4, 10, 11}));
             }
          }
       }
@@ -1373,20 +1373,20 @@ TEST_CASE("dequeng")
                deque_counted_type_t::iterator it = d.insert(d.end()-1, 0, value);
                REQUIRE(counted_type::check{}.constructions(0).destructions(0));
                REQUIRE(it == d.end()-1);
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
             }
             SECTION("range (input iterator)")
             {
                deque_counted_type_t::iterator it = d.insert(d.cend()-1, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
                REQUIRE(it == d.cend()-1);
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
             }
             SECTION("range (forward iterator)")
             {
                deque_counted_type_t::iterator it = d.insert(d.end()-1, values.begin(), values.end());
                REQUIRE(counted_type::check{}.constructions(0).destructions(0));
                REQUIRE(it == d.end()-1);
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
             }
          }
          SECTION("number of new elements=1")
@@ -1398,20 +1398,20 @@ TEST_CASE("dequeng")
                deque_counted_type_t::iterator it = d.insert(d.end()-1, 1, value);
                REQUIRE(counted_type::check{}.move_constructions(1).copy_assignments(1));
                REQUIRE(it == d.end()-2);
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 10, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 10, 4}));
             }
             SECTION("range (input iterator)")
             {
                deque_counted_type_t::iterator it = d.insert(d.cend()-1, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
                REQUIRE(it == d.cend()-2);
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 10, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 10, 4}));
             }
             SECTION("range (forward iterator)")
             {
                deque_counted_type_t::iterator it = d.insert(d.end()-1, values.begin(), values.end());
                REQUIRE(counted_type::check{}.move_constructions(1).copy_assignments(1));
                REQUIRE(it == d.end()-2);
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 10, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 10, 4}));
             }
          }
          SECTION("number of new elements=2")
@@ -1423,20 +1423,20 @@ TEST_CASE("dequeng")
                deque_counted_type_t::iterator it = d.insert(d.end()-1, 2, value);
                REQUIRE(counted_type::check{}.move_constructions(1).copy_constructions(1).copy_assignments(1));
                REQUIRE(it == d.end()-3);
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 10, 10, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 10, 10, 4}));
             }
             SECTION("range (input iterator)")
             {
                deque_counted_type_t::iterator it = d.insert(d.cend()-1, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
                REQUIRE(it == d.cend()-3);
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 10, 11, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 10, 11, 4}));
             }
             SECTION("range (forward iterator)")
             {
                deque_counted_type_t::iterator it = d.insert(d.end()-1, values.begin(), values.end());
                REQUIRE(counted_type::check{}.move_constructions(1).copy_constructions(1).copy_assignments(1));
                REQUIRE(it == d.end()-3);
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 10, 11, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 10, 11, 4}));
             }
          }
          SECTION("number of new elements=3")
@@ -1448,20 +1448,20 @@ TEST_CASE("dequeng")
                deque_counted_type_t::iterator it = d.insert(d.end()-1, 3, value);
                REQUIRE(counted_type::check{}.move_constructions(1).copy_constructions(2).copy_assignments(1));
                REQUIRE(it == d.end()-4);
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 10, 10, 10, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 10, 10, 10, 4}));
             }
             SECTION("range (input iterator)")
             {
                deque_counted_type_t::iterator it = d.insert(d.cend()-1, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
                REQUIRE(it == d.cend()-4);
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 10, 11, 12, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 10, 11, 12, 4}));
             }
             SECTION("range (forward iterator)")
             {
                deque_counted_type_t::iterator it = d.insert(d.end()-1, values.begin(), values.end());
                REQUIRE(counted_type::check{}.move_constructions(1).copy_constructions(2).copy_assignments(1));
                REQUIRE(it == d.end()-4);
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 10, 11, 12, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 10, 11, 12, 4}));
             }
          }
       }
@@ -1476,20 +1476,20 @@ TEST_CASE("dequeng")
                deque_counted_type_t::iterator it = d.insert(d.end()-2, 0, value);
                REQUIRE(counted_type::check{}.constructions(0).destructions(0));
                REQUIRE(it == d.end()-2);
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
             }
             SECTION("range (input iterator)")
             {
                deque_counted_type_t::iterator it = d.insert(d.cend()-2, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
                REQUIRE(it == d.cend()-2);
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
             }
             SECTION("range (forward iterator)")
             {
                deque_counted_type_t::iterator it = d.insert(d.end()-2, values.begin(), values.end());
                REQUIRE(counted_type::check{}.constructions(0).destructions(0));
                REQUIRE(it == d.end()-2);
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
             }
          }
          SECTION("number of new elements=1")
@@ -1501,20 +1501,20 @@ TEST_CASE("dequeng")
                deque_counted_type_t::iterator it = d.insert(d.end()-2, 1, value);
                REQUIRE(counted_type::check{}.move_constructions(1).move_assignments(1).copy_assignments(1));
                REQUIRE(it == d.end()-3);
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 10, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 10, 3, 4}));
             }
             SECTION("range (input iterator)")
             {
                deque_counted_type_t::iterator it = d.insert(d.cend()-2, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
                REQUIRE(it == d.cend()-3);
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 10, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 10, 3, 4}));
             }
             SECTION("range (forward iterator)")
             {
                deque_counted_type_t::iterator it = d.insert(d.end()-2, values.begin(), values.end());
                REQUIRE(counted_type::check{}.move_constructions(1).move_assignments(1).copy_assignments(1));
                REQUIRE(it == d.end()-3);
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 10, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 10, 3, 4}));
             }
          }
          SECTION("number of new elements=2")
@@ -1526,20 +1526,20 @@ TEST_CASE("dequeng")
                deque_counted_type_t::iterator it = d.insert(d.end()-2, 2, value);
                REQUIRE(counted_type::check{}.move_constructions(2).copy_assignments(2));
                REQUIRE(it == d.end()-4);
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 10, 10, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 10, 10, 3, 4}));
             }
             SECTION("range (input iterator)")
             {
                deque_counted_type_t::iterator it = d.insert(d.cend()-2, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
                REQUIRE(it == d.cend()-4);
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 10, 11, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 10, 11, 3, 4}));
             }
             SECTION("range (forward iterator)")
             {
                deque_counted_type_t::iterator it = d.insert(d.end()-2, values.begin(), values.end());
                REQUIRE(counted_type::check{}.move_constructions(2).copy_assignments(2));
                REQUIRE(it == d.end()-4);
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 10, 11, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 10, 11, 3, 4}));
             }
          }
          SECTION("number of new elements=3")
@@ -1552,13 +1552,13 @@ TEST_CASE("dequeng")
                deque_counted_type_t::iterator it = d.insert(d.end()-2, 3, value);
                REQUIRE(counted_type::check{}.move_constructions(2).copy_constructions(1).copy_assignments(2));
                REQUIRE(it == d.end()-5);
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 10, 10, 10, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 10, 10, 10, 3, 4}));
             }
             SECTION("range (input iterator)")
             {
                deque_counted_type_t::iterator it = d.insert(d.cend()-2, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
                REQUIRE(it == d.cend()-5);
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 10, 11, 12, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 10, 11, 12, 3, 4}));
             }
             SECTION("range (forward iterator)")
             {
@@ -1566,7 +1566,7 @@ TEST_CASE("dequeng")
                deque_counted_type_t::iterator it = d.insert(d.end()-2, values.begin(), values.end());
                REQUIRE(counted_type::check{}.move_constructions(2).copy_constructions(1).copy_assignments(2));
                REQUIRE(it == d.end()-5);
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 10, 11, 12, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 10, 11, 12, 3, 4}));
             }
          }
       }
@@ -1582,7 +1582,7 @@ TEST_CASE("dequeng")
                counted_type::throw_at_nth_copy_construction(2);
                REQUIRE_THROWS_AS(d.insert(d.cbegin()+2, 5, value), counted_type::copy_construction::exception);
                REQUIRE(counted_type::check{}.move_constructions(2).copy_constructions(1).destructions(3));
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
             }
             SECTION("range (input iterator)")
             {
@@ -1590,14 +1590,14 @@ TEST_CASE("dequeng")
                REQUIRE_THROWS_AS(d.insert(d.cbegin()+2, counted_type_stream_iterator{values}, counted_type_stream_iterator{})
                                  , counted_type::copy_construction::exception);
                REQUIRE(counted_type::check{}.copy_constructions(3).destructions(0));
-               REQUIRE((d == deque_counted_type_t{12, 11, 10, 0, 1, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{12, 11, 10, 0, 1, 2, 3, 4}));
             }
             SECTION("range (forward iterator)")
             {
                counted_type::throw_at_nth_copy_construction(2);
                REQUIRE_THROWS_AS(d.insert(d.cbegin()+2, values.begin(), values.begin()+5), counted_type::copy_construction::exception);
                REQUIRE(counted_type::check{}.move_constructions(2).copy_constructions(1).destructions(3));
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
             }
          }
          SECTION("end region")
@@ -1607,7 +1607,7 @@ TEST_CASE("dequeng")
                counted_type::throw_at_nth_copy_construction(2);
                REQUIRE_THROWS_AS(d.insert(d.cend()-2, 5, value), counted_type::copy_construction::exception);
                REQUIRE(counted_type::check{}.move_constructions(2).copy_constructions(1).destructions(3));
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));  
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));  
             }
             SECTION("range (input iterator)")
             {
@@ -1615,14 +1615,14 @@ TEST_CASE("dequeng")
                REQUIRE_THROWS_AS(d.insert(d.cend()-2, counted_type_stream_iterator{values}, counted_type_stream_iterator{})
                                  , counted_type::copy_construction::exception);
                REQUIRE(counted_type::check{}.copy_constructions(3).destructions(0));
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4, 10, 11, 12}));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4, 10, 11, 12}));
             }
             SECTION("range (forward iterator)")
             {             
                counted_type::throw_at_nth_copy_construction(2);
                REQUIRE_THROWS_AS(d.insert(d.cend()-2, 5, value), counted_type::copy_construction::exception);
                REQUIRE(counted_type::check{}.move_constructions(2).copy_constructions(1).destructions(3));
-               REQUIRE((d == deque_counted_type_t{0, 1, 2, 3, 4}));  
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));  
             }
          }
       }
@@ -1634,8 +1634,8 @@ TEST_CASE("dequeng")
       SECTION("lhs < rhs")
       {
          {
-            auto lhs = deque_int_t{0, 1, 2};
-            auto rhs = deque_int_t{0, 1, 2, 3};
+            auto lhs = deque_counted_type_t{0, 1, 2};
+            auto rhs = deque_counted_type_t{0, 1, 2, 3};
             REQUIRE(!(lhs == rhs));
             //REQUIRE(lhs != rhs);
             //REQUIRE(lhs < rhs);
@@ -1644,8 +1644,8 @@ TEST_CASE("dequeng")
             //REQUIRE(!(lhs >= rhs));
          }
          {
-            auto lhs = deque_int_t{0, 1, 2, 3};
-            auto rhs = deque_int_t{0, 1, 3, 3};
+            auto lhs = deque_counted_type_t{0, 1, 2, 3};
+            auto rhs = deque_counted_type_t{0, 1, 3, 3};
             REQUIRE(!(lhs == rhs));
             //REQUIRE(lhs != rhs);
             //REQUIRE(lhs < rhs);
@@ -1657,8 +1657,8 @@ TEST_CASE("dequeng")
       SECTION("lhs == rhs")
       {
          {
-            auto lhs = deque_int_t{0, 1, 2};
-            auto rhs = deque_int_t{0, 1, 2};
+            auto lhs = deque_counted_type_t{0, 1, 2};
+            auto rhs = deque_counted_type_t{0, 1, 2};
             REQUIRE(lhs == rhs);
             //REQUIRE(!(lhs != rhs));
             //REQUIRE(!(lhs < rhs));
@@ -1670,8 +1670,8 @@ TEST_CASE("dequeng")
       SECTION("lhs > rhs")
       {
          {
-            auto lhs = deque_int_t{0, 1, 2, 3};
-            auto rhs = deque_int_t{0, 1, 2};
+            auto lhs = deque_counted_type_t{0, 1, 2, 3};
+            auto rhs = deque_counted_type_t{0, 1, 2};
             REQUIRE(!(lhs == rhs));
             //REQUIRE(lhs != rhs);
             //REQUIRE(!(lhs < rhs));
@@ -1680,8 +1680,8 @@ TEST_CASE("dequeng")
             //REQUIRE(lhs >= rhs);
          }
          {
-            auto lhs = deque_int_t{0, 1, 3, 3};
-            auto rhs = deque_int_t{0, 1, 2, 3};
+            auto lhs = deque_counted_type_t{0, 1, 3, 3};
+            auto rhs = deque_counted_type_t{0, 1, 2, 3};
             REQUIRE(!(lhs == rhs));
             //REQUIRE(lhs != rhs);
             //REQUIRE(!(lhs < rhs));
