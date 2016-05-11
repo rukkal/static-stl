@@ -1629,6 +1629,73 @@ TEST_CASE("dequeng")
       #endif
    }
 
+   SECTION("erase (position)")
+   {
+      auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4, 5, 6});
+      counted_type::reset_counts();
+      SECTION("begin")
+      {
+         deque_counted_type_t::iterator it = d.erase(d.cbegin());
+         REQUIRE(counted_type::check{}.move_assignments(0).destructions(1));
+         REQUIRE(it == d.begin());
+         REQUIRE(d == (deque_counted_type_t{1, 2, 3, 4, 5, 6}));
+      }
+      SECTION("begin+1")
+      {
+         deque_counted_type_t::iterator it = d.erase(d.cbegin()+1);
+         REQUIRE(counted_type::check{}.move_assignments(1).destructions(1));
+         REQUIRE(it == d.begin()+1);
+         REQUIRE(d == (deque_counted_type_t{0, 2, 3, 4, 5, 6}));
+      }
+      SECTION("begin+2")
+      {
+         deque_counted_type_t::iterator it = d.erase(d.cbegin()+2);
+         REQUIRE(counted_type::check{}.move_assignments(2).destructions(1));
+         REQUIRE(it == d.begin()+2);
+         REQUIRE(d == (deque_counted_type_t{0, 1, 3, 4, 5, 6}));
+      }
+      SECTION("end-1")
+      {
+         deque_counted_type_t::iterator it = d.erase(d.cend()-1);
+         REQUIRE(counted_type::check{}.move_assignments(0).destructions(1));
+         REQUIRE(it == d.end());
+         REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4, 5}));
+      }
+      SECTION("end-2")
+      {
+         deque_counted_type_t::iterator it = d.erase(d.cend()-2);
+         REQUIRE(counted_type::check{}.move_assignments(1).destructions(1));
+         REQUIRE(it == d.end()-1);
+         REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4, 6}));
+      }
+      SECTION("end-3")
+      {
+         deque_counted_type_t::iterator it = d.erase(d.cend()-3);
+         REQUIRE(counted_type::check{}.move_assignments(2).destructions(1));
+         REQUIRE(it == d.end()-2);
+         REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 5, 6}));
+      }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling")
+      {
+         SECTION("begin region")
+         {
+            counted_type::throw_at_nth_move_assignment(2);
+            REQUIRE_THROWS_AS(d.erase(d.cbegin()+2), counted_type::move_assignment::exception);
+            REQUIRE(counted_type::check{}.move_assignments(1).destructions(0));
+            REQUIRE(d == (deque_counted_type_t{0, 1, 1, 3, 4, 5, 6}));
+         }
+         SECTION("end region")
+         {
+            counted_type::throw_at_nth_move_assignment(2);
+            REQUIRE_THROWS_AS(d.erase(d.cend()-3), counted_type::move_assignment::exception);
+            REQUIRE(counted_type::check{}.move_assignments(1).destructions(0));
+            REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 5, 5, 6}));
+         }
+      }
+      #endif
+   }
+
    SECTION("non-member relative operators")
    {
       SECTION("lhs < rhs")

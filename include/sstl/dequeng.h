@@ -609,6 +609,47 @@ public:
       }
    }
 
+   iterator erase(const_iterator pos)
+      _sstl_noexcept(std::is_nothrow_move_assignable<value_type>::value)
+   {
+      sstl_assert(!empty());
+      sstl_assert(pos != cend());
+      auto distance_to_begin = static_cast<size_type>(pos - cbegin());
+      auto distance_to_end = static_cast<size_type>(cend() - pos);
+      auto pos_pointer = const_cast<pointer>(pos._pos);
+      if(distance_to_begin < distance_to_end)
+      {
+         auto src = _dec_pointer(pos_pointer);
+         auto dst = pos_pointer;
+         while(dst != _derived()._first_pointer)
+         {
+            *dst = std::move(*src);
+            dst = src;
+            src = _dec_pointer(src);
+         }
+         _derived()._first_pointer->~value_type();
+         _derived()._first_pointer = _inc_pointer(_derived()._first_pointer);
+         --_derived()._size;
+         return iterator{ this, _inc_pointer(pos_pointer) };
+      }
+      else
+      {
+         auto src = _inc_pointer(pos_pointer);
+         auto dst = pos_pointer;
+         while(dst != _derived()._last_pointer)
+         {
+            *dst = std::move(*src);
+            dst = src;
+            src = _inc_pointer(src);
+         }
+         auto pos_pointer_to_return = pos_pointer != _derived()._last_pointer ? pos_pointer : nullptr;
+         _derived()._last_pointer->~value_type();
+         _derived()._last_pointer = _dec_pointer(_derived()._last_pointer);
+         --_derived()._size;
+         return iterator{ this, pos_pointer_to_return };
+      }
+   }
+
    template<class... Args>
    iterator emplace(const_iterator pos, Args&&... args)
       _sstl_noexcept(noexcept(std::declval<dequeng>()._emplace_value(std::declval<const_iterator>(),
