@@ -67,11 +67,8 @@ public:
       _sstl_noexcept(noexcept(std::declval<vector>()._move_assign(std::declval<iterator>(), std::declval<iterator>())))
    {
       sstl_assert(rhs.size() <= capacity());
-      if(this != &rhs)
-      {
-         _move_assign(rhs.begin(), rhs.end());
-         rhs._set_end(rhs.begin());
-      }
+      _move_assign(rhs.begin(), rhs.end());
+      rhs._set_end(rhs.begin());
       return *this;
    }
 

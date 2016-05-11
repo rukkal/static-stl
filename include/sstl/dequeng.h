@@ -70,9 +70,6 @@ public:
       _sstl_noexcept(std::is_nothrow_move_assignable<value_type>::value
                      && std::is_nothrow_move_constructible<value_type>::value)
    {
-      if(this == &rhs)
-         return *this;
-
       sstl_assert(rhs.size() <= capacity());
       auto move_assignments = std::min(size(), rhs.size());
       auto move_constructions = rhs.size() - move_assignments;

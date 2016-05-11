@@ -397,7 +397,9 @@ private:
    template<class T>
    void _assign_internal_callable(T&& rhs)
    {
-      if(static_cast<void*>(this) == reinterpret_cast<void*>(std::addressof(rhs)))
+      //omit self check in case of move assignment (self move assignment is UB)
+      if(   std::is_lvalue_reference<T>::value 
+         && static_cast<void*>(this) == reinterpret_cast<void*>(std::addressof(rhs)))
          return;
       if(_is_internal_callable_valid())
          _get_internal_callable().~_internal_callable();
