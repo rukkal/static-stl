@@ -647,6 +647,69 @@ public:
       }
    }
 
+   iterator erase(const_iterator range_begin, const_iterator range_end)
+      _sstl_noexcept(std::is_nothrow_move_assignable<value_type>::value)
+   {
+      if(range_begin == range_end)
+         return iterator{ this, const_cast<pointer>(range_begin._pos) };
+      
+      auto distance_to_begin = static_cast<size_type>(range_begin - cbegin());
+      auto distance_to_end = static_cast<size_type>(cend() - range_end);
+      auto range_size = range_end - range_begin;
+      if(distance_to_begin < distance_to_end)
+      {
+         auto src = const_cast<pointer>(range_begin._pos);
+         auto dst = (range_end != cend())
+                  ? const_cast<pointer>(_dec_pointer(range_end._pos))
+                  : _derived()._last_pointer;
+         while(src != _derived()._first_pointer)
+         {
+            src = _dec_pointer(src);
+            *dst = std::move(*src);
+            dst = _dec_pointer(dst);
+         }
+         auto new_first_pointer = _inc_pointer(dst);
+         while(true)
+         {
+            dst->~value_type();
+            if(dst == _derived()._first_pointer)
+               break;
+            dst = _dec_pointer(dst);
+         };
+         _derived()._first_pointer = new_first_pointer;
+         _derived()._size -= range_size;
+         return iterator{ this, const_cast<pointer>(range_end._pos) };
+      }
+      else
+      {
+         auto src = (range_end != cend())
+                  ? const_cast<pointer>(_dec_pointer(range_end._pos))
+                  : _derived()._last_pointer;
+         auto dst = const_cast<pointer>(range_begin._pos);
+         while(src != _derived()._last_pointer)
+         {
+            src = _inc_pointer(src);
+            *dst = std::move(*src);
+            dst = _inc_pointer(dst);
+         }
+         auto new_last_pointer = _dec_pointer(dst);
+         while(true)
+         {
+            dst->~value_type();
+            if(dst == _derived()._last_pointer)
+               break;
+            dst = _inc_pointer(dst);
+         }
+         pointer return_pos = (range_end._pos != nullptr)
+                           ? const_cast<pointer>(range_begin._pos)
+                           : nullptr;
+         _derived()._last_pointer = new_last_pointer;
+         _derived()._size -= range_size;
+         return iterator{ this, return_pos };
+      }
+      
+   }
+
    template<class... Args>
    iterator emplace(const_iterator pos, Args&&... args)
       _sstl_noexcept(noexcept(std::declval<dequeng>()._emplace_value(std::declval<const_iterator>(),
