@@ -170,7 +170,7 @@ public:
 
    const_pointer data() const _sstl_noexcept(std::declval<vector>().data())
    {
-      return const_cast<vector&>(this).data();
+      return const_cast<vector&>(*this).data();
    }
 
    iterator begin() _sstl_noexcept_

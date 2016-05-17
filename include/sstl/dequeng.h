@@ -54,8 +54,8 @@ public:
 
 public:
    dequeng& operator=(const dequeng& rhs)
-      _sstl_noexcept_(  std::is_nothrow_copy_assignable<value_type>::value
-                        && std::is_nothrow_copy_constructible<value_type>::value)
+      _sstl_noexcept(std::is_nothrow_copy_assignable<value_type>::value
+                     && std::is_nothrow_copy_constructible<value_type>::value)
    {
       if(this == &rhs)
          return *this;

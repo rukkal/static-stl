@@ -68,7 +68,7 @@ public:
 
 private:
    std::initializer_list<counted_type> init;
-   typename std::initializer_list<counted_type>::iterator pos;
+   std::initializer_list<counted_type>::iterator pos;
 };
 
 }

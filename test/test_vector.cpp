@@ -577,9 +577,9 @@ TEST_CASE("vector")
       SECTION("read access")
       {
          const auto& cv = v;
-         REQUIRE(v.at(0) == 1);
-         REQUIRE(v.at(2) == 3);
-         REQUIRE(v.at(4) == 5);
+         REQUIRE(cv.at(0) == 1);
+         REQUIRE(cv.at(2) == 3);
+         REQUIRE(cv.at(4) == 5);
       }
       SECTION("write access")
       {
@@ -604,9 +604,9 @@ TEST_CASE("vector")
       SECTION("read access")
       {
          const auto& cv = v;
-         REQUIRE(v[0] == 1);
-         REQUIRE(v[2] == 3);
-         REQUIRE(v[4] == 5);
+         REQUIRE(cv[0] == 1);
+         REQUIRE(cv[2] == 3);
+         REQUIRE(cv[4] == 5);
       }
       SECTION("write access")
       {
@@ -625,7 +625,7 @@ TEST_CASE("vector")
       SECTION("read access")
       {
          const auto& cv = v;
-         REQUIRE(v.front() == 1);
+         REQUIRE(cv.front() == 1);
       }
       SECTION("write access")
       {
@@ -640,7 +640,7 @@ TEST_CASE("vector")
       SECTION("read access")
       {
          const auto& cv = v;
-         REQUIRE(v.back() == 3);
+         REQUIRE(cv.back() == 3);
       }
       SECTION("write access")
       {
@@ -655,7 +655,7 @@ TEST_CASE("vector")
       SECTION("read access")
       {
          const auto& cv = v;
-         REQUIRE(*v.data() == 1);
+         REQUIRE(*cv.data() == 1);
       }
       SECTION("write access")
       {

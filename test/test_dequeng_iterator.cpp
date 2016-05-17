@@ -26,8 +26,8 @@ struct value_type
    int value;
 };
 
-using iterator_type = typename sstl::dequeng<value_type>::iterator;
-using const_iterator_type = typename sstl::dequeng<value_type>::const_iterator;
+using iterator_type = sstl::dequeng<value_type>::iterator;
+using const_iterator_type = sstl::dequeng<value_type>::const_iterator;
 
 TEST_CASE("_dequeng_iterator")
 {

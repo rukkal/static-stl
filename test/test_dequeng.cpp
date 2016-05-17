@@ -503,7 +503,7 @@ TEST_CASE("dequeng")
 
    SECTION("count assign")
    {
-      auto count = typename deque_counted_type_t::size_type{ 5 };
+      auto count = deque_counted_type_t::size_type{ 5 };
       auto value = counted_type{ 3 };
       auto expected_lhs = deque_counted_type_t{3, 3, 3, 3, 3};
 
