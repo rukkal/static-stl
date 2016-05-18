@@ -1913,6 +1913,38 @@ TEST_CASE("dequeng")
       }
    }
    
+   SECTION("emplace_back")
+   {
+      auto d = deque_counted_type_t{};      
+      SECTION("contained values + number of operations")
+      {
+         counted_type::reset_counts();
+         d.emplace_back(0);
+         REQUIRE(counted_type::check{}.parameter_constructions(1));
+         REQUIRE(d == (deque_counted_type_t{0}));
+         
+         counted_type::reset_counts();
+         d.emplace_back(1);
+         REQUIRE(counted_type::check{}.parameter_constructions(1));
+         REQUIRE(d == (deque_counted_type_t{0, 1}));
+      }
+      SECTION("exception handling")
+      {
+         counted_type::reset_counts();
+         counted_type::throw_at_nth_parameter_construction(1);
+         REQUIRE_THROWS_AS(d.emplace_back(0), counted_type::parameter_construction::exception);
+         REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+         REQUIRE(d == (deque_counted_type_t{}));
+         
+         d.emplace_back(0);
+         counted_type::reset_counts();
+         counted_type::throw_at_nth_parameter_construction(1);
+         REQUIRE_THROWS_AS(d.emplace_back(1), counted_type::parameter_construction::exception);
+         REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+         REQUIRE(d == (deque_counted_type_t{0}));
+      }
+   }
+   
    SECTION("non-member relative operators")
    {
       SECTION("lhs < rhs")
