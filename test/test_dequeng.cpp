@@ -1964,7 +1964,8 @@ TEST_CASE("dequeng")
       REQUIRE(d == (deque_counted_type_t{10, 11}));
       
       counted_type::reset_counts();
-      d.pop_back(); d.pop_back();
+      d.pop_back();
+      d.pop_back();
       REQUIRE(counted_type::check{}.destructions(2));
       REQUIRE(d == (deque_counted_type_t{}));
       
@@ -1973,7 +1974,8 @@ TEST_CASE("dequeng")
       REQUIRE(d == (deque_counted_type_t{11, 10}));
       
       counted_type::reset_counts();
-      d.pop_back(); d.pop_back();
+      d.pop_back();
+      d.pop_back();
       REQUIRE(counted_type::check{}.destructions(2));
       REQUIRE(d == (deque_counted_type_t{}));
    }
@@ -2072,6 +2074,41 @@ TEST_CASE("dequeng")
          REQUIRE(counted_type::check{}.constructions(0).destructions(0));
          REQUIRE(d == (deque_counted_type_t{0}));
       }
+   }
+
+   SECTION("pop_front")
+   {
+      auto d = deque_counted_type_t{1, 0};
+      
+      counted_type::reset_counts();
+      d.pop_front();
+      REQUIRE(counted_type::check{}.destructions(1));
+      REQUIRE(d == (deque_counted_type_t{0}));
+      
+      counted_type::reset_counts();
+      d.pop_front();
+      REQUIRE(counted_type::check{}.destructions(1));
+      REQUIRE(d == (deque_counted_type_t{}));
+      
+      d.emplace_front(10);
+      d.emplace_front(11);
+      REQUIRE(d == (deque_counted_type_t{11, 10}));
+      
+      counted_type::reset_counts();
+      d.pop_front();
+      d.pop_front();
+      REQUIRE(counted_type::check{}.destructions(2));
+      REQUIRE(d == (deque_counted_type_t{}));
+      
+      d.emplace_front(10);
+      d.emplace_front(11);
+      REQUIRE(d == (deque_counted_type_t{11, 10}));
+      
+      counted_type::reset_counts();
+      d.pop_front();
+      d.pop_front();
+      REQUIRE(counted_type::check{}.destructions(2));
+      REQUIRE(d == (deque_counted_type_t{}));
    }
 
    SECTION("non-member relative operators")
