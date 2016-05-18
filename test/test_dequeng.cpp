@@ -1945,6 +1945,39 @@ TEST_CASE("dequeng")
       }
    }
    
+   SECTION("pop_back")
+   {
+      auto d = deque_counted_type_t{0, 1};
+      
+      counted_type::reset_counts();
+      d.pop_back();
+      REQUIRE(counted_type::check{}.destructions(1));
+      REQUIRE(d == (deque_counted_type_t{0}));
+      
+      counted_type::reset_counts();
+      d.pop_back();
+      REQUIRE(counted_type::check{}.destructions(1));
+      REQUIRE(d == (deque_counted_type_t{}));
+      
+      d.emplace_back(10);
+      d.emplace_back(11);
+      REQUIRE(d == (deque_counted_type_t{10, 11}));
+      
+      counted_type::reset_counts();
+      d.pop_back(); d.pop_back();
+      REQUIRE(counted_type::check{}.destructions(2));
+      REQUIRE(d == (deque_counted_type_t{}));
+      
+      d.emplace_front(10);
+      d.emplace_front(11);
+      REQUIRE(d == (deque_counted_type_t{11, 10}));
+      
+      counted_type::reset_counts();
+      d.pop_back(); d.pop_back();
+      REQUIRE(counted_type::check{}.destructions(2));
+      REQUIRE(d == (deque_counted_type_t{}));
+   }
+   
    SECTION("non-member relative operators")
    {
       SECTION("lhs < rhs")
