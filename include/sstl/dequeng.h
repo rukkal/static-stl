@@ -1231,7 +1231,6 @@ public:
 
 public:
    dequeng() _sstl_noexcept_
-      : _last_pointer(_begin_storage()-1)
    {
       _assert_hacky_derived_class_access_is_valid<dequeng<value_type>, dequeng, _type_for_derived_class_access>();
    }
@@ -1344,7 +1343,7 @@ private:
 private:
    size_type _size{ 0 };
    pointer _first_pointer{ _begin_storage() };
-   pointer _last_pointer;
+   pointer _last_pointer{ _begin_storage() + CAPACITY - 1};
    pointer _end_storage{ _begin_storage() + CAPACITY };
    std::array<typename _aligned_storage<sizeof(value_type), std::alignment_of<value_type>::value>::type, CAPACITY> _buffer;
 };
