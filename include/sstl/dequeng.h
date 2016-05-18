@@ -736,7 +736,15 @@ public:
       _sstl_noexcept(std::is_nothrow_constructible<value_type, typename std::add_rvalue_reference<Args>::type...>::value)
    {
       sstl_assert(!full());
-      auto new_first_pointer = _dec_pointer(_derived()._first_pointer);
+      pointer new_first_pointer;
+      if(!empty())
+      {
+         new_first_pointer = _dec_pointer(_derived()._first_pointer);
+      }
+      else
+      {
+         new_first_pointer = _derived()._last_pointer;
+      }
       new(new_first_pointer) value_type(std::forward<Args>(value)...);
       _derived()._first_pointer = new_first_pointer;
       ++_derived()._size;

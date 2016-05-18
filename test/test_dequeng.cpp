@@ -1978,6 +1978,70 @@ TEST_CASE("dequeng")
       REQUIRE(d == (deque_counted_type_t{}));
    }
    
+   SECTION("push_front")
+   {
+      auto d = deque_counted_type_t{};
+      auto v0 = counted_type{0};
+      auto v1 = counted_type{1};
+      SECTION("lvalue version")
+      {
+         counted_type::reset_counts();
+         d.push_front(v0);
+         REQUIRE(counted_type::check{}.copy_constructions(1));
+         REQUIRE(d == (deque_counted_type_t{0}));
+         
+         counted_type::reset_counts();
+         d.push_front(v1);
+         REQUIRE(counted_type::check{}.copy_constructions(1));
+         REQUIRE(d == (deque_counted_type_t{1, 0}));
+      }
+      SECTION("rvalue version")
+      {
+         counted_type::reset_counts();
+         d.push_front(std::move(v0));
+         REQUIRE(counted_type::check{}.move_constructions(1));
+         REQUIRE(d == (deque_counted_type_t{0}));
+         
+         counted_type::reset_counts();
+         d.push_front(std::move(v1));
+         REQUIRE(counted_type::check{}.move_constructions(1));
+         REQUIRE(d == (deque_counted_type_t{1, 0}));
+      }
+      SECTION("exception handling")
+      {
+         SECTION("lvalue version")
+         {
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_copy_construction(1);
+            REQUIRE_THROWS_AS(d.push_front(v0), counted_type::copy_construction::exception);
+            REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+            REQUIRE(d == (deque_counted_type_t{}));
+            
+            d.push_front(v0);
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_copy_construction(1);
+            REQUIRE_THROWS_AS(d.push_front(v1), counted_type::copy_construction::exception);
+            REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+            REQUIRE(d == (deque_counted_type_t{0}));
+         }
+         SECTION("rvalue version")
+         {
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_move_construction(1);
+            REQUIRE_THROWS_AS(d.push_front(std::move(v0)), counted_type::move_construction::exception);
+            REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+            REQUIRE(d == (deque_counted_type_t{}));
+            
+            d.push_front(v0);
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_move_construction(1);
+            REQUIRE_THROWS_AS(d.push_front(std::move(v1)), counted_type::move_construction::exception);
+            REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+            REQUIRE(d == (deque_counted_type_t{0}));
+         }
+      }
+   }
+   
    SECTION("non-member relative operators")
    {
       SECTION("lhs < rhs")
