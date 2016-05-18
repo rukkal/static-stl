@@ -1227,15 +1227,15 @@ private:
 public:
    using value_type = typename _base::value_type;
    using size_type = typename _base::size_type;
-   //using difference_type = typename _base::difference_type;
+   using difference_type = typename _base::difference_type;
    using reference = typename _base::reference;
    using const_reference = typename _base::const_reference;
    using pointer = typename _base::pointer;
    using const_pointer = typename _base::const_pointer;
    using iterator = typename _base::iterator;
    using const_iterator = typename _base::const_iterator;
-   //using reverse_iterator = typename _base::reverse_iterator;
-   //using const_reverse_iterator = typename _base::const_reverse_iterator;
+   using reverse_iterator = typename _base::reverse_iterator;
+   using const_reverse_iterator = typename _base::const_reverse_iterator;
 
 public:
    dequeng() _sstl_noexcept_
