@@ -168,7 +168,7 @@ public:
       return begin();
    }
 
-   const_pointer data() const _sstl_noexcept(std::declval<vector>().data())
+   const_pointer data() const _sstl_noexcept(noexcept(std::declval<vector>().data()))
    {
       return const_cast<vector&>(*this).data();
    }
