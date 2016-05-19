@@ -1878,6 +1878,7 @@ TEST_CASE("dequeng")
          REQUIRE(counted_type::check{}.move_constructions(1));
          REQUIRE(d == (deque_counted_type_t{0, 1}));
       }
+      #if _sstl_has_exceptions()
       SECTION("exception handling")
       {
          SECTION("lvalue version")
@@ -1911,6 +1912,7 @@ TEST_CASE("dequeng")
             REQUIRE(d == (deque_counted_type_t{0}));
          }
       }
+      #endif
    }
    
    SECTION("emplace_back")
@@ -1928,6 +1930,7 @@ TEST_CASE("dequeng")
          REQUIRE(counted_type::check{}.parameter_constructions(1));
          REQUIRE(d == (deque_counted_type_t{0, 1}));
       }
+      #if _sstl_has_exceptions()
       SECTION("exception handling")
       {
          counted_type::reset_counts();
@@ -1943,6 +1946,7 @@ TEST_CASE("dequeng")
          REQUIRE(counted_type::check{}.constructions(0).destructions(0));
          REQUIRE(d == (deque_counted_type_t{0}));
       }
+      #endif
    }
    
    SECTION("pop_back")
@@ -2009,6 +2013,7 @@ TEST_CASE("dequeng")
          REQUIRE(counted_type::check{}.move_constructions(1));
          REQUIRE(d == (deque_counted_type_t{1, 0}));
       }
+      #if _sstl_has_exceptions()
       SECTION("exception handling")
       {
          SECTION("lvalue version")
@@ -2042,6 +2047,7 @@ TEST_CASE("dequeng")
             REQUIRE(d == (deque_counted_type_t{0}));
          }
       }
+      #endif
    }
 
    SECTION("emplace_front")
@@ -2059,6 +2065,7 @@ TEST_CASE("dequeng")
          REQUIRE(counted_type::check{}.parameter_constructions(1));
          REQUIRE(d == (deque_counted_type_t{1, 0}));
       }
+      #if _sstl_has_exceptions()
       SECTION("exception handling")
       {
          counted_type::reset_counts();
@@ -2074,6 +2081,7 @@ TEST_CASE("dequeng")
          REQUIRE(counted_type::check{}.constructions(0).destructions(0));
          REQUIRE(d == (deque_counted_type_t{0}));
       }
+      #endif
    }
 
    SECTION("pop_front")
