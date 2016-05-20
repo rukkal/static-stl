@@ -1621,10 +1621,20 @@ TEST_CASE("dequeng")
             counted_type::reset_counts();
             SECTION("count")
             {
-               counted_type::throw_at_nth_copy_construction(2);
-               REQUIRE_THROWS_AS(d.insert(d.cbegin()+2, 5, value), counted_type::copy_construction::exception);
-               REQUIRE(counted_type::check{}.move_constructions(2).copy_constructions(1).destructions(3));
-               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
+               SECTION("copy assignment throws")
+               {
+                  counted_type::throw_at_nth_copy_assignment(2);
+                  REQUIRE_THROWS_AS(d.insert(d.cbegin()+2, 5, value), counted_type::copy_assignment::exception);
+                  REQUIRE(counted_type::check{}.move_constructions(2).copy_constructions(3).copy_assignments(1).destructions(0));
+                  REQUIRE(d == (deque_counted_type_t{0, 1, 10, 10, 10, 10, 1, 2, 3, 4}));
+               }
+               SECTION("copy construction throws")
+               {
+                  counted_type::throw_at_nth_copy_construction(2);
+                  REQUIRE_THROWS_AS(d.insert(d.cbegin()+2, 5, value), counted_type::copy_construction::exception);
+                  REQUIRE(counted_type::check{}.move_constructions(2).copy_constructions(1).destructions(3));
+                  REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
+               }
             }
             SECTION("range (input iterator)")
             {
@@ -1660,10 +1670,20 @@ TEST_CASE("dequeng")
             counted_type::reset_counts();
             SECTION("count")
             {
-               counted_type::throw_at_nth_copy_construction(2);
-               REQUIRE_THROWS_AS(d.insert(d.cend()-2, 5, value), counted_type::copy_construction::exception);
-               REQUIRE(counted_type::check{}.move_constructions(2).copy_constructions(1).destructions(3));
-               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));  
+               SECTION("copy assignment throws")
+               {
+                  counted_type::throw_at_nth_copy_assignment(2);
+                  REQUIRE_THROWS_AS(d.insert(d.cend()-2, 5, value), counted_type::copy_assignment::exception);
+                  REQUIRE(counted_type::check{}.move_constructions(2).copy_constructions(3).copy_assignments(1).destructions(0));
+                  REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 10, 10, 10, 10, 3, 4}));
+               }
+               SECTION("copy construction throws")
+               {
+                  counted_type::throw_at_nth_copy_construction(2);
+                  REQUIRE_THROWS_AS(d.insert(d.cend()-2, 5, value), counted_type::copy_construction::exception);
+                  REQUIRE(counted_type::check{}.move_constructions(2).copy_constructions(1).destructions(3));
+                  REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));  
+               }
             }
             SECTION("range (input iterator)")
             {
@@ -1682,7 +1702,7 @@ TEST_CASE("dequeng")
                   REQUIRE(counted_type::check{}.move_constructions(2).copy_assignments(1).destructions(2));
                   REQUIRE(d == (deque_counted_type_t{0, 1, 2, 10, 4}));
                }
-               SECTION("copy construction throw")
+               SECTION("copy construction throws")
                {
                   counted_type::throw_at_nth_copy_construction(2);
                   REQUIRE_THROWS_AS(d.insert(d.cend()-2, values.begin(), values.end()), counted_type::copy_construction::exception);
