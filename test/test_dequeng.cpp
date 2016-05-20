@@ -2205,6 +2205,68 @@ TEST_CASE("dequeng")
       REQUIRE(d == (deque_counted_type_t{}));
    }
 
+   SECTION("swap")
+   {
+      SECTION("rhs' capacity is same")
+      {
+         SECTION("lhs.size() < rhs.size()")
+         {
+            auto lhs = deque_counted_type_t{0, 1};
+            auto rhs = deque_counted_type_t{10, 11, 12, 13, 14, 15, 16};
+            counted_type::reset_counts();
+            swap(lhs, rhs);
+            REQUIRE(counted_type::check{}.move_constructions(2+5).move_assignments(4).destructions(2+5));
+            REQUIRE(lhs == (deque_counted_type_t{10, 11, 12, 13, 14, 15, 16}));
+            REQUIRE(rhs == (deque_counted_type_t{0, 1}));
+         }
+         SECTION("lhs.size() > rhs.size()")
+         {
+            auto lhs = deque_counted_type_t{0, 1, 2, 3, 4, 5, 6};
+            auto rhs = deque_counted_type_t{10, 11};
+            counted_type::reset_counts();
+            swap(lhs, rhs);
+            REQUIRE(counted_type::check{}.move_constructions(2+5).move_assignments(4).destructions(2+5));
+            REQUIRE(lhs == (deque_counted_type_t{10, 11}));
+            REQUIRE(rhs == (deque_counted_type_t{0, 1, 2, 3, 4, 5, 6}));
+         }         
+      }
+      SECTION("deque capacities are different")
+      {
+         auto lhs = sstl::dequeng<counted_type, 10>{0, 1, 2, 3, 4, 5, 6};
+         auto rhs = sstl::dequeng<counted_type, 30>{10, 11};
+         counted_type::reset_counts();
+         swap(lhs, rhs);
+         REQUIRE(counted_type::check{}.move_constructions(2+5).move_assignments(4).destructions(2+5));
+         REQUIRE(lhs == (deque_counted_type_t{10, 11}));
+         REQUIRE(rhs == (deque_counted_type_t{0, 1, 2, 3, 4, 5, 6}));
+      }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling")
+      {
+         auto lhs = deque_counted_type_t{0, 1, 2, 3, 4, 5, 6};
+         auto rhs = deque_counted_type_t{10, 11, 12};
+         SECTION("exception thrown during first half of swap operation (while swapping lhs and rhs elements)")
+         {
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_move_assignment(5);
+            REQUIRE_THROWS_AS(swap(lhs, rhs), counted_type::move_assignment::exception);
+            REQUIRE(counted_type::check().move_constructions(3).move_assignments(4).destructions(3));
+            REQUIRE(lhs == (deque_counted_type_t{10, 11, 2, 3, 4, 5, 6}));
+            REQUIRE(rhs == (deque_counted_type_t{0, 1, 12}));
+         }
+         SECTION("exception thrown during second half of swap operation (while move constructing lhs elements into rhs)")
+         {
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_move_construction(5);
+            REQUIRE_THROWS_AS(swap(lhs, rhs), counted_type::move_construction::exception);
+            REQUIRE(counted_type::check().move_constructions(4).move_assignments(6).destructions(3));
+            REQUIRE(lhs == (deque_counted_type_t{10, 11, 12, 3, 4, 5, 6}));
+            REQUIRE(rhs == (deque_counted_type_t{0, 1, 2, 3}));
+         }
+      }
+      #endif
+   }
+
    SECTION("non-member relative operators")
    {
       SECTION("lhs < rhs")

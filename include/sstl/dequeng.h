@@ -798,6 +798,24 @@ public:
       --_derived()._size;
    }
 
+   void swap(dequeng& rhs)
+      _sstl_noexcept(std::is_nothrow_move_constructible<value_type>::value
+                  && std::is_nothrow_move_assignable<value_type>::value)
+   {
+      if(size() < rhs.size())
+      {
+         auto pos = std::swap_ranges(begin(), end(), rhs.begin());
+         insert(end(), std::make_move_iterator(pos), std::make_move_iterator(rhs.end()));
+         rhs.erase(pos, rhs.end());
+      }
+      else
+      {
+         auto pos = std::swap_ranges(rhs.begin(), rhs.end(), begin());
+         rhs.insert(rhs.cend(), std::make_move_iterator(pos), std::make_move_iterator(end()));
+         erase(pos, cend());
+      }
+   }
+
 protected:
    using _type_for_derived_class_access = dequeng<T, 11>;
 
@@ -1365,12 +1383,6 @@ private:
 };
 
 template<class T>
-inline bool operator==(const dequeng<T>& lhs, const dequeng<T>& rhs) _sstl_noexcept_
-{
-   return lhs.size() == rhs.size() && std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
-}
-
-template<class T>
 typename dequeng<T>::_type_for_derived_class_access& dequeng<T>::_derived() _sstl_noexcept_
 {
    return reinterpret_cast<_type_for_derived_class_access&>(*this);
@@ -1380,6 +1392,31 @@ template<class T>
 const typename dequeng<T>::_type_for_derived_class_access& dequeng<T>::_derived() const _sstl_noexcept_
 {
    return reinterpret_cast<const _type_for_derived_class_access&>(*this);
+}
+
+template<class T>
+void swap(dequeng<T>& lhs, dequeng<T>& rhs)
+   _sstl_noexcept(noexcept(std::declval<dequeng<T>&>().swap(std::declval<dequeng<T>&>())))
+{
+   lhs.swap(rhs);
+}
+
+template<class T>
+inline bool operator==(const dequeng<T>& lhs, const dequeng<T>& rhs) _sstl_noexcept_
+{
+   return lhs.size() == rhs.size() && std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
+}
+
+template<class T>
+inline bool operator!=(const dequeng<T>& lhs, const dequeng<T>& rhs) _sstl_noexcept_
+{
+   return !operator==(lhs, rhs);
+}
+
+template<class T>
+inline bool operator<(const dequeng<T>& lhs, const dequeng<T>& rhs) _sstl_noexcept_
+{
+   
 }
 
 }
