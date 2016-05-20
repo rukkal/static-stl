@@ -2275,21 +2275,21 @@ TEST_CASE("dequeng")
             auto lhs = deque_counted_type_t{0, 1, 2};
             auto rhs = deque_counted_type_t{0, 1, 2, 3};
             REQUIRE(!(lhs == rhs));
-            //REQUIRE(lhs != rhs);
-            //REQUIRE(lhs < rhs);
-            //REQUIRE(lhs <= rhs);
-            //REQUIRE(!(lhs > rhs));
-            //REQUIRE(!(lhs >= rhs));
+            REQUIRE(lhs != rhs);
+            REQUIRE(lhs < rhs);
+            REQUIRE(lhs <= rhs);
+            REQUIRE(!(lhs > rhs));
+            REQUIRE(!(lhs >= rhs));
          }
          {
             auto lhs = deque_counted_type_t{0, 1, 2, 3};
             auto rhs = deque_counted_type_t{0, 1, 3, 3};
             REQUIRE(!(lhs == rhs));
-            //REQUIRE(lhs != rhs);
-            //REQUIRE(lhs < rhs);
-            //REQUIRE(lhs <= rhs);
-            //REQUIRE(!(lhs > rhs));
-            //REQUIRE(!(lhs >= rhs));
+            REQUIRE(lhs != rhs);
+            REQUIRE(lhs < rhs);
+            REQUIRE(lhs <= rhs);
+            REQUIRE(!(lhs > rhs));
+            REQUIRE(!(lhs >= rhs));
          }
       }
       SECTION("lhs == rhs")
@@ -2298,11 +2298,11 @@ TEST_CASE("dequeng")
             auto lhs = deque_counted_type_t{0, 1, 2};
             auto rhs = deque_counted_type_t{0, 1, 2};
             REQUIRE(lhs == rhs);
-            //REQUIRE(!(lhs != rhs));
-            //REQUIRE(!(lhs < rhs));
-            //REQUIRE(lhs <= rhs);
-            //REQUIRE(!(lhs > rhs));
-            //REQUIRE(lhs >= rhs);
+            REQUIRE(!(lhs != rhs));
+            REQUIRE(!(lhs < rhs));
+            REQUIRE(lhs <= rhs);
+            REQUIRE(!(lhs > rhs));
+            REQUIRE(lhs >= rhs);
          }
       }
       SECTION("lhs > rhs")
@@ -2311,21 +2311,21 @@ TEST_CASE("dequeng")
             auto lhs = deque_counted_type_t{0, 1, 2, 3};
             auto rhs = deque_counted_type_t{0, 1, 2};
             REQUIRE(!(lhs == rhs));
-            //REQUIRE(lhs != rhs);
-            //REQUIRE(!(lhs < rhs));
-            //REQUIRE(!(lhs <= rhs));
-            //REQUIRE(lhs > rhs);
-            //REQUIRE(lhs >= rhs);
+            REQUIRE(lhs != rhs);
+            REQUIRE(!(lhs < rhs));
+            REQUIRE(!(lhs <= rhs));
+            REQUIRE(lhs > rhs);
+            REQUIRE(lhs >= rhs);
          }
          {
             auto lhs = deque_counted_type_t{0, 1, 3, 3};
             auto rhs = deque_counted_type_t{0, 1, 2, 3};
             REQUIRE(!(lhs == rhs));
-            //REQUIRE(lhs != rhs);
-            //REQUIRE(!(lhs < rhs));
-            //REQUIRE(!(lhs <= rhs));
-            //REQUIRE(lhs > rhs);
-            //REQUIRE(lhs >= rhs);
+            REQUIRE(lhs != rhs);
+            REQUIRE(!(lhs < rhs));
+            REQUIRE(!(lhs <= rhs));
+            REQUIRE(lhs > rhs);
+            REQUIRE(lhs >= rhs);
          }
       }
    }

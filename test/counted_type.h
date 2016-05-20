@@ -311,6 +311,7 @@ public:
 
    void operator()() const {} // make type also usable as function object
    bool operator==(const counted_type& rhs) const { return member == rhs.member; }
+   bool operator<(const counted_type& rhs) const { return member < rhs.member; }
    static void reset_counts()
    {
       construction::count = 0;

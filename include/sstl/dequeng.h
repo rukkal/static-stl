@@ -1395,13 +1395,6 @@ const typename dequeng<T>::_type_for_derived_class_access& dequeng<T>::_derived(
 }
 
 template<class T>
-void swap(dequeng<T>& lhs, dequeng<T>& rhs)
-   _sstl_noexcept(noexcept(std::declval<dequeng<T>&>().swap(std::declval<dequeng<T>&>())))
-{
-   lhs.swap(rhs);
-}
-
-template<class T>
 inline bool operator==(const dequeng<T>& lhs, const dequeng<T>& rhs) _sstl_noexcept_
 {
    return lhs.size() == rhs.size() && std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
@@ -1416,7 +1409,32 @@ inline bool operator!=(const dequeng<T>& lhs, const dequeng<T>& rhs) _sstl_noexc
 template<class T>
 inline bool operator<(const dequeng<T>& lhs, const dequeng<T>& rhs) _sstl_noexcept_
 {
-   
+   return std::lexicographical_compare(lhs.cbegin(), lhs.cend(), rhs.cbegin(), rhs.cend());
+}
+
+template<class T>
+inline bool operator<=(const dequeng<T>& lhs, const dequeng<T>& rhs) _sstl_noexcept_
+{
+   return !(rhs < lhs);
+}
+
+template<class T>
+inline bool operator>(const dequeng<T>& lhs, const dequeng<T>& rhs) _sstl_noexcept_
+{
+   return rhs < lhs;
+}
+
+template<class T>
+inline bool operator>=(const dequeng<T>& lhs, const dequeng<T>& rhs) _sstl_noexcept_
+{
+   return !(lhs < rhs);
+}
+
+template<class T>
+void swap(dequeng<T>& lhs, dequeng<T>& rhs)
+   _sstl_noexcept(noexcept(std::declval<dequeng<T>&>().swap(std::declval<dequeng<T>&>())))
+{
+   lhs.swap(rhs);
 }
 
 }
