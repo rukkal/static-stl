@@ -8,10 +8,10 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include <catch.hpp>
 #include <initializer_list>
 
-#include <sstl/dequeng.h>
+#include <sstl/deque.h>
 #include "utility.h"
 #include "counted_type.h"
-#include "test_dequeng_utility.h"
+#include "test_deque_utility.h"
 
 namespace sstl_test
 {
@@ -26,8 +26,8 @@ struct value_type
    int value;
 };
 
-using iterator_type = sstl::dequeng<value_type>::iterator;
-using const_iterator_type = sstl::dequeng<value_type>::const_iterator;
+using iterator_type = sstl::deque<value_type>::iterator;
+using const_iterator_type = sstl::deque<value_type>::const_iterator;
 
 TEST_CASE("_dequeng_iterator")
 {

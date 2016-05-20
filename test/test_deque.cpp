@@ -1,1408 +1,2334 @@
-/******************************************************************************
-The MIT License(MIT)
+/*
+Copyright © 2015 Kean Mariotti <kean.mariotti@gmail.com>
+This work is free. You can redistribute it and/or modify it under the
+terms of the Do What The Fuck You Want To Public License, Version 2,
+as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
+*/
 
-Embedded Template Library.
-https://github.com/ETLCPP/etl
-
-Copyright(c) 2014 jwellbelove
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files(the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and / or sellc
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions :
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-******************************************************************************/
-
-#include <UnitTest++/UnitTest++.h>
-
+#include <catch.hpp>
+#include <algorithm>
+#include <sstl/__internal/_except.h>
 #include <sstl/deque.h>
 
-#include "data.h"
+#include "utility.h"
 #include "counted_type.h"
-
-#include <vector>
-#include <deque>
-#include <algorithm>
-#include <iostream>
-#include <numeric>
-
-const size_t SIZE = 14;
-
-typedef TestDataDC<std::string>  DC;
-typedef TestDataNDC<std::string> NDC;
-
-typedef sstl::deque<DC, SIZE>     DataDC;
-typedef sstl::deque<NDC, SIZE>    DataNDC;
-
-typedef std::deque<NDC>          Compare_Data;
-typedef std::deque<DC>           Compare_DataDC;
-
-NDC N0   = NDC("0");
-NDC N1   = NDC("1");
-NDC N2   = NDC("2");
-NDC N3   = NDC("3");
-NDC N4   = NDC("4");
-NDC N5   = NDC("5");
-NDC N6   = NDC("6");
-NDC N7   = NDC("7");
-NDC N8   = NDC("8");
-NDC N9   = NDC("9");
-NDC N10  = NDC("10");
-NDC N11  = NDC("11");
-NDC N12  = NDC("12");
-NDC N13  = NDC("13");
-NDC N14  = NDC("14");
-NDC N15  = NDC("15");
-NDC N16  = NDC("16");
-NDC N17  = NDC("17");
-NDC N999 = NDC("999");
-
-std::vector<NDC> blank_data          = { N999, N999, N999, N999, N999, N999, N999, N999, N999, N999, N999, N999, N999, N999 };
-std::vector<NDC> initial_data        = { N0, N1, N2, N3, N4, N5, N6, N7, N8, N9, N10, N11, N12, N13 };
-std::vector<NDC> initial_data_excess = { N0, N1, N2, N3, N4, N5, N6, N7, N8, N9, N10, N11, N12, N13, N14 };
-std::vector<NDC> initial_data_under  = { N0, N1, N2, N3, N4, N5, N6, N7, N8, N9, N10, N11 };
-std::vector<NDC> initial_data_small  = { N0, N1, N2, N3, N4, N5, N6, N7, N8, N9 };
-std::vector<NDC> insert_data         = { N10, N11, N12, N13, N14 };
-std::vector<DC>  initial_data_dc     = { DC("0"), DC("1"), DC("2"), DC("3"), DC("4"), DC("5"), DC("6"), DC("7"), DC("8"), DC("9"), DC("10"), DC("11"), DC("12"), DC("13") };
+#include "counted_type_stream_iterator.h"
+#include "test_deque_utility.h"
 
 namespace sstl_test
 {
-	SUITE(test_deque)
-	{
-    //*************************************************************************
-		TEST(test_constructor)
-		{
-      DataDC data;
-
-      CHECK_EQUAL(SIZE, data.max_size());
-		}
-
-    //*************************************************************************
-    TEST(test_constructor_fill)
-    {
-      Compare_Data compare_data(SIZE, N999);
-      DataNDC data(SIZE, N999);
-
-      CHECK_EQUAL(compare_data.size(), data.size());
-      CHECK(std::equal(compare_data.begin(), compare_data.end(), data.begin()));
-    }
-
-    //*************************************************************************
-    TEST(test_constructor_range)
-    {
-      Compare_Data compare_data(initial_data.begin(), initial_data.end());
-      DataNDC data(initial_data.begin(), initial_data.end());
-
-      CHECK_EQUAL(compare_data.size(), data.size());
-      CHECK(std::equal(compare_data.begin(), compare_data.end(), data.begin()));
-    }
-
-    //*************************************************************************
-		TEST(test_copy_constructor)
-		{
-      DataNDC deque1(initial_data.begin(), initial_data.end());
-      DataNDC deque2(deque1);
-
-      CHECK_EQUAL(deque1.size(), deque2.size());
-      CHECK(std::equal(deque1.begin(), deque1.end(), deque2.begin()));
-		}
-
-    //*************************************************************************
-		TEST(test_assignment)
-		{
-      DataNDC deque1(initial_data.begin(), initial_data.end());
-      DataNDC deque2;
-
-      deque2 = deque1;
-
-      CHECK_EQUAL(deque1.size(), deque2.size());
-      CHECK(std::equal(deque1.begin(), deque1.end(), deque2.begin()));
-		}
-
-    //*************************************************************************
-    TEST(test_self_assignment)
-    {
-      DataNDC deque1(initial_data.begin(), initial_data.end());
-      DataNDC deque2(deque1);
-
-      deque2 = deque2;
-
-      CHECK_EQUAL(deque1.size(), deque2.size());
-      CHECK(std::equal(deque1.begin(), deque1.end(), deque2.begin()));
-    }
-
-    //*************************************************************************
-    TEST(test_assign_range)
-    {
-      DataNDC data;
-
-      data.assign(initial_data.begin(), initial_data.end());
-
-      CHECK_EQUAL(initial_data.size(), data.size());
-      CHECK(std::equal(initial_data.begin(), initial_data.end(), data.begin()));
-    }
-
-    //*************************************************************************
-    TEST(test_assign_fill)
-    {
-      Compare_Data compare_data;
-      DataNDC data;
-
-      compare_data.assign(SIZE, N999);
-
-      data.assign(SIZE, N999);
-
-      CHECK_EQUAL(compare_data.size(), data.size());
-      CHECK(std::equal(compare_data.begin(), compare_data.end(), data.begin()));
-    }
-
-    //*************************************************************************
-    TEST(test_at)
-    {
-      Compare_Data compare_data(initial_data.begin(), initial_data.end());
-      DataNDC data(initial_data.begin(), initial_data.end());
-
-      CHECK_EQUAL(compare_data.at(0), data.at(0));
-      CHECK_EQUAL(compare_data.at(1), data.at(1));
-      CHECK_EQUAL(compare_data.at(2), data.at(2));
-      CHECK_EQUAL(compare_data.at(3), data.at(3));
-      CHECK_EQUAL(compare_data.at(4), data.at(4));
-      CHECK_EQUAL(compare_data.at(5), data.at(5));
-    }
-
-    //*************************************************************************
-    TEST(test_at_const)
-    {
-      const Compare_Data compare_data(initial_data.begin(), initial_data.end());
-      const DataNDC data(initial_data.begin(), initial_data.end());
-
-      CHECK_EQUAL(compare_data.at(0), data.at(0));
-      CHECK_EQUAL(compare_data.at(1), data.at(1));
-      CHECK_EQUAL(compare_data.at(2), data.at(2));
-      CHECK_EQUAL(compare_data.at(3), data.at(3));
-      CHECK_EQUAL(compare_data.at(4), data.at(4));
-      CHECK_EQUAL(compare_data.at(5), data.at(5));
-    }
-
-    //*************************************************************************
-    TEST(test_index_operator)
-    {
-      Compare_Data compare_data(initial_data.begin(), initial_data.end());
-      DataNDC data(initial_data.begin(), initial_data.end());
-
-      CHECK_EQUAL(compare_data[0], data[0]);
-      CHECK_EQUAL(compare_data[1], data[1]);
-      CHECK_EQUAL(compare_data[2], data[2]);
-      CHECK_EQUAL(compare_data[3], data[3]);
-      CHECK_EQUAL(compare_data[4], data[4]);
-      CHECK_EQUAL(compare_data[5], data[5]);
-    }
-
-    //*************************************************************************
-    TEST(test_index_operator_const)
-    {
-      const Compare_Data compare_data(initial_data.begin(), initial_data.end());
-      const DataNDC data(initial_data.begin(), initial_data.end());
-
-      CHECK_EQUAL(compare_data[0], data[0]);
-      CHECK_EQUAL(compare_data[1], data[1]);
-      CHECK_EQUAL(compare_data[2], data[2]);
-      CHECK_EQUAL(compare_data[3], data[3]);
-      CHECK_EQUAL(compare_data[4], data[4]);
-      CHECK_EQUAL(compare_data[5], data[5]);
-    }
-
-    //*************************************************************************
-    TEST(test_front)
-    {
-      DataNDC data;
-
-      data.push_front(N1);
-      CHECK_EQUAL(N1, data.front());
-
-      data.push_front(N2);
-      CHECK_EQUAL(N2, data.front());
-
-      data.push_front(N3);
-      CHECK_EQUAL(N3, data.front());
-
-      data.push_front(N4);
-      CHECK_EQUAL(N4, data.front());
-
-      data.push_front(N5);
-      CHECK_EQUAL(N5, data.front());
-
-      data.push_front(N6);
-      CHECK_EQUAL(N6, data.front());
-    }
-
-    //*************************************************************************
-    TEST(test_front_const)
-    {
-      DataNDC data;
-      const DataNDC& ctestDeque = data;
-
-      data.push_front(N1);
-      CHECK_EQUAL(N1, ctestDeque.front());
-
-      data.push_front(N2);
-      CHECK_EQUAL(N2, ctestDeque.front());
-
-      data.push_front(N3);
-      CHECK_EQUAL(N3, ctestDeque.front());
-
-      data.push_front(N4);
-      CHECK_EQUAL(N4, ctestDeque.front());
-
-      data.push_front(N5);
-      CHECK_EQUAL(N5, ctestDeque.front());
-
-      data.push_front(N6);
-      CHECK_EQUAL(N6, ctestDeque.front());
-    }
-
-    //*************************************************************************
-    TEST(test_back)
-    {
-      DataNDC data;
-
-      data.push_back(N1);
-      CHECK_EQUAL(N1, data.back());
-
-      data.push_back(N2);
-      CHECK_EQUAL(N2, data.back());
-
-      data.push_back(N3);
-      CHECK_EQUAL(N3, data.back());
-
-      data.push_back(N4);
-      CHECK_EQUAL(N4, data.back());
-
-      data.push_back(N5);
-      CHECK_EQUAL(N5, data.back());
-
-      data.push_back(N6);
-      CHECK_EQUAL(N6, data.back());
-    }
-
-    //*************************************************************************
-    TEST(test_back_const)
-    {
-      DataNDC data;
-      const DataNDC& ctestDeque = data;
-
-      data.push_back(N1);
-      CHECK_EQUAL(N1, ctestDeque.back());
-
-      data.push_back(N2);
-      CHECK_EQUAL(N2, ctestDeque.back());
-
-      data.push_back(N3);
-      CHECK_EQUAL(N3, ctestDeque.back());
-
-      data.push_back(N4);
-      CHECK_EQUAL(N4, ctestDeque.back());
-
-      data.push_back(N5);
-      CHECK_EQUAL(N5, ctestDeque.back());
-
-      data.push_back(N6);
-      CHECK_EQUAL(N6, ctestDeque.back());
-    }
-
-    //*************************************************************************
-    TEST(test_iterator_comparison_empty)
-    {
-       auto data = DataNDC{};
-
-       CHECK(data.begin() == data.end());
-       CHECK(data.cbegin() == data.cend());
-       CHECK(data.rbegin() == data.rend());
-       CHECK(data.crbegin() == data.crend());
-    }
-
-    //*************************************************************************
-    TEST(test_iterator_comparison)
-    {
-      DataNDC data(SIZE, N0);
-
-      DataNDC::iterator first = data.begin() + 1;
-      DataNDC::iterator second = data.begin() + 4;
-
-      CHECK(first < second);
-      CHECK(!(second < first));
-    }
-
-    //*************************************************************************
-    TEST(test_const_iterator_comparison)
-    {
-      DataNDC data(SIZE, N0);
-
-      DataNDC::const_iterator first  = data.cbegin() + 1;
-      DataNDC::const_iterator second = data.cbegin() + 4;
-
-      CHECK(first < second);
-      CHECK(!(second < first));
-    }
-
-    //*************************************************************************
-    TEST(test_iterator_comparison_rollover_left)
-    {
-      DataNDC data(SIZE, N0);
-
-      data.pop_back();
-      data.pop_back();
-      data.pop_back();
-      data.pop_back();
-      data.push_front(N1);
-      data.push_front(N1);
-      data.push_front(N1);
-      data.push_front(N1);
-
-      DataNDC::const_iterator first  = data.cbegin() + 1;
-      DataNDC::const_iterator second = data.cbegin() + 4;
-
-      CHECK(first < second);
-      CHECK(!(second < first));
-    }
-
-    //*************************************************************************
-    TEST(test_const_iterator_comparison_rollover_left)
-    {
-      DataNDC data(SIZE, N0);
-
-      data.pop_back();
-      data.pop_back();
-      data.pop_back();
-      data.pop_back();
-      data.push_front(N1);
-      data.push_front(N1);
-      data.push_front(N1);
-      data.push_front(N1);
-
-      DataNDC::const_iterator first  = data.cbegin() + 1;
-      DataNDC::const_iterator second = data.cbegin() + 4;
-
-      CHECK(first < second);
-      CHECK(!(second < first));
-    }
-
-    //*************************************************************************
-    TEST(test_iterator_comparison_rollover_right)
-    {
-      DataNDC data(SIZE, N0);
-
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.push_back(N1);
-      data.push_back(N1);
-      data.push_back(N1);
-      data.push_back(N1);
-
-      DataNDC::iterator first  = data.begin() + 1;
-      DataNDC::iterator second = data.begin() + 4;
-
-      CHECK(first < second);
-      CHECK(!(second < first));
-    }
-
-    //*************************************************************************
-    TEST(test_const_iterator_comparison_rollover_right)
-    {
-      DataNDC data(SIZE, N0);
-
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.push_back(N1);
-      data.push_back(N1);
-      data.push_back(N1);
-      data.push_back(N1);
-
-      DataNDC::const_iterator first  = data.cbegin() + 1;
-      DataNDC::const_iterator second = data.cbegin() + 4;
-
-      CHECK(first < second);
-      CHECK(!(second < first));
-    }
-
-    //*************************************************************************
-    TEST(test_reverse_iterator_comparison)
-    {
-      DataNDC data(SIZE, N0);
-
-      DataNDC::reverse_iterator first  = data.rbegin() + 1;
-      DataNDC::reverse_iterator second = data.rbegin() + 4;
-
-      CHECK(first < second);
-      CHECK(!(second < first));
-    }
-
-    //*************************************************************************
-    TEST(test_const_reverse_iterator_comparison)
-    {
-      DataNDC data(SIZE, N0);
-
-      DataNDC::const_reverse_iterator first  = data.crbegin() + 1;
-      DataNDC::const_reverse_iterator second = data.crbegin() + 4;
-
-      CHECK(first < second);
-      CHECK(!(second < first));
-    }
-
-    //*************************************************************************
-    TEST(test_reverse_iterator_comparison_rollover_left)
-    {
-      DataNDC data(SIZE, N0);
-
-      data.pop_back();
-      data.pop_back();
-      data.pop_back();
-      data.pop_back();
-      data.push_front(N1);
-      data.push_front(N1);
-      data.push_front(N1);
-      data.push_front(N1);
-
-      DataNDC::reverse_iterator first  = data.rbegin() + 1;
-      DataNDC::reverse_iterator second = data.rbegin() + 4;
-
-      CHECK(first < second);
-      CHECK(!(second < first));
-    }
-
-    //*************************************************************************
-    TEST(test_const_reverse_iterator_comparison_rollover_left)
-    {
-      DataNDC data(SIZE, N0);
-
-      data.pop_back();
-      data.pop_back();
-      data.pop_back();
-      data.pop_back();
-      data.push_front(N1);
-      data.push_front(N1);
-      data.push_front(N1);
-      data.push_front(N1);
-
-      DataNDC::const_reverse_iterator first  = data.crbegin() + 1;
-      DataNDC::const_reverse_iterator second = data.crbegin() + 4;
-
-      CHECK(first < second);
-      CHECK(!(second < first));
-    }
-
-    //*************************************************************************
-    TEST(test_reverse_iterator_comparison_rollover_right)
-    {
-      DataNDC data(SIZE, N0);
-
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.push_back(N1);
-      data.push_back(N1);
-      data.push_back(N1);
-      data.push_back(N1);
-
-      DataNDC::reverse_iterator first  = data.rbegin() + 1;
-      DataNDC::reverse_iterator second = data.rbegin() + 4;
-
-      CHECK(first < second);
-      CHECK(!(second < first));
-    }
-
-    //*************************************************************************
-    TEST(test_const_reverse_iterator_comparison_rollover_right)
-    {
-      DataNDC data(SIZE, N0);
-
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.push_back(N1);
-      data.push_back(N1);
-      data.push_back(N1);
-      data.push_back(N1);
-
-      DataNDC::const_reverse_iterator first  = data.crbegin() + 1;
-      DataNDC::const_reverse_iterator second = data.crbegin() + 4;
-
-      CHECK(first < second);
-      CHECK(!(second < first));
-    }
-
-    //*************************************************************************
-    TEST(test_empty)
-    {
-      DataNDC data;
-
-      CHECK(data.empty());
-    }
-
-    //*************************************************************************
-    TEST(test_full)
-    {
-      DataDC data;
-      data.resize(SIZE);
-
-      CHECK(data.full());
-    }
-
-    //*************************************************************************
-    TEST(test_clear)
-    {
-      DataDC data;
-
-      data.resize(SIZE);
-      data.clear();
-      CHECK(data.empty());
-    }
-
-    //*************************************************************************
-    TEST(test_insert_value_begin)
-    {
-      Compare_Data compare_data(initial_data_under.begin(), initial_data_under.end());
-      DataNDC data(compare_data.begin(), compare_data.end());
-
-      Compare_Data::iterator cposition = compare_data.insert(compare_data.begin(), N14);
-      DataNDC::iterator         position  = data.insert(data.begin(), N14);
-
-      CHECK_EQUAL(compare_data.size(), data.size());
-      CHECK(std::equal(compare_data.begin(), compare_data.end(), data.begin()));
-      CHECK_EQUAL(std::distance(compare_data.begin(), cposition), std::distance(data.begin(), position));
-    }
-
-    //*************************************************************************
-    TEST(test_insert_value_end)
-    {
-      Compare_Data compare_data(initial_data_under.begin(), initial_data_under.end());
-      DataNDC data(compare_data.begin(), compare_data.end());
-
-      Compare_Data::iterator cposition = compare_data.insert(compare_data.end(), N14);
-      DataNDC::iterator         position = data.insert(data.end(), N14);
-
-      CHECK_EQUAL(compare_data.size(), data.size());
-      CHECK(std::equal(compare_data.begin(), compare_data.end(), data.begin()));
-      CHECK_EQUAL(std::distance(compare_data.begin(), cposition), std::distance(data.begin(), position));
-    }
-
-    //*************************************************************************
-    TEST(test_insert_value)
-    {
-      Compare_Data compare_data(initial_data_under.begin(), initial_data_under.end());
-      DataNDC data(compare_data.begin(), compare_data.end());
-
-      Compare_Data::iterator cposition = compare_data.insert(compare_data.begin() + 3, N14);
-      DataNDC::iterator         position  = data.insert(data.begin() + 3, N14);
-
-      CHECK_EQUAL(compare_data.size(), data.size());
-      CHECK(std::equal(compare_data.begin(), compare_data.end(), data.begin()));
-      CHECK_EQUAL(std::distance(compare_data.begin(), cposition), std::distance(data.begin(), position));
-
-      compare_data.assign(initial_data_under.begin(), initial_data_under.end());
-      data.assign(compare_data.begin(), compare_data.end());
-
-      cposition = compare_data.insert(compare_data.begin() + 4, N14);
-      position  = data.insert(data.begin() + 4, N14);
-
-      CHECK_EQUAL(compare_data.size(), data.size());
-      CHECK(std::equal(compare_data.begin(), compare_data.end(), data.begin()));
-      CHECK_EQUAL(std::distance(compare_data.begin(), cposition), std::distance(data.begin(), position));
-    }
-
-    //*************************************************************************
-    TEST(test_insert_n_value_position)
-    {
-      size_t max_insert = SIZE - initial_data_small.size();
-
-      for (size_t insert_size = 1; insert_size <= max_insert; ++insert_size)
+using deque_counted_type_base_t = sstl::deque<counted_type>;
+using deque_counted_type_t = sstl::deque<counted_type, 11>;
+
+TEST_CASE("deque")
+{
+   SECTION("user cannot directly construct the base class")
+   {
+      #if !_sstl_is_gcc()
+         REQUIRE(!std::is_default_constructible<deque_counted_type_base_t>::value);
+      #endif
+      REQUIRE(!std::is_copy_constructible<deque_counted_type_base_t>::value);
+      REQUIRE(!std::is_move_constructible<deque_counted_type_base_t>::value);
+   }
+
+   SECTION("user cannot directly destroy the base class")
+   {
+      #if !_is_msvc() //MSVC (VS2013) has a buggy implementation of std::is_destructible
+      REQUIRE(!std::is_destructible<deque_counted_type_base_t>::value);
+      #endif
+   }
+
+   SECTION("default constructor")
+   {
+      counted_type::reset_counts();
+      auto d = deque_counted_type_t();
+      REQUIRE(counted_type::check{}.constructions(0));
+      REQUIRE(d.empty());
+   }
+
+   SECTION("count constructor")
+   {
+      SECTION("contained values")
       {
-        for (size_t offset = 0; offset <= initial_data_small.size(); ++offset)
-        {
-          Compare_Data compare_data(initial_data_small.begin(), initial_data_small.end());
-          DataNDC data(compare_data.begin(), compare_data.end());
-
-          compare_data.insert(compare_data.begin() + offset, insert_size, N14);
-          data.insert(data.begin() + offset, insert_size, N14);
-
-          CHECK_EQUAL(compare_data.size(), data.size());
-          CHECK(std::equal(compare_data.begin(), compare_data.end(), data.begin()));
-        }
+         auto expected = deque_counted_type_t{counted_type(), counted_type(), counted_type()};
+         counted_type::reset_counts();
+         auto actual = deque_counted_type_t(3);
+         REQUIRE(counted_type::check{}.default_constructions(1).copy_constructions(3));
+         REQUIRE(actual == expected);
       }
-    }
-
-    //*************************************************************************
-    TEST(test_insert_range)
-    {
-      size_t max_insert = SIZE - initial_data_small.size();
-
-      for (size_t insert_size = 1; insert_size <= max_insert; ++insert_size)
+      #if _sstl_has_exceptions()
+      SECTION("exception handling")
       {
-        Compare_Data range(insert_data.begin(), insert_data.begin() + insert_size);
-
-        for (size_t offset = 0; offset <= initial_data_small.size(); ++offset)
-        {
-          Compare_Data compare_data(initial_data_small.begin(), initial_data_small.end());
-          DataNDC data(blank_data.begin(), blank_data.end());
-          data.assign(compare_data.begin(), compare_data.end());
-
-          compare_data.insert(compare_data.begin() + offset, range.begin(), range.end());
-          data.insert(data.begin() + offset, range.begin(), range.end());
-
-          CHECK_EQUAL(compare_data.size(), data.size());
-          CHECK(std::equal(compare_data.begin(), compare_data.end(), data.begin()));
-        }
+         counted_type::reset_counts();
+         counted_type::throw_at_nth_copy_construction(3);
+         REQUIRE_THROWS_AS(deque_counted_type_t(4), counted_type::copy_construction::exception);
+         REQUIRE(counted_type::check{}.default_constructions(1).copy_constructions(2).destructions(3));
       }
-    }
+      #endif
+   }
 
-    //*************************************************************************
-    TEST(test_erase_begin)
-    {
-      Compare_Data compare_data = { N0, N0, N0, N0, N0, N0, N0, N0, N0, N1, N2, N3 };
-      DataNDC data(compare_data.begin(), compare_data.end());
-
-      // Cause rollover.
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.push_back(N4);
-      data.push_back(N5);
-      data.push_back(N6);
-      data.push_back(N7);
-      data.push_back(N8);
-      data.push_back(N9);
-      data.push_back(N10);
-
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.push_back(N4);
-      compare_data.push_back(N5);
-      compare_data.push_back(N6);
-      compare_data.push_back(N7);
-      compare_data.push_back(N8);
-      compare_data.push_back(N9);
-      compare_data.push_back(N10);
-
-      DataNDC::iterator i_next          = data.erase(data.begin());
-      Compare_Data::iterator i_cnext = compare_data.erase(compare_data.begin());
-
-      CHECK_EQUAL(DataNDC::difference_type(data.size()), std::distance(data.begin(), data.end()));
-      CHECK(std::equal(compare_data.begin(), compare_data.end(), data.begin()));
-      CHECK_EQUAL(std::distance(compare_data.begin(), i_cnext), std::distance(data.begin(), i_next));
-    }
-
-    //*************************************************************************
-    TEST(test_erase_end)
-    {
-      Compare_Data compare_data = { N0, N0, N0, N0, N0, N0, N0, N0, N0, N1, N2, N3 };
-      DataNDC data(compare_data.begin(), compare_data.end());
-
-      // Cause rollover.
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.push_back(N4);
-      data.push_back(N5);
-      data.push_back(N6);
-      data.push_back(N7);
-      data.push_back(N8);
-      data.push_back(N9);
-      data.push_back(N10);
-
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.push_back(N4);
-      compare_data.push_back(N5);
-      compare_data.push_back(N6);
-      compare_data.push_back(N7);
-      compare_data.push_back(N8);
-      compare_data.push_back(N9);
-      compare_data.push_back(N10);
-
-      DataNDC::iterator i_erase = data.end() - 1;
-      DataNDC::iterator i_next = data.erase(i_erase);
-
-      Compare_Data::iterator i_cerase = compare_data.end() - 1;
-      Compare_Data::iterator i_cnext = compare_data.erase(i_cerase);
-
-      CHECK_EQUAL(DataNDC::difference_type(compare_data.size()), std::distance(data.begin(), data.end()));
-      CHECK(std::equal(compare_data.begin(), compare_data.end(), data.begin()));
-      CHECK_EQUAL(std::distance(compare_data.begin(), i_cnext), std::distance(data.begin(), i_next));
-    }
-
-    //*************************************************************************
-    TEST(test_erase_middle)
-    {
-      std::vector<NDC> initial = { N0, N0, N0, N0, N0, N0, N0, N0, N0, N1, N2, N3 };
-
-      Compare_Data compare_data(initial.begin(), initial.end());
-      DataNDC data(initial.begin(), initial.end());
-
-      // Cause rollover.
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.push_back(N4);
-      data.push_back(N5);
-      data.push_back(N6);
-      data.push_back(N7);
-      data.push_back(N8);
-      data.push_back(N9);
-      data.push_back(N10);
-
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.push_back(N4);
-      compare_data.push_back(N5);
-      compare_data.push_back(N6);
-      compare_data.push_back(N7);
-      compare_data.push_back(N8);
-      compare_data.push_back(N9);
-      compare_data.push_back(N10);
-
-      // Erase near beginning.
-      DataNDC::iterator i_erase = data.begin() + 2;
-      DataNDC::iterator i_next = data.erase(i_erase);
-
-      Compare_Data::iterator i_cerase = compare_data.begin() + 2;
-      Compare_Data::iterator i_cnext = compare_data.erase(i_cerase);
-
-      CHECK_EQUAL(DataNDC::difference_type(compare_data.size()), std::distance(data.begin(), data.end()));
-      CHECK(std::equal(compare_data.begin(), compare_data.end(), data.begin()));
-      CHECK_EQUAL(std::distance(compare_data.begin(), i_cnext), std::distance(data.begin(), i_next));
-
-      compare_data.assign(initial.begin(), initial.end());
-      data.assign(initial.begin(), initial.end());
-
-      // Cause rollover.
-      // Cause rollover.
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.push_back(N4);
-      data.push_back(N5);
-      data.push_back(N6);
-      data.push_back(N7);
-      data.push_back(N8);
-      data.push_back(N9);
-      data.push_back(N10);
-
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.push_back(N4);
-      compare_data.push_back(N5);
-      compare_data.push_back(N6);
-      compare_data.push_back(N7);
-      compare_data.push_back(N8);
-      compare_data.push_back(N9);
-      compare_data.push_back(N10);
-
-      // Erase near end.
-      i_erase = data.begin() + 3;
-      i_next = data.erase(i_erase);
-
-      i_cerase = compare_data.begin() + 3;
-      i_cnext = compare_data.erase(i_cerase);
-
-      CHECK_EQUAL(DataNDC::difference_type(compare_data.size()), std::distance(data.begin(), data.end()));
-      CHECK(std::equal(compare_data.begin(), compare_data.end(), data.begin()));
-      CHECK_EQUAL(std::distance(compare_data.begin(), i_cnext), std::distance(data.begin(), i_next));
-    }
-
-    //*************************************************************************
-    TEST(test_erase_range_begin)
-    {
-      std::vector<NDC> initial = { N0, N0, N0, N0, N0, N0, N0, N0, N0, N1, N2, N3 };
-
-      Compare_Data compare_data(initial.begin(), initial.end());
-      DataNDC data(initial.begin(), initial.end());
-
-      // Cause rollover.
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.push_back(N4);
-      data.push_back(N5);
-      data.push_back(N6);
-      data.push_back(N7);
-      data.push_back(N8);
-      data.push_back(N9);
-      data.push_back(N10);
-
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.push_back(N4);
-      compare_data.push_back(N5);
-      compare_data.push_back(N6);
-      compare_data.push_back(N7);
-      compare_data.push_back(N8);
-      compare_data.push_back(N9);
-      compare_data.push_back(N10);
-
-      DataNDC::iterator i_next       = data.erase(data.begin(), data.begin() + 3);
-      Compare_Data::iterator i_cnext = compare_data.erase(compare_data.begin(), compare_data.begin() + 3);
-
-      CHECK_EQUAL(DataNDC::difference_type(compare_data.size()), std::distance(data.begin(), data.end()));
-      CHECK(std::equal(compare_data.begin(), compare_data.end(), data.begin()));
-      CHECK_EQUAL(std::distance(compare_data.begin(), i_cnext), std::distance(data.begin(), i_next));
-    }
-
-    //*************************************************************************
-    TEST(test_erase_range_end)
-    {
-      std::vector<NDC> initial = { N0, N0, N0, N0, N0, N0, N0, N0, N0, N1, N2, N3 };
-
-      Compare_Data compare_data(initial.begin(), initial.end());
-      DataNDC      data(initial.begin(), initial.end());
-
-      // Cause rollover.
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.push_back(N4);
-      data.push_back(N5);
-      data.push_back(N6);
-      data.push_back(N7);
-      data.push_back(N8);
-      data.push_back(N9);
-      data.push_back(N10);
-
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.push_back(N4);
-      compare_data.push_back(N5);
-      compare_data.push_back(N6);
-      compare_data.push_back(N7);
-      compare_data.push_back(N8);
-      compare_data.push_back(N9);
-      compare_data.push_back(N10);
-
-      DataNDC::iterator i_next = data.erase(data.end() - 3, data.end());
-      Compare_Data::iterator i_cnext = compare_data.erase(compare_data.end() - 3, compare_data.end());
-
-      CHECK_EQUAL(DataNDC::difference_type(compare_data.size()), std::distance(data.begin(), data.end()));
-      CHECK(std::equal(compare_data.begin(), compare_data.end(), data.begin()));
-      CHECK_EQUAL(std::distance(compare_data.begin(), i_cnext), std::distance(data.begin(), i_next));
-    }
-
-    //*************************************************************************
-    TEST(test_erase_range_middle)
-    {
-      std::vector<NDC> initial = { N0, N0, N0, N0, N0, N0, N0, N0, N0, N1, N2, N3 };
-
-      Compare_Data compare_data(initial.begin(), initial.end());
-      DataNDC data(initial.begin(), initial.end());
-
-      // Cause rollover.
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.push_back(N4);
-      data.push_back(N5);
-      data.push_back(N6);
-      data.push_back(N7);
-      data.push_back(N8);
-      data.push_back(N9);
-      data.push_back(N10);
-
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.push_back(N4);
-      compare_data.push_back(N5);
-      compare_data.push_back(N6);
-      compare_data.push_back(N7);
-      compare_data.push_back(N8);
-      compare_data.push_back(N9);
-      compare_data.push_back(N10);
-
-      DataNDC::iterator         i_next  = data.erase(data.begin() + 1, data.begin() + 3);
-      Compare_Data::iterator i_cnext = compare_data.erase(compare_data.begin() + 1, compare_data.begin() + 3);
-
-      CHECK_EQUAL(DataNDC::difference_type(compare_data.size()), std::distance(data.begin(), data.end()));
-      CHECK(std::equal(compare_data.begin(), compare_data.end(), data.begin()));
-      CHECK_EQUAL(std::distance(compare_data.begin(), i_cnext), std::distance(data.begin(), i_next));
-
-      compare_data.assign(initial.begin(), initial.end());
-      data.assign(initial.begin(), initial.end());
-
-      // Cause rollover.
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.push_back(N4);
-      data.push_back(N5);
-      data.push_back(N6);
-      data.push_back(N7);
-      data.push_back(N8);
-      data.push_back(N9);
-      data.push_back(N10);
-
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.push_back(N4);
-      compare_data.push_back(N5);
-      compare_data.push_back(N6);
-      compare_data.push_back(N7);
-      compare_data.push_back(N8);
-      compare_data.push_back(N9);
-      compare_data.push_back(N10);
-
-      i_next  = data.erase(data.begin() + 3, data.begin() + 5);
-      i_cnext = compare_data.erase(compare_data.begin() + 3, compare_data.begin() + 5);
-
-      CHECK_EQUAL(DataNDC::difference_type(compare_data.size()), std::distance(data.begin(), data.end()));
-      CHECK(std::equal(compare_data.begin(), compare_data.end(), data.begin()));
-      CHECK_EQUAL(std::distance(compare_data.begin(), i_cnext), std::distance(data.begin(), i_next));
-    }
-
-    //*************************************************************************
-    TEST(test_push_back)
-    {
-      Compare_Data compare_data = { N1, N2, N3, N4, N5 };
-      DataNDC data;
-
-      data.push_back(N1);
-      CHECK_EQUAL(size_t(1), data.size());
-      CHECK(std::equal(compare_data.begin(), compare_data.end() - 4, data.begin()));
-
-      data.push_back(N2);
-      CHECK_EQUAL(size_t(2), data.size());
-      CHECK(std::equal(compare_data.begin(), compare_data.end() - 3, data.begin()));
-
-      data.push_back(N3);
-      CHECK_EQUAL(size_t(3), data.size());
-      CHECK(std::equal(compare_data.begin(), compare_data.end() - 2, data.begin()));
-
-      data.push_back(N4);
-      CHECK_EQUAL(size_t(4), data.size());
-      CHECK(std::equal(compare_data.begin(), compare_data.end() - 1, data.begin()));
-
-      data.push_back(N5);
-      CHECK_EQUAL(size_t(5), data.size());
-      CHECK(std::equal(compare_data.begin(), compare_data.end(), data.begin()));
-    }
-
-    //*************************************************************************
-    TEST(test_emplace_back)
-    {
+   SECTION("range constructor")
+   {
+      auto values = std::initializer_list<counted_type>{0, 1, 2, 3};
       counted_type::reset_counts();
-      auto deque = sstl::deque<counted_type, 5>{};
-      CHECK(counted_type::check().constructions(0).destructions(0));
-
-      counted_type::reset_counts();
-      deque.emplace_back(3);
-      CHECK(deque.back().member == 3);
-      CHECK(counted_type::check().constructions(1).destructions(0));
-
-      auto c = counted_type{5};
-      counted_type::reset_counts();
-      deque.emplace_back(std::move(c));
-      CHECK(deque.back().member == 5);
-      CHECK(counted_type::check().move_constructions(1).destructions(0));
-    }
-
-    //*************************************************************************
-    TEST(test_pop_back)
-    {
-      Compare_Data compare_data = { N1, N2, N3, N4, N5 };
-      DataNDC data;
-
-      data.assign(compare_data.begin(), compare_data.end());
-
-      data.pop_back();
-      CHECK_EQUAL(size_t(4), data.size());
-      CHECK(std::equal(compare_data.begin(), compare_data.end() - 1, data.begin()));
-
-      data.pop_back();
-      CHECK_EQUAL(size_t(3), data.size());
-      CHECK(std::equal(compare_data.begin(), compare_data.end() - 2, data.begin()));
-
-      data.pop_back();
-      CHECK_EQUAL(size_t(2), data.size());
-      CHECK(std::equal(compare_data.begin(), compare_data.end() - 3, data.begin()));
-
-      data.pop_back();
-      CHECK_EQUAL(size_t(1), data.size());
-      CHECK(std::equal(compare_data.begin(), compare_data.end() - 4, data.begin()));
-
-      data.pop_back();
-      CHECK_EQUAL(size_t(0), data.size());
-    }
-
-    //*************************************************************************
-    TEST(test_push_front_null)
-    {
-      Compare_DataDC compare_data = { DC("5"), DC("4"), DC("3"), DC("2"), DC("1") };
-      DataDC data;
-
-      data.push_front();
-      data.front() = DC("1");
-      CHECK_EQUAL(size_t(1), data.size());
-
-      data.push_front();
-      data.front() = DC("2");
-      CHECK_EQUAL(size_t(2), data.size());
-
-      data.push_front();
-      data.front() = DC("3");
-      CHECK_EQUAL(size_t(3), data.size());
-
-      data.push_front();
-      data.front() = DC("4");
-      CHECK_EQUAL(size_t(4), data.size());
-
-      data.push_front();
-      data.front() = DC("5");
-      CHECK_EQUAL(size_t(5), data.size());
-
-      CHECK(std::equal(compare_data.begin(), compare_data.end(), data.begin()));
-    }
-
-    //*************************************************************************
-    TEST(test_push_front)
-    {
-      Compare_Data compare_data = { N5, N4, N3, N2, N1 };
-      DataNDC data;
-
-      data.push_front(N1);
-      CHECK_EQUAL(size_t(1), data.size());
-      CHECK(std::equal(compare_data.begin() + 4, compare_data.end(), data.begin()));
-
-      data.push_front(N2);
-      CHECK_EQUAL(size_t(2), data.size());
-      CHECK(std::equal(compare_data.begin() + 3, compare_data.end(), data.begin()));
-
-      data.push_front(N3);
-      CHECK_EQUAL(size_t(3), data.size());
-      CHECK(std::equal(compare_data.begin() + 2, compare_data.end(), data.begin()));
-
-      data.push_front(N4);
-      CHECK_EQUAL(size_t(4), data.size());
-      CHECK(std::equal(compare_data.begin() + 1, compare_data.end(), data.begin()));
-
-      data.push_front(N5);
-      CHECK_EQUAL(size_t(5), data.size());
-      CHECK(std::equal(compare_data.begin(), compare_data.end(), data.begin()));
-    }
-
-    //*************************************************************************
-    TEST(test_push_front_excess)
-    {
-      DataNDC data;
-
-      for (size_t i = 0; i < SIZE; ++i)
+      SECTION("contained values")
       {
-        data.push_front(N1);
+         auto d = deque_counted_type_t(values.begin(), values.end());
+         REQUIRE(are_containers_equal(d, values));
       }
-    }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling")
+      {
+         counted_type::throw_at_nth_copy_construction(3);
+         REQUIRE_THROWS_AS(deque_counted_type_t(values.begin(), values.end()), counted_type::copy_construction::exception);
+         REQUIRE(counted_type::check{}.copy_constructions(2).destructions(2));
+      }
+      #endif
+   }
 
-    //*************************************************************************
-    TEST(test_emplace_front)
-    {
+   SECTION("copy constructor")
+   {
+      SECTION("contained values + number of operations")
+      {
+         SECTION("same capacity")
+         {
+            auto rhs = deque_counted_type_t{0, 1, 2, 3};
+            counted_type::reset_counts();
+            auto lhs = rhs;
+            REQUIRE(lhs == rhs);
+            REQUIRE(counted_type::check().copy_constructions(4));
+         }
+         SECTION("different capacity")
+         {
+            auto rhs = sstl::deque<counted_type, 7>{0, 1, 2, 3};
+            counted_type::reset_counts();
+            auto lhs = sstl::deque<counted_type, 11>{ rhs };
+            REQUIRE(lhs == rhs);
+            REQUIRE(counted_type::check().copy_constructions(4));
+         }
+         SECTION("non-contiguous values")
+         {
+            auto rhs = make_noncontiguous_deque<counted_type>({0, 1, 2, 3});
+            counted_type::reset_counts();
+            auto lhs = deque_counted_type_t{ rhs };
+            REQUIRE(lhs == rhs);
+            REQUIRE(counted_type::check().copy_constructions(4));
+         }
+      }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling")
+      {
+         auto rhs = deque_counted_type_t{0, 1, 2, 3};
+         counted_type::reset_counts();
+         counted_type::throw_at_nth_copy_construction(3);
+         REQUIRE_THROWS_AS(deque_counted_type_t{ rhs }, counted_type::copy_construction::exception);
+      }
+      #endif
+   }
+
+   SECTION("move constructor")
+   {
+      SECTION("contained values + number of operations")
+      {
+         auto expected_lhs = deque_counted_type_t{0, 1, 2, 3};
+         SECTION("same capacity")
+         {
+            auto rhs = deque_counted_type_t{0, 1, 2, 3};
+            counted_type::reset_counts();
+            auto lhs = deque_counted_type_t{ std::move(rhs) };
+            REQUIRE(counted_type::check().move_constructions(4).destructions(4));
+            REQUIRE(lhs == expected_lhs);
+         }
+         SECTION("different capacity")
+         {
+            auto rhs = sstl::deque<counted_type, 7>{0, 1, 2, 3};
+            counted_type::reset_counts();
+            auto lhs = sstl::deque<counted_type, 11>{ std::move(rhs) };
+            REQUIRE(counted_type::check().move_constructions(4).destructions(4));
+            REQUIRE(lhs == expected_lhs);
+         }
+         SECTION("non-contiguous values")
+         {
+            auto rhs = make_noncontiguous_deque<counted_type>({0, 1, 2, 3});
+            counted_type::reset_counts();
+            auto lhs = deque_counted_type_t{ std::move(rhs) };
+            REQUIRE(counted_type::check().move_constructions(4).destructions(4));
+            REQUIRE(lhs == expected_lhs);
+         }
+      }
+      SECTION("moved-from state")
+      {
+         auto rhs = deque_counted_type_t{0, 1, 2, 3};
+         auto lhs = deque_counted_type_t{ std::move(rhs) };
+         REQUIRE(rhs.empty());
+
+         rhs.push_back(10); rhs.push_back(11);
+         REQUIRE(rhs == (deque_counted_type_t{10, 11}));
+      }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling")
+      {
+         auto rhs = deque_counted_type_t{0, 1, 2, 3};
+         counted_type::reset_counts();
+         counted_type::throw_at_nth_move_construction(3);
+         REQUIRE_THROWS_AS(deque_counted_type_t{ std::move(rhs) }, counted_type::move_construction::exception);
+         REQUIRE(counted_type::check{}.move_constructions(2).destructions(4));
+         REQUIRE(rhs == (deque_counted_type_t{2, 3}));
+      }
+      #endif
+   }
+
+   SECTION("initializer-list constructor")
+   {
+      auto init = std::initializer_list<counted_type>{0, 1, 2, 3};
       counted_type::reset_counts();
-      auto deque = sstl::deque<counted_type, 5>{};
-      CHECK(counted_type::check().constructions(0).destructions(0));
+      SECTION("contained values")
+      {
+         auto d = deque_counted_type_t{0, 1, 2, 3};
+         REQUIRE(counted_type::check{}.parameter_constructions(4).copy_constructions(4));
+         REQUIRE(are_containers_equal(d, init));
+      }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling")
+      {
+         counted_type::throw_at_nth_copy_construction(3);
+         REQUIRE_THROWS_AS(deque_counted_type_t{ init }, counted_type::copy_construction::exception);
+         REQUIRE(counted_type::check{}.copy_constructions(2).destructions(2));
+      }
+      #endif
+   }
 
+   SECTION("destructor")
+   {
+      {
+         auto d = deque_counted_type_t{0, 1, 2, 3};
+         counted_type::reset_counts();
+      }
+      REQUIRE(counted_type::check().destructions(4));
+   }
+
+   SECTION("copy assignment operator")
+   {
+      auto rhs = deque_counted_type_t{0, 1, 2, 3, 4};
+      auto expected_lhs = deque_counted_type_t{0, 1, 2, 3, 4};
+
+      SECTION("contained values + number of operations")
+      {
+         SECTION("lhs is empty")
+         {
+            auto lhs = deque_counted_type_t{};
+            counted_type::reset_counts();
+            lhs = rhs;
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(counted_type::check{}.copy_constructions(5));
+         }
+         SECTION("rhs is empty")
+         {
+            auto rhs = deque_counted_type_t{};
+            auto lhs = deque_counted_type_t{0, 1};
+            auto expected_lhs = deque_counted_type_t{};
+            counted_type::reset_counts();
+            lhs = rhs;
+            REQUIRE(lhs.empty());
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(counted_type::check{}.destructions(2));
+         }
+         SECTION("lhs.size() < rhs.size()")
+         {
+            auto lhs = deque_counted_type_t{10, 11};
+            counted_type::reset_counts();
+            lhs = rhs;
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(counted_type::check{}.copy_assignments(2).copy_constructions(3));
+         }
+         SECTION("lhs.size() == rhs.size()")
+         {
+            auto lhs = deque_counted_type_t{10, 11, 12, 13, 14};
+            counted_type::reset_counts();
+            lhs = rhs;
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(counted_type::check{}.copy_assignments(5));
+         }
+         SECTION("lhs.size() > rhs.size()")
+         {
+            auto lhs = deque_counted_type_t{10, 11, 12, 13, 14, 15, 16};
+            counted_type::reset_counts();
+            lhs = rhs;
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(counted_type::check{}.copy_assignments(5).destructions(2));
+         }
+         SECTION("different capacities")
+         {
+            auto rhs = sstl::deque<counted_type, 11>{0, 1, 2, 3};
+            auto expected_lhs = deque_counted_type_t{0, 1, 2, 3};
+            auto lhs = sstl::deque<counted_type, 7>{};
+            counted_type::reset_counts();
+            lhs = rhs;
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(counted_type::check().copy_constructions(4));
+         }
+         SECTION("non-contiguous values")
+         {
+            auto rhs = make_noncontiguous_deque<counted_type>({0, 1, 2, 3});
+            auto expected_lhs = deque_counted_type_t{0, 1, 2, 3};
+            auto lhs = make_noncontiguous_deque<counted_type>({10, 11, 12, 13});
+            counted_type::reset_counts();
+            lhs = rhs;
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(counted_type::check().copy_assignments(4));
+         }
+      }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling")
+      {
+         SECTION("copy assignment throws")
+         {
+            auto lhs = deque_counted_type_t{10, 11, 12};
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_copy_assignment(2);
+            REQUIRE_THROWS_AS(lhs = rhs, counted_type::copy_assignment::exception);
+            REQUIRE(counted_type::check().copy_assignments(1));
+            REQUIRE(lhs == deque_counted_type_t({0, 11, 12}));
+         }
+         SECTION("copy constructor throws")
+         {
+            auto lhs = deque_counted_type_t{10, 11};
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_copy_construction(2);
+            REQUIRE_THROWS_AS(lhs = rhs, counted_type::copy_construction::exception);
+            REQUIRE(counted_type::check().copy_assignments(2).copy_constructions(1));
+            REQUIRE(lhs == (deque_counted_type_t{0, 1, 2}));
+         }
+      }
+      #endif
+   }
+
+   SECTION("move assignment operator")
+   {
+      auto rhs = deque_counted_type_t{0, 1, 2, 3, 4};
+      auto expected_lhs = deque_counted_type_t{0, 1, 2, 3, 4};
+
+      SECTION("contained values + number of operations")
+      {
+         SECTION("lhs is empty")
+         {
+            auto lhs = deque_counted_type_t{};
+            counted_type::reset_counts();
+            lhs = std::move(rhs);
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(rhs.empty());
+            REQUIRE(counted_type::check{}.move_constructions(5).destructions(5));
+         }
+         SECTION("rhs is empty")
+         {
+            auto rhs = deque_counted_type_t{};
+            auto lhs = deque_counted_type_t{0, 1};
+            auto expected_lhs = deque_counted_type_t{};
+            counted_type::reset_counts();
+            lhs = std::move(rhs);
+            REQUIRE(lhs.empty());
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(counted_type::check{}.destructions(2));
+         }
+         SECTION("lhs.size() < rhs.size()")
+         {
+            auto lhs = deque_counted_type_t{10, 11};
+            counted_type::reset_counts();
+            lhs = std::move(rhs);
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(rhs.empty());
+            REQUIRE(counted_type::check{}.move_assignments(2).move_constructions(3).destructions(5));
+         }
+         SECTION("lhs.size() == rhs.size()")
+         {
+            auto lhs = deque_counted_type_t{10, 11, 12, 13, 14};
+            counted_type::reset_counts();
+            lhs = std::move(rhs);
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(rhs.empty());
+            REQUIRE(counted_type::check{}.move_assignments(5).destructions(5));
+         }
+         SECTION("lhs.size() > rhs.size()")
+         {
+            auto lhs = deque_counted_type_t{10, 11, 12, 13, 14, 15, 16};
+            counted_type::reset_counts();
+            lhs = std::move(rhs);
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(rhs.empty());
+            REQUIRE(counted_type::check{}.move_assignments(5).destructions(7));
+         }
+         SECTION("different capacities")
+         {
+            auto rhs = sstl::deque<counted_type, 11>{0, 1, 2, 3};
+            auto expected_lhs = deque_counted_type_t{0, 1, 2, 3};
+            auto lhs = sstl::deque<counted_type, 7>{};
+            counted_type::reset_counts();
+            lhs = std::move(rhs);
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(rhs.empty());
+            REQUIRE(counted_type::check().move_constructions(4).destructions(4));
+         }
+         SECTION("non-contiguous values")
+         {
+            auto rhs = make_noncontiguous_deque<counted_type>({0, 1, 2, 3});
+            auto expected_lhs = deque_counted_type_t{0, 1, 2, 3};
+            auto lhs = deque_counted_type_t{};
+            counted_type::reset_counts();
+            lhs = std::move(rhs);
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(rhs.empty());
+            REQUIRE(counted_type::check().move_constructions(4).destructions(4));
+         }
+      }
+      SECTION("moved-from state")
+      {
+         auto rhs = deque_counted_type_t{0, 1, 2, 3};
+         auto lhs = deque_counted_type_t{ };
+         lhs = std::move(rhs);
+         REQUIRE(rhs.empty());
+
+         rhs.push_back(10); rhs.push_back(11);
+         REQUIRE(rhs == (deque_counted_type_t{10, 11}));
+      }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling")
+      {
+         SECTION("move assignment throws")
+         {
+            auto lhs = deque_counted_type_t{10, 11, 12};
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_move_assignment(2);
+            REQUIRE_THROWS_AS(lhs = std::move(rhs), counted_type::move_assignment::exception);
+            REQUIRE(counted_type::check().move_assignments(1).destructions(1));
+            REQUIRE(lhs == (deque_counted_type_t{0, 11, 12}));
+            REQUIRE(rhs == (deque_counted_type_t{1, 2, 3, 4}));
+         }
+         SECTION("move constructor throws")
+         {
+            auto lhs = deque_counted_type_t{10, 11};
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_move_construction(2);
+            REQUIRE_THROWS_AS(lhs = std::move(rhs), counted_type::move_construction::exception);
+            REQUIRE(counted_type::check().move_assignments(2).move_constructions(1).destructions(3));
+            REQUIRE(lhs == (deque_counted_type_t{0, 1, 2}));
+            REQUIRE(rhs == (deque_counted_type_t{3, 4}));
+         }
+      }
+      #endif
+   }
+
+   SECTION("initializer list assignment operator")
+   {
+      auto rhs = std::initializer_list<counted_type>{0, 1, 2, 3, 4};
+      auto expected_lhs = deque_counted_type_t{0, 1, 2, 3, 4};
+
+      SECTION("contained values + number of operations")
+      {
+         SECTION("lhs is empty")
+         {
+            auto lhs = deque_counted_type_t{};
+            counted_type::reset_counts();
+            lhs = rhs;
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(counted_type::check{}.copy_constructions(5));
+         }
+         SECTION("rhs is empty")
+         {
+            auto rhs = deque_counted_type_t{};
+            auto lhs = deque_counted_type_t{0, 1};
+            auto expected_lhs = deque_counted_type_t{};
+            counted_type::reset_counts();
+            lhs = rhs;
+            REQUIRE(lhs.empty());
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(counted_type::check{}.destructions(2));
+         }
+         SECTION("lhs.size() < rhs.size()")
+         {
+            auto lhs = deque_counted_type_t{10, 11};
+            counted_type::reset_counts();
+            lhs = rhs;
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(counted_type::check{}.copy_assignments(2).copy_constructions(3));
+         }
+         SECTION("lhs.size() == rhs.size()")
+         {
+            auto lhs = deque_counted_type_t{10, 11, 12, 13, 14};
+            counted_type::reset_counts();
+            lhs = rhs;
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(counted_type::check{}.copy_assignments(5));
+         }
+         SECTION("lhs.size() > rhs.size()")
+         {
+            auto lhs = deque_counted_type_t{10, 11, 12, 13, 14, 15, 16};
+            counted_type::reset_counts();
+            lhs = rhs;
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(counted_type::check{}.copy_assignments(5).destructions(2));
+         }
+         SECTION("non-contiguous values")
+         {
+            auto lhs = make_noncontiguous_deque<counted_type>({10, 11, 12, 13});
+            counted_type::reset_counts();
+            lhs = rhs;
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(counted_type::check().copy_assignments(4).copy_constructions(1));
+         }
+      }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling")
+      {
+         SECTION("copy assignment throws")
+         {
+            auto lhs = deque_counted_type_t{10, 11, 12};
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_copy_assignment(2);
+            REQUIRE_THROWS_AS(lhs = rhs, counted_type::copy_assignment::exception);
+            REQUIRE(counted_type::check().copy_assignments(1));
+            REQUIRE(lhs == (deque_counted_type_t{0, 11, 12}));
+         }
+         SECTION("copy constructor throws")
+         {
+            auto lhs = deque_counted_type_t{10, 11};
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_copy_construction(2);
+            REQUIRE_THROWS_AS(lhs = rhs, counted_type::copy_construction::exception);
+            REQUIRE(counted_type::check().copy_assignments(2).copy_constructions(1));
+            REQUIRE(lhs == (deque_counted_type_t{0, 1, 2}));
+         }
+      }
+      #endif
+   }
+
+   SECTION("count assign")
+   {
+      auto count = deque_counted_type_t::size_type{ 5 };
+      auto value = counted_type{ 3 };
+      auto expected_lhs = deque_counted_type_t{3, 3, 3, 3, 3};
+
+      SECTION("contained values + number of operations")
+      {
+         SECTION("lhs is empty")
+         {
+            auto lhs = deque_counted_type_t{};
+            counted_type::reset_counts();
+            lhs.assign(count, value);
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(counted_type::check{}.copy_constructions(5));
+         }
+         SECTION("count == 0")
+         {
+            auto lhs = deque_counted_type_t{0, 1};
+            auto expected_lhs = deque_counted_type_t{};
+            counted_type::reset_counts();
+            lhs.assign(0, value);
+            REQUIRE(lhs.empty());
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(counted_type::check{}.destructions(2));
+         }
+         SECTION("lhs.size() < count")
+         {
+            auto lhs = deque_counted_type_t{10, 11};
+            counted_type::reset_counts();
+            lhs.assign(count, value);
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(counted_type::check{}.copy_assignments(2).copy_constructions(3));
+         }
+         SECTION("lhs.size() == count")
+         {
+            auto lhs = deque_counted_type_t{10, 11, 12, 13, 14};
+            counted_type::reset_counts();
+            lhs.assign(count, value);
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(counted_type::check{}.copy_assignments(5));
+         }
+         SECTION("lhs.size() > count")
+         {
+            auto lhs = deque_counted_type_t{10, 11, 12, 13, 14, 15, 16};
+            counted_type::reset_counts();
+            lhs.assign(count, value);
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(counted_type::check{}.copy_assignments(5).destructions(2));
+         }
+         SECTION("non-contiguous values")
+         {
+            auto lhs = make_noncontiguous_deque<counted_type>({10, 11, 12, 13});
+            counted_type::reset_counts();
+            lhs.assign(count, value);
+            REQUIRE(lhs == expected_lhs);
+            REQUIRE(counted_type::check().copy_assignments(4).copy_constructions(1));
+         }
+      }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling")
+      {
+         SECTION("copy assignment throws")
+         {
+            auto lhs = deque_counted_type_t{10, 11, 12};
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_copy_assignment(2);
+            REQUIRE_THROWS_AS(lhs.assign(count, value), counted_type::copy_assignment::exception);
+            REQUIRE(counted_type::check().copy_assignments(1));
+            REQUIRE(lhs == (deque_counted_type_t{value, 11, 12}));
+         }
+         SECTION("copy constructor throws")
+         {
+            auto lhs = deque_counted_type_t{10, 11};
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_copy_construction(2);
+            REQUIRE_THROWS_AS(lhs.assign(count, value), counted_type::copy_construction::exception);
+            REQUIRE(counted_type::check().copy_assignments(2).copy_constructions(1));
+            REQUIRE(lhs == (deque_counted_type_t{value, value, value}));
+         }
+      }
+      #endif
+   }
+
+   SECTION("at")
+   {
+      auto d = deque_counted_type_t{0, 1, 2, 3, 4};
+      SECTION("read access")
+      {
+         const auto& cd = d;
+         REQUIRE(d.at(0) == 0);
+         REQUIRE(d.at(2) == 2);
+         REQUIRE(d.at(4) == 4);
+      }
+      SECTION("write access")
+      {
+         d.at(0) = 10;
+         d.at(2) = 12;
+         d.at(4) = 14;
+         REQUIRE(d.at(0) == 10);
+         REQUIRE(d.at(2) == 12);
+         REQUIRE(d.at(4) == 14);
+      }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling")
+      {
+         REQUIRE_THROWS_AS(d.at(5), std::out_of_range);
+      }
+      #endif
+   }
+
+   SECTION("operator[]")
+   {
+      auto d = deque_counted_type_t{0, 1, 2, 3, 4};
+      SECTION("read access")
+      {
+         const auto& cd = d;
+         REQUIRE(d[0]==0);
+         REQUIRE(d[2]==2);
+         REQUIRE(d[4]==4);
+      }
+      SECTION("write")
+      {
+         d[0] = 10;
+         d[2] = 12;
+         d[4] = 14;
+         REQUIRE(d == (deque_counted_type_t{10, 1, 12, 3, 14}));
+      }
+   }
+
+   SECTION("front")
+   {
+      auto d = deque_counted_type_t{0, 1, 2};
+      SECTION("read access")
+      {
+         const auto& cd = d;
+         REQUIRE(cd.front() == 0);
+      }
+      SECTION("write access")
+      {
+         d.front() = 10;
+         REQUIRE(d.front() == 10);
+         REQUIRE(d == (deque_counted_type_t{10, 1, 2}));
+      }
+   }
+
+   SECTION("back")
+   {
+      auto d = deque_counted_type_t{0, 1, 2};
+      SECTION("read access")
+      {
+         const auto& cd = d;
+         REQUIRE(cd.back() == 2);
+      }
+      SECTION("write access")
+      {
+         d.back() = 12;
+         REQUIRE(d.back() == 12);
+         REQUIRE(d == (deque_counted_type_t{0, 1, 12}));
+      }
+   }
+
+   SECTION("iterators")
+   {
+      SECTION("zero elements")
+      {
+         auto d = deque_counted_type_t{};
+         const auto& cd = d;
+
+         REQUIRE(d.begin() == d.end());
+         REQUIRE(cd.cbegin() == cd.cend());
+         REQUIRE(d.rbegin() == d.rend());
+         REQUIRE(cd.crbegin() == cd.crend());
+      }
+      SECTION("one elements")
+      {
+         auto d = deque_counted_type_t{1};
+         const auto& cd = d;
+
+         REQUIRE(std::distance(d.begin(), d.end()) == 1);
+         REQUIRE(std::distance(cd.cbegin(), cd.cend()) == 1);
+         REQUIRE(std::distance(d.rbegin(), d.rend()) == 1);
+         REQUIRE(std::distance(cd.crbegin(), cd.crend()) == 1);
+
+         REQUIRE(*d.begin() == 1);
+         REQUIRE(*cd.cbegin() == 1);
+         REQUIRE(*d.rbegin() == 1);
+         REQUIRE(*cd.crbegin() == 1);
+      }
+      SECTION("many elements")
+      {
+         auto l = std::initializer_list<counted_type>{1, 2, 3, 4, 5};
+         auto lbegin = l.begin();
+         auto lend = l.end();
+         auto lrbegin = std::reverse_iterator<decltype(lend)>{ lend };
+         auto lrend = std::reverse_iterator<decltype(lbegin)>{ lbegin };
+
+         auto d = deque_counted_type_t{ l };
+         const auto& cd = d;
+
+         REQUIRE(std::distance(d.begin(), d.end()) == 5);
+         REQUIRE(std::distance(cd.cbegin(), cd.cend()) == 5);
+         REQUIRE(std::distance(d.rbegin(), d.rend()) == 5);
+         REQUIRE(std::distance(cd.crbegin(), cd.crend()) == 5);
+
+         REQUIRE(std::equal(lbegin, lend, d.begin()));
+         REQUIRE(std::equal(lbegin, lend, cd.cbegin()));
+         REQUIRE(std::equal(lrbegin, lrend, d.rbegin()));
+         REQUIRE(std::equal(lrbegin, lrend, cd.crbegin()));
+      }
+   }
+
+   SECTION("empty")
+   {
+      auto d = deque_counted_type_t{};
+      REQUIRE(d.empty());
+      d.push_back(0);
+      REQUIRE(!d.empty());
+      d.clear();
+      REQUIRE(d.empty());
+   }
+
+   SECTION("full")
+   {
+      auto d = sstl::deque<counted_type, 3>{0, 1, 2};
+      REQUIRE(d.full());
+      d.pop_back();
+      REQUIRE(!d.full());
+      d.push_back(0);
+      REQUIRE(d.full());
+   }
+
+   SECTION("size")
+   {
+      auto d = deque_counted_type_t{};
+      REQUIRE(d.size() == 0);
+      d.push_back(0);
+      REQUIRE(d.size() == 1);
+      d.clear();
+      REQUIRE(d.size() == 0);
+   }
+
+   SECTION("max_size")
+   {
+      {
+         auto d = sstl::deque<counted_type, 1>{};
+         REQUIRE(d.max_size() == 1);
+      }
+      {
+         auto d = sstl::deque<counted_type, 11>{};
+         REQUIRE(d.max_size() == 11);
+      }
+   }
+
+   SECTION("clear")
+   {
+      SECTION("contiguous values")
+      {
+         auto d = deque_counted_type_t{0, 1, 2, 3};
+         counted_type::reset_counts();
+         d.clear();
+         REQUIRE(counted_type::check().destructions(4));
+         REQUIRE(d.empty());
+      }
+      SECTION("non-contiguous values")
+      {
+         auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3});
+         counted_type::reset_counts();
+         d.clear();
+         REQUIRE(counted_type::check().destructions(4));
+         REQUIRE(d.empty());
+      }
+   }
+
+   SECTION("insert (lvalue reference + rvalue reference) + emplace")
+   {
+      auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+      auto value = counted_type{ 10 };
       counted_type::reset_counts();
-      deque.emplace_front(3);
-      CHECK(deque.front().member == 3);
-      CHECK(counted_type::check().constructions(1).destructions(0));
+      SECTION("begin")
+      {
+         SECTION("lvalue reference")
+         {
+            deque_counted_type_t::iterator it = d.insert(d.cbegin(), value);
+            REQUIRE(counted_type::check().copy_constructions(1));
+            REQUIRE(it == d.begin());
+            REQUIRE(d == (deque_counted_type_t{10, 0, 1, 2, 3, 4}));         
+         }
+         SECTION("rvalue reference")
+         {
+            deque_counted_type_t::iterator it = d.insert(d.cbegin(), std::move(value));
+            REQUIRE(counted_type::check().move_constructions(1));
+            REQUIRE(it == d.begin());
+            REQUIRE(d == (deque_counted_type_t{10, 0, 1, 2, 3, 4}));
+         }
+         SECTION("emplace")
+         {
+            deque_counted_type_t::iterator it = d.emplace(d.cbegin(), 10);
+            REQUIRE(counted_type::check().parameter_constructions(1).move_constructions(1));
+            REQUIRE(it == d.begin());
+            REQUIRE(d == (deque_counted_type_t{10, 0, 1, 2, 3, 4}));
+         }
+      }
+      SECTION("begin+1")
+      {
+         SECTION("lvalue reference")
+         {
+            deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, value);
+            REQUIRE(counted_type::check().move_constructions(1).copy_assignments(1));
+            REQUIRE(it == d.begin()+1);
+            REQUIRE(d == (deque_counted_type_t{0, 10, 1, 2, 3, 4}));
+         }
+         SECTION("rvalue reference")
+         {
+            deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, std::move(value));
+            REQUIRE(counted_type::check().move_constructions(1).move_assignments(1));
+            REQUIRE(it == d.begin()+1);
+            REQUIRE(d == (deque_counted_type_t{0, 10, 1, 2, 3, 4}));
+         }
+         SECTION("emplace")
+         {
+            deque_counted_type_t::iterator it = d.emplace(d.cbegin()+1, 10);
+            REQUIRE(counted_type::check().parameter_constructions(1).move_constructions(1).move_assignments(1));
+            REQUIRE(it == d.begin()+1);
+            REQUIRE(d == (deque_counted_type_t{0, 10, 1, 2, 3, 4}));
+         }
+      }
+      SECTION("begin+2")
+      {
+         SECTION("lvalue reference")
+         {
+            deque_counted_type_t::iterator it = d.insert(d.cbegin()+2, value);
+            REQUIRE(counted_type::check().move_constructions(1).move_assignments(1).copy_assignments(1));
+            REQUIRE(it == d.begin()+2);
+            REQUIRE(d == (deque_counted_type_t{0, 1, 10, 2, 3, 4}));
+         }
+         SECTION("rvalue reference")
+         {
+            deque_counted_type_t::iterator it = d.insert(d.cbegin()+2, std::move(value));
+            REQUIRE(counted_type::check().move_constructions(1).move_assignments(2));
+            REQUIRE(it == d.begin()+2);
+            REQUIRE(d == (deque_counted_type_t{0, 1, 10, 2, 3, 4}));
+         }
+         SECTION("emplace")
+         {
+            deque_counted_type_t::iterator it = d.emplace(d.cbegin()+2, 10);
+            REQUIRE(counted_type::check().parameter_constructions(1).move_constructions(1).move_assignments(2));
+            REQUIRE(it == d.begin()+2);
+            REQUIRE(d == (deque_counted_type_t{0, 1, 10, 2, 3, 4}));
+         }
+      }
+      SECTION("end")
+      {
+         SECTION("lvalue reference")
+         {
+            deque_counted_type_t::iterator it = d.insert(d.cend(), value);
+            REQUIRE(counted_type::check().copy_constructions(1));
+            REQUIRE(it == d.end()-1);
+            REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4, 10}));
+         }
+         SECTION("rvalue reference")
+         {
+            deque_counted_type_t::iterator it = d.insert(d.cend(), std::move(value));
+            REQUIRE(counted_type::check().move_constructions(1));
+            REQUIRE(it == d.end()-1);
+            REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4, 10}));
+         }
+         SECTION("emplace")
+         {
+            deque_counted_type_t::iterator it = d.emplace(d.cend(), 10);
+            REQUIRE(counted_type::check().parameter_constructions(1).move_constructions(1));
+            REQUIRE(it == d.end()-1);
+            REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4, 10}));
+         }
+      }
+      SECTION("end-1")
+      {
+         SECTION("lvalue_reference")
+         {
+            deque_counted_type_t::iterator it = d.insert(d.cend()-1, value);
+            REQUIRE(counted_type::check().move_constructions(1).copy_assignments(1));
+            REQUIRE(it == d.end()-2);
+            REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 10, 4}));
+         }
+         SECTION("rvalue reference")
+         {
+            deque_counted_type_t::iterator it = d.insert(d.cend()-1, std::move(value));
+            REQUIRE(counted_type::check().move_constructions(1).move_assignments(1));
+            REQUIRE(it == d.end()-2);
+            REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 10, 4}));
+         }
+         SECTION("emplace")
+         {
+            deque_counted_type_t::iterator it = d.emplace(d.cend()-1, 10);
+            REQUIRE(counted_type::check().parameter_constructions(1).move_constructions(1).move_assignments(1));
+            REQUIRE(it == d.end()-2);
+            REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 10, 4}));
+         }
+      }
+      SECTION("end-2")
+      {
+         SECTION("lvalue reference")
+         {
+            deque_counted_type_t::iterator it = d.insert(d.cend()-2, value);
+            REQUIRE(counted_type::check().move_constructions(1).move_assignments(1).copy_assignments(1));
+            REQUIRE(it == d.end()-3);
+            REQUIRE(d == (deque_counted_type_t{0, 1, 2, 10, 3, 4}));
+         }
+         SECTION("rvalue reference")
+         {
+            deque_counted_type_t::iterator it = d.insert(d.cend()-2, std::move(value));
+            REQUIRE(counted_type::check().move_constructions(1).move_assignments(2));
+            REQUIRE(it == d.end()-3);
+            REQUIRE(d == (deque_counted_type_t{0, 1, 2, 10, 3, 4}));
+         }
+         SECTION("emplace")
+         {
+            deque_counted_type_t::iterator it = d.emplace(d.cend()-2, 10);
+            REQUIRE(counted_type::check().parameter_constructions(1).move_constructions(1).move_assignments(2));
+            REQUIRE(it == d.end()-3);
+            REQUIRE(d == (deque_counted_type_t{0, 1, 2, 10, 3, 4}));
+         }
+      }
+      #if _sstl_has_exceptions()
+      //note only the lvalue-reference version is tested here, because the rvalue-version
+      //and emplace share the same exception handling code
+      SECTION("exception handling")
+      {
+         SECTION("construction of new element throws")
+         {
+            SECTION("begin")
+            {
+               counted_type::throw_at_nth_copy_construction(1);
+               REQUIRE_THROWS_AS(d.insert(d.begin(), value), counted_type::copy_construction::exception);
+               REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
+            }
+            SECTION("end")
+            {
+               counted_type::throw_at_nth_copy_construction(1);
+               REQUIRE_THROWS_AS(d.insert(d.end(), value), counted_type::copy_construction::exception);
+               REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
+            }
+         }
+         SECTION("assignment of new element throws")
+         {
+            counted_type::throw_at_nth_copy_assignment(1);
+            REQUIRE_THROWS_AS(d.insert(d.end()-2, value), counted_type::copy_assignment::exception);
+            REQUIRE(counted_type::check{}.move_constructions(1).move_assignments(1).copy_assignments(0).destructions(0));
+            REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 3, 4}));
+         }
+         SECTION("move construction throws (during internal shift)")
+         {
+            SECTION("begin region")
+            {
+               counted_type::throw_at_nth_move_construction(1);
+               REQUIRE_THROWS_AS(d.insert(d.begin()+1, value), counted_type::move_construction::exception);
+               REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
+            }
+            SECTION("end region")
+            {
+               counted_type::throw_at_nth_move_construction(1);
+               REQUIRE_THROWS_AS(d.insert(d.end()-1, value), counted_type::move_construction::exception);
+               REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
+            }
+         }
+         SECTION("move assignment throws (during internal shift)")
+         {
+            SECTION("end region")
+            {
+               counted_type::throw_at_nth_move_assignment(1);
+               REQUIRE_THROWS_AS(d.insert(d.end()-2, value), counted_type::move_assignment::exception);
+               REQUIRE(counted_type::check{}.move_constructions(1).move_assignments(0).destructions(0));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4, 4}));
+            }
+            SECTION("begin region")
+            {
+               auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4, 5});
+               counted_type::reset_counts();
+               counted_type::throw_at_nth_move_assignment(1);
+               REQUIRE_THROWS_AS(d.insert(d.begin()+2, value), counted_type::move_assignment::exception);
+               REQUIRE(counted_type::check{}.move_constructions(1).move_assignments(0).destructions(0));
+               REQUIRE(d == (deque_counted_type_t{0, 0, 1, 2, 3, 4, 5}));
+            }
+         }
+      }
+      #endif
+   }
 
-      auto c = counted_type{5};
+   SECTION("insert (count + range versions)")
+   {
+      SECTION("begin")
+      {
+         SECTION("number of new elements=0")
+         {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
+            auto values = std::initializer_list<counted_type>{};
+            counted_type::reset_counts();
+            SECTION("count")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cbegin(), 0, value);
+               REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+               REQUIRE(it == d.begin());
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
+            }
+            SECTION("range (input iterator)")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cbegin(), counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.begin());
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
+            }
+            SECTION("range (forward iterator)")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cbegin(), values.begin(), values.end());
+               REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+               REQUIRE(it == d.begin());
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
+            }
+         }
+         SECTION("number of new elements=1")
+         {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
+            auto values = std::initializer_list<counted_type>{ 10 };
+            counted_type::reset_counts();
+            SECTION("count")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cbegin(), 1, value);
+               REQUIRE(counted_type::check{}.copy_constructions(1));
+               REQUIRE(it == d.begin());
+               REQUIRE(d == (deque_counted_type_t{10, 0, 1, 2, 3, 4}));
+            }
+            SECTION("range (input iterator)")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cbegin(), counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.begin());
+               REQUIRE(d == (deque_counted_type_t{10, 0, 1, 2, 3, 4}));
+            }
+            SECTION("range (forward iterator)")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cbegin(), values.begin(), values.end());
+               REQUIRE(counted_type::check{}.copy_constructions(1));
+               REQUIRE(it == d.begin());
+               REQUIRE(d == (deque_counted_type_t{10, 0, 1, 2, 3, 4}));
+            }
+         }
+         SECTION("number of new elements=2")
+         {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
+            auto values = std::initializer_list<counted_type>{ 10, 11 };
+            counted_type::reset_counts();
+            SECTION("count")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cbegin(), 2, value);
+               REQUIRE(counted_type::check{}.copy_constructions(2));
+               REQUIRE(it == d.begin());
+               REQUIRE(d == (deque_counted_type_t{10, 10, 0, 1, 2, 3, 4}));
+            }
+            SECTION("range (input iterator)")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cbegin(), counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.begin());
+               REQUIRE(d == (deque_counted_type_t{10, 11, 0, 1, 2, 3, 4}));
+            }
+            SECTION("range (forward iterator)")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cbegin(), values.begin(), values.end());
+               REQUIRE(counted_type::check{}.copy_constructions(2));
+               REQUIRE(it == d.begin());
+               REQUIRE(d == (deque_counted_type_t{10, 11, 0, 1, 2, 3, 4}));
+            }
+         }
+      }
+      SECTION("begin+1")
+      {
+         SECTION("number of new elements=0")
+         {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
+            auto values = std::initializer_list<counted_type>{};
+            counted_type::reset_counts();
+            SECTION("count")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, 0, value);
+               REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+               REQUIRE(it == d.begin()+1);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
+            }
+            SECTION("input iterator")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.begin()+1);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
+            }
+            SECTION("forward iterator")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, values.begin(), values.end());
+               REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+               REQUIRE(it == d.begin()+1);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
+            }
+         }
+         SECTION("number of new elements=1")
+         {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
+            auto values = std::initializer_list<counted_type>{ 10 };
+            counted_type::reset_counts();
+            SECTION("count")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, 1, value);
+               REQUIRE(counted_type::check{}.move_constructions(1).copy_assignments(1));
+               REQUIRE(it == d.begin()+1);
+               REQUIRE(d == (deque_counted_type_t{0, 10, 1, 2, 3, 4}));
+            }
+            SECTION("input iterator")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.begin()+1);
+               REQUIRE(d == (deque_counted_type_t{0, 10, 1, 2, 3, 4}));
+            }
+            SECTION("forward iterator")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, values.begin(), values.end());
+               REQUIRE(counted_type::check{}.move_constructions(1).copy_assignments(1));
+               REQUIRE(it == d.begin()+1);
+               REQUIRE(d == (deque_counted_type_t{0, 10, 1, 2, 3, 4}));
+            }
+         }
+         SECTION("number of new elements=2")
+         {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
+            auto values = std::initializer_list<counted_type>{ 10, 11 };
+            counted_type::reset_counts();
+            SECTION("count")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, 2, value);
+               REQUIRE(counted_type::check{}.move_constructions(1).copy_constructions(1).copy_assignments(1));
+               REQUIRE(it == d.begin()+1);
+               REQUIRE(d == (deque_counted_type_t{0, 10, 10, 1, 2, 3, 4}));
+            }
+            SECTION("input iterator")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.begin()+1);
+               REQUIRE(d == (deque_counted_type_t{0, 10, 11, 1, 2, 3, 4}));
+            }
+            SECTION("forward iterator")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, values.begin(), values.end());
+               REQUIRE(counted_type::check{}.move_constructions(1).copy_constructions(1).copy_assignments(1));
+               REQUIRE(it == d.begin()+1);
+               REQUIRE(d == (deque_counted_type_t{0, 10, 11, 1, 2, 3, 4}));            
+            }
+         }
+         SECTION("number of new elements=3")
+         {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
+            auto values = std::initializer_list<counted_type>{ 10, 11, 12 };
+            counted_type::reset_counts();
+            SECTION("count")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, 3, value);
+               REQUIRE(counted_type::check{}.move_constructions(1).copy_constructions(2).copy_assignments(1));
+               REQUIRE(it == d.begin()+1);
+               REQUIRE(d == (deque_counted_type_t{0, 10, 10, 10, 1, 2, 3, 4}));
+            }
+            SECTION("input iterator")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.begin()+1);
+               REQUIRE(d == (deque_counted_type_t{0, 10, 11, 12, 1, 2, 3, 4}));
+            }
+            SECTION("forward iterator")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cbegin()+1, values.begin(), values.end());
+               REQUIRE(counted_type::check{}.move_constructions(1).copy_constructions(2).copy_assignments(1));
+               REQUIRE(it == d.begin()+1);
+               REQUIRE(d == (deque_counted_type_t{0, 10, 11, 12, 1, 2, 3, 4}));
+            }
+         }
+      }
+      SECTION("begin+2")
+      {
+         SECTION("number of new elements=0")
+         {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
+            auto values = std::initializer_list<counted_type>{};
+            counted_type::reset_counts();
+            SECTION("count")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cbegin()+2, 0, value);
+               REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+               REQUIRE(it == d.begin()+2);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
+            }
+            SECTION("input iterator")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cbegin()+2, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.begin()+2);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
+            }
+            SECTION("forward iterator")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cbegin()+2, values.begin(), values.end());
+               REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+               REQUIRE(it == d.begin()+2);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
+            }
+         }
+         SECTION("number of new elements=1")
+         {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
+            auto values = std::initializer_list<counted_type>{ 10 };
+            counted_type::reset_counts();
+            SECTION("count")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cbegin()+2, 1, value);
+               REQUIRE(counted_type::check{}.move_constructions(1).move_assignments(1).copy_assignments(1));
+               REQUIRE(it == d.begin()+2);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 10, 2, 3, 4}));
+            }
+            SECTION("input iterator")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cbegin()+2, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.begin()+2);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 10, 2, 3, 4}));
+            }
+            SECTION("forward iterator")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cbegin()+2, values.begin(), values.end());
+               REQUIRE(counted_type::check{}.move_constructions(1).move_assignments(1).copy_assignments(1));
+               REQUIRE(it == d.begin()+2);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 10, 2, 3, 4}));
+            }
+         }
+         SECTION("number of new elements=2")
+         {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
+            auto values = std::initializer_list<counted_type>{ 10, 11 };
+            counted_type::reset_counts();
+            SECTION("count")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cbegin()+2, 2, value);
+               REQUIRE(counted_type::check{}.move_constructions(2).copy_assignments(2));
+               REQUIRE(it == d.begin()+2);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 10, 10, 2, 3, 4}));
+            }
+            SECTION("input iterator")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cbegin()+2, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.begin()+2);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 10, 11, 2, 3, 4}));
+            }
+            SECTION("forward iterator")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cbegin()+2, values.begin(), values.end());
+               REQUIRE(counted_type::check{}.move_constructions(2).copy_assignments(2));
+               REQUIRE(it == d.begin()+2);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 10, 11, 2, 3, 4}));            
+            }
+         }
+         SECTION("number of new elements=3")
+         {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
+            auto values = std::initializer_list<counted_type>{ 10, 11, 12 };
+            counted_type::reset_counts();
+            SECTION("count")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cbegin()+2, 3, value);
+               REQUIRE(counted_type::check{}.move_constructions(2).copy_constructions(1).copy_assignments(2));
+               REQUIRE(it == d.begin()+2);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 10, 10, 10, 2, 3, 4}));
+            }
+            SECTION("input iterator")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cbegin()+2, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.begin()+2);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 10, 11, 12, 2, 3, 4}));
+            }
+            SECTION("forward iterator")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cbegin()+2, values.begin(), values.end());
+               REQUIRE(counted_type::check{}.move_constructions(2).copy_constructions(1).copy_assignments(2));
+               REQUIRE(it == d.begin()+2);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 10, 11, 12, 2, 3, 4}));
+            }
+         }
+      }
+      SECTION("end")
+      {
+         SECTION("number of new elements=0")
+         {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
+            auto values = std::initializer_list<counted_type>{};
+            counted_type::reset_counts();
+            SECTION("count")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.end(), 0, value);
+               REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+               REQUIRE(it == d.end());
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
+            }
+            SECTION("input iterator")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cend(), counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.end());
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
+            }
+            SECTION("forward iterator")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.end(), values.begin(), values.end());
+               REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+               REQUIRE(it == d.end());
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
+            }
+         }
+         SECTION("number of new elements=1")
+         {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
+            auto values = std::initializer_list<counted_type>{ 10 };
+            counted_type::reset_counts();
+            SECTION("count")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.end(), 1, value);
+               REQUIRE(counted_type::check{}.copy_constructions(1));
+               REQUIRE(it == d.end()-1);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4, 10}));
+            }
+            SECTION("input iterator")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cend(), counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.end()-1);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4, 10}));
+            }
+            SECTION("forward iterator")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.end(), values.begin(), values.end());
+               REQUIRE(counted_type::check{}.copy_constructions(1));
+               REQUIRE(it == d.end()-1);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4, 10}));
+            }
+         }
+         SECTION("number of new elements=2")
+         {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
+            auto values = std::initializer_list<counted_type>{ 10, 11 };
+            counted_type::reset_counts();
+            SECTION("count")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.end(), 2, value);
+               REQUIRE(counted_type::check{}.copy_constructions(2));
+               REQUIRE(it == d.end()-2);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4, 10, 10}));
+            }
+            SECTION("input iterator")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cend(), counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.end()-2);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4, 10, 11}));
+            }
+            SECTION("forward iterator")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.end(), values.begin(), values.end());
+               REQUIRE(counted_type::check{}.copy_constructions(2));
+               REQUIRE(it == d.end()-2);
+               counted_type v2;
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4, 10, 11}));
+            }
+         }
+      }
+      SECTION("end-1")
+      {
+         SECTION("number of new elements=0")
+         {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
+            auto values = std::initializer_list<counted_type>{};
+            counted_type::reset_counts();
+            SECTION("count")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.end()-1, 0, value);
+               REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+               REQUIRE(it == d.end()-1);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
+            }
+            SECTION("range (input iterator)")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cend()-1, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.cend()-1);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
+            }
+            SECTION("range (forward iterator)")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.end()-1, values.begin(), values.end());
+               REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+               REQUIRE(it == d.end()-1);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
+            }
+         }
+         SECTION("number of new elements=1")
+         {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
+            auto values = std::initializer_list<counted_type>{ 10 };
+            counted_type::reset_counts();
+            SECTION("count")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.end()-1, 1, value);
+               REQUIRE(counted_type::check{}.move_constructions(1).copy_assignments(1));
+               REQUIRE(it == d.end()-2);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 10, 4}));
+            }
+            SECTION("range (input iterator)")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cend()-1, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.cend()-2);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 10, 4}));
+            }
+            SECTION("range (forward iterator)")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.end()-1, values.begin(), values.end());
+               REQUIRE(counted_type::check{}.move_constructions(1).copy_assignments(1));
+               REQUIRE(it == d.end()-2);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 10, 4}));
+            }
+         }
+         SECTION("number of new elements=2")
+         {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
+            auto values = std::initializer_list<counted_type>{ 10, 11 };
+            counted_type::reset_counts();
+            SECTION("count")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.end()-1, 2, value);
+               REQUIRE(counted_type::check{}.move_constructions(1).copy_constructions(1).copy_assignments(1));
+               REQUIRE(it == d.end()-3);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 10, 10, 4}));
+            }
+            SECTION("range (input iterator)")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cend()-1, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.cend()-3);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 10, 11, 4}));
+            }
+            SECTION("range (forward iterator)")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.end()-1, values.begin(), values.end());
+               REQUIRE(counted_type::check{}.move_constructions(1).copy_constructions(1).copy_assignments(1));
+               REQUIRE(it == d.end()-3);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 10, 11, 4}));
+            }
+         }
+         SECTION("number of new elements=3")
+         {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
+            auto values = std::initializer_list<counted_type>{ 10, 11, 12 };
+            counted_type::reset_counts();
+            SECTION("count")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.end()-1, 3, value);
+               REQUIRE(counted_type::check{}.move_constructions(1).copy_constructions(2).copy_assignments(1));
+               REQUIRE(it == d.end()-4);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 10, 10, 10, 4}));
+            }
+            SECTION("range (input iterator)")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cend()-1, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.cend()-4);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 10, 11, 12, 4}));
+            }
+            SECTION("range (forward iterator)")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.end()-1, values.begin(), values.end());
+               REQUIRE(counted_type::check{}.move_constructions(1).copy_constructions(2).copy_assignments(1));
+               REQUIRE(it == d.end()-4);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 10, 11, 12, 4}));
+            }
+         }
+      }
+      SECTION("end-2")
+      {
+         SECTION("number of new elements=0")
+         {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
+            auto values = std::initializer_list<counted_type>{};
+            counted_type::reset_counts();
+            SECTION("count")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.end()-2, 0, value);
+               REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+               REQUIRE(it == d.end()-2);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
+            }
+            SECTION("range (input iterator)")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cend()-2, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.cend()-2);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
+            }
+            SECTION("range (forward iterator)")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.end()-2, values.begin(), values.end());
+               REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+               REQUIRE(it == d.end()-2);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
+            }
+         }
+         SECTION("number of new elements=1")
+         {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
+            auto values = std::initializer_list<counted_type>{ 10 };
+            counted_type::reset_counts();
+            SECTION("count")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.end()-2, 1, value);
+               REQUIRE(counted_type::check{}.move_constructions(1).move_assignments(1).copy_assignments(1));
+               REQUIRE(it == d.end()-3);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 10, 3, 4}));
+            }
+            SECTION("range (input iterator)")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cend()-2, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.cend()-3);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 10, 3, 4}));
+            }
+            SECTION("range (forward iterator)")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.end()-2, values.begin(), values.end());
+               REQUIRE(counted_type::check{}.move_constructions(1).move_assignments(1).copy_assignments(1));
+               REQUIRE(it == d.end()-3);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 10, 3, 4}));
+            }
+         }
+         SECTION("number of new elements=2")
+         {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
+            auto values = std::initializer_list<counted_type>{ 10, 11 };
+            counted_type::reset_counts();
+            SECTION("count")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.end()-2, 2, value);
+               REQUIRE(counted_type::check{}.move_constructions(2).copy_assignments(2));
+               REQUIRE(it == d.end()-4);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 10, 10, 3, 4}));
+            }
+            SECTION("range (input iterator)")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cend()-2, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.cend()-4);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 10, 11, 3, 4}));
+            }
+            SECTION("range (forward iterator)")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.end()-2, values.begin(), values.end());
+               REQUIRE(counted_type::check{}.move_constructions(2).copy_assignments(2));
+               REQUIRE(it == d.end()-4);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 10, 11, 3, 4}));
+            }
+         }
+         SECTION("number of new elements=3")
+         {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
+            auto values = std::initializer_list<counted_type>{ 10, 11, 12 };
+            counted_type::reset_counts();
+            SECTION("count")
+            {
+               counted_type::reset_counts();
+               deque_counted_type_t::iterator it = d.insert(d.end()-2, 3, value);
+               REQUIRE(counted_type::check{}.move_constructions(2).copy_constructions(1).copy_assignments(2));
+               REQUIRE(it == d.end()-5);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 10, 10, 10, 3, 4}));
+            }
+            SECTION("range (input iterator)")
+            {
+               deque_counted_type_t::iterator it = d.insert(d.cend()-2, counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+               REQUIRE(it == d.cend()-5);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 10, 11, 12, 3, 4}));
+            }
+            SECTION("range (forward iterator)")
+            {
+               counted_type::reset_counts();
+               deque_counted_type_t::iterator it = d.insert(d.end()-2, values.begin(), values.end());
+               REQUIRE(counted_type::check{}.move_constructions(2).copy_constructions(1).copy_assignments(2));
+               REQUIRE(it == d.end()-5);
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 10, 11, 12, 3, 4}));
+            }
+         }
+      }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling (copy construction throws)")
+      {
+         SECTION("begin region")
+         {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
+            auto values = std::initializer_list<counted_type>{ 10, 11, 12, 13, 14 };
+            counted_type::reset_counts();
+            SECTION("count")
+            {
+               SECTION("copy assignment throws")
+               {
+                  counted_type::throw_at_nth_copy_assignment(2);
+                  REQUIRE_THROWS_AS(d.insert(d.cbegin()+2, 5, value), counted_type::copy_assignment::exception);
+                  REQUIRE(counted_type::check{}.move_constructions(2).copy_constructions(3).copy_assignments(1).destructions(0));
+                  REQUIRE(d == (deque_counted_type_t{0, 1, 10, 10, 10, 10, 1, 2, 3, 4}));
+               }
+               SECTION("copy construction throws")
+               {
+                  counted_type::throw_at_nth_copy_construction(2);
+                  REQUIRE_THROWS_AS(d.insert(d.cbegin()+2, 5, value), counted_type::copy_construction::exception);
+                  REQUIRE(counted_type::check{}.move_constructions(2).copy_constructions(1).destructions(3));
+                  REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
+               }
+            }
+            SECTION("range (input iterator)")
+            {
+               counted_type::throw_at_nth_copy_construction(4);
+               REQUIRE_THROWS_AS(d.insert(d.cbegin()+2, counted_type_stream_iterator{values}, counted_type_stream_iterator{})
+                                 , counted_type::copy_construction::exception);
+               REQUIRE(counted_type::check{}.copy_constructions(3).destructions(0));
+               REQUIRE(d == (deque_counted_type_t{12, 11, 10, 0, 1, 2, 3, 4}));
+            }
+            SECTION("range (forward iterator)")
+            {
+               SECTION("copy assignment throws")
+               {
+                  counted_type::throw_at_nth_copy_assignment(2);
+                  REQUIRE_THROWS_AS(d.insert(d.cbegin()+2, values.begin(), values.end()), counted_type::copy_assignment::exception);
+                  REQUIRE(counted_type::check{}.move_constructions(2).copy_constructions(3).copy_assignments(1).destructions(0));
+                  REQUIRE(d == (deque_counted_type_t{0, 1, 10, 11, 12, 13, 1, 2, 3, 4}));
+               }
+               SECTION("copy construction throws")
+               {
+                  counted_type::throw_at_nth_copy_construction(2);
+                  REQUIRE_THROWS_AS(d.insert(d.cbegin()+2, values.begin(), values.end()), counted_type::copy_construction::exception);
+                  REQUIRE(counted_type::check{}.move_constructions(2).copy_constructions(1).destructions(3));
+                  REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
+               }
+            }
+         }
+         SECTION("end region")
+         {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
+            auto values = std::initializer_list<counted_type>{ 10, 11, 12, 13, 14 };
+            counted_type::reset_counts();
+            SECTION("count")
+            {
+               SECTION("copy assignment throws")
+               {
+                  counted_type::throw_at_nth_copy_assignment(2);
+                  REQUIRE_THROWS_AS(d.insert(d.cend()-2, 5, value), counted_type::copy_assignment::exception);
+                  REQUIRE(counted_type::check{}.move_constructions(2).copy_constructions(3).copy_assignments(1).destructions(0));
+                  REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 10, 10, 10, 10, 3, 4}));
+               }
+               SECTION("copy construction throws")
+               {
+                  counted_type::throw_at_nth_copy_construction(2);
+                  REQUIRE_THROWS_AS(d.insert(d.cend()-2, 5, value), counted_type::copy_construction::exception);
+                  REQUIRE(counted_type::check{}.move_constructions(2).copy_constructions(1).destructions(3));
+                  REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));  
+               }
+            }
+            SECTION("range (input iterator)")
+            {
+               counted_type::throw_at_nth_copy_construction(4);
+               REQUIRE_THROWS_AS(d.insert(d.cend()-2, counted_type_stream_iterator{values}, counted_type_stream_iterator{})
+                                 , counted_type::copy_construction::exception);
+               REQUIRE(counted_type::check{}.copy_constructions(3).destructions(0));
+               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4, 10, 11, 12}));
+            }
+            SECTION("range (forward iterator)")
+            {
+               SECTION("copy assignment throws")
+               {
+                  counted_type::throw_at_nth_copy_assignment(2);
+                  REQUIRE_THROWS_AS(d.insert(d.cend()-2, values.begin(), values.end()), counted_type::copy_assignment::exception);
+                  REQUIRE(counted_type::check{}.move_constructions(2).copy_assignments(1).destructions(2));
+                  REQUIRE(d == (deque_counted_type_t{0, 1, 2, 10, 4}));
+               }
+               SECTION("copy construction throws")
+               {
+                  counted_type::throw_at_nth_copy_construction(2);
+                  REQUIRE_THROWS_AS(d.insert(d.cend()-2, values.begin(), values.end()), counted_type::copy_construction::exception);
+                  REQUIRE(counted_type::check{}.move_constructions(2).copy_assignments(2).copy_constructions(1).destructions(2));
+                  REQUIRE(d == (deque_counted_type_t{0, 1, 2, 10, 11, 12}));
+               }
+            }
+         }
+      }
+      #endif
+   }
+
+   SECTION("erase (position)")
+   {
+      auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4, 5, 6});
       counted_type::reset_counts();
-      deque.emplace_front(std::move(c));
-      CHECK(deque.front().member == 5);
-      CHECK(counted_type::check().move_constructions(1).destructions(0));
-    }
+      SECTION("begin")
+      {
+         deque_counted_type_t::iterator it = d.erase(d.cbegin());
+         REQUIRE(counted_type::check{}.move_assignments(0).destructions(1));
+         REQUIRE(it == d.begin());
+         REQUIRE(d == (deque_counted_type_t{1, 2, 3, 4, 5, 6}));
+      }
+      SECTION("begin+1")
+      {
+         deque_counted_type_t::iterator it = d.erase(d.cbegin()+1);
+         REQUIRE(counted_type::check{}.move_assignments(1).destructions(1));
+         REQUIRE(it == d.begin()+1);
+         REQUIRE(d == (deque_counted_type_t{0, 2, 3, 4, 5, 6}));
+      }
+      SECTION("begin+2")
+      {
+         deque_counted_type_t::iterator it = d.erase(d.cbegin()+2);
+         REQUIRE(counted_type::check{}.move_assignments(2).destructions(1));
+         REQUIRE(it == d.begin()+2);
+         REQUIRE(d == (deque_counted_type_t{0, 1, 3, 4, 5, 6}));
+      }
+      SECTION("end-1")
+      {
+         deque_counted_type_t::iterator it = d.erase(d.cend()-1);
+         REQUIRE(counted_type::check{}.move_assignments(0).destructions(1));
+         REQUIRE(it == d.end());
+         REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4, 5}));
+      }
+      SECTION("end-2")
+      {
+         deque_counted_type_t::iterator it = d.erase(d.cend()-2);
+         REQUIRE(counted_type::check{}.move_assignments(1).destructions(1));
+         REQUIRE(it == d.end()-1);
+         REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4, 6}));
+      }
+      SECTION("end-3")
+      {
+         deque_counted_type_t::iterator it = d.erase(d.cend()-3);
+         REQUIRE(counted_type::check{}.move_assignments(2).destructions(1));
+         REQUIRE(it == d.end()-2);
+         REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 5, 6}));
+      }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling")
+      {
+         SECTION("begin region")
+         {
+            counted_type::throw_at_nth_move_assignment(2);
+            REQUIRE_THROWS_AS(d.erase(d.cbegin()+2), counted_type::move_assignment::exception);
+            REQUIRE(counted_type::check{}.move_assignments(1).destructions(0));
+            REQUIRE(d == (deque_counted_type_t{0, 1, 1, 3, 4, 5, 6}));
+         }
+         SECTION("end region")
+         {
+            counted_type::throw_at_nth_move_assignment(2);
+            REQUIRE_THROWS_AS(d.erase(d.cend()-3), counted_type::move_assignment::exception);
+            REQUIRE(counted_type::check{}.move_assignments(1).destructions(0));
+            REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 5, 5, 6}));
+         }
+      }
+      #endif
+   }
+   
+   SECTION("erase (range)")
+   {
+      auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4, 5, 6});
+      deque_counted_type_t::iterator it;
+      counted_type::reset_counts();
+      SECTION("range size = 0")
+      {
+         it = d.erase(d.cbegin(), d.cbegin());
+         REQUIRE(it == d.begin());
+         
+         it = d.erase(d.cbegin()+1, d.cbegin()+1);
+         REQUIRE(it == d.begin()+1);
+         
+         it = d.erase(d.cbegin()+2, d.cbegin()+2);
+         REQUIRE(it == d.begin()+2);
+         
+         it = d.erase(d.cend()-2, d.cend()-2);
+         REQUIRE(it == d.end()-2);
+         
+         it = d.erase(d.cend()-1, d.cend()-1);
+         REQUIRE(it == d.end()-1);
+         
+         it = d.erase(d.cend(), d.cend());
+         REQUIRE(it == d.end());
+         
+         REQUIRE(counted_type::check{}.move_assignments(0).destructions(0));
+         REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4, 5, 6}));
+      }
+      SECTION("range size = 1")
+      {
+         SECTION("[begin; begin+1[")
+         {
+            it = d.erase(d.cbegin(), d.cbegin()+1);
+            REQUIRE(counted_type::check{}.move_assignments(0).destructions(1));
+            REQUIRE(it == d.begin());
+            REQUIRE(d == (deque_counted_type_t{1, 2, 3, 4, 5, 6}));
+         }
+         SECTION("[begin+1; begin+2[")
+         {
+            it = d.erase(d.cbegin()+1, d.cbegin()+2);
+            REQUIRE(counted_type::check{}.move_assignments(1).destructions(1));
+            REQUIRE(it == d.begin()+1);
+            REQUIRE(d == (deque_counted_type_t{0, 2, 3, 4, 5, 6}));
+         }
+         SECTION("[end-1; end[")
+         {
+            it = d.erase(d.cend()-1, d.cend());
+            REQUIRE(counted_type::check{}.move_assignments(0).destructions(1));
+            REQUIRE(it == d.end());
+            REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4, 5}));
+         }
+         SECTION("[end-2; end-1[")
+         {
+            it = d.erase(d.cend()-2, d.cend()-1);
+            REQUIRE(counted_type::check{}.move_assignments(1).destructions(1));
+            REQUIRE(it == d.end()-1);
+            REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4, 6}));
+         }
+      }
+      SECTION("range size = 2")
+      {
+         SECTION("[begin; begin+2[")
+         {
+            it = d.erase(d.cbegin(), d.cbegin()+2);
+            REQUIRE(counted_type::check{}.move_assignments(0).destructions(2));
+            REQUIRE(it == d.begin());
+            REQUIRE(d == (deque_counted_type_t{2, 3, 4, 5, 6}));
+         }
+         SECTION("[begin+1; begin+3[")
+         {
+            it = d.erase(d.cbegin()+1, d.cbegin()+3);
+            REQUIRE(counted_type::check{}.move_assignments(1).destructions(2));
+            REQUIRE(it == d.begin()+1);
+            REQUIRE(d == (deque_counted_type_t{0, 3, 4, 5, 6}));
+         }
+         SECTION("[end-2; end[")
+         {
+            it = d.erase(d.cend()-2, d.cend());
+            REQUIRE(counted_type::check{}.move_assignments(0).destructions(2));
+            REQUIRE(it == d.end());
+            REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
+         }
+         SECTION("[end-3; end-1[")
+         {
+            it = d.erase(d.cend()-3, d.cend()-1);
+            REQUIRE(counted_type::check{}.move_assignments(1).destructions(2));
+            REQUIRE(it == d.end()-1);
+            REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 6}));
+         }
+      }
+      SECTION("range size = deque size - 1")
+      {
+         SECTION("[begin; end-1[")
+         {
+            it = d.erase(d.cbegin(), d.cend()-1);
+            REQUIRE(counted_type::check{}.move_assignments(0).destructions(6));
+            REQUIRE(it == d.begin());
+            REQUIRE(d == (deque_counted_type_t{6}));
+         }
+         SECTION("]begin+1, end[")
+         {
+            it = d.erase(d.cbegin()+1, d.cend());
+            REQUIRE(counted_type::check{}.move_assignments(0).destructions(6));
+            REQUIRE(it == d.end());
+            REQUIRE(d == (deque_counted_type_t{0}));
+         }
+      }
+      SECTION("range size = deque size")
+      {
+         it = d.erase(d.cbegin(), d.cend());
+         REQUIRE(counted_type::check{}.move_assignments(0).destructions(7));
+         REQUIRE(it == d.end());
+         REQUIRE(d.empty()); 
+      }
+      SECTION("deque size = 0")
+      {
+         auto d = deque_counted_type_t{};
+         counted_type::reset_counts();
+         it = d.erase(d.cbegin(), d.cend());
+         REQUIRE(counted_type::check{}.move_assignments(0).destructions(0));
+         REQUIRE(it == d.end());
+         REQUIRE(d.empty()); 
+      }
+      SECTION("deque size = 1")
+      {
+         auto d = deque_counted_type_t{ 0 };
+         counted_type::reset_counts();
+         it = d.erase(d.cbegin(), d.cend());
+         REQUIRE(counted_type::check{}.move_assignments(0).destructions(1));
+         REQUIRE(it == d.end());
+         REQUIRE(d.empty());
+      }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling")
+      {
+         SECTION("begin region")
+         {
+            counted_type::throw_at_nth_move_assignment(2);
+            REQUIRE_THROWS_AS(d.erase(d.cbegin()+2, d.cbegin()+3), counted_type::move_assignment::exception);
+            REQUIRE(counted_type::check{}.move_assignments(1).destructions(0));
+            REQUIRE(d == (deque_counted_type_t{0, 1, 1, 3, 4, 5, 6}));
+         }
+         SECTION("end region")
+         {
+            counted_type::throw_at_nth_move_assignment(2);
+            REQUIRE_THROWS_AS(d.erase(d.cend()-3, d.cend()-2), counted_type::move_assignment::exception);
+            REQUIRE(counted_type::check{}.move_assignments(1).destructions(0));
+            REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 5, 5, 6}));
+         }
+      }
+      #endif
+   }
+   
+   SECTION("push_back")
+   {
+      auto d = deque_counted_type_t{};
+      auto v0 = counted_type{0};
+      auto v1 = counted_type{1};      
+      SECTION("lvalue version")
+      {
+         counted_type::reset_counts();
+         d.push_back(v0);
+         REQUIRE(counted_type::check{}.copy_constructions(1));
+         REQUIRE(d == (deque_counted_type_t{0}));
+         
+         counted_type::reset_counts();
+         d.push_back(v1);
+         REQUIRE(counted_type::check{}.copy_constructions(1));
+         REQUIRE(d == (deque_counted_type_t{0, 1}));
+      }
+      SECTION("rvalue version")
+      {
+         counted_type::reset_counts();
+         d.push_back(std::move(v0));
+         REQUIRE(counted_type::check{}.move_constructions(1));
+         REQUIRE(d == (deque_counted_type_t{0}));
+         
+         counted_type::reset_counts();
+         d.push_back(std::move(v1));
+         REQUIRE(counted_type::check{}.move_constructions(1));
+         REQUIRE(d == (deque_counted_type_t{0, 1}));
+      }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling")
+      {
+         SECTION("lvalue version")
+         {
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_copy_construction(1);
+            REQUIRE_THROWS_AS(d.push_back(v0), counted_type::copy_construction::exception);
+            REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+            REQUIRE(d == (deque_counted_type_t{}));
+            
+            d.push_back(v0);
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_copy_construction(1);
+            REQUIRE_THROWS_AS(d.push_back(v1), counted_type::copy_construction::exception);
+            REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+            REQUIRE(d == (deque_counted_type_t{0}));
+         }
+         SECTION("rvalue version")
+         {
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_move_construction(1);
+            REQUIRE_THROWS_AS(d.push_back(std::move(v0)), counted_type::move_construction::exception);
+            REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+            REQUIRE(d == (deque_counted_type_t{}));
+            
+            d.push_back(v0);
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_move_construction(1);
+            REQUIRE_THROWS_AS(d.push_back(std::move(v1)), counted_type::move_construction::exception);
+            REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+            REQUIRE(d == (deque_counted_type_t{0}));
+         }
+      }
+      #endif
+   }
+   
+   SECTION("emplace_back")
+   {
+      auto d = deque_counted_type_t{};      
+      SECTION("contained values + number of operations")
+      {
+         counted_type::reset_counts();
+         d.emplace_back(0);
+         REQUIRE(counted_type::check{}.parameter_constructions(1));
+         REQUIRE(d == (deque_counted_type_t{0}));
+         
+         counted_type::reset_counts();
+         d.emplace_back(1);
+         REQUIRE(counted_type::check{}.parameter_constructions(1));
+         REQUIRE(d == (deque_counted_type_t{0, 1}));
+      }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling")
+      {
+         counted_type::reset_counts();
+         counted_type::throw_at_nth_parameter_construction(1);
+         REQUIRE_THROWS_AS(d.emplace_back(0), counted_type::parameter_construction::exception);
+         REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+         REQUIRE(d == (deque_counted_type_t{}));
+         
+         d.emplace_back(0);
+         counted_type::reset_counts();
+         counted_type::throw_at_nth_parameter_construction(1);
+         REQUIRE_THROWS_AS(d.emplace_back(1), counted_type::parameter_construction::exception);
+         REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+         REQUIRE(d == (deque_counted_type_t{0}));
+      }
+      #endif
+   }
+   
+   SECTION("pop_back")
+   {
+      auto d = deque_counted_type_t{0, 1};
+      
+      counted_type::reset_counts();
+      d.pop_back();
+      REQUIRE(counted_type::check{}.destructions(1));
+      REQUIRE(d == (deque_counted_type_t{0}));
+      
+      counted_type::reset_counts();
+      d.pop_back();
+      REQUIRE(counted_type::check{}.destructions(1));
+      REQUIRE(d == (deque_counted_type_t{}));
+      
+      d.emplace_back(10);
+      d.emplace_back(11);
+      REQUIRE(d == (deque_counted_type_t{10, 11}));
+      
+      counted_type::reset_counts();
+      d.pop_back();
+      d.pop_back();
+      REQUIRE(counted_type::check{}.destructions(2));
+      REQUIRE(d == (deque_counted_type_t{}));
+      
+      d.emplace_front(10);
+      d.emplace_front(11);
+      REQUIRE(d == (deque_counted_type_t{11, 10}));
+      
+      counted_type::reset_counts();
+      d.pop_back();
+      d.pop_back();
+      REQUIRE(counted_type::check{}.destructions(2));
+      REQUIRE(d == (deque_counted_type_t{}));
+   }
+   
+   SECTION("push_front")
+   {
+      auto d = deque_counted_type_t{};
+      auto v0 = counted_type{0};
+      auto v1 = counted_type{1};
+      SECTION("lvalue version")
+      {
+         counted_type::reset_counts();
+         d.push_front(v0);
+         REQUIRE(counted_type::check{}.copy_constructions(1));
+         REQUIRE(d == (deque_counted_type_t{0}));
+         
+         counted_type::reset_counts();
+         d.push_front(v1);
+         REQUIRE(counted_type::check{}.copy_constructions(1));
+         REQUIRE(d == (deque_counted_type_t{1, 0}));
+      }
+      SECTION("rvalue version")
+      {
+         counted_type::reset_counts();
+         d.push_front(std::move(v0));
+         REQUIRE(counted_type::check{}.move_constructions(1));
+         REQUIRE(d == (deque_counted_type_t{0}));
+         
+         counted_type::reset_counts();
+         d.push_front(std::move(v1));
+         REQUIRE(counted_type::check{}.move_constructions(1));
+         REQUIRE(d == (deque_counted_type_t{1, 0}));
+      }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling")
+      {
+         SECTION("lvalue version")
+         {
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_copy_construction(1);
+            REQUIRE_THROWS_AS(d.push_front(v0), counted_type::copy_construction::exception);
+            REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+            REQUIRE(d == (deque_counted_type_t{}));
+            
+            d.push_front(v0);
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_copy_construction(1);
+            REQUIRE_THROWS_AS(d.push_front(v1), counted_type::copy_construction::exception);
+            REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+            REQUIRE(d == (deque_counted_type_t{0}));
+         }
+         SECTION("rvalue version")
+         {
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_move_construction(1);
+            REQUIRE_THROWS_AS(d.push_front(std::move(v0)), counted_type::move_construction::exception);
+            REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+            REQUIRE(d == (deque_counted_type_t{}));
+            
+            d.push_front(v0);
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_move_construction(1);
+            REQUIRE_THROWS_AS(d.push_front(std::move(v1)), counted_type::move_construction::exception);
+            REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+            REQUIRE(d == (deque_counted_type_t{0}));
+         }
+      }
+      #endif
+   }
 
-    //*************************************************************************
-    TEST(test_push_front_push_back)
-    {
-      Compare_Data compare_data = { N1, N2, N3, N4, N5};
-      DataNDC data;
+   SECTION("emplace_front")
+   {
+      auto d = deque_counted_type_t{};
+      SECTION("contained values + number of operations")
+      {
+         counted_type::reset_counts();
+         d.emplace_front(0);
+         REQUIRE(counted_type::check{}.parameter_constructions(1));
+         REQUIRE(d == (deque_counted_type_t{0}));
+         
+         counted_type::reset_counts();
+         d.emplace_front(1);
+         REQUIRE(counted_type::check{}.parameter_constructions(1));
+         REQUIRE(d == (deque_counted_type_t{1, 0}));
+      }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling")
+      {
+         counted_type::reset_counts();
+         counted_type::throw_at_nth_parameter_construction(1);
+         REQUIRE_THROWS_AS(d.emplace_front(0), counted_type::parameter_construction::exception);
+         REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+         REQUIRE(d == (deque_counted_type_t{}));
+         
+         d.emplace_front(0);
+         counted_type::reset_counts();
+         counted_type::throw_at_nth_parameter_construction(1);
+         REQUIRE_THROWS_AS(d.emplace_front(1), counted_type::parameter_construction::exception);
+         REQUIRE(counted_type::check{}.constructions(0).destructions(0));
+         REQUIRE(d == (deque_counted_type_t{0}));
+      }
+      #endif
+   }
 
-      data.push_back(N3);
-      data.push_front(N2);
-      data.push_back(N4);
-      data.push_front(N1);
-      data.push_back(N5);
+   SECTION("pop_front")
+   {
+      auto d = deque_counted_type_t{1, 0};
+      
+      counted_type::reset_counts();
+      d.pop_front();
+      REQUIRE(counted_type::check{}.destructions(1));
+      REQUIRE(d == (deque_counted_type_t{0}));
+      
+      counted_type::reset_counts();
+      d.pop_front();
+      REQUIRE(counted_type::check{}.destructions(1));
+      REQUIRE(d == (deque_counted_type_t{}));
+      
+      d.emplace_front(10);
+      d.emplace_front(11);
+      REQUIRE(d == (deque_counted_type_t{11, 10}));
+      
+      counted_type::reset_counts();
+      d.pop_front();
+      d.pop_front();
+      REQUIRE(counted_type::check{}.destructions(2));
+      REQUIRE(d == (deque_counted_type_t{}));
+      
+      d.emplace_front(10);
+      d.emplace_front(11);
+      REQUIRE(d == (deque_counted_type_t{11, 10}));
+      
+      counted_type::reset_counts();
+      d.pop_front();
+      d.pop_front();
+      REQUIRE(counted_type::check{}.destructions(2));
+      REQUIRE(d == (deque_counted_type_t{}));
+   }
 
-      CHECK(std::equal(compare_data.begin(), compare_data.end(), data.begin()));
-    }
+   SECTION("swap")
+   {
+      SECTION("rhs' capacity is same")
+      {
+         SECTION("lhs.size() < rhs.size()")
+         {
+            auto lhs = deque_counted_type_t{0, 1};
+            auto rhs = deque_counted_type_t{10, 11, 12, 13, 14, 15, 16};
+            counted_type::reset_counts();
+            swap(lhs, rhs);
+            REQUIRE(counted_type::check{}.move_constructions(2+5).move_assignments(4).destructions(2+5));
+            REQUIRE(lhs == (deque_counted_type_t{10, 11, 12, 13, 14, 15, 16}));
+            REQUIRE(rhs == (deque_counted_type_t{0, 1}));
+         }
+         SECTION("lhs.size() > rhs.size()")
+         {
+            auto lhs = deque_counted_type_t{0, 1, 2, 3, 4, 5, 6};
+            auto rhs = deque_counted_type_t{10, 11};
+            counted_type::reset_counts();
+            swap(lhs, rhs);
+            REQUIRE(counted_type::check{}.move_constructions(2+5).move_assignments(4).destructions(2+5));
+            REQUIRE(lhs == (deque_counted_type_t{10, 11}));
+            REQUIRE(rhs == (deque_counted_type_t{0, 1, 2, 3, 4, 5, 6}));
+         }         
+      }
+      SECTION("deque capacities are different")
+      {
+         auto lhs = sstl::deque<counted_type, 10>{0, 1, 2, 3, 4, 5, 6};
+         auto rhs = sstl::deque<counted_type, 30>{10, 11};
+         counted_type::reset_counts();
+         swap(lhs, rhs);
+         REQUIRE(counted_type::check{}.move_constructions(2+5).move_assignments(4).destructions(2+5));
+         REQUIRE(lhs == (deque_counted_type_t{10, 11}));
+         REQUIRE(rhs == (deque_counted_type_t{0, 1, 2, 3, 4, 5, 6}));
+      }
+      #if _sstl_has_exceptions()
+      SECTION("exception handling")
+      {
+         auto lhs = deque_counted_type_t{0, 1, 2, 3, 4, 5, 6};
+         auto rhs = deque_counted_type_t{10, 11, 12};
+         SECTION("exception thrown during first half of swap operation (while swapping lhs and rhs elements)")
+         {
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_move_assignment(5);
+            REQUIRE_THROWS_AS(swap(lhs, rhs), counted_type::move_assignment::exception);
+            REQUIRE(counted_type::check().move_constructions(3).move_assignments(4).destructions(3));
+            REQUIRE(lhs == (deque_counted_type_t{10, 11, 2, 3, 4, 5, 6}));
+            REQUIRE(rhs == (deque_counted_type_t{0, 1, 12}));
+         }
+         SECTION("exception thrown during second half of swap operation (while move constructing lhs elements into rhs)")
+         {
+            counted_type::reset_counts();
+            counted_type::throw_at_nth_move_construction(5);
+            REQUIRE_THROWS_AS(swap(lhs, rhs), counted_type::move_construction::exception);
+            REQUIRE(counted_type::check().move_constructions(4).move_assignments(6).destructions(3));
+            REQUIRE(lhs == (deque_counted_type_t{10, 11, 12, 3, 4, 5, 6}));
+            REQUIRE(rhs == (deque_counted_type_t{0, 1, 2, 3}));
+         }
+      }
+      #endif
+   }
 
-    //*************************************************************************
-    TEST(test_push_back_pop_front_push_back)
-    {
-      Compare_Data compare_data = { N6, N7, N8 };
-      DataNDC data;
+   SECTION("non-member relative operators")
+   {
+      SECTION("lhs < rhs")
+      {
+         {
+            auto lhs = deque_counted_type_t{0, 1, 2};
+            auto rhs = deque_counted_type_t{0, 1, 2, 3};
+            REQUIRE(!(lhs == rhs));
+            REQUIRE(lhs != rhs);
+            REQUIRE(lhs < rhs);
+            REQUIRE(lhs <= rhs);
+            REQUIRE(!(lhs > rhs));
+            REQUIRE(!(lhs >= rhs));
+         }
+         {
+            auto lhs = deque_counted_type_t{0, 1, 2, 3};
+            auto rhs = deque_counted_type_t{0, 1, 3, 3};
+            REQUIRE(!(lhs == rhs));
+            REQUIRE(lhs != rhs);
+            REQUIRE(lhs < rhs);
+            REQUIRE(lhs <= rhs);
+            REQUIRE(!(lhs > rhs));
+            REQUIRE(!(lhs >= rhs));
+         }
+      }
+      SECTION("lhs == rhs")
+      {
+         {
+            auto lhs = deque_counted_type_t{0, 1, 2};
+            auto rhs = deque_counted_type_t{0, 1, 2};
+            REQUIRE(lhs == rhs);
+            REQUIRE(!(lhs != rhs));
+            REQUIRE(!(lhs < rhs));
+            REQUIRE(lhs <= rhs);
+            REQUIRE(!(lhs > rhs));
+            REQUIRE(lhs >= rhs);
+         }
+      }
+      SECTION("lhs > rhs")
+      {
+         {
+            auto lhs = deque_counted_type_t{0, 1, 2, 3};
+            auto rhs = deque_counted_type_t{0, 1, 2};
+            REQUIRE(!(lhs == rhs));
+            REQUIRE(lhs != rhs);
+            REQUIRE(!(lhs < rhs));
+            REQUIRE(!(lhs <= rhs));
+            REQUIRE(lhs > rhs);
+            REQUIRE(lhs >= rhs);
+         }
+         {
+            auto lhs = deque_counted_type_t{0, 1, 3, 3};
+            auto rhs = deque_counted_type_t{0, 1, 2, 3};
+            REQUIRE(!(lhs == rhs));
+            REQUIRE(lhs != rhs);
+            REQUIRE(!(lhs < rhs));
+            REQUIRE(!(lhs <= rhs));
+            REQUIRE(lhs > rhs);
+            REQUIRE(lhs >= rhs);
+         }
+      }
+   }
+}
 
-      data.push_back(N1);
-      data.push_back(N2);
-      data.push_back(N3);
-      data.push_back(N4);
-      data.push_back(N5);
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.push_back(N6);
-      data.push_back(N7);
-      data.push_back(N8);
-
-      CHECK(std::equal(compare_data.begin(), compare_data.end(), data.begin()));
-    }
-
-    //*************************************************************************
-    TEST(test_pop_front)
-    {
-      Compare_Data compare_data = { N1, N2, N3, N4, N5 };
-      DataNDC data;
-
-      data.assign(compare_data.begin(), compare_data.end());
-
-      data.pop_front();
-      CHECK_EQUAL(size_t(4), data.size());
-      CHECK(std::equal(compare_data.begin() + 1, compare_data.end(), data.begin()));
-
-      data.pop_front();
-      CHECK_EQUAL(size_t(3), data.size());
-      CHECK(std::equal(compare_data.begin() + 2, compare_data.end(), data.begin()));
-
-      data.pop_front();
-      CHECK_EQUAL(size_t(2), data.size());
-      CHECK(std::equal(compare_data.begin() + 3, compare_data.end(), data.begin()));
-
-      data.pop_front();
-      CHECK_EQUAL(size_t(1), data.size());
-      CHECK(std::equal(compare_data.begin() + 4, compare_data.end(), data.begin()));
-
-      data.pop_front();
-      CHECK_EQUAL(size_t(0), data.size());
-    }
-
-    //*************************************************************************
-    TEST(test_resize_up)
-    {
-      Compare_DataDC compare_data(initial_data_dc.begin(), initial_data_dc.end());
-      DataDC data(initial_data_dc.begin(), initial_data_dc.end());
-
-      // Cause rollover.
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.push_back(DC("14"));
-      data.push_back(DC("15"));
-      data.push_back(DC("16"));
-      data.push_back(DC("17"));
-      data.resize(SIZE);
-
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.push_back(DC("14"));
-      compare_data.push_back(DC("15"));
-      compare_data.push_back(DC("16"));
-      compare_data.push_back(DC("17"));
-      compare_data.resize(SIZE);
-
-      CHECK_EQUAL(size_t(SIZE), data.size());
-      CHECK(std::equal(compare_data.begin(), compare_data.end(), data.begin()));
-    }
-
-    //*************************************************************************
-    TEST(test_resize_down)
-    {
-      Compare_DataDC compare_data(initial_data_dc.begin(), initial_data_dc.end());
-      DataDC data(initial_data_dc.begin(), initial_data_dc.end());
-
-      // Cause rollover.
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.pop_front();
-      data.push_back(DC("14"));
-      data.push_back(DC("15"));
-      data.push_back(DC("16"));
-      data.push_back(DC("17"));
-      data.resize(SIZE / 2);
-
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.pop_front();
-      compare_data.push_back(DC("14"));
-      compare_data.push_back(DC("15"));
-      compare_data.push_back(DC("16"));
-      compare_data.push_back(DC("17"));
-      compare_data.resize(SIZE / 2);
-
-      CHECK_EQUAL(compare_data.size(), data.size());
-      CHECK(std::equal(compare_data.begin(), compare_data.end(), data.begin()));
-    }
-
-    //*************************************************************************
-    TEST(test_resize_value)
-    {
-      Compare_Data compare_data = { N1, N2, N3, N3, N3 };
-      DataNDC data;
-
-      data.push_front(N1);
-      data.push_back(N2);
-      data.resize(SIZE, N3);
-
-      CHECK_EQUAL(size_t(SIZE), data.size());
-      CHECK(std::equal(compare_data.begin(), compare_data.end(), data.begin()));
-    }
-
-    //*************************************************************************
-		TEST(test_equality_operator)
-		{
-      Compare_Data same      = { N1, N2, N3, N4, N5, N6 };
-      Compare_Data different = { N6, N5, N4, N3, N2, N1 };
-
-      DataNDC deque1(same.begin(), same.end());
-      DataNDC deque2(deque1);
-
-      CHECK(deque1 == deque2);
-
-      // Change deque2's data.
-      std::copy(different.begin(), different.end(), deque2.begin());
-
-      CHECK(!(deque1 == deque2));
-		}
-
-    //*************************************************************************
-    TEST(test_inequality_operator)
-    {
-      Compare_Data same      = { N1, N2, N3, N4, N5, N6 };
-      Compare_Data different = { N6, N5, N4, N3, N2, N1 };
-
-      DataNDC deque1(same.begin(), same.end());
-      DataNDC deque2(deque1);
-
-      CHECK(!(deque1 != deque2));
-
-      // Change deque2's data.
-      std::copy(different.begin(), different.end(), deque2.begin());
-
-      CHECK(deque1 != deque2);
-    }
-	};
 }

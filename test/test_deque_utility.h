@@ -9,12 +9,12 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #define _SSTL_TEST_DEQUENG_UTILITY__
 
 #include <initializer_list>
-#include <sstl/dequeng.h>
+#include <sstl/deque.h>
 
 template<class T>
-sstl::dequeng<T, 11> make_noncontiguous_deque(std::initializer_list<T> init)
+sstl::deque<T, 11> make_noncontiguous_deque(std::initializer_list<T> init)
 {
-   auto d = sstl::dequeng<T, 11>{};
+   auto d = sstl::deque<T, 11>{};
    for(size_t i=0; i<d.capacity()-(init.size()/2)-1; ++i)
    {
       d.push_back(0);
