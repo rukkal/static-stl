@@ -567,38 +567,46 @@ public:
          auto number_of_constructions = count > distance_to_end ? count-distance_to_end : 0;
          auto number_of_assignments = count - number_of_constructions;
 
-         for(size_type i=number_of_assignments; i>0; --i)
-         {
-            *dst = *range_pos;
-            ++range_pos;
-            dst = _inc_pointer(dst);
-         }
-         size_type remaining_constructions;
+         size_type remaining_assignments = number_of_assignments;
+         size_type remaining_constructions = number_of_constructions;
          #if _sstl_has_exceptions()
          try
          {
          #endif
-            for(remaining_constructions=number_of_constructions; remaining_constructions>0; --remaining_constructions)
+            while(remaining_assignments > 0)
+            {
+               *dst = *range_pos;
+               ++range_pos;
+               dst = _inc_pointer(dst);
+               --remaining_assignments;
+            }
+            while(remaining_constructions > 0)
             {
                new(dst) value_type(*range_pos);
                ++range_pos;
                dst = _inc_pointer(dst);
+               --remaining_constructions;
             }
          #if _sstl_has_exceptions()
          }
          catch(...)
          {
-            for(size_type i=0; i<remaining_constructions; i++)
+            for(size_type i=0; i<remaining_assignments; ++i)
             {
                dst = _inc_pointer(dst);
             }
-            for(size_type i=0; i<count; ++i)
+            for(size_type i=0; i<remaining_constructions; ++i)
+            {
+               dst = _inc_pointer(dst);
+            }
+            for(size_type i=0; i<distance_to_end; ++i)
             {
                dst->~value_type();
                dst = _inc_pointer(dst);
             }
-            _derived()._last_pointer = _subtract_offset_to_pointer(_derived()._last_pointer, count);
-            _derived()._size -= count;
+            auto constructions_done = number_of_constructions-remaining_constructions;
+            _derived()._last_pointer = _subtract_offset_to_pointer(_derived()._last_pointer, count-constructions_done);
+            _derived()._size -= (count-constructions_done);
             throw;
          }
          #endif

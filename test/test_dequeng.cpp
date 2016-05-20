@@ -995,13 +995,12 @@ TEST_CASE("dequeng")
 
    SECTION("insert (count + range versions)")
    {
-      auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
-      auto value = counted_type{ 10 };
-      auto values = std::initializer_list<counted_type>{ 10, 11, 12, 13, 14 };
       SECTION("begin")
       {
          SECTION("number of new elements=0")
          {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
             auto values = std::initializer_list<counted_type>{};
             counted_type::reset_counts();
             SECTION("count")
@@ -1027,6 +1026,8 @@ TEST_CASE("dequeng")
          }
          SECTION("number of new elements=1")
          {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
             auto values = std::initializer_list<counted_type>{ 10 };
             counted_type::reset_counts();
             SECTION("count")
@@ -1052,6 +1053,8 @@ TEST_CASE("dequeng")
          }
          SECTION("number of new elements=2")
          {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
             auto values = std::initializer_list<counted_type>{ 10, 11 };
             counted_type::reset_counts();
             SECTION("count")
@@ -1080,6 +1083,8 @@ TEST_CASE("dequeng")
       {
          SECTION("number of new elements=0")
          {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
             auto values = std::initializer_list<counted_type>{};
             counted_type::reset_counts();
             SECTION("count")
@@ -1105,6 +1110,8 @@ TEST_CASE("dequeng")
          }
          SECTION("number of new elements=1")
          {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
             auto values = std::initializer_list<counted_type>{ 10 };
             counted_type::reset_counts();
             SECTION("count")
@@ -1130,6 +1137,8 @@ TEST_CASE("dequeng")
          }
          SECTION("number of new elements=2")
          {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
             auto values = std::initializer_list<counted_type>{ 10, 11 };
             counted_type::reset_counts();
             SECTION("count")
@@ -1155,6 +1164,8 @@ TEST_CASE("dequeng")
          }
          SECTION("number of new elements=3")
          {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
             auto values = std::initializer_list<counted_type>{ 10, 11, 12 };
             counted_type::reset_counts();
             SECTION("count")
@@ -1183,6 +1194,8 @@ TEST_CASE("dequeng")
       {
          SECTION("number of new elements=0")
          {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
             auto values = std::initializer_list<counted_type>{};
             counted_type::reset_counts();
             SECTION("count")
@@ -1208,6 +1221,8 @@ TEST_CASE("dequeng")
          }
          SECTION("number of new elements=1")
          {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
             auto values = std::initializer_list<counted_type>{ 10 };
             counted_type::reset_counts();
             SECTION("count")
@@ -1216,7 +1231,6 @@ TEST_CASE("dequeng")
                REQUIRE(counted_type::check{}.move_constructions(1).move_assignments(1).copy_assignments(1));
                REQUIRE(it == d.begin()+2);
                REQUIRE(d == (deque_counted_type_t{0, 1, 10, 2, 3, 4}));
-            
             }
             SECTION("input iterator")
             {
@@ -1234,6 +1248,8 @@ TEST_CASE("dequeng")
          }
          SECTION("number of new elements=2")
          {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
             auto values = std::initializer_list<counted_type>{ 10, 11 };
             counted_type::reset_counts();
             SECTION("count")
@@ -1259,6 +1275,8 @@ TEST_CASE("dequeng")
          }
          SECTION("number of new elements=3")
          {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
             auto values = std::initializer_list<counted_type>{ 10, 11, 12 };
             counted_type::reset_counts();
             SECTION("count")
@@ -1287,6 +1305,8 @@ TEST_CASE("dequeng")
       {
          SECTION("number of new elements=0")
          {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
             auto values = std::initializer_list<counted_type>{};
             counted_type::reset_counts();
             SECTION("count")
@@ -1312,6 +1332,8 @@ TEST_CASE("dequeng")
          }
          SECTION("number of new elements=1")
          {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
             auto values = std::initializer_list<counted_type>{ 10 };
             counted_type::reset_counts();
             SECTION("count")
@@ -1337,6 +1359,8 @@ TEST_CASE("dequeng")
          }
          SECTION("number of new elements=2")
          {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
             auto values = std::initializer_list<counted_type>{ 10, 11 };
             counted_type::reset_counts();
             SECTION("count")
@@ -1366,6 +1390,8 @@ TEST_CASE("dequeng")
       {
          SECTION("number of new elements=0")
          {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
             auto values = std::initializer_list<counted_type>{};
             counted_type::reset_counts();
             SECTION("count")
@@ -1391,6 +1417,8 @@ TEST_CASE("dequeng")
          }
          SECTION("number of new elements=1")
          {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
             auto values = std::initializer_list<counted_type>{ 10 };
             counted_type::reset_counts();
             SECTION("count")
@@ -1416,6 +1444,8 @@ TEST_CASE("dequeng")
          }
          SECTION("number of new elements=2")
          {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
             auto values = std::initializer_list<counted_type>{ 10, 11 };
             counted_type::reset_counts();
             SECTION("count")
@@ -1441,6 +1471,8 @@ TEST_CASE("dequeng")
          }
          SECTION("number of new elements=3")
          {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
             auto values = std::initializer_list<counted_type>{ 10, 11, 12 };
             counted_type::reset_counts();
             SECTION("count")
@@ -1469,6 +1501,8 @@ TEST_CASE("dequeng")
       {
          SECTION("number of new elements=0")
          {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
             auto values = std::initializer_list<counted_type>{};
             counted_type::reset_counts();
             SECTION("count")
@@ -1494,6 +1528,8 @@ TEST_CASE("dequeng")
          }
          SECTION("number of new elements=1")
          {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
             auto values = std::initializer_list<counted_type>{ 10 };
             counted_type::reset_counts();
             SECTION("count")
@@ -1519,6 +1555,8 @@ TEST_CASE("dequeng")
          }
          SECTION("number of new elements=2")
          {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
             auto values = std::initializer_list<counted_type>{ 10, 11 };
             counted_type::reset_counts();
             SECTION("count")
@@ -1544,6 +1582,8 @@ TEST_CASE("dequeng")
          }
          SECTION("number of new elements=3")
          {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
             auto values = std::initializer_list<counted_type>{ 10, 11, 12 };
             counted_type::reset_counts();
             SECTION("count")
@@ -1573,10 +1613,12 @@ TEST_CASE("dequeng")
       #if _sstl_has_exceptions()
       SECTION("exception handling (copy construction throws)")
       {
-         auto values = std::initializer_list<counted_type>{ 10, 11, 12, 13, 14 };
-         counted_type::reset_counts();
          SECTION("begin region")
          {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
+            auto values = std::initializer_list<counted_type>{ 10, 11, 12, 13, 14 };
+            counted_type::reset_counts();
             SECTION("count")
             {
                counted_type::throw_at_nth_copy_construction(2);
@@ -1594,14 +1636,28 @@ TEST_CASE("dequeng")
             }
             SECTION("range (forward iterator)")
             {
-               counted_type::throw_at_nth_copy_construction(2);
-               REQUIRE_THROWS_AS(d.insert(d.cbegin()+2, values.begin(), values.begin()+5), counted_type::copy_construction::exception);
-               REQUIRE(counted_type::check{}.move_constructions(2).copy_constructions(1).destructions(3));
-               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
+               SECTION("copy assignment throws")
+               {
+                  counted_type::throw_at_nth_copy_assignment(2);
+                  REQUIRE_THROWS_AS(d.insert(d.cbegin()+2, values.begin(), values.end()), counted_type::copy_assignment::exception);
+                  REQUIRE(counted_type::check{}.move_constructions(2).copy_constructions(3).copy_assignments(1).destructions(0));
+                  REQUIRE(d == (deque_counted_type_t{0, 1, 10, 11, 12, 13, 1, 2, 3, 4}));
+               }
+               SECTION("copy construction throws")
+               {
+                  counted_type::throw_at_nth_copy_construction(2);
+                  REQUIRE_THROWS_AS(d.insert(d.cbegin()+2, values.begin(), values.end()), counted_type::copy_construction::exception);
+                  REQUIRE(counted_type::check{}.move_constructions(2).copy_constructions(1).destructions(3));
+                  REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));
+               }
             }
          }
          SECTION("end region")
          {
+            auto d = make_noncontiguous_deque<counted_type>({0, 1, 2, 3, 4});
+            auto value = counted_type{ 10 };
+            auto values = std::initializer_list<counted_type>{ 10, 11, 12, 13, 14 };
+            counted_type::reset_counts();
             SECTION("count")
             {
                counted_type::throw_at_nth_copy_construction(2);
@@ -1618,11 +1674,21 @@ TEST_CASE("dequeng")
                REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4, 10, 11, 12}));
             }
             SECTION("range (forward iterator)")
-            {             
-               counted_type::throw_at_nth_copy_construction(2);
-               REQUIRE_THROWS_AS(d.insert(d.cend()-2, 5, value), counted_type::copy_construction::exception);
-               REQUIRE(counted_type::check{}.move_constructions(2).copy_constructions(1).destructions(3));
-               REQUIRE(d == (deque_counted_type_t{0, 1, 2, 3, 4}));  
+            {
+               SECTION("copy assignment throws")
+               {
+                  counted_type::throw_at_nth_copy_assignment(2);
+                  REQUIRE_THROWS_AS(d.insert(d.cend()-2, values.begin(), values.end()), counted_type::copy_assignment::exception);
+                  REQUIRE(counted_type::check{}.move_constructions(2).copy_assignments(1).destructions(2));
+                  REQUIRE(d == (deque_counted_type_t{0, 1, 2, 10, 4}));
+               }
+               SECTION("copy construction throw")
+               {
+                  counted_type::throw_at_nth_copy_construction(2);
+                  REQUIRE_THROWS_AS(d.insert(d.cend()-2, values.begin(), values.end()), counted_type::copy_construction::exception);
+                  REQUIRE(counted_type::check{}.move_constructions(2).copy_assignments(2).copy_constructions(1).destructions(2));
+                  REQUIRE(d == (deque_counted_type_t{0, 1, 2, 10, 11, 12}));
+               }
             }
          }
       }
