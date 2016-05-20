@@ -23,7 +23,7 @@ There are applications in which such additional costs cannot be accepted. An exa
   - std::vector (OK)
   - std::list (REFACTORING REQUIRED)
   - std::forward_list (REFACTORING REQUIRED)
-  - std::deque (REFACTORING REQUIRED)
+  - std::deque (OK)
   - std::set (REFACTORING REQUIRED)
   - std::multiset (REFACTORING REQUIRED)
   - std::map (REFACTORING REQUIRED)
