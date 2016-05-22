@@ -388,12 +388,8 @@ protected:
    
 protected:
    function() _sstl_noexcept_ = default;
-   function(const function&) = default;
-   #if _is_msvc()
-   function(function&&) {}
-   #else
-   function(function&&) = default;
-   #endif
+   function(const function&) _sstl_noexcept_ = default;
+   function(function&&) _sstl_noexcept_ {} //MSVC (VS2013) does not support default move special member functions
    ~function() = default;
 };
 

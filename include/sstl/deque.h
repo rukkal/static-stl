@@ -820,9 +820,9 @@ protected:
    using _type_for_derived_class_access = deque<T, 11>;
 
 protected:
-   deque() = default;
-   deque(const deque&) = default;
-   deque(deque&&) {}; //MSVC (VS2013) does not allow to default move special member functions
+   deque() _sstl_noexcept_ = default;
+   deque(const deque&) _sstl_noexcept_ = default;
+   deque(deque&&) _sstl_noexcept_ {}; //MSVC (VS2013) does not support default move special member functions
    ~deque() = default;
 
    void _count_constructor(size_type count, const_reference value)

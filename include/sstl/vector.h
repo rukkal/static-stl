@@ -582,9 +582,9 @@ protected:
    static const bool _is_copy = true;
 
 protected:
-   vector() = default;
-   vector(const vector&) = default;
-   vector(vector&&) {}; //MSVC (VS2013) does not allow to default move special member functions
+   vector() _sstl_noexcept_ = default;
+   vector(const vector&) _sstl_noexcept_ = default;
+   vector(vector&&) _sstl_noexcept_ {}; //MSVC (VS2013) does not support default move special member functions
    ~vector() = default;
 
    void _count_constructor(size_type count, const_reference value)
