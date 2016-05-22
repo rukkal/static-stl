@@ -137,7 +137,7 @@ public:
                      ((std::is_lvalue_reference<T>::value && std::is_nothrow_copy_constructible<TTarget>::value)
                      || (!std::is_lvalue_reference<T>::value && std::is_nothrow_move_constructible<TTarget>::value)))
    {
-      _derived()._runtime_assert_buffer_can_contain_target(rhs);
+      _runtime_assert_buffer_can_contain_target(rhs);
       _derived()._assign_internal_callable(std::forward<T>(rhs));
       return *this;
    }
@@ -290,82 +290,14 @@ protected:
    };
 
 protected:
-   function() _sstl_noexcept_ = default;
-   function(const function&) = default;
-   #if _is_msvc()
-   function(function&&) {}
-   #else
-   function(function&&) = default;
-   #endif
-   ~function() = default;
-};
-
-template<class TResult, class... TParams, size_t CALLABLE_SIZE>
-class function<TResult(TParams...), CALLABLE_SIZE> final : public function<TResult(TParams...)>
-{
-   template<class, size_t >
-   friend class function;
-
-private:
-   using _base = function<TResult(TParams...)>;
-   using _type_for_derived_class_access = typename _base::_type_for_derived_class_access;
-   using _internal_callable = typename _base::_internal_callable;
-
-public:
-   function() _sstl_noexcept_
+   bool _is_internal_callable_valid() const _sstl_noexcept_
    {
-      _assert_hacky_derived_class_access_is_valid<_base, function, _type_for_derived_class_access>();
-      _invalidate_internal_callable();
+      return std::any_of(_derived()._buffer, _derived()._buffer+_derived()._buffer_size, [](uint8_t c){ return c!=0; });
    }
 
-   template<
-      class T,
-      class TTarget = typename std::decay<T>::type,
-      class = typename std::enable_if<_detail::_is_function<TTarget>::value>::type>
-   function(T&& rhs)
-   {
-      _static_assert_buffer_can_contain_target(_type_tag<TTarget>{});
-      _assert_hacky_derived_class_access_is_valid<_base, function, _type_for_derived_class_access>();
-      _construct_internal_callable(std::forward<T>(rhs));
-   }
-
-   template<
-      class T,
-      class TTarget = typename std::decay<T>::type,
-      class = typename std::enable_if<!_detail::_is_function<TTarget>::value>::type>
-   // dummy parameter required in order not to declare an invalid overload
-   function(T&& rhs, char=0)
-      _sstl_noexcept((std::is_lvalue_reference<T>::value && std::is_nothrow_copy_constructible<TTarget>::value)
-                     || (!std::is_lvalue_reference<T>::value && std::is_nothrow_move_constructible<TTarget>::value))
-   {
-      _static_assert_buffer_can_contain_target(_type_tag<TTarget>{});
-      _assert_hacky_derived_class_access_is_valid<_base, function, _type_for_derived_class_access>();
-      _construct_internal_callable(std::forward<T>(rhs));
-   }
-
-   template<class T, class TTarget = typename std::decay<T>::type>
-   function& operator=(T&& rhs)
-      _sstl_noexcept(!_detail::_is_function<TTarget>::value &&
-                     ((std::is_lvalue_reference<T>::value && std::is_nothrow_copy_constructible<TTarget>::value)
-                     || (!std::is_lvalue_reference<T>::value && std::is_nothrow_move_constructible<TTarget>::value)))
-   {
-      _static_assert_buffer_can_contain_target(_type_tag<TTarget>{});
-      _assign_internal_callable(std::forward<T>(rhs));
-      return *this;
-   }
-
-   ~function()
-   {
-      if(_is_internal_callable_valid())
-      {
-         _get_internal_callable().~_internal_callable();
-      }
-   }
-
-private:
    _internal_callable& _get_internal_callable() const _sstl_noexcept_
    {
-      auto non_const_buffer = const_cast<void*>(static_cast<const void*>(_buffer));
+      auto non_const_buffer = const_cast<void*>(static_cast<const void*>(_derived()._buffer));
       return *static_cast<_internal_callable*>(non_const_buffer);
    }
 
@@ -377,7 +309,7 @@ private:
       if(rhs._is_internal_callable_valid())
       {
          using is_copy_construction = std::is_lvalue_reference<T>;
-         rhs._derived()._get_internal_callable()._construct_to_buffer(is_copy_construction{}, _buffer);
+         rhs._get_internal_callable()._construct_to_buffer(is_copy_construction{}, _derived()._buffer);
       }
       else
       {
@@ -391,7 +323,7 @@ private:
    // dummy parameter required in order not to declare an invalid overload
    void _construct_internal_callable(T&& rhs, char=0)
    {
-      new(_buffer) typename _base::template _internal_callable_imp<TTarget>(std::forward<T>(rhs));
+      new(_derived()._buffer) _internal_callable_imp<TTarget>(std::forward<T>(rhs));
    }
 
    template<class T>
@@ -417,17 +349,103 @@ private:
       }
       #endif
    }
-
+   
    void _invalidate_internal_callable() _sstl_noexcept_
    {
-      std::fill(std::begin(_buffer), std::end(_buffer), 0);
+      std::fill(_derived()._buffer, _derived()._buffer+_derived()._buffer_size, 0);
    }
-
-   bool _is_internal_callable_valid() const _sstl_noexcept_
+   
+   template<class T,
+            class TTarget = typename std::decay<T>::type,
+            class = typename std::enable_if<_detail::_is_function<TTarget>::value>::type>
+   void _runtime_assert_buffer_can_contain_target(const T& rhs)
    {
-      return std::any_of(std::begin(_buffer), std::end(_buffer), [](uint8_t c){ return c!=0; });
+      sstl_assert(rhs._get_internal_callable()._size() <= _derived()._buffer_size);
    }
 
+   template<class T,
+            class TTarget = typename std::decay<T>::type,
+            class = typename std::enable_if<!_detail::_is_function<TTarget>::value>::type>
+   // dummy parameter required in order not to declare an invalid overload
+   void _runtime_assert_buffer_can_contain_target(const T&, char=0)
+   {
+      sstl_assert(sizeof(_internal_callable_imp<TTarget>) <= _derived()._buffer_size);
+   }
+   
+protected:
+   function() _sstl_noexcept_ = default;
+   function(const function&) = default;
+   #if _is_msvc()
+   function(function&&) {}
+   #else
+   function(function&&) = default;
+   #endif
+   ~function() = default;
+};
+
+template<class TResult, class... TParams, size_t CALLABLE_SIZE>
+class function<TResult(TParams...), CALLABLE_SIZE> final : public function<TResult(TParams...)>
+{
+   template<class, size_t >
+   friend class function;
+
+private:
+   using _base = function<TResult(TParams...)>;
+   using _type_for_derived_class_access = typename _base::_type_for_derived_class_access;
+   using _internal_callable = typename _base::_internal_callable;
+
+public:
+   function() _sstl_noexcept_
+   {
+      _assert_hacky_derived_class_access_is_valid<_base, function, _type_for_derived_class_access>();
+      _base::_invalidate_internal_callable();
+   }
+
+   template<
+      class T,
+      class TTarget = typename std::decay<T>::type,
+      class = typename std::enable_if<_detail::_is_function<TTarget>::value>::type>
+   function(T&& rhs)
+   {
+      _static_assert_buffer_can_contain_target(_type_tag<TTarget>{});
+      _assert_hacky_derived_class_access_is_valid<_base, function, _type_for_derived_class_access>();
+      _base::_construct_internal_callable(std::forward<T>(rhs));
+   }
+
+   template<
+      class T,
+      class TTarget = typename std::decay<T>::type,
+      class = typename std::enable_if<!_detail::_is_function<TTarget>::value>::type>
+   // dummy parameter required in order not to declare an invalid overload
+   function(T&& rhs, char=0)
+      _sstl_noexcept((std::is_lvalue_reference<T>::value && std::is_nothrow_copy_constructible<TTarget>::value)
+                     || (!std::is_lvalue_reference<T>::value && std::is_nothrow_move_constructible<TTarget>::value))
+   {
+      _static_assert_buffer_can_contain_target(_type_tag<TTarget>{});
+      _assert_hacky_derived_class_access_is_valid<_base, function, _type_for_derived_class_access>();
+      _base::_construct_internal_callable(std::forward<T>(rhs));
+   }
+
+   template<class T, class TTarget = typename std::decay<T>::type>
+   function& operator=(T&& rhs)
+      _sstl_noexcept(!_detail::_is_function<TTarget>::value &&
+                     ((std::is_lvalue_reference<T>::value && std::is_nothrow_copy_constructible<TTarget>::value)
+                     || (!std::is_lvalue_reference<T>::value && std::is_nothrow_move_constructible<TTarget>::value)))
+   {
+      _static_assert_buffer_can_contain_target(_type_tag<TTarget>{});
+      _base::_assign_internal_callable(std::forward<T>(rhs));
+      return *this;
+   }
+
+   ~function()
+   {
+      if(_base::_is_internal_callable_valid())
+      {
+         _base::_get_internal_callable().~_internal_callable();
+      }
+   }
+
+private:
    template<class TTarget,
             class = typename std::enable_if<!_detail::_is_function<TTarget>::value>::type>
    void _static_assert_buffer_can_contain_target(_type_tag<TTarget>)
@@ -442,23 +460,6 @@ private:
       //fallback overload (if target is an instance of sstl::function the size
       //of the target's internal callable cannot be determined at compile time,
       //alas the assertion cannot be performed)
-   }
-
-   template<class T,
-            class TTarget = typename std::decay<T>::type,
-            class = typename std::enable_if<_detail::_is_function<TTarget>::value>::type>
-   void _runtime_assert_buffer_can_contain_target(const T& rhs)
-   {
-      sstl_assert(rhs._derived()._get_internal_callable()._size() <= _buffer_size);
-   }
-
-   template<class T,
-            class TTarget = typename std::decay<T>::type,
-            class = typename std::enable_if<!_detail::_is_function<TTarget>::value>::type>
-   // dummy parameter required in order not to declare an invalid overload
-   void _runtime_assert_buffer_can_contain_target(const T&, char=0)
-   {
-      sstl_assert(sizeof(_base::template _internal_callable_imp<TTarget>) <= _buffer_size);
    }
 
 private:
