@@ -86,11 +86,19 @@ TEST_CASE("function")
          REQUIRE(lhs == true);
          REQUIRE(lhs() == 101);
       }
-      SECTION("number of underlying target's constructions")
+      SECTION("rhs is base class reference")
+      {
+         auto rhs = sstl::function<void(), sizeof(counted_type)>{ counted_type{} };
+         sstl::function<void()>& ref = rhs;
+         counted_type::reset_counts();
+         sstl::function<void(), sizeof(counted_type)> lhs{ ref };
+         REQUIRE(counted_type::check().copy_constructions(1));
+      }
+      SECTION("rhs is derived class reference")
       {
          auto rhs = sstl::function<void(), sizeof(counted_type)>{ counted_type{} };
          counted_type::reset_counts();
-         auto lhs = rhs;
+         sstl::function<void(), sizeof(counted_type)> lhs{ rhs };
          REQUIRE(counted_type::check().copy_constructions(1));
       }
    }
@@ -110,12 +118,20 @@ TEST_CASE("function")
          REQUIRE(lhs == true);
          REQUIRE(lhs() == 101);
       }
-      SECTION("number of underlying target's constructions")
+      SECTION("rhs is base class reference")
       {
-         auto rhs = sstl::function<void(), sizeof(counted_type)>{ counted_type{} };
+         auto rhs = sstl::function<void(), sizeof(counted_type)>{ counted_type() };
+         sstl::function<void()>& ref = rhs;
          counted_type::reset_counts();
-         auto lhs = std::move(rhs);
-         REQUIRE(counted_type::check().move_constructions(1));
+         sstl::function<void(), sizeof(counted_type)> lhs{ std::move(ref) };
+         REQUIRE(counted_type::check{}.move_constructions(1));
+      }
+      SECTION("rhs is derived class reference")
+      {
+         auto rhs = sstl::function<void(), sizeof(counted_type)>{ counted_type() };
+         counted_type::reset_counts();
+         sstl::function<void(), sizeof(counted_type)> lhs{ std::move(rhs) };
+         REQUIRE(counted_type::check{}.move_constructions(1));
       }
    }
 
@@ -244,12 +260,21 @@ TEST_CASE("function")
       }
       SECTION("lhs is base class reference")
       {
-         auto rhs = sstl::function<int(), 0>{ [](){ return 101; } };
-         auto lhs = sstl::function<int(), 0>{ [](){ return 0; } };
-         sstl::function<int()>& lhs_base_class_ref = lhs;
-         lhs_base_class_ref = rhs;
-         REQUIRE(lhs == true);
-         REQUIRE(lhs() == 101);
+         auto rhs = sstl::function<void(), sizeof(counted_type)>{ counted_type{} };
+         auto lhs = sstl::function<void(), sizeof(counted_type)>{ counted_type{} };
+         sstl::function<void()>& ref = lhs;
+         counted_type::reset_counts();
+         ref = rhs;
+         REQUIRE(counted_type::check{}.destructions(1).copy_constructions(1));
+      }
+      SECTION("rhs is base class reference")
+      {
+         auto rhs = sstl::function<void(), sizeof(counted_type)>{ counted_type{} };
+         auto lhs = sstl::function<void(), sizeof(counted_type)>{ counted_type{} };
+         sstl::function<void()>& ref = rhs;
+         counted_type::reset_counts();
+         lhs = ref;
+         REQUIRE(counted_type::check{}.destructions(1).copy_constructions(1));
       }
       #if !_is_msvc()
       //note: the test breaks because MSVC elides the assignment (although the optimizer is turned off)
@@ -315,6 +340,24 @@ TEST_CASE("function")
          lhs = std::move(rhs);
          REQUIRE(lhs == true);
          REQUIRE(lhs() == 101);
+      }
+      SECTION("lhs is base class reference")
+      {
+         auto rhs = sstl::function<void(), sizeof(counted_type)>{ counted_type{} };
+         auto lhs = sstl::function<void(), sizeof(counted_type)>{ counted_type{} };
+         sstl::function<void()>& ref = lhs;
+         counted_type::reset_counts();
+         ref = std::move(rhs);
+         REQUIRE(counted_type::check{}.destructions(1).move_constructions(1));
+      }
+      SECTION("rhs is base class reference")
+      {
+         auto rhs = sstl::function<void(), sizeof(counted_type)>{ counted_type{} };
+         auto lhs = sstl::function<void(), sizeof(counted_type)>{ counted_type{} };
+         sstl::function<void()>& ref = rhs;
+         counted_type::reset_counts();
+         lhs = std::move(ref);
+         REQUIRE(counted_type::check{}.destructions(1).move_constructions(1));
       }
       SECTION("number of underlying target's constructions")
       {
