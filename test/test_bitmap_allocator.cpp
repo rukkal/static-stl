@@ -30,6 +30,22 @@ void check_unique(Titer begin, Titer end)
 
 TEST_CASE("bitmap_allocator")
 {
+   SECTION("user cannot directly construct the base class")
+   {
+      #if !_sstl_is_gcc()
+         REQUIRE(!std::is_default_constructible<sstl::bitmap_allocator<int>>::value);
+      #endif
+      REQUIRE(!std::is_copy_constructible<sstl::bitmap_allocator<int>>::value);
+      REQUIRE(!std::is_move_constructible<sstl::bitmap_allocator<int>>::value);
+   }
+
+   SECTION("user cannot directly destroy the base class")
+   {
+      #if !_is_msvc() //MSVC (VS2013) has a buggy implementation of std::is_destructible
+      REQUIRE(!std::is_destructible<sstl::bitmap_allocator<int>>::value);
+      #endif
+   }
+   
    SECTION("allocate/deallocate")
    {
       static const size_t capacity = 31;

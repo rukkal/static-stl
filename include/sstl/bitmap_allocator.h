@@ -60,6 +60,7 @@ protected:
    using _type_for_derived_class_access = bitmap_allocator<T, 11>;
 
    bitmap_allocator() = default;
+   ~bitmap_allocator() = default;
 
 private:
    _type_for_derived_class_access& _derived() _sstl_noexcept_;
