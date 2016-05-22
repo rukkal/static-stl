@@ -36,7 +36,7 @@ public:
    using size_type = size_t;
 
 public:
-   T* allocate()
+   T* allocate() _sstl_noexcept_
    {
       auto bitmap = bitset_span(_derived()._bitmap_data.data(), _derived()._capacity);
       sstl_assert(!bitmap.all());
@@ -45,7 +45,7 @@ public:
       return &_derived()._pool[free_block_idx];
    }
 
-   void deallocate(void* p)
+   void deallocate(void* p) _sstl_noexcept_
    {
       auto bitmap = bitset_span(_derived()._bitmap_data.data(), _derived()._capacity);
       pointer block = static_cast<pointer>(p);
@@ -66,7 +66,7 @@ private:
    _type_for_derived_class_access& _derived() _sstl_noexcept_;
    const _type_for_derived_class_access& _derived() const _sstl_noexcept_;
 
-   size_t get_next_free_block_idx()
+   size_t get_next_free_block_idx() _sstl_noexcept_
    {
       auto bitmap = bitset_span(_derived()._bitmap_data.data(), _derived()._capacity);
       auto idx = _derived()._last_allocated_block_idx;
@@ -102,7 +102,7 @@ public:
    using size_type = typename bitmap_allocator<T>::size_type;
 
 public:
-   bitmap_allocator()
+   bitmap_allocator() _sstl_noexcept_
    {
       _assert_hacky_derived_class_access_is_valid<bitmap_allocator<value_type>, bitmap_allocator, _type_for_derived_class_access>();
       _bitmap_data.fill(0);
