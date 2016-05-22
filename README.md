@@ -35,8 +35,8 @@ There are applications in which such additional costs cannot be accepted. An exa
   - std::stack (OK)
   - std::queue (OK)
   - std::priority_queue (OK)
-  - bitmap allocation policy (REFACTORING REQUIRED)
-  - free-list allocation policy (TODO)
+  - bitmap allocation policy (OK)
+  - free-list allocation policy (OK)
 - No RTTI used.
 - No exceptions required (however the components marked with "OK" are exception safe).
 - No virtual functions used (except for sstl::function's type erasure, of course).

@@ -13,6 +13,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include <type_traits>
 
 #include "_preprocessor.h"
+#include "_metaprog.h"
 
 namespace sstl
 {
@@ -24,31 +25,12 @@ namespace sstl
    };
 #else
    namespace _detail
-   {
       template<size_t Align>
       struct invalid_alignment_value
       {
          static const bool error = false;
       };
-
-      template < size_t A, size_t B, bool SelectA >
-      struct select
-      {
-         static const size_t value = A;
-      };
-
-      template<size_t A, size_t B>
-      struct select < A, B, false >
-      {
-         static const size_t value = B;
-      };
-
-      template<size_t A, size_t B>
-      struct max
-      {
-         static const size_t value = select<A, B, (A>B)>::value;
-      };
-   };
+   }
 
    template<size_t Len, size_t Align>
    struct _aligned_storage
@@ -56,31 +38,27 @@ namespace sstl
       static_assert(_detail::invalid_alignment_value<Align>::error, "specified alignment is not valid");
    };
 
-   #ifndef __cplusplus_cli
-   
+#ifndef __cplusplus_cli
    #define define_aligned_storage(Align) \
       template<size_t Len> \
       struct _aligned_storage<Len, Align> \
       { \
          __declspec(align(Align)) struct type \
          { \
-            uint8_t _data[_detail::max<Len, Align>::value]; /* max required to avoid MSVC's warning about padding */ \
+            uint8_t _data[_metaprog::max<Len, Align>::value]; /* max required to avoid MSVC's warning about padding */ \
          }; \
       };
-   
-   #else
-      
+#else
    #define define_aligned_storage(Align) \
       template<size_t Len> \
       struct _aligned_storage<Len, Align> \
       { \
          struct type /*aligned types cannot be compiled in c++/cli*/ \
          { \
-            uint8_t _data[_detail::max<Len, Align>::value]; /* max required to avoid MSVC's warning about padding */ \
+            uint8_t _data[_metaprog::max<Len, Align>::value]; /* max required to avoid MSVC's warning about padding */ \
          }; \
-      };
-   
-   #endif
+      };   
+#endif
   
    define_aligned_storage(1)
    define_aligned_storage(2)
