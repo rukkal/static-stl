@@ -9,12 +9,15 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #define _SSTL_BITMAP_ALLOCATOR__
 
 #include <type_traits>
+#include <cstdint>
 #include <array>
 
 #include <sstl_assert.h>
 
+#include "__internal/_except.h"
 #include "__internal/_aligned_storage.h"
 #include "__internal/bitset_span.h"
+#include "__internal/_hacky_derived_class_access.h"
 #include "__internal/warnings.h"
 
 namespace sstl
@@ -34,34 +37,39 @@ public:
     using size_type = size_t;
 
 public:
-    bitmap_allocator(void* buffer, bitset_span bitmap)
-        : buffer(static_cast<pointer>(buffer))
-        , bitmap(bitmap)
-    {
-    }
-
     T* allocate()
     {
+        auto bitmap = bitset_span(_derived()._bitmap_data.data(), _derived()._capacity);
         sstl_assert(!bitmap.all());
         auto free_block_idx = get_next_free_block_idx();
         bitmap.set(free_block_idx);
-        return &buffer[free_block_idx];
+        return &_derived()._pool[free_block_idx];
     }
 
     void deallocate(void* p)
     {
-        T* block = static_cast<T*>(p);
-        sstl_assert(block>=buffer && block<buffer+bitmap.size());
-        auto idx = block - buffer;
+        auto bitmap = bitset_span(_derived()._bitmap_data.data(), _derived()._capacity);
+        pointer block = static_cast<pointer>(p);
+        sstl_assert(block>=_derived()._pool && block<_derived()._pool+bitmap.size());
+        auto idx = block - _derived()._pool;
         sstl_assert(bitmap.test(idx));
         bitmap.reset(idx);
-        last_allocated_block_idx = idx-1;
+        _derived()._last_allocated_block_idx = idx-1;
     }
 
+protected:
+   using _type_for_derived_class_access = bitmap_allocator<T, 11>;
+
+   bitmap_allocator() = default;
+
 private:
+   _type_for_derived_class_access& _derived() _sstl_noexcept_;
+   const _type_for_derived_class_access& _derived() const _sstl_noexcept_;
+   
     size_t get_next_free_block_idx()
     {
-        auto idx = last_allocated_block_idx;
+        auto bitmap = bitset_span(_derived()._bitmap_data.data(), _derived()._capacity);
+        auto idx = _derived()._last_allocated_block_idx;
         while(true)
         {
             if(++idx >= bitmap.size())
@@ -73,42 +81,52 @@ private:
         }
         return idx;
     }
-
-private:
-    pointer buffer;
-    bitset_span bitmap;
-    size_t last_allocated_block_idx = static_cast<size_t>(-1);
 };
 
 // An allocator that uses a bitmap to keep track of the allocated blocks
 template <class T, size_t CAPACITY>
 class bitmap_allocator : public bitmap_allocator<T>
 {
+   template<class, size_t> friend class bitmap_allocator;
+   
+private:
+   using _base = bitmap_allocator<T>;
+   using _type_for_derived_class_access = typename _base::_type_for_derived_class_access;
+
+public:
+   using value_type = typename bitmap_allocator<T>::value_type;
+   using pointer = typename bitmap_allocator<T>::pointer;
+   using const_pointer = typename bitmap_allocator<T>::const_pointer;
+   using reference = typename bitmap_allocator<T>::reference;
+   using const_reference = typename bitmap_allocator<T>::const_reference;
+   using size_type = typename bitmap_allocator<T>::size_type;
+
 public:
     bitmap_allocator()
-    warnings_clang_push_ignore("-Wuninitialized")
-    : bitmap_allocator<T>(buffer.data(), bitset_span(bitmap.data(),CAPACITY))
-    warnings_clang_pop_ignore()
     {
-        bitmap.fill(0);
+      _assert_hacky_derived_class_access_is_valid<bitmap_allocator<value_type>, bitmap_allocator, _type_for_derived_class_access>();
+      _bitmap_data.fill(0);
     }
 
 private:
-    void reset_bitmap()
-    {
-        for(size_t i=0; i<BITMAP_SIZE; ++i)
-        {
-            bitmap[i] = 0;
-        }
-    }
-
-private:
-    using bitset_block_type = unsigned char;
-    static const size_t BITS_PER_BLOCK = sizeof(bitset_block_type) * 8;
-    static const size_t BITMAP_SIZE = (CAPACITY-1) / BITS_PER_BLOCK + 1;
-    std::array<bitset_block_type, BITMAP_SIZE> bitmap;
-    std::array<typename _aligned_storage<sizeof(T), std::alignment_of<T>::value>::type, CAPACITY> buffer;
+    const size_type _capacity{ CAPACITY };
+    size_type _last_allocated_block_idx{ static_cast<size_type>(-1) };
+    pointer _pool{ static_cast<pointer>(static_cast<void*>(_pool_data)) };
+    std::array<std::uint8_t, (CAPACITY-1) / 8 + 1> _bitmap_data;
+    typename _aligned_storage<sizeof(value_type), std::alignment_of<value_type>::value>::type _pool_data[CAPACITY];
 };
+
+template<class T>
+typename bitmap_allocator<T>::_type_for_derived_class_access& bitmap_allocator<T>::_derived() _sstl_noexcept_
+{
+   return reinterpret_cast<_type_for_derived_class_access&>(*this);
+}
+
+template<class T>
+const typename bitmap_allocator<T>::_type_for_derived_class_access& bitmap_allocator<T>::_derived() const _sstl_noexcept_
+{
+   return reinterpret_cast<const _type_for_derived_class_access&>(*this);
+}
 
 }
 

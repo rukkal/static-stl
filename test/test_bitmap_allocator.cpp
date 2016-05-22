@@ -55,6 +55,12 @@ TEST_CASE("bitmap_allocator")
                     [&allocator]() { return allocator.allocate(); });
       check_unique(allocated.begin(), allocated.end());
    }
+   
+   SECTION("memory footprint")
+   {
+      REQUIRE(sizeof(sstl::bitmap_allocator<size_t, 1>) == (4+1)*sizeof(size_t));
+      REQUIRE(sizeof(sstl::bitmap_allocator<size_t, 2>) == (4+2)*sizeof(size_t));
+   }
 }
 
 }
