@@ -9,14 +9,18 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #define _SSTL_PRIORITY_QUEUE__
 
 #include <queue>
+#include <functional>
 #include "vector.h"
 
 namespace sstl
 {
    // alias template to provide an sstl::priority_queue type that has consistent
    // interface with the rest of the library's containers
-   template<class T, size_t CAPACITY, class Container=sstl::vector<T, CAPACITY>>
-   using priority_queue = std::priority_queue<T, Container>;
+   template<class T,
+            size_t CAPACITY,
+            class Container=sstl::vector<T, CAPACITY>,
+            class Compare=std::less<typename  Container::value_type>>
+   using priority_queue = std::priority_queue<T, Container, Compare>;
 }
 
 #endif
