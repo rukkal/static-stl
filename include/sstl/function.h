@@ -131,6 +131,20 @@ class function<TResult(TParams...)>
    friend class function;
 
 public:
+   function& operator=(const function& rhs)
+   {
+      _runtime_assert_buffer_can_contain_target(rhs);
+      _derived()._assign_internal_callable(rhs);
+      return *this;
+   }
+   
+   function& operator=(const function&& rhs)
+   {
+      _runtime_assert_buffer_can_contain_target(rhs);
+      _derived()._assign_internal_callable(std::move(rhs));
+      return *this;
+   }
+   
    template<class T, class TTarget = typename std::decay<T>::type>
    function& operator=(T&& rhs)
       _sstl_noexcept(!_detail::_is_function<TTarget>::value &&
