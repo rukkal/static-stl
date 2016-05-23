@@ -53,7 +53,11 @@ public:
 protected:
    using _type_for_derived_class_access = freelist_allocator<T, 11>;
 
-   freelist_allocator() = default;
+   freelist_allocator() _sstl_noexcept_ = default;
+   freelist_allocator(const freelist_allocator&) _sstl_noexcept_ = default;
+   freelist_allocator(freelist_allocator&&) _sstl_noexcept_{} //MSVC (VS2013) does not support default move special member functions
+   freelist_allocator& operator=(const freelist_allocator&)_sstl_noexcept_ = default;
+   freelist_allocator& operator=(freelist_allocator&&)_sstl_noexcept_{}; //MSVC (VS2013) does not support default move special member functions
    ~freelist_allocator() = default;
 
    void _initialize_pool(size_type capacity) _sstl_noexcept_

@@ -25,6 +25,7 @@ namespace sstl
    };
 #else
    namespace _detail
+   {
       template<size_t Align>
       struct invalid_alignment_value
       {

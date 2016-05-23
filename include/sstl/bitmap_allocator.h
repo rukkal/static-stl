@@ -59,7 +59,11 @@ public:
 protected:
    using _type_for_derived_class_access = bitmap_allocator<T, 11>;
 
-   bitmap_allocator() = default;
+   bitmap_allocator() _sstl_noexcept_ = default;
+   bitmap_allocator(const bitmap_allocator&) _sstl_noexcept_ = default;
+   bitmap_allocator(bitmap_allocator&&) _sstl_noexcept_ {} //MSVC (VS2013) does not support default move special member functions
+   bitmap_allocator& operator=(const bitmap_allocator&) _sstl_noexcept_ = default;
+   bitmap_allocator& operator=(bitmap_allocator&&) _sstl_noexcept_ {}; //MSVC (VS2013) does not support default move special member functions
    ~bitmap_allocator() = default;
 
 private:
