@@ -89,7 +89,7 @@ TEST_CASE("function")
       SECTION("rhs is base class reference")
       {
          auto rhs = sstl::function<void(), sizeof(counted_type)>{ counted_type{} };
-         sstl::function<void()>& ref = rhs;
+         const sstl::function<void()>& ref = rhs;
          counted_type::reset_counts();
          sstl::function<void(), sizeof(counted_type)> lhs{ ref };
          REQUIRE(counted_type::check().copy_constructions(1));
@@ -97,8 +97,9 @@ TEST_CASE("function")
       SECTION("rhs is derived class reference")
       {
          auto rhs = sstl::function<void(), sizeof(counted_type)>{ counted_type{} };
+         const sstl::function<void(), sizeof(counted_type)>& ref = rhs;
          counted_type::reset_counts();
-         sstl::function<void(), sizeof(counted_type)> lhs{ rhs };
+         sstl::function<void(), sizeof(counted_type)> lhs{ ref };
          REQUIRE(counted_type::check().copy_constructions(1));
       }
    }

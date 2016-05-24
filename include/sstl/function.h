@@ -131,20 +131,22 @@ class function<TResult(TParams...)>
    friend class function;
 
 public:
+   //required because gcc-arm-none-eabi 4.9 might not consider the forwarding-reference overload as candidate
    function& operator=(const function& rhs)
    {
       _runtime_assert_buffer_can_contain_target(rhs);
-      _derived()._assign_internal_callable(rhs);
+      _assign_internal_callable(rhs);
       return *this;
    }
    
+   //required because gcc-arm-none-eabi 4.9 might not consider the forwarding-reference overload as candidate
    function& operator=(const function&& rhs)
    {
       _runtime_assert_buffer_can_contain_target(rhs);
-      _derived()._assign_internal_callable(std::move(rhs));
+      _assign_internal_callable(std::move(rhs));
       return *this;
    }
-   
+
    template<class T, class TTarget = typename std::decay<T>::type>
    function& operator=(T&& rhs)
       _sstl_noexcept(!_detail::_is_function<TTarget>::value &&
@@ -152,18 +154,18 @@ public:
                      || (!std::is_lvalue_reference<T>::value && std::is_nothrow_move_constructible<TTarget>::value)))
    {
       _runtime_assert_buffer_can_contain_target(rhs);
-      _derived()._assign_internal_callable(std::forward<T>(rhs));
+      _assign_internal_callable(std::forward<T>(rhs));
       return *this;
    }
 
    TResult operator()(typename _detail::_make_const_ref_if_value<TParams>::type... params) const
    {
-      return _derived()._get_internal_callable()._call(std::forward<typename _detail::_make_const_ref_if_value<TParams>::type>(params)...);
+      return _get_internal_callable()._call(std::forward<typename _detail::_make_const_ref_if_value<TParams>::type>(params)...);
    }
 
    operator bool() const _sstl_noexcept_
    {
-      return _derived()._is_internal_callable_valid();
+      return _is_internal_callable_valid();
    }
 
 protected:
@@ -345,7 +347,7 @@ protected:
    {
       //omit self check in case of move assignment (self move assignment is UB)
       if(   std::is_lvalue_reference<T>::value 
-         && static_cast<void*>(this) == reinterpret_cast<void*>(std::addressof(rhs)))
+         && static_cast<const void*>(this) == reinterpret_cast<const void*>(std::addressof(rhs)))
          return;
       if(_is_internal_callable_valid())
          _get_internal_callable().~_internal_callable();
@@ -372,17 +374,20 @@ protected:
    template<class T,
             class TTarget = typename std::decay<T>::type,
             class = typename std::enable_if<_detail::_is_function<TTarget>::value>::type>
-   void _runtime_assert_buffer_can_contain_target(const T& rhs)
+   void _runtime_assert_buffer_can_contain_target(const T& rhs) _sstl_noexcept_
    {
-      sstl_assert(rhs._get_internal_callable()._size() <= _derived()._buffer_size);
+      //if assertion fails specify a larger callable size (template parameter)
+      sstl_assert(!rhs._is_internal_callable_valid()
+               || rhs._get_internal_callable()._size() <= _derived()._buffer_size);
    }
 
    template<class T,
             class TTarget = typename std::decay<T>::type,
             class = typename std::enable_if<!_detail::_is_function<TTarget>::value>::type>
    // dummy parameter required in order not to declare an invalid overload
-   void _runtime_assert_buffer_can_contain_target(const T&, char=0)
+   void _runtime_assert_buffer_can_contain_target(const T&, char=0) _sstl_noexcept_
    {
+      //if assertion fails specify a larger callable size (template parameter)
       sstl_assert(sizeof(_internal_callable_imp<TTarget>) <= _derived()._buffer_size);
    }
    
@@ -411,29 +416,59 @@ public:
       _base::_invalidate_internal_callable();
    }
 
-   template<
-      class T,
-      class TTarget = typename std::decay<T>::type,
-      class = typename std::enable_if<_detail::_is_function<TTarget>::value>::type>
+   //required because gcc-arm-none-eabi 4.9 might not consider the forwarding-reference overload as candidate
+   function(const function& rhs)
+   {
+      _assert_hacky_derived_class_access_is_valid<_base, function, _type_for_derived_class_access>();
+      _assert_buffer_can_contain_target(rhs);
+      _base::_construct_internal_callable(rhs);
+   }
+
+   //required because gcc-arm-none-eabi 4.9 might not consider the forwarding-reference overload as candidate
+   function(function&& rhs)
+   {
+      _assert_hacky_derived_class_access_is_valid<_base, function, _type_for_derived_class_access>();
+      _assert_buffer_can_contain_target(rhs);
+      _base::_construct_internal_callable(std::move(rhs));
+   }
+
+   template<class T,
+            class TTarget = typename std::decay<T>::type,
+            class = typename std::enable_if<_detail::_is_function<TTarget>::value>::type>
    function(T&& rhs)
    {
-      _static_assert_buffer_can_contain_target(_type_tag<TTarget>{});
       _assert_hacky_derived_class_access_is_valid<_base, function, _type_for_derived_class_access>();
+      _assert_buffer_can_contain_target(rhs);
       _base::_construct_internal_callable(std::forward<T>(rhs));
    }
 
-   template<
-      class T,
-      class TTarget = typename std::decay<T>::type,
-      class = typename std::enable_if<!_detail::_is_function<TTarget>::value>::type>
+   template<class T,
+            class TTarget = typename std::decay<T>::type,
+            class = typename std::enable_if<!_detail::_is_function<TTarget>::value>::type>
    // dummy parameter required in order not to declare an invalid overload
-   function(T&& rhs, char=0)
+   function(T&& rhs, char = 0)
       _sstl_noexcept((std::is_lvalue_reference<T>::value && std::is_nothrow_copy_constructible<TTarget>::value)
-                     || (!std::is_lvalue_reference<T>::value && std::is_nothrow_move_constructible<TTarget>::value))
+                  || (!std::is_lvalue_reference<T>::value && std::is_nothrow_move_constructible<TTarget>::value))
    {
-      _static_assert_buffer_can_contain_target(_type_tag<TTarget>{});
       _assert_hacky_derived_class_access_is_valid<_base, function, _type_for_derived_class_access>();
+      _assert_buffer_can_contain_target(rhs);
       _base::_construct_internal_callable(std::forward<T>(rhs));
+   }
+
+   //required because gcc-arm-none-eabi 4.9 might not consider the forwarding-reference overload as candidate
+   function& operator=(const function& rhs)
+   {
+      _assert_buffer_can_contain_target(rhs);
+      _base::_assign_internal_callable(rhs);
+      return *this;
+   }
+
+   //required because gcc-arm-none-eabi 4.9 might not consider the forwarding-reference overload as candidate
+   function& operator=(function&& rhs)
+   {
+      _assert_buffer_can_contain_target(rhs);
+      _base::_assign_internal_callable(std::move(rhs));
+      return *this;
    }
 
    template<class T, class TTarget = typename std::decay<T>::type>
@@ -442,7 +477,7 @@ public:
                      ((std::is_lvalue_reference<T>::value && std::is_nothrow_copy_constructible<TTarget>::value)
                      || (!std::is_lvalue_reference<T>::value && std::is_nothrow_move_constructible<TTarget>::value)))
    {
-      _static_assert_buffer_can_contain_target(_type_tag<TTarget>{});
+      _assert_buffer_can_contain_target(rhs);
       _base::_assign_internal_callable(std::forward<T>(rhs));
       return *this;
    }
@@ -456,20 +491,23 @@ public:
    }
 
 private:
-   template<class TTarget,
-            class = typename std::enable_if<!_detail::_is_function<TTarget>::value>::type>
-   void _static_assert_buffer_can_contain_target(_type_tag<TTarget>)
+   template<class T,
+            class TTarget = typename std::decay<T>::type,
+            class = typename std::enable_if<_detail::_is_function<TTarget>::value>::type>
+   void _assert_buffer_can_contain_target(const T& rhs) _sstl_noexcept_
    {
-      static_assert( sizeof(typename _base::template _internal_callable_imp<TTarget>) <= sizeof(_buffer),
-                     "Not enough memory available to store the wished target."
-                     "Hint: specify size of the target as extra template argument");
+      _base::_runtime_assert_buffer_can_contain_target(rhs);
    }
 
-   void _static_assert_buffer_can_contain_target(...)
+   template<class T,
+            class TTarget = typename std::decay<T>::type,
+            class = typename std::enable_if<!_detail::_is_function<TTarget>::value>::type>
+   // dummy parameter required in order not to declare an invalid overload
+   void _assert_buffer_can_contain_target(const T&, char = 0) _sstl_noexcept_
    {
-      //fallback overload (if target is an instance of sstl::function the size
-      //of the target's internal callable cannot be determined at compile time,
-      //alas the assertion cannot be performed)
+      static_assert(sizeof(typename _base::template _internal_callable_imp<TTarget>) <= sizeof(_buffer),
+         "Not enough memory available to store the wished target."
+         " Hint: specify a larger callable size (template parameter).");
    }
 
 private:
