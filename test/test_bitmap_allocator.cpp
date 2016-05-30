@@ -71,6 +71,25 @@ TEST_CASE("bitmap_allocator")
                     [&allocator]() { return allocator.allocate(); });
       check_unique(allocated.begin(), allocated.end());
    }
+
+   SECTION("full")
+   {
+      static const size_t capacity = 2;
+      auto allocator = sstl::bitmap_allocator < int, capacity > {};
+      REQUIRE(!allocator.full());
+      
+      auto ptr0 = allocator.allocate();
+      REQUIRE(!allocator.full());
+      
+      auto ptr1 = allocator.allocate();
+      REQUIRE(allocator.full());
+      
+      allocator.deallocate(ptr1);
+      REQUIRE(!allocator.full());
+      
+      allocator.deallocate(ptr0);
+      REQUIRE(!allocator.full());
+   }
    
    SECTION("memory footprint")
    {

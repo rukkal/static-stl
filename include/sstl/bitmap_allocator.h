@@ -56,6 +56,13 @@ public:
       _derived()._last_allocated_block_idx = idx-1;
    }
 
+   bool full() const _sstl_noexcept_
+   {
+      auto bitmap = bitset_span( const_cast<void*>(static_cast<const void*>(_derived()._bitmap_data.data())),
+                                 _derived()._capacity);
+      return bitmap.all();
+   }
+
 protected:
    using _type_for_derived_class_access = bitmap_allocator<T, 11>;
 

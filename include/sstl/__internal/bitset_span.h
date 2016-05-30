@@ -13,9 +13,8 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 
 namespace sstl
 {
-// A GSL-like (Guideline Support Library) implementation to manipulate a
-// span of bits. This class is leveraged by other components to reduce
-// code bloat avoiding the use of a template size parameter.
+
+// A GSL-like (Guideline Support Library) implementation to manipulate a span of bits
 class bitset_span
 {
 public:
