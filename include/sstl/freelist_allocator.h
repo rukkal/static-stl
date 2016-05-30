@@ -50,6 +50,11 @@ public:
       _derived()._next_free = p;
    }
 
+   bool full() const
+   {
+      return _derived()._next_free == nullptr;
+   }
+
 protected:
    using _type_for_derived_class_access = freelist_allocator<T, 11>;
 

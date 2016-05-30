@@ -86,6 +86,25 @@ TEST_CASE("freelist_allocator")
       check_unique(allocated.begin(), allocated.end());
    }
    
+   SECTION("full")
+   {
+      static const size_t capacity = 2;
+      auto allocator = sstl::freelist_allocator < int, capacity > {};
+      REQUIRE(!allocator.full());
+
+      auto ptr0 = allocator.allocate();
+      REQUIRE(!allocator.full());
+
+      auto ptr1 = allocator.allocate();
+      REQUIRE(allocator.full());
+
+      allocator.deallocate(ptr1);
+      REQUIRE(!allocator.full());
+
+      allocator.deallocate(ptr0);
+      REQUIRE(!allocator.full());
+   }
+
    SECTION("memory footprint")
    {
       REQUIRE(sizeof(sstl::freelist_allocator<size_t, 1>) == (1+1)*sizeof(size_t));
