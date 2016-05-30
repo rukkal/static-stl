@@ -68,7 +68,7 @@ public:
    {
       sstl_assert(rhs.size() <= capacity());
       _move_assign(rhs.begin(), rhs.end());
-      rhs._set_end(rhs.begin());
+      _sstl_member_of_derived_class(&rhs, _end_) = rhs.begin();
       return *this;
    }
 
@@ -77,7 +77,7 @@ public:
             std::declval<std::initializer_list<value_type>>().begin(),
             std::declval<std::initializer_list<value_type>>().end())))
    {
-      sstl_assert(init.size() <= _capacity());
+      sstl_assert(init.size() <= _sstl_member_of_derived_class(this, _capacity_));
       _copy_assign(init.begin(), init.end());
       return *this;
    }
@@ -85,7 +85,7 @@ public:
    void assign(size_type count, const_reference value)
       _sstl_noexcept(noexcept(std::declval<vector>()._count_assign(std::declval<size_type>(), std::declval<const_reference>())))
    {
-      sstl_assert(count <= _capacity());
+      sstl_assert(count <= _sstl_member_of_derived_class(this, _capacity_));
       _count_assign(count, value);
    }
 
@@ -103,7 +103,7 @@ public:
          std::declval<std::initializer_list<value_type>>().begin(),
          std::declval<std::initializer_list<value_type>>().end())))
    {
-      sstl_assert(ilist.size() <= _capacity());
+      sstl_assert(ilist.size() <= _sstl_member_of_derived_class(this, _capacity_));
       _copy_assign(ilist.begin(), ilist.end());
    }
 
@@ -175,7 +175,7 @@ public:
 
    iterator begin() _sstl_noexcept_
    {
-      return _begin();
+      return static_cast<iterator>(static_cast<void*>(_sstl_member_of_derived_class(this, _buffer_).data()));
    }
 
    const_iterator begin() const _sstl_noexcept(noexcept(std::declval<vector>().begin()))
@@ -190,7 +190,7 @@ public:
 
    iterator end() _sstl_noexcept_
    {
-      return _end();
+      return _sstl_member_of_derived_class(this, _end_);
    }
 
    const_iterator end() const _sstl_noexcept(noexcept(std::declval<vector>().end()))
@@ -257,7 +257,7 @@ public:
 
    size_type capacity() const _sstl_noexcept_
    {
-      return _capacity();
+      return _sstl_member_of_derived_class(this, _capacity_);
    }
 
    void clear() _sstl_noexcept(std::is_nothrow_destructible<value_type>::value)
@@ -265,7 +265,7 @@ public:
       auto pos = begin();
       while(pos != end())
          (pos++)->~value_type();
-      _set_end(begin());
+      _sstl_member_of_derived_class(this, _end_) = begin();
    }
 
    iterator insert(const_iterator pos, const_reference value)
@@ -337,13 +337,13 @@ public:
             p->~value_type();
          if(pos != end())
          {
-            _set_end(std::min(end(), dst+1));
+            _sstl_member_of_derived_class(this, _end_) = std::min(end(), dst+1);
             clear();
          }
          throw;
       }
       #endif
-      _set_end(new_end);
+      _sstl_member_of_derived_class(this, _end_) = new_end;
       return const_cast<iterator>(pos);
    }
 
@@ -387,7 +387,7 @@ public:
          while(end() > old_end)
          {
             (end()-1)->~value_type();
-            _set_end(end()-1);
+            _sstl_member_of_derived_class(this, _end_) = end()-1;
          }
          throw;
       }
@@ -443,7 +443,7 @@ public:
       }
       #endif
       current->~value_type();
-      _set_end(current);
+      _sstl_member_of_derived_class(this, _end_) = current;
       return const_cast<iterator>(pos);
    }
 
@@ -479,7 +479,7 @@ public:
          dst->~value_type();
          ++dst;
       }
-      _set_end(new_end);
+      _sstl_member_of_derived_class(this, _end_) = new_end;
       return const_cast<iterator>(range_begin);
    }
 
@@ -503,7 +503,7 @@ public:
    {
       sstl_assert(size() < capacity());
       new(end()) value_type(std::forward<Args>(args)...);
-      _set_end(end()+1);
+      _sstl_member_of_derived_class(this, _end_) = end()+1;
    }
 
    void pop_back()
@@ -511,7 +511,7 @@ public:
    {
       sstl_assert(!empty());
       (end()-1)->~value_type();
-      _set_end(end()-1);
+      _sstl_member_of_derived_class(this, _end_) = end()-1;
    }
 
    void swap(vector& rhs)
@@ -565,20 +565,21 @@ public:
                large_pos->~value_type();
                ++large_pos;
             }
-            large->_set_end(large_end_swaps);
-            small->_set_end(small_pos);
+            _sstl_member_of_derived_class(large, _end_) = large_end_swaps;
+            _sstl_member_of_derived_class(small, _end_) = small_pos;
          }
          large->clear();
          small->clear();
          throw;
       }
       #endif
-
-      large->_set_end(large_end_swaps);
-      small->_set_end(small_pos);
+      
+      _sstl_member_of_derived_class(large, _end_) = large_end_swaps;
+      _sstl_member_of_derived_class(small, _end_) = small_pos;
    }
 
 protected:
+   using _type_for_hacky_derived_class_access = vector<value_type, 11>;
    static const bool _is_copy = true;
 
 protected:
@@ -618,16 +619,16 @@ protected:
       #endif
          while(src != range_end)
          {
-            sstl_assert(dst-begin() < capacity());
+            sstl_assert(static_cast<size_type>(dst-begin()) < capacity());
             new(dst) value_type(*src);
             ++src; ++dst;
          }
-         _set_end(dst);
+         _sstl_member_of_derived_class(this, _end_) = dst;
       #if _sstl_has_exceptions()
       }
       catch(...)
       {
-         _set_end(dst);
+         _sstl_member_of_derived_class(this, _end_) = dst;
          clear();
          throw;
       }
@@ -658,13 +659,13 @@ protected:
       }
       catch(...)
       {
-         _set_end(std::max(dest, end()));
+         _sstl_member_of_derived_class(this, _end_) = std::max(dest, end());
          clear();
          throw;
       }
       #endif
       auto old_end = end();
-      _set_end(dest);
+      _sstl_member_of_derived_class(this, _end_) = dest;
       while(dest < old_end)
       {
          dest->~value_type();
@@ -693,19 +694,19 @@ protected:
       }
       catch(...)
       {
-         _set_end(dst);
+         _sstl_member_of_derived_class(this, _end_) = dst;
          clear();
          while(src != rhs.end())
          {
             src->~value_type();
             ++src;
          }
-         rhs._set_end(rhs.begin());
+         _sstl_member_of_derived_class(&rhs, _end_) = rhs.begin();
          throw;
       }
       #endif
-      _set_end(dst);
-      rhs._set_end(rhs.begin());
+      _sstl_member_of_derived_class(this, _end_) = dst;
+      _sstl_member_of_derived_class(&rhs, _end_) = rhs.begin();
    }
 
    void _destructor() _sstl_noexcept(std::is_nothrow_destructible<value_type>::value)
@@ -741,7 +742,7 @@ protected:
       }
       catch(...)
       {
-         _set_end(std::max(dest, end()));
+         _sstl_member_of_derived_class(this, _end_) = std::max(dest, end());
          clear();
          while(src < rhs_end)
          {
@@ -753,7 +754,7 @@ protected:
       #endif
 
       auto old_end = end();
-      _set_end(dest);
+      _sstl_member_of_derived_class(this, _end_) = dest;
       while(dest < old_end)
       {
          dest->~value_type();
@@ -783,7 +784,7 @@ protected:
       }
       catch(...)
       {
-         _set_end(std::max(dest, end()));
+         _sstl_member_of_derived_class(this, _end_) = std::max(dest, end());
          clear();
          throw;
       }
@@ -794,14 +795,9 @@ protected:
          dest->~value_type();
          ++dest;
       }
-      _set_end(new_end);
+      _sstl_member_of_derived_class(this, _end_) = new_end; 
    }
-
-   pointer _begin() _sstl_noexcept_;
-   pointer _end() _sstl_noexcept_;
-   void _set_end(pointer) _sstl_noexcept_;
-   size_type _capacity() const _sstl_noexcept_;
-
+   
    template<bool is_copy_insertion>
    iterator _insert(iterator pos, reference value)
       _sstl_noexcept(std::is_nothrow_move_constructible<value_type>::value
@@ -833,7 +829,7 @@ protected:
          }
          catch(...)
          {
-            _set_end(end()+1);
+            _sstl_member_of_derived_class(this, _end_) = end()+1;
             clear();
             throw;
          }
@@ -843,7 +839,7 @@ protected:
       {
          new(end()) value_type(_conditional_move<!is_copy_insertion>(value));
       }
-      _set_end(end()+1);
+      _sstl_member_of_derived_class(this, _end_) = end()+1;
       return pos;
    }
 
@@ -899,13 +895,13 @@ protected:
             p->~value_type();
          if(pos != end())
          {
-            _set_end(std::min(end(), dst_vector+1));
+            _sstl_member_of_derived_class(this, _end_) = std::min(end(), dst_vector+1);
             clear();
          }
          throw;
       }
       #endif
-      _set_end(new_end);
+      _sstl_member_of_derived_class(this, _end_) = new_end;
 
       return pos;
    }
@@ -914,10 +910,8 @@ protected:
 template<class T, size_t Capacity>
 class vector : public vector<T>
 {
-   friend T* vector<T>::_begin() _sstl_noexcept_;
-   friend T* vector<T>::_end() _sstl_noexcept_;
-   friend void vector<T>::_set_end(T*) _sstl_noexcept_;
-   friend size_t vector<T>::_capacity() const _sstl_noexcept_;
+   template<class U, size_t S>
+   friend class vector;
 
 private:
    using _base = vector<T>;
@@ -1040,34 +1034,6 @@ private:
    pointer _end_;
    std::array<typename _aligned_storage<sizeof(value_type), std::alignment_of<value_type>::value>::type, Capacity> _buffer_;
 };
-
-template<class T>
-T* vector<T>::_begin() _sstl_noexcept_
-{
-   using type_for_derived_member_variable_access = typename vector<T, 1>::_type_for_derived_member_variable_access;
-   return reinterpret_cast<T*>(reinterpret_cast<type_for_derived_member_variable_access&>(*this)._buffer_.data());
-}
-
-template<class T>
-T* vector<T>::_end() _sstl_noexcept_
-{
-   using type_for_derived_member_variable_access = typename vector<T, 1>::_type_for_derived_member_variable_access;
-   return reinterpret_cast<type_for_derived_member_variable_access&>(*this)._end_;
-}
-
-template<class T>
-void vector<T>::_set_end(T* value) _sstl_noexcept_
-{
-   using type_for_derived_member_variable_access = typename vector<T, 1>::_type_for_derived_member_variable_access;
-   reinterpret_cast<type_for_derived_member_variable_access&>(*this)._end_ = value;
-}
-
-template<class T>
-size_t vector<T>::_capacity() const _sstl_noexcept_
-{
-   using type_for_derived_member_variable_access = typename vector<T, 1>::_type_for_derived_member_variable_access;
-   return reinterpret_cast<const type_for_derived_member_variable_access&>(*this)._capacity_;
-}
 
 template <class T>
 inline bool operator==(const vector<T>& lhs, const vector<T>& rhs)

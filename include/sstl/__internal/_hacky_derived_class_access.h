@@ -10,6 +10,12 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include <type_traits>
 #include <sstl_assert.h>
 
+#define _sstl_member_of_derived_class(this_pointer, member_name) \
+   (*static_cast<decltype(std::declval<_type_for_hacky_derived_class_access>().member_name)*>( \
+      static_cast<void*>( \
+         static_cast<char*>(const_cast<void*>(static_cast<const void*>(this_pointer))) \
+         + offsetof(_type_for_hacky_derived_class_access, member_name))))
+
 template<class TBase, class TDerived, class TDerivedForHackyAccess>
 void _assert_hacky_derived_class_access_is_valid()
 {
