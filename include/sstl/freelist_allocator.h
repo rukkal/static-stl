@@ -37,26 +37,26 @@ public:
 public:
    pointer allocate() _sstl_noexcept_
    {
-      sstl_assert(_derived()._next_free != nullptr);
-      auto new_next_free = *reinterpret_cast<void**>(_derived()._next_free);
-      auto ret = static_cast<pointer>(_derived()._next_free);
-      _derived()._next_free = new_next_free;
+      sstl_assert(_sstl_member_of_derived_class(this, _next_free) != nullptr);
+      auto new_next_free = *reinterpret_cast<void**>(_sstl_member_of_derived_class(this, _next_free));
+      auto ret = static_cast<pointer>(_sstl_member_of_derived_class(this, _next_free));
+      _sstl_member_of_derived_class(this, _next_free) = new_next_free;
       return ret;
    }
 
    void deallocate(pointer p) _sstl_noexcept_
    {
-      *reinterpret_cast<void**>(p) = _derived()._next_free;
-      _derived()._next_free = p;
+      *reinterpret_cast<void**>(p) = _sstl_member_of_derived_class(this, _next_free);
+      _sstl_member_of_derived_class(this, _next_free) = p;
    }
 
    bool full() const
    {
-      return _derived()._next_free == nullptr;
+      return _sstl_member_of_derived_class(this, _next_free) == nullptr;
    }
 
 protected:
-   using _type_for_derived_class_access = freelist_allocator<T, 11>;
+   using _type_for_hacky_derived_class_access = freelist_allocator<T, 11>;
 
    freelist_allocator() _sstl_noexcept_ = default;
    freelist_allocator(const freelist_allocator&) _sstl_noexcept_ = default;
@@ -67,8 +67,8 @@ protected:
 
    void _initialize_pool(size_type capacity) _sstl_noexcept_
    {
-      auto crt = _derived()._pool;
-      auto last = _derived()._pool+capacity-1;
+      auto crt = _sstl_member_of_derived_class(this, _pool);
+      auto last = _sstl_member_of_derived_class(this, _pool) + capacity - 1;
       while(crt != last)
       {
          *reinterpret_cast<void**>(crt) = static_cast<void*>(crt+1);
@@ -76,10 +76,6 @@ protected:
       }
       *reinterpret_cast<void**>(last) = nullptr;
    }
-
-private:
-   _type_for_derived_class_access& _derived() _sstl_noexcept_;
-   const _type_for_derived_class_access& _derived() const _sstl_noexcept_;
 };
 
 template <class T, size_t CAPACITY>
@@ -89,7 +85,7 @@ class freelist_allocator : public freelist_allocator<T>
    
 private:
    using _base = freelist_allocator<T>;
-   using _type_for_derived_class_access = typename _base::_type_for_derived_class_access;
+   using _type_for_hacky_derived_class_access = typename _base::_type_for_hacky_derived_class_access;
 
 public:
    using value_type = typename freelist_allocator<T>::value_type;
@@ -102,7 +98,7 @@ public:
 public:
    freelist_allocator() _sstl_noexcept_
    {
-      _assert_hacky_derived_class_access_is_valid<freelist_allocator<value_type>, freelist_allocator, _type_for_derived_class_access>();
+      _assert_hacky_derived_class_access_is_valid<freelist_allocator<value_type>, freelist_allocator, _type_for_hacky_derived_class_access>();
       _base::_initialize_pool(CAPACITY);
    }
 
@@ -116,18 +112,6 @@ private:
    void* _next_free{ _pool };
    typename _aligned_storage<_pool_block_size, _pool_block_align>::type _pool[CAPACITY];
 };
-
-template<class T>
-typename freelist_allocator<T>::_type_for_derived_class_access& freelist_allocator<T>::_derived() _sstl_noexcept_
-{
-   return reinterpret_cast<_type_for_derived_class_access&>(*this);
-}
-
-template<class T>
-const typename freelist_allocator<T>::_type_for_derived_class_access& freelist_allocator<T>::_derived() const _sstl_noexcept_
-{
-   return reinterpret_cast<const _type_for_derived_class_access&>(*this);
-}
 
 }
 
