@@ -169,10 +169,7 @@ public:
    }
 
 protected:
-   using _type_for_derived_class_access = function<TResult(TParams...), 0>;
-
-   _type_for_derived_class_access& _derived() _sstl_noexcept_;
-   const _type_for_derived_class_access& _derived() const _sstl_noexcept_;
+   using _type_for_hacky_derived_class_access = function<TResult(TParams...), 0>;
 
    struct _internal_callable
    {
@@ -308,12 +305,15 @@ protected:
 protected:
    bool _is_internal_callable_valid() const _sstl_noexcept_
    {
-      return std::any_of(_derived()._buffer, _derived()._buffer+_derived()._buffer_size, [](uint8_t c){ return c!=0; });
+      return std::any_of(
+         _sstl_member_of_derived_class(this, _buffer),
+         _sstl_member_of_derived_class(this, _buffer) + _sstl_member_of_derived_class(this, _buffer_size),
+         [](uint8_t c){ return c != 0; });
    }
 
    _internal_callable& _get_internal_callable() const _sstl_noexcept_
    {
-      auto non_const_buffer = const_cast<void*>(static_cast<const void*>(_derived()._buffer));
+      auto non_const_buffer = const_cast<void*>(static_cast<const void*>(_sstl_member_of_derived_class(this, _buffer)));
       return *static_cast<_internal_callable*>(non_const_buffer);
    }
 
@@ -323,7 +323,7 @@ protected:
       if(rhs._is_internal_callable_valid())
       {
          using is_copy_construction = std::is_lvalue_reference<T>;
-         rhs._get_internal_callable()._construct_to_buffer(is_copy_construction{}, _derived()._buffer);
+         rhs._get_internal_callable()._construct_to_buffer(is_copy_construction{}, _sstl_member_of_derived_class(this, _buffer));
       }
       else
       {
@@ -334,7 +334,7 @@ protected:
    template<class T, class TTarget = typename std::decay<T>::type>
    void _construct_internal_callable(T&& rhs, typename std::enable_if<!_detail::_is_function<TTarget>::value>::type* = nullptr)
    {
-      new(_derived()._buffer) _internal_callable_imp<TTarget>(std::forward<T>(rhs));
+      new(_sstl_member_of_derived_class(this, _buffer)) _internal_callable_imp<TTarget>(std::forward<T>(rhs));
    }
 
    template<class T>
@@ -363,7 +363,10 @@ protected:
    
    void _invalidate_internal_callable() _sstl_noexcept_
    {
-      std::fill(_derived()._buffer, _derived()._buffer+_derived()._buffer_size, 0);
+      std::fill(
+         _sstl_member_of_derived_class(this, _buffer),
+         _sstl_member_of_derived_class(this, _buffer) + _sstl_member_of_derived_class(this, _buffer_size),
+         0);
    }
    
    template<class T, class TTarget = typename std::decay<T>::type>
@@ -371,14 +374,14 @@ protected:
    {
       //if assertion fails specify a larger callable size (template parameter)
       sstl_assert(!rhs._is_internal_callable_valid()
-               || rhs._get_internal_callable()._size() <= _derived()._buffer_size);
+                  || rhs._get_internal_callable()._size() <= _sstl_member_of_derived_class(this, _buffer_size));
    }
 
    template<class T, class TTarget = typename std::decay<T>::type>
    void _runtime_assert_buffer_can_contain_target(const T&, typename std::enable_if<!_detail::_is_function<TTarget>::value>::type* = nullptr) _sstl_noexcept_
    {
       //if assertion fails specify a larger callable size (template parameter)
-      sstl_assert(sizeof(_internal_callable_imp<TTarget>) <= _derived()._buffer_size);
+      sstl_assert(sizeof(_internal_callable_imp<TTarget>) <= _sstl_member_of_derived_class(this, _buffer_size));
    }
    
 protected:
@@ -396,20 +399,20 @@ class function<TResult(TParams...), CALLABLE_SIZE> final : public function<TResu
 
 private:
    using _base = function<TResult(TParams...)>;
-   using _type_for_derived_class_access = typename _base::_type_for_derived_class_access;
+   using _type_for_hacky_derived_class_access = typename _base::_type_for_hacky_derived_class_access;
    using _internal_callable = typename _base::_internal_callable;
 
 public:
    function() _sstl_noexcept_
    {
-      _assert_hacky_derived_class_access_is_valid<_base, function, _type_for_derived_class_access>();
+      _assert_hacky_derived_class_access_is_valid<_base, function, _type_for_hacky_derived_class_access>();
       _base::_invalidate_internal_callable();
    }
 
    //required because gcc-arm-none-eabi 4.9 might not consider the forwarding-reference overload as candidate
    function(const function& rhs)
    {
-      _assert_hacky_derived_class_access_is_valid<_base, function, _type_for_derived_class_access>();
+      _assert_hacky_derived_class_access_is_valid<_base, function, _type_for_hacky_derived_class_access>();
       _assert_buffer_can_contain_target(rhs);
       _base::_construct_internal_callable(rhs);
    }
@@ -417,7 +420,7 @@ public:
    //required because gcc-arm-none-eabi 4.9 might not consider the forwarding-reference overload as candidate
    function(function&& rhs)
    {
-      _assert_hacky_derived_class_access_is_valid<_base, function, _type_for_derived_class_access>();
+      _assert_hacky_derived_class_access_is_valid<_base, function, _type_for_hacky_derived_class_access>();
       _assert_buffer_can_contain_target(rhs);
       _base::_construct_internal_callable(std::move(rhs));
    }
@@ -425,7 +428,7 @@ public:
    template<class T, class TTarget = typename std::decay<T>::type>
    function(T&& rhs, typename std::enable_if<_detail::_is_function<TTarget>::value>::type* = nullptr)
    {
-      _assert_hacky_derived_class_access_is_valid<_base, function, _type_for_derived_class_access>();
+      _assert_hacky_derived_class_access_is_valid<_base, function, _type_for_hacky_derived_class_access>();
       _assert_buffer_can_contain_target(rhs);
       _base::_construct_internal_callable(std::forward<T>(rhs));
    }
@@ -435,7 +438,7 @@ public:
       _sstl_noexcept((std::is_lvalue_reference<T>::value && std::is_nothrow_copy_constructible<TTarget>::value)
                   || (!std::is_lvalue_reference<T>::value && std::is_nothrow_move_constructible<TTarget>::value))
    {
-      _assert_hacky_derived_class_access_is_valid<_base, function, _type_for_derived_class_access>();
+      _assert_hacky_derived_class_access_is_valid<_base, function, _type_for_hacky_derived_class_access>();
       _assert_buffer_can_contain_target(rhs);
       _base::_construct_internal_callable(std::forward<T>(rhs));
    }
@@ -495,18 +498,6 @@ private:
    size_t _buffer_size{ sizeof(_buffer) };
    mutable uint8_t _buffer[_VPTR_SIZE + CALLABLE_SIZE];
 };
-
-template<class TResult, class... TParams>
-typename function<TResult(TParams...)>::_type_for_derived_class_access& function<TResult(TParams...)>::_derived() _sstl_noexcept_
-{
-   return reinterpret_cast<_type_for_derived_class_access&>(*this);
-}
-
-template<class TResult, class... TParams>
-const typename function<TResult(TParams...)>::_type_for_derived_class_access& function<TResult(TParams...)>::_derived() const _sstl_noexcept_
-{
-   return reinterpret_cast<const _type_for_derived_class_access&>(*this);
-}
 
 }
 
