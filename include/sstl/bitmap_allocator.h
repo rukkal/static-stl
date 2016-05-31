@@ -38,33 +38,31 @@ public:
 public:
    T* allocate() _sstl_noexcept_
    {
-      auto bitmap = bitset_span(_derived()._bitmap_data.data(), _derived()._capacity);
+      auto bitmap = _bitmap();
       sstl_assert(!bitmap.all());
       auto free_block_idx = get_next_free_block_idx();
       bitmap.set(free_block_idx);
-      return &_derived()._pool[free_block_idx];
+      return &_sstl_member_of_derived_class(this, _pool)[free_block_idx];
    }
 
    void deallocate(void* p) _sstl_noexcept_
    {
-      auto bitmap = bitset_span(_derived()._bitmap_data.data(), _derived()._capacity);
+      auto bitmap = _bitmap();
       pointer block = static_cast<pointer>(p);
-      sstl_assert(block>=_derived()._pool && block<_derived()._pool+bitmap.size());
-      auto idx = block - _derived()._pool;
+      sstl_assert(block >= _sstl_member_of_derived_class(this, _pool) && block<_sstl_member_of_derived_class(this, _pool) + bitmap.size());
+      auto idx = block - _sstl_member_of_derived_class(this, _pool);
       sstl_assert(bitmap.test(idx));
       bitmap.reset(idx);
-      _derived()._last_allocated_block_idx = idx-1;
+      _sstl_member_of_derived_class(this, _last_allocated_block_idx) = idx - 1;
    }
 
    bool full() const _sstl_noexcept_
    {
-      auto bitmap = bitset_span( const_cast<void*>(static_cast<const void*>(_derived()._bitmap_data.data())),
-                                 _derived()._capacity);
-      return bitmap.all();
+      return _bitmap().all();
    }
 
 protected:
-   using _type_for_derived_class_access = bitmap_allocator<T, 11>;
+   using _type_for_hacky_derived_class_access = bitmap_allocator<T, 11>;
 
    bitmap_allocator() _sstl_noexcept_ = default;
    bitmap_allocator(const bitmap_allocator&) _sstl_noexcept_ = default;
@@ -74,13 +72,10 @@ protected:
    ~bitmap_allocator() = default;
 
 private:
-   _type_for_derived_class_access& _derived() _sstl_noexcept_;
-   const _type_for_derived_class_access& _derived() const _sstl_noexcept_;
-
    size_t get_next_free_block_idx() _sstl_noexcept_
    {
-      auto bitmap = bitset_span(_derived()._bitmap_data.data(), _derived()._capacity);
-      auto idx = _derived()._last_allocated_block_idx;
+      auto bitmap = _bitmap();
+      auto idx = _sstl_member_of_derived_class(this, _last_allocated_block_idx);
       while(true)
       {
          if(++idx >= bitmap.size())
@@ -92,6 +87,12 @@ private:
       }
       return idx;
    }
+
+   bitset_span _bitmap() const
+   {
+      return bitset_span(const_cast<void*>(static_cast<const void*>(_sstl_member_of_derived_class(this, _bitmap_data).data())),
+                        _sstl_member_of_derived_class(this, _capacity));
+   }
 };
 
 // An allocator that uses a bitmap to keep track of the allocated blocks
@@ -102,7 +103,7 @@ class bitmap_allocator : public bitmap_allocator<T>
    
 private:
    using _base = bitmap_allocator<T>;
-   using _type_for_derived_class_access = typename _base::_type_for_derived_class_access;
+   using _type_for_hacky_derived_class_access = typename _base::_type_for_hacky_derived_class_access;
 
 public:
    using value_type = typename bitmap_allocator<T>::value_type;
@@ -115,7 +116,7 @@ public:
 public:
    bitmap_allocator() _sstl_noexcept_
    {
-      _assert_hacky_derived_class_access_is_valid<bitmap_allocator<value_type>, bitmap_allocator, _type_for_derived_class_access>();
+      _assert_hacky_derived_class_access_is_valid<bitmap_allocator<value_type>, bitmap_allocator, _type_for_hacky_derived_class_access>();
       _bitmap_data.fill(0);
    }
 
@@ -126,18 +127,6 @@ private:
    std::array<std::uint8_t, (CAPACITY-1) / 8 + 1> _bitmap_data;
    typename _aligned_storage<sizeof(value_type), std::alignment_of<value_type>::value>::type _pool_data[CAPACITY];
 };
-
-template<class T>
-typename bitmap_allocator<T>::_type_for_derived_class_access& bitmap_allocator<T>::_derived() _sstl_noexcept_
-{
-   return reinterpret_cast<_type_for_derived_class_access&>(*this);
-}
-
-template<class T>
-const typename bitmap_allocator<T>::_type_for_derived_class_access& bitmap_allocator<T>::_derived() const _sstl_noexcept_
-{
-   return reinterpret_cast<const _type_for_derived_class_access&>(*this);
-}
 
 }
 
