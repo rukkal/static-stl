@@ -39,6 +39,9 @@ friend class deque; //friend declaration required for derived class' noexcept ex
 friend class _dequeng_iterator<deque>;
 friend class _dequeng_iterator<const deque>;
 
+protected:
+   using _type_for_hacky_derived_class_access = deque < T, 11 > ;
+
 public:
    using value_type = T;
    using size_type = size_t;
@@ -76,8 +79,8 @@ public:
       auto destructions =  move_assignments + move_constructions < size()
                            ? size() - move_assignments - move_constructions
                            : 0;
-      auto src = rhs._derived()._first_pointer;
-      auto dst = _derived()._first_pointer;
+      auto src = _sstl_member_of_derived_class(&rhs, _first_pointer);
+      auto dst = _sstl_member_of_derived_class(this, _first_pointer);
 
       size_type i;
       #if _sstl_has_exceptions()
@@ -95,8 +98,8 @@ public:
       }
       catch(...)
       {
-         rhs._derived()._first_pointer = src;
-         rhs._derived()._size -= i;
+         _sstl_member_of_derived_class(&rhs, _first_pointer) = src;
+         _sstl_member_of_derived_class(&rhs, _size) -= i;
          throw;
       }
       #endif
@@ -118,11 +121,11 @@ public:
       {
          auto new_lhs_last = dst;
          new_lhs_last = _dec_pointer(new_lhs_last);
-         _derived()._last_pointer = new_lhs_last;
-         _derived()._size += i;
+         _sstl_member_of_derived_class(this, _last_pointer) = new_lhs_last;
+         _sstl_member_of_derived_class(this, _size) += i;
 
-         rhs._derived()._first_pointer = src;
-         rhs._derived()._size -= (move_assignments + i);
+         _sstl_member_of_derived_class(&rhs, _first_pointer) = src;
+         _sstl_member_of_derived_class(&rhs, _size) -= (move_assignments + i);
 
          throw;
       }
@@ -130,18 +133,18 @@ public:
 
       auto new_lhs_last = dst;
       new_lhs_last = _dec_pointer(new_lhs_last);
-      _derived()._last_pointer = new_lhs_last;
+      _sstl_member_of_derived_class(this, _last_pointer) = new_lhs_last;
       for(auto i=destructions; i!=0; --i)
       {
          dst->~value_type();
          dst = _inc_pointer(dst);
       }
-      _derived()._size = rhs.size();
+      _sstl_member_of_derived_class(this, _size) = rhs.size();
 
-      auto new_rhs_last = rhs._derived()._first_pointer;
+      auto new_rhs_last = _sstl_member_of_derived_class(&rhs, _first_pointer);
       new_rhs_last = rhs._dec_pointer(new_rhs_last);
-      rhs._derived()._last_pointer = new_rhs_last;
-      rhs._derived()._size = 0;
+      _sstl_member_of_derived_class(&rhs, _last_pointer) = new_rhs_last;
+      _sstl_member_of_derived_class(&rhs, _size) = 0;
 
       return *this;
    }
@@ -160,7 +163,7 @@ public:
                      && std::is_nothrow_copy_constructible<value_type>())
    {
       sstl_assert(count <= capacity());
-      auto dst = _derived()._first_pointer;
+      auto dst = _sstl_member_of_derived_class(this, _first_pointer);
 
       auto assignments = std::min(size(), count);
       for(size_type i=0; i<assignments; ++i)
@@ -185,8 +188,8 @@ public:
       catch(...)
       {
          dst = _dec_pointer(dst);
-         _derived()._last_pointer = dst;
-         _derived()._size += constructions_done;
+         _sstl_member_of_derived_class(this, _last_pointer) = dst;
+         _sstl_member_of_derived_class(this, _size) += constructions_done;
          throw;
       }
       #endif
@@ -201,8 +204,8 @@ public:
          dst = _inc_pointer(dst);
       }
 
-      _derived()._last_pointer = new_last;
-      _derived()._size = count;
+      _sstl_member_of_derived_class(this, _last_pointer) = new_last;
+      _sstl_member_of_derived_class(this, _size) = count;
    }
 
    reference at(size_type idx) _sstl_noexcept(!_sstl_has_exceptions())
@@ -214,7 +217,7 @@ public:
       }
       #endif
       sstl_assert(idx < size());
-      return *_add_offset_to_pointer(_derived()._first_pointer, idx);
+      return *_add_offset_to_pointer(_sstl_member_of_derived_class(this, _first_pointer), idx);
    }
 
    const_reference at(size_type idx) const
@@ -225,7 +228,7 @@ public:
 
    reference operator[](size_type idx) _sstl_noexcept_
    {
-      return *_add_offset_to_pointer(_derived()._first_pointer, idx);
+      return *_add_offset_to_pointer(_sstl_member_of_derived_class(this, _first_pointer), idx);
    }
 
    const_reference operator[](size_type idx) const _sstl_noexcept_
@@ -236,7 +239,7 @@ public:
    reference front() _sstl_noexcept_
    {
       sstl_assert(!empty());
-      return *_derived()._first_pointer;
+      return *_sstl_member_of_derived_class(this, _first_pointer);
    }
 
    const_reference front() const _sstl_noexcept_
@@ -248,7 +251,7 @@ public:
    reference back() _sstl_noexcept_
    {
       sstl_assert(!empty());
-      return *(_derived()._last_pointer);
+      return *(_sstl_member_of_derived_class(this, _last_pointer));
    }
 
    const_reference back() const _sstl_noexcept_
@@ -258,17 +261,17 @@ public:
 
    iterator begin() _sstl_noexcept_
    {
-      return iterator{ this, empty() ? nullptr : _derived()._first_pointer };
+      return iterator{ this, empty() ? nullptr : _sstl_member_of_derived_class(this, _first_pointer) };
    }
 
    const_iterator begin() const _sstl_noexcept_
    {
-      return const_iterator{ this, empty() ? nullptr : _derived()._first_pointer };
+      return const_iterator{ this, empty() ? nullptr : _sstl_member_of_derived_class(this, _first_pointer) };
    }
 
    const_iterator cbegin() const _sstl_noexcept_
    {
-      return const_iterator{ this, empty() ? nullptr : _derived()._first_pointer };
+      return const_iterator{ this, empty() ? nullptr : _sstl_member_of_derived_class(this, _first_pointer) };
    }
 
    iterator end() _sstl_noexcept_
@@ -328,7 +331,7 @@ public:
 
    size_type size() const _sstl_noexcept_
    {
-      return _derived()._size;
+      return _sstl_member_of_derived_class(this, _size);
    }
 
    size_type max_size() const _sstl_noexcept_
@@ -338,16 +341,16 @@ public:
 
    size_type capacity() const _sstl_noexcept_
    {
-      return _derived()._end_storage - _derived()._begin_storage();
+      return _sstl_member_of_derived_class(this, _end_storage) - _begin_storage();
    }
 
    void clear() _sstl_noexcept(std::is_nothrow_destructible<value_type>::value)
    {
-      while(_derived()._size > 0)
+      while (_sstl_member_of_derived_class(this, _size) > 0)
       {
-         _derived()._last_pointer->~value_type();
-         _derived()._last_pointer = _dec_pointer(_derived()._last_pointer);
-         --_derived()._size;
+         _sstl_member_of_derived_class(this, _last_pointer)->~value_type();
+         _sstl_member_of_derived_class(this, _last_pointer) = _dec_pointer(_sstl_member_of_derived_class(this, _last_pointer));
+         --_sstl_member_of_derived_class(this, _size);
       }
    }
 
@@ -400,7 +403,7 @@ public:
          }
          catch(...)
          {
-            auto crt = _derived()._first_pointer;
+            auto crt = _sstl_member_of_derived_class(this, _first_pointer);
             while(crt != dst)
             {
                crt->~value_type();
@@ -410,8 +413,8 @@ public:
             {
                crt = _inc_pointer(crt);
             }
-            _derived()._first_pointer = crt;
-            _derived()._size -= count;
+            _sstl_member_of_derived_class(this, _first_pointer) = crt;
+            _sstl_member_of_derived_class(this, _size) -= count;
             throw;
          }
          #endif
@@ -441,13 +444,14 @@ public:
          }
          catch(...)
          {
-            while(dst != _derived()._last_pointer)
+            while (dst != _sstl_member_of_derived_class(this, _last_pointer))
             {
                dst = _inc_pointer(dst);
                dst->~value_type();
             }
-            _derived()._last_pointer = _subtract_offset_to_pointer(_derived()._last_pointer, count);
-            _derived()._size -= count;
+            _sstl_member_of_derived_class(this, _last_pointer) =
+               _subtract_offset_to_pointer(_sstl_member_of_derived_class(this, _last_pointer), count);
+            _sstl_member_of_derived_class(this, _size) -= count;
             throw;
          }
          #endif
@@ -535,7 +539,7 @@ public:
          }
          catch(...)
          {
-            auto crt = _derived()._first_pointer;
+            auto crt = _sstl_member_of_derived_class(this, _first_pointer);
             while(crt != dst)
             {
                crt->~value_type();
@@ -545,8 +549,8 @@ public:
             {
                crt = _inc_pointer(crt);
             }
-            _derived()._first_pointer = crt;
-            _derived()._size -= count;
+            _sstl_member_of_derived_class(this, _first_pointer) = crt;
+            _sstl_member_of_derived_class(this, _size) -= count;
             throw;
          }
          #endif
@@ -605,8 +609,9 @@ public:
                dst = _inc_pointer(dst);
             }
             auto constructions_done = number_of_constructions-remaining_constructions;
-            _derived()._last_pointer = _subtract_offset_to_pointer(_derived()._last_pointer, count-constructions_done);
-            _derived()._size -= (count-constructions_done);
+            _sstl_member_of_derived_class(this, _last_pointer) =
+               _subtract_offset_to_pointer(_sstl_member_of_derived_class(this, _last_pointer), count - constructions_done);
+            _sstl_member_of_derived_class(this, _size) -= (count - constructions_done);
             throw;
          }
          #endif
@@ -626,31 +631,32 @@ public:
       {
          auto src = _dec_pointer(pos_pointer);
          auto dst = pos_pointer;
-         while(dst != _derived()._first_pointer)
+         while (dst != _sstl_member_of_derived_class(this, _first_pointer))
          {
             *dst = std::move(*src);
             dst = src;
             src = _dec_pointer(src);
          }
-         _derived()._first_pointer->~value_type();
-         _derived()._first_pointer = _inc_pointer(_derived()._first_pointer);
-         --_derived()._size;
+         _sstl_member_of_derived_class(this, _first_pointer)->~value_type();
+         _sstl_member_of_derived_class(this, _first_pointer) = _inc_pointer(_sstl_member_of_derived_class(this, _first_pointer));
+         --_sstl_member_of_derived_class(this, _size);
          return iterator{ this, _inc_pointer(pos_pointer) };
       }
       else
       {
          auto src = _inc_pointer(pos_pointer);
          auto dst = pos_pointer;
-         while(dst != _derived()._last_pointer)
+         while (dst != _sstl_member_of_derived_class(this, _last_pointer))
          {
             *dst = std::move(*src);
             dst = src;
             src = _inc_pointer(src);
          }
-         auto pos_pointer_to_return = pos_pointer != _derived()._last_pointer ? pos_pointer : nullptr;
-         _derived()._last_pointer->~value_type();
-         _derived()._last_pointer = _dec_pointer(_derived()._last_pointer);
-         --_derived()._size;
+         auto pos_pointer_to_return =  pos_pointer != _sstl_member_of_derived_class(this, _last_pointer)
+                                       ? pos_pointer : nullptr;
+         _sstl_member_of_derived_class(this, _last_pointer)->~value_type();
+         _sstl_member_of_derived_class(this, _last_pointer) = _dec_pointer(_sstl_member_of_derived_class(this, _last_pointer));
+         --_sstl_member_of_derived_class(this, _size);
          return iterator{ this, pos_pointer_to_return };
       }
    }
@@ -669,8 +675,8 @@ public:
          auto src = const_cast<pointer>(range_begin._pos);
          auto dst = (range_end != cend())
                   ? const_cast<pointer>(_dec_pointer(range_end._pos))
-                  : _derived()._last_pointer;
-         while(src != _derived()._first_pointer)
+                  : _sstl_member_of_derived_class(this, _last_pointer);
+         while (src != _sstl_member_of_derived_class(this, _first_pointer))
          {
             src = _dec_pointer(src);
             *dst = std::move(*src);
@@ -680,21 +686,21 @@ public:
          while(true)
          {
             dst->~value_type();
-            if(dst == _derived()._first_pointer)
+            if (dst == _sstl_member_of_derived_class(this, _first_pointer))
                break;
             dst = _dec_pointer(dst);
          };
-         _derived()._first_pointer = new_first_pointer;
-         _derived()._size -= range_size;
+         _sstl_member_of_derived_class(this, _first_pointer) = new_first_pointer;
+         _sstl_member_of_derived_class(this, _size) -= range_size;
          return iterator{ this, const_cast<pointer>(range_end._pos) };
       }
       else
       {
          auto src = (range_end != cend())
                   ? const_cast<pointer>(_dec_pointer(range_end._pos))
-                  : _derived()._last_pointer;
+                  : _sstl_member_of_derived_class(this, _last_pointer);
          auto dst = const_cast<pointer>(range_begin._pos);
-         while(src != _derived()._last_pointer)
+         while (src != _sstl_member_of_derived_class(this, _last_pointer))
          {
             src = _inc_pointer(src);
             *dst = std::move(*src);
@@ -704,15 +710,15 @@ public:
          while(true)
          {
             dst->~value_type();
-            if(dst == _derived()._last_pointer)
+            if (dst == _sstl_member_of_derived_class(this, _last_pointer))
                break;
             dst = _inc_pointer(dst);
          }
          pointer return_pos = (range_end._pos != nullptr)
                            ? const_cast<pointer>(range_begin._pos)
                            : nullptr;
-         _derived()._last_pointer = new_last_pointer;
-         _derived()._size -= range_size;
+         _sstl_member_of_derived_class(this, _last_pointer) = new_last_pointer;
+         _sstl_member_of_derived_class(this, _size) -= range_size;
          return iterator{ this, return_pos };
       }
       
@@ -747,15 +753,15 @@ public:
       pointer new_first_pointer;
       if(!empty())
       {
-         new_first_pointer = _dec_pointer(_derived()._first_pointer);
+         new_first_pointer = _dec_pointer(_sstl_member_of_derived_class(this, _first_pointer));
       }
       else
       {
-         new_first_pointer = _derived()._last_pointer;
+         new_first_pointer = _sstl_member_of_derived_class(this, _last_pointer);
       }
       new(new_first_pointer) value_type(std::forward<Args>(value)...);
-      _derived()._first_pointer = new_first_pointer;
-      ++_derived()._size;
+      _sstl_member_of_derived_class(this, _first_pointer) = new_first_pointer;
+      ++_sstl_member_of_derived_class(this, _size);
    }
 
    void push_back(const_reference value)
@@ -775,27 +781,27 @@ public:
       _sstl_noexcept(std::is_nothrow_constructible<value_type, typename std::add_rvalue_reference<Args>::type...>::value)
    {
       sstl_assert(!full());
-      auto new_last_pointer = _inc_pointer(_derived()._last_pointer);
+      auto new_last_pointer = _inc_pointer(_sstl_member_of_derived_class(this, _last_pointer));
       new(new_last_pointer) value_type(std::forward<Args>(args)...);
-      _derived()._last_pointer = new_last_pointer;
-      ++_derived()._size;
+      _sstl_member_of_derived_class(this, _last_pointer) = new_last_pointer;
+      ++_sstl_member_of_derived_class(this, _size);
    }
 
    void pop_back() _sstl_noexcept_
    {
       sstl_assert(!empty());
-      _derived()._last_pointer->~value_type();
-      _derived()._last_pointer = _dec_pointer(_derived()._last_pointer);
-      --_derived()._size;
+      _sstl_member_of_derived_class(this, _last_pointer)->~value_type();
+      _sstl_member_of_derived_class(this, _last_pointer) = _dec_pointer(_sstl_member_of_derived_class(this, _last_pointer));
+      --_sstl_member_of_derived_class(this, _size);
    }
 
    void pop_front()
       _sstl_noexcept(std::is_nothrow_destructible<value_type>::value)
    {
       sstl_assert(!empty());
-      _derived()._first_pointer->~value_type();
-      _derived()._first_pointer = _inc_pointer(_derived()._first_pointer);
-      --_derived()._size;
+      _sstl_member_of_derived_class(this, _first_pointer)->~value_type();
+      _sstl_member_of_derived_class(this, _first_pointer) = _inc_pointer(_sstl_member_of_derived_class(this, _first_pointer));
+      --_sstl_member_of_derived_class(this, _size);
    }
 
    void swap(deque& rhs)
@@ -817,9 +823,6 @@ public:
    }
 
 protected:
-   using _type_for_derived_class_access = deque<T, 11>;
-
-protected:
    deque() _sstl_noexcept_ = default;
    deque(const deque&) _sstl_noexcept_ = default;
    deque(deque&&) _sstl_noexcept_ {}; //MSVC (VS2013) does not support default move special member functions
@@ -829,7 +832,7 @@ protected:
       _sstl_noexcept(std::is_nothrow_copy_constructible<value_type>::value)
    {
       sstl_assert(count <= capacity());
-      auto pos = _derived()._first_pointer;
+      auto pos = _sstl_member_of_derived_class(this, _first_pointer);
       auto last_pos = pos+count;
       #if _sstl_has_exceptions()
       try
@@ -844,14 +847,14 @@ protected:
       }
       catch(...)
       {
-         _derived()._last_pointer = pos-1;
-         _derived()._size = pos - _derived()._first_pointer;
+         _sstl_member_of_derived_class(this, _last_pointer) = pos - 1;
+         _sstl_member_of_derived_class(this, _size) = pos - _sstl_member_of_derived_class(this, _first_pointer);
          clear();
          throw;
       }
       #endif
-      _derived()._size = count;
-      _derived()._last_pointer = pos-1;
+      _sstl_member_of_derived_class(this, _size) = count;
+      _sstl_member_of_derived_class(this, _last_pointer) = pos - 1;
    }
 
    template<class TIterator, class = typename std::enable_if<_is_input_iterator<TIterator>::value>::type>
@@ -859,7 +862,7 @@ protected:
       _sstl_noexcept(std::is_nothrow_copy_constructible<value_type>::value)
    {
       auto src = range_begin;
-      auto dst = _derived()._begin_storage()-1;
+      auto dst = _begin_storage()-1;
       #if _sstl_has_exceptions()
       try
       {
@@ -868,15 +871,15 @@ protected:
          {
             sstl_assert(size() < capacity());
             new(++dst) value_type(*src);
-            ++_derived()._size;
+            ++_sstl_member_of_derived_class(this, _size);
             ++src;
          }
-         _derived()._last_pointer = dst;
+         _sstl_member_of_derived_class(this, _last_pointer) = dst;
       #if _sstl_has_exceptions()
       }
       catch(...)
       {
-         _derived()._last_pointer = dst-1;
+         _sstl_member_of_derived_class(this, _last_pointer) = dst - 1;
          clear();
          throw;
       }
@@ -887,8 +890,8 @@ protected:
       _sstl_noexcept(std::is_nothrow_move_constructible<value_type>::value)
    {
       sstl_assert(rhs.size() <= capacity());
-      auto src = rhs._derived()._first_pointer;
-      auto dst = _derived()._begin_storage();
+      auto src = _sstl_member_of_derived_class(&rhs, _first_pointer);
+      auto dst = _begin_storage();
       auto remaining_move_constructions = rhs.size();
       #if _sstl_has_exceptions()
       try
@@ -907,18 +910,18 @@ protected:
       catch(...)
       {
          auto number_of_move_constructions = rhs.size() - remaining_move_constructions;
-         rhs._derived()._first_pointer = std::addressof(*src);
-         rhs._derived()._size -= number_of_move_constructions;
-         _derived()._last_pointer = dst-1;
-         _derived()._size = number_of_move_constructions;
+         _sstl_member_of_derived_class(&rhs, _first_pointer) = std::addressof(*src);
+         _sstl_member_of_derived_class(&rhs, _size) -= number_of_move_constructions;
+         _sstl_member_of_derived_class(this, _last_pointer) = dst - 1;
+         _sstl_member_of_derived_class(this, _size) = number_of_move_constructions;
          clear();
          throw;
       }
       #endif
-      _derived()._last_pointer = dst-1;
-      _derived()._size = rhs.size();
-      rhs._derived()._last_pointer = rhs._derived()._first_pointer-1;
-      rhs._derived()._size = 0;
+      _sstl_member_of_derived_class(this, _last_pointer) = dst - 1;
+      _sstl_member_of_derived_class(this, _size) = rhs.size();
+      _sstl_member_of_derived_class(&rhs, _last_pointer) = _sstl_member_of_derived_class(&rhs, _first_pointer) - 1;
+      _sstl_member_of_derived_class(&rhs, _size) = 0;
    }
 
    template<class TIterator, class = typename std::enable_if<_is_input_iterator<TIterator>::value>::type>
@@ -927,7 +930,7 @@ protected:
                      && std::is_nothrow_copy_constructible<value_type>::value)
    {
       auto src = range_begin;
-      auto dst = _derived()._first_pointer;
+      auto dst = _sstl_member_of_derived_class(this, _first_pointer);
 
       size_type assignments = 0;
       while(src != range_end && assignments < size())
@@ -957,8 +960,8 @@ protected:
       catch(...)
       {
          dst = _dec_pointer(dst);
-         _derived()._last_pointer = dst;
-         _derived()._size = new_size;
+         _sstl_member_of_derived_class(this, _last_pointer) = dst;
+         _sstl_member_of_derived_class(this, _size) = new_size;
          throw;
       }
       #endif
@@ -974,8 +977,8 @@ protected:
          --destructions;
       }
 
-      _derived()._last_pointer = new_last_pointer;
-      _derived()._size = new_size;
+      _sstl_member_of_derived_class(this, _last_pointer) = new_last_pointer;
+      _sstl_member_of_derived_class(this, _size) = new_size;
    }
 
    template<class TValue>
@@ -988,15 +991,15 @@ protected:
       auto distance_to_end = std::distance(pos, cend());
       if(distance_to_begin < distance_to_end)
       {
-         auto src = _derived()._first_pointer;
-         auto dst = _dec_pointer(_derived()._first_pointer);
+         auto src = _sstl_member_of_derived_class(this, _first_pointer);
+         auto dst = _dec_pointer(_sstl_member_of_derived_class(this, _first_pointer));
          auto dst_end = _add_offset_to_pointer(dst, distance_to_begin);
 
          if(distance_to_begin > 0)
          {
             new(dst) value_type(std::move(*src));
-            _derived()._first_pointer = dst;
-            ++_derived()._size;
+            _sstl_member_of_derived_class(this, _first_pointer) = dst;
+            ++_sstl_member_of_derived_class(this, _size);
 
             src = _inc_pointer(src);
             dst = _inc_pointer(dst);
@@ -1012,23 +1015,23 @@ protected:
          else
          {
             new(dst_end) value_type(std::forward<TValue>(value));
-            _derived()._first_pointer = dst;
-            ++_derived()._size;
+            _sstl_member_of_derived_class(this, _first_pointer) = dst;
+            ++_sstl_member_of_derived_class(this, _size);
          }
 
          return iterator{this, dst_end};
       }
       else
       {
-         auto src = _derived()._last_pointer;
-         auto dst = _inc_pointer(_derived()._last_pointer);
+         auto src = _sstl_member_of_derived_class(this, _last_pointer);
+         auto dst = _inc_pointer(_sstl_member_of_derived_class(this, _last_pointer));
          auto dst_end = _subtract_offset_to_pointer(dst, distance_to_end);
 
          if(distance_to_end > 0)
          {
             new(dst) value_type(std::move(*src));
-            _derived()._last_pointer = dst;
-            ++_derived()._size;
+            _sstl_member_of_derived_class(this, _last_pointer) = dst;
+            ++_sstl_member_of_derived_class(this, _size);
 
             src = _dec_pointer(src);
             dst = _dec_pointer(dst);
@@ -1044,8 +1047,8 @@ protected:
          else
          {
             new(dst_end) value_type(std::forward<TValue>(value));
-            _derived()._last_pointer = dst;
-            ++_derived()._size;
+            _sstl_member_of_derived_class(this, _last_pointer) = dst;
+            ++_sstl_member_of_derived_class(this, _size);
          }
 
          return iterator{this, dst_end};
@@ -1059,9 +1062,9 @@ protected:
       auto number_of_constructions = std::min(n, distance_to_begin);
       auto number_of_assignments = distance_to_begin - number_of_constructions;
 
-      auto dst_first = _subtract_offset_to_pointer(_derived()._first_pointer, n);
+      auto dst_first = _subtract_offset_to_pointer(_sstl_member_of_derived_class(this, _first_pointer), n);
       auto dst = dst_first;
-      auto src = _derived()._first_pointer;
+      auto src = _sstl_member_of_derived_class(this, _first_pointer);
 
       size_type remaining_constructions;
       #if _sstl_has_exceptions()
@@ -1096,10 +1099,11 @@ protected:
       }
       #endif
 
-      _derived()._first_pointer = _subtract_offset_to_pointer(_derived()._first_pointer, n);
-      _derived()._size += n;
+      _sstl_member_of_derived_class(this, _first_pointer) =
+         _subtract_offset_to_pointer(_sstl_member_of_derived_class(this, _first_pointer), n);
+      _sstl_member_of_derived_class(this, _size) += n;
 
-      return _add_offset_to_pointer(_derived()._first_pointer, distance_to_begin);
+      return _add_offset_to_pointer(_sstl_member_of_derived_class(this, _first_pointer), distance_to_begin);
    }
 
    pointer _shift_from_pos_to_end_by_n_positions(size_type n, size_type distance_to_end)
@@ -1109,9 +1113,9 @@ protected:
       auto number_of_constructions = std::min(n, distance_to_end);
       auto number_of_assignments = distance_to_end - number_of_constructions;
 
-      auto dst_first = _add_offset_to_pointer(_derived()._last_pointer, n);
+      auto dst_first = _add_offset_to_pointer(_sstl_member_of_derived_class(this, _last_pointer), n);
       auto dst = dst_first;
-      auto src = _derived()._last_pointer;
+      auto src = _sstl_member_of_derived_class(this, _last_pointer);
 
       size_type remaining_constructions;
       #if _sstl_has_exceptions()
@@ -1146,20 +1150,18 @@ protected:
       }
       #endif
 
-      _derived()._last_pointer = _add_offset_to_pointer(_derived()._last_pointer, n);
-      _derived()._size += n;
+      _sstl_member_of_derived_class(this, _last_pointer) =
+         _add_offset_to_pointer(_sstl_member_of_derived_class(this, _last_pointer), n);
+      _sstl_member_of_derived_class(this, _size) += n;
 
-      return _subtract_offset_to_pointer(_derived()._last_pointer, distance_to_end);
+      return _subtract_offset_to_pointer(_sstl_member_of_derived_class(this, _last_pointer), distance_to_end);
    }
-
-   _type_for_derived_class_access& _derived() _sstl_noexcept_;
-   const _type_for_derived_class_access& _derived() const _sstl_noexcept_;
 
    pointer _inc_pointer(pointer ptr) const _sstl_noexcept_
    {
       ptr += 1;
-      if(ptr == _derived()._end_storage)
-         ptr = const_cast<pointer>(_derived()._begin_storage());
+      if (ptr == _sstl_member_of_derived_class(this, _end_storage))
+         ptr = const_cast<pointer>(_begin_storage());
       return ptr;
    }
 
@@ -1171,8 +1173,8 @@ protected:
    pointer _dec_pointer(pointer ptr) const _sstl_noexcept_
    {
       ptr -= 1;
-      if(ptr < _derived()._begin_storage())
-         ptr = const_cast<pointer>(_derived()._end_storage) - 1;
+      if(ptr < _begin_storage())
+         ptr = const_cast<pointer>(_sstl_member_of_derived_class(this, _end_storage)) - 1;
       return ptr;
    }
 
@@ -1183,8 +1185,8 @@ protected:
 
    pointer _add_offset_to_pointer(pointer ptr, size_type offset) const _sstl_noexcept_
    {
-      auto begin_storage = const_cast<pointer>(_derived()._begin_storage());
-      auto end_storage = const_cast<pointer>(_derived()._end_storage);
+      auto begin_storage = const_cast<pointer>(_begin_storage());
+      auto end_storage = const_cast<pointer>(_sstl_member_of_derived_class(this, _end_storage));
 
       ptr += offset;
       if(ptr >= end_storage)
@@ -1196,8 +1198,8 @@ protected:
 
    pointer _subtract_offset_to_pointer(pointer ptr, size_type offset) const _sstl_noexcept_
    {
-      auto begin_storage = const_cast<pointer>(_derived()._begin_storage());
-      auto end_storage = const_cast<pointer>(_derived()._end_storage);
+      auto begin_storage = const_cast<pointer>(_begin_storage());
+      auto end_storage = const_cast<pointer>(_sstl_member_of_derived_class(this, _end_storage));
 
       ptr -= offset;
       if(ptr < begin_storage)
@@ -1209,9 +1211,6 @@ protected:
 
    pointer _apply_offset_to_pointer(pointer ptr, difference_type offset) const _sstl_noexcept_
    {
-      auto first_pointer = const_cast<pointer>(_derived()._first_pointer);
-      auto last_pointer = const_cast<pointer>(_derived()._last_pointer);
-
       if(offset > 0)
       {
          ptr = _add_offset_to_pointer(ptr, offset);
@@ -1231,9 +1230,19 @@ protected:
 
    bool _is_pointer_one_past_last_pointer(const_pointer ptr) const _sstl_noexcept_
    {
-      auto one_past_last_pointer = _derived()._last_pointer;
+      auto one_past_last_pointer = _sstl_member_of_derived_class(this, _last_pointer);
       one_past_last_pointer = _inc_pointer(one_past_last_pointer);
       return ptr == one_past_last_pointer;
+   }
+
+   pointer _begin_storage() _sstl_noexcept_
+   {
+      return static_cast<pointer>(static_cast<void*>(_sstl_member_of_derived_class(this, _buffer).data()));
+   }
+
+   const_pointer _begin_storage() const _sstl_noexcept_
+   {
+      return const_cast<deque&>(*this)._begin_storage();
    }
 };
 
@@ -1242,7 +1251,7 @@ class deque : public deque<T>
 {
 private:
    using _base = deque<T>;
-   using _type_for_derived_class_access = typename _base::_type_for_derived_class_access;
+   using _type_for_hacky_derived_class_access = typename _base::_type_for_hacky_derived_class_access;
 
    template<class, size_t>
    friend class deque;
@@ -1266,13 +1275,13 @@ public:
 public:
    deque() _sstl_noexcept_
    {
-      _assert_hacky_derived_class_access_is_valid<deque<value_type>, deque, _type_for_derived_class_access>();
+      _assert_hacky_derived_class_access_is_valid<deque<value_type>, deque, _type_for_hacky_derived_class_access>();
    }
 
    explicit deque(size_type count, const_reference value = value_type())
       _sstl_noexcept(noexcept(std::declval<_base>()._count_constructor(std::declval<size_type>(), std::declval<value_type>())))
    {
-      _assert_hacky_derived_class_access_is_valid<deque<value_type>, deque, _type_for_derived_class_access>();
+      _assert_hacky_derived_class_access_is_valid<deque<value_type>, deque, _type_for_hacky_derived_class_access>();
       _base::_count_constructor(count, value);
    }
 
@@ -1281,7 +1290,7 @@ public:
       _sstl_noexcept(noexcept(std::declval<_base>()._range_constructor( std::declval<TIterator>(),
                                                                         std::declval<TIterator>())))
    {
-      _assert_hacky_derived_class_access_is_valid<deque<value_type>, deque, _type_for_derived_class_access>();
+      _assert_hacky_derived_class_access_is_valid<deque<value_type>, deque, _type_for_hacky_derived_class_access>();
       _base::_range_constructor(range_begin, range_end);
    }
 
@@ -1290,7 +1299,7 @@ public:
       _sstl_noexcept(noexcept(std::declval<_base>()._range_constructor( std::declval<const_iterator>(),
                                                                         std::declval<const_iterator>())))
    {
-      _assert_hacky_derived_class_access_is_valid<deque<value_type>, deque, _type_for_derived_class_access>();
+      _assert_hacky_derived_class_access_is_valid<deque<value_type>, deque, _type_for_hacky_derived_class_access>();
       _base::_range_constructor(const_cast<_base&>(rhs).cbegin(), const_cast<_base&>(rhs).cend());
    }
 
@@ -1298,14 +1307,14 @@ public:
       _sstl_noexcept(noexcept(deque(std::declval<const _base&>())))
       : deque(static_cast<const _base&>(rhs))
    {
-      _assert_hacky_derived_class_access_is_valid<deque<value_type>, deque, _type_for_derived_class_access>();
+      _assert_hacky_derived_class_access_is_valid<deque<value_type>, deque, _type_for_hacky_derived_class_access>();
    }
 
    //move construction from any instance with same value type (capacity doesn't matter)
    deque(_base&& rhs)
       _sstl_noexcept(noexcept(std::declval<_base>()._move_constructor(std::declval<_base>())))
    {
-      _assert_hacky_derived_class_access_is_valid<deque<value_type>, deque, _type_for_derived_class_access>();
+      _assert_hacky_derived_class_access_is_valid<deque<value_type>, deque, _type_for_hacky_derived_class_access>();
       _base::_move_constructor(std::move(rhs));
    }
 
@@ -1313,14 +1322,14 @@ public:
       _sstl_noexcept(noexcept(deque(std::declval<_base>())))
       : deque(static_cast<_base&&>(rhs))
    {
-      _assert_hacky_derived_class_access_is_valid<deque<value_type>, deque, _type_for_derived_class_access>();
+      _assert_hacky_derived_class_access_is_valid<deque<value_type>, deque, _type_for_hacky_derived_class_access>();
    }
 
    deque(std::initializer_list<value_type> init)
       _sstl_noexcept(noexcept(std::declval<_base>()._range_constructor( std::declval<std::initializer_list<value_type>>().begin(),
                                                                         std::declval<std::initializer_list<value_type>>().end())))
    {
-      _assert_hacky_derived_class_access_is_valid<deque<value_type>, deque, _type_for_derived_class_access>();
+      _assert_hacky_derived_class_access_is_valid<deque<value_type>, deque, _type_for_hacky_derived_class_access>();
       _base::_range_constructor(init.begin(), init.end());
    }
 
@@ -1362,37 +1371,12 @@ public:
    }
 
 private:
-   pointer _begin_storage() _sstl_noexcept_
-   {
-      auto begin_storage = reinterpret_cast<_type_for_derived_class_access&>(*this)._buffer.data();
-      return static_cast<pointer>(static_cast<void*>(begin_storage));
-   }
-
-   const_pointer _begin_storage() const _sstl_noexcept_
-   {
-      auto begin_storage = reinterpret_cast<const _type_for_derived_class_access&>(*this)._buffer.data();
-      return static_cast<const_pointer>(static_cast<const void*>(begin_storage));
-   }
-
-private:
    size_type _size{ 0 };
-   pointer _first_pointer{ _begin_storage() };
-   pointer _last_pointer{ _begin_storage() + CAPACITY - 1};
-   pointer _end_storage{ _begin_storage() + CAPACITY };
+   pointer _first_pointer{ _base::_begin_storage() };
+   pointer _last_pointer{ _base::_begin_storage() + CAPACITY - 1 };
+   pointer _end_storage{ _base::_begin_storage() + CAPACITY };
    std::array<typename _aligned_storage<sizeof(value_type), std::alignment_of<value_type>::value>::type, CAPACITY> _buffer;
 };
-
-template<class T>
-typename deque<T>::_type_for_derived_class_access& deque<T>::_derived() _sstl_noexcept_
-{
-   return reinterpret_cast<_type_for_derived_class_access&>(*this);
-}
-
-template<class T>
-const typename deque<T>::_type_for_derived_class_access& deque<T>::_derived() const _sstl_noexcept_
-{
-   return reinterpret_cast<const _type_for_derived_class_access&>(*this);
-}
 
 template<class T>
 inline bool operator==(const deque<T>& lhs, const deque<T>& rhs) _sstl_noexcept_

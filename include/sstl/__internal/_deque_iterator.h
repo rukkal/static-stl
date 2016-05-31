@@ -11,6 +11,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include <cstddef>
 #include <type_traits>
 #include <iterator>
+#include "_hacky_derived_class_access.h"
 #include "_except.h"
 
 template<class TDeque>
@@ -22,6 +23,7 @@ class _dequeng_iterator
    friend _dequeng_iterator<typename std::remove_const<TDeque>::type>;
 
 private:
+   using _type_for_hacky_derived_class_access = typename TDeque::_type_for_hacky_derived_class_access;
    static const bool is_const = std::is_const<TDeque>::value;
 
 public:
@@ -62,7 +64,7 @@ public:
 
    _dequeng_iterator& operator++() _sstl_noexcept_
    {
-      if(_pos == _deque->_derived()._last_pointer)
+      if (_pos == _sstl_member_of_derived_class(_deque, _last_pointer))
          _pos = nullptr;
       else
          _pos = _deque->_inc_pointer(_pos);
@@ -79,7 +81,7 @@ public:
    _dequeng_iterator& operator--() _sstl_noexcept_
    {
       if(_pos == nullptr)
-         _pos = _deque->_derived()._last_pointer;
+         _pos = _sstl_member_of_derived_class(_deque, _last_pointer);
       else
          _pos = _deque->_dec_pointer(_pos);
       return *this;
@@ -97,7 +99,7 @@ public:
       if(_pos == nullptr)
       {
          sstl_assert(inc <= 0);
-         _pos = _deque->_derived()._last_pointer;
+         _pos = _sstl_member_of_derived_class(_deque, _last_pointer);
          ++inc;
       }
       _pos = _deque->_apply_offset_to_pointer(_pos, inc);
@@ -111,7 +113,7 @@ public:
       if(_pos == nullptr)
       {
          sstl_assert(dec >= 0);
-         _pos = _deque->_derived()._last_pointer;
+         _pos = _sstl_member_of_derived_class(_deque, _last_pointer);
          --dec;
       }
       _pos = _deque->_apply_offset_to_pointer(_pos, -dec);
@@ -191,10 +193,11 @@ private:
    {
       if(_pos != nullptr)
       {
-         if(_pos >= _deque->_derived()._first_pointer)
-            return _pos - _deque->_derived()._first_pointer;
+         if(_pos >= _sstl_member_of_derived_class(_deque, _first_pointer))
+            return _pos - _sstl_member_of_derived_class(_deque, _first_pointer);
          else
-            return (_deque->_derived()._end_storage - _deque->_derived()._first_pointer) + (_pos - _deque->_derived()._begin_storage());
+            return (_sstl_member_of_derived_class(_deque, _end_storage) - _sstl_member_of_derived_class(_deque, _first_pointer))
+                  + (_pos - _deque->_begin_storage());
       }
       else
       {
