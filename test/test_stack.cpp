@@ -10,33 +10,32 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 
 namespace sstl_test
 {
-TEST_CASE("stack")
+
+TEST_CASE("stack - constructors can be instantiated")
 {
-   SECTION("constructors can be instantiated")
-   {
-      static const auto CAPACITY = 5;
-      auto container = sstl::vector<int, CAPACITY> {};
+   static const auto CAPACITY = 5;
+   auto container = sstl::vector<int, CAPACITY> {};
 
-      sstl::stack<int, CAPACITY> {};
+   sstl::stack<int, CAPACITY> {};
 
-      sstl::stack<int, CAPACITY> {container};
+   sstl::stack<int, CAPACITY> {container};
 
-      auto other_stack = sstl::stack<int, CAPACITY> {};
-      sstl::stack<int, CAPACITY> {other_stack};
-   }
-
-   SECTION("member functions can be instantiated")
-   {
-      auto stack = sstl::stack<int, 5> {};
-      auto stack2 = stack;
-
-      stack.push(3);
-      stack.emplace(3);
-      stack.top();
-      stack.pop();
-      stack.empty();
-      stack.size();
-      stack.swap(stack2);
-   }
+   auto other_stack = sstl::stack<int, CAPACITY> {};
+   sstl::stack<int, CAPACITY> {other_stack};
 }
+
+TEST_CASE("stack - member functions can be instantiated")
+{
+   auto stack = sstl::stack<int, 5> {};
+   auto stack2 = stack;
+
+   stack.push(3);
+   stack.emplace(3);
+   stack.top();
+   stack.pop();
+   stack.empty();
+   stack.size();
+   stack.swap(stack2);
+}
+
 }

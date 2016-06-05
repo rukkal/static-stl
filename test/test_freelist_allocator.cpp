@@ -28,88 +28,85 @@ void check_unique(Titer begin, Titer end)
    REQUIRE(std::equal(values.begin(), values.end(), unique_values.begin()));
 }
 
-TEST_CASE("freelist_allocator")
+TEST_CASE("freelist_allocator - user cannot directly construct the base class")
 {
-   SECTION("user cannot directly construct the base class")
-   {
-      #if !_sstl_is_gcc()
-         REQUIRE(!std::is_default_constructible<sstl::freelist_allocator<int>>::value);
-      #endif
-      REQUIRE(!std::is_copy_constructible<sstl::freelist_allocator<int>>::value);
-      REQUIRE(!std::is_move_constructible<sstl::freelist_allocator<int>>::value);
-   }
+   #if !_sstl_is_gcc()
+      REQUIRE(!std::is_default_constructible<sstl::freelist_allocator<int>>::value);
+   #endif
+   REQUIRE(!std::is_copy_constructible<sstl::freelist_allocator<int>>::value);
+   REQUIRE(!std::is_move_constructible<sstl::freelist_allocator<int>>::value);
+}
 
-   SECTION("user cannot directly destroy the base class")
+TEST_CASE("freelist_allocator - user cannot directly destroy the base class")
+{
+   #if !_is_msvc() //MSVC (VS2013) has a buggy implementation of std::is_destructible
+   REQUIRE(!std::is_destructible<sstl::freelist_allocator<int>>::value);
+   #endif
+}
+
+TEST_CASE("freelist_allocator - allocate/deallocate")
+{
+   static const size_t capacity = 31;
+   auto allocator = sstl::freelist_allocator<int, capacity> {};
+   auto allocated = std::vector<int*> {};
+
+   //allocate all
+   std::generate_n(std::back_inserter(allocated),
+                 capacity,
+                 [&allocator]() { return allocator.allocate(); });
+   check_unique(allocated.begin(), allocated.end());
+
+   //deallocate all
+   for(auto p : allocated)
    {
-      #if !_is_msvc() //MSVC (VS2013) has a buggy implementation of std::is_destructible
-      REQUIRE(!std::is_destructible<sstl::freelist_allocator<int>>::value);
-      #endif
+     allocator.deallocate(p);
    }
+   allocated.clear();
+
+   //allocate all
+   std::generate_n(std::back_inserter(allocated),
+                 capacity,
+                 [&allocator]() { return allocator.allocate(); });
+   check_unique(allocated.begin(), allocated.end());
    
-   SECTION("allocate/deallocate")
+   //deallocate in reverse order
+   std::reverse(allocated.begin(), allocated.end());
+   for(auto p : allocated)
    {
-      static const size_t capacity = 31;
-      auto allocator = sstl::freelist_allocator<int, capacity> {};
-      auto allocated = std::vector<int*> {};
-
-      //allocate all
-      std::generate_n(std::back_inserter(allocated),
-                    capacity,
-                    [&allocator]() { return allocator.allocate(); });
-      check_unique(allocated.begin(), allocated.end());
-
-      //deallocate all
-      for(auto p : allocated)
-      {
-        allocator.deallocate(p);
-      }
-      allocated.clear();
-
-      //allocate all
-      std::generate_n(std::back_inserter(allocated),
-                    capacity,
-                    [&allocator]() { return allocator.allocate(); });
-      check_unique(allocated.begin(), allocated.end());
-      
-      //deallocate in reverse order
-      std::reverse(allocated.begin(), allocated.end());
-      for(auto p : allocated)
-      {
-        allocator.deallocate(p);
-      }
-      allocated.clear();
-      
-      //allocate all
-      std::generate_n(std::back_inserter(allocated),
-                    capacity,
-                    [&allocator]() { return allocator.allocate(); });
-      check_unique(allocated.begin(), allocated.end());
+     allocator.deallocate(p);
    }
+   allocated.clear();
    
-   SECTION("full")
-   {
-      static const size_t capacity = 2;
-      auto allocator = sstl::freelist_allocator < int, capacity > {};
-      REQUIRE(!allocator.full());
+   //allocate all
+   std::generate_n(std::back_inserter(allocated),
+                 capacity,
+                 [&allocator]() { return allocator.allocate(); });
+   check_unique(allocated.begin(), allocated.end());
+}
 
-      auto ptr0 = allocator.allocate();
-      REQUIRE(!allocator.full());
+TEST_CASE("freelist_allocator - full")
+{
+   static const size_t capacity = 2;
+   auto allocator = sstl::freelist_allocator < int, capacity > {};
+   REQUIRE(!allocator.full());
 
-      auto ptr1 = allocator.allocate();
-      REQUIRE(allocator.full());
+   auto ptr0 = allocator.allocate();
+   REQUIRE(!allocator.full());
 
-      allocator.deallocate(ptr1);
-      REQUIRE(!allocator.full());
+   auto ptr1 = allocator.allocate();
+   REQUIRE(allocator.full());
 
-      allocator.deallocate(ptr0);
-      REQUIRE(!allocator.full());
-   }
+   allocator.deallocate(ptr1);
+   REQUIRE(!allocator.full());
 
-   SECTION("memory footprint")
-   {
-      REQUIRE(sizeof(sstl::freelist_allocator<size_t, 1>) == (1+1)*sizeof(size_t));
-      REQUIRE(sizeof(sstl::freelist_allocator<size_t, 2>) == (1+2)*sizeof(size_t));
-   }
+   allocator.deallocate(ptr0);
+   REQUIRE(!allocator.full());
+}
+
+TEST_CASE("freelist_allocator - memory footprint")
+{
+   REQUIRE(sizeof(sstl::freelist_allocator<size_t, 1>) == (1+1)*sizeof(size_t));
+   REQUIRE(sizeof(sstl::freelist_allocator<size_t, 2>) == (1+2)*sizeof(size_t));
 }
 
 }

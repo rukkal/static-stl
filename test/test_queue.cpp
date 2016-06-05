@@ -11,34 +11,33 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 
 namespace sstl_test
 {
-TEST_CASE("queue")
+
+TEST_CASE("queue - constructors can be instantiated")
 {
-   SECTION("constructors can be instantiated")
-   {
-      static const auto CAPACITY = 5;
-      auto container = sstl::deque<int, CAPACITY> {};
+   static const auto CAPACITY = 5;
+   auto container = sstl::deque<int, CAPACITY> {};
 
-      sstl::queue<int, CAPACITY> {};
+   sstl::queue<int, CAPACITY> {};
 
-      sstl::queue<int, CAPACITY> {container};
+   sstl::queue<int, CAPACITY> {container};
 
-      auto other_queue = sstl::queue<int, CAPACITY> {};
-      sstl::queue<int, CAPACITY> {other_queue};
-   }
-
-   SECTION("member functions can be instantiated")
-   {
-      auto queue = sstl::queue<int, 5> {};
-      auto queue2 = queue;
-
-      queue.push(3);
-      queue.emplace(5);
-      queue.front();
-      queue.back();
-      queue.pop();
-      queue.empty();
-      queue.size();
-      queue.swap(queue2);
-   }
+   auto other_queue = sstl::queue<int, CAPACITY> {};
+   sstl::queue<int, CAPACITY> {other_queue};
 }
+
+TEST_CASE("queue - member functions can be instantiated")
+{
+   auto queue = sstl::queue<int, 5> {};
+   auto queue2 = queue;
+
+   queue.push(3);
+   queue.emplace(5);
+   queue.front();
+   queue.back();
+   queue.pop();
+   queue.empty();
+   queue.size();
+   queue.swap(queue2);
+}
+
 }
