@@ -18,32 +18,26 @@ There are applications in which such additional costs cannot be accepted. An exa
 **Features** 
 
 - Static reimplementations of STL abstractions:
-  - std::function (OK)
-  - std::shared_ptr (TODO)
-  - std::vector (OK)
-  - std::list (REFACTORING REQUIRED)
-  - std::forward_list (REFACTORING REQUIRED)
-  - std::deque (OK)
-  - std::set (REFACTORING REQUIRED)
-  - std::multiset (REFACTORING REQUIRED)
-  - std::map (REFACTORING REQUIRED)
-  - std::multimap (REFACTORING REQUIRED)
-  - std::unordered_set (TODO)
-  - std::unordered_multiset (TODO)
-  - std::unordered_map (TODO)
-  - std::unordered_multimap (TODO)
-  - std::stack (OK)
-  - std::queue (OK)
-  - std::priority_queue (OK)
-  - bitmap allocation policy (OK)
-  - free-list allocation policy (OK)
+  - std::function
+  - std::vector
+  - std::deque
+  - std::stack
+  - std::queue
+  - std::priority_queue
+  - bitmap allocator
+  - free-list allocator
 - No RTTI used.
-- No exceptions required (however the components marked with "OK" are exception safe).
+- No exceptions required (however all the components are exception safe).
 - No virtual functions used (except for sstl::function's type erasure, of course).
-- No runtime check overheads (only customizable assertions in debug build).
+- No runtime check overheads (only customizable assertions).
 - C++11 compatible.
 - Header-only library.
 - Tested with clang 3.7, gcc 5 and MSVC 1800 (Visual Studio 2013).
+
+**TODO list**
+- std::shared_ptr
+- std::unordered_set
+- std::unordered_map
 
 **Example**
 
@@ -58,13 +52,4 @@ The elements are stored into an internal buffer whose capacity is specified by t
 
 **How was SSTL born?**
 
-I currently make a living from programming CPU-intensive algorithms on an embedded system with quite tight memory constraints. In that system I can't have a heap, since it would at least require some extra memory that I can't afford. As a consequence, many of the much-loved STL components can't be used, since they heavily rely on dynamic memory allocations. To make up for this lack of abstractions I started to reimplement some STL components.
-
-It was fun and relatively quick to reimplement std::vector, however I realized that reimplementing other abstractions such as std::unordered_map would have been more involved. So I looked about for some existing work and I came across the Embedded Template Library (ETL) of John Wellbelove. The ETL provides fixed-capacity reimplementations of many STL containers as well as other generic components. Exactly what I needed one might think! Not quite... unfortunately the ETL has some characteristics that don't really fit my needs:
-- Performs runtime checks.
-- Part of the library uses virtual functions.
-- Doesn't leverage move semantics and perfect forwarding (doesn't leverage modern C++ features in general and will keep doing so in order not to break compatibility with the slow vendors of C++ compilers for embedded systems).
-- Memory footprint of components is not always as small as it might be.
-- No customizable allocation policies (pools used to allocate nodes of linked lists and BSTs).
-
-In my case the runtime checks, the virtuals and the lack of move semantics and perfect forwarding were especially undesired. In fact having such additional runtime overheads in my algorithms' hotspots would have blown up my CPU usage. To fix these issues I decided to develop my own static STL library and so the SSTL was born! I started to develop the SSTL from a duplication of the ETL, thus many STL reimplementations of John were straight ready to be used at my company (at least in the non-performance-critical code). Thank you John for making this possible! However, I plan on either reimplement from scratch or drastically refactor many of the components that where originally in the ETL.
+I used to make a living from programming CPU-intensive algorithms on an embedded system with quite tight memory constraints. In that system I couldn't have a heap, since it would have required some extra memory that I couldn't afford. As a consequence I couldn't use many of the much-loved STL components, since they heavily rely on dynamic memory allocations. To make up for this lack of abstractions I started to reimplement some STL components.
