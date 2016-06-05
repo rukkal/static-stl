@@ -1037,7 +1037,9 @@ TEST_CASE("deque - insert (count + range versions)")
          }
          SECTION("range (input iterator)")
          {
-            deque_counted_type_t::iterator it = d.insert(d.cbegin(), counted_type_stream_iterator{values}, counted_type_stream_iterator{});
+            auto beg = counted_type_stream_iterator{values};
+            auto end = counted_type_stream_iterator{};
+            deque_counted_type_t::iterator it = d.insert(d.cbegin(), beg, end);
             REQUIRE(it == d.begin());
             REQUIRE(d == (deque_counted_type_t{10, 0, 1, 2, 3, 4}));
          }
