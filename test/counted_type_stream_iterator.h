@@ -28,37 +28,37 @@ public:
 
 public:
    counted_type_stream_iterator()
-      : values{}
-      , pos{ values.begin() }
+      : init{}
+      , pos{ init.begin() }
    {}
 
    counted_type_stream_iterator(std::initializer_list<counted_type> init)
-      : values( init )
-      , pos{ values.begin() }
+      : init( init )
+      , pos{ init.begin() }
    {}
 
    const value_type& operator*() const _sstl_noexcept_
    {
-      assert(pos != values.end());
+      assert(pos != init.end());
       return *pos;
    }
 
    const value_type* operator->() const _sstl_noexcept_
    {
-      assert(pos != values.end());
+      assert(pos != init.end());
       return std::addressof(*pos);
    }
 
    counted_type_stream_iterator& operator++() _sstl_noexcept_
    {
-      assert(pos != values.end());
+      assert(pos != init.end());
       ++pos;
       return *this;
    }
 
    bool operator==(const counted_type_stream_iterator& rhs) const _sstl_noexcept_
    {
-      return (pos== values.end()) && (rhs.pos==rhs.values.end());
+      return (pos==init.end()) && (rhs.pos==rhs.init.end());
    }
 
    bool operator!=(const counted_type_stream_iterator& rhs) const _sstl_noexcept_
@@ -67,8 +67,8 @@ public:
    }
 
 private:
-   std::vector<counted_type> values;
-   std::vector<counted_type>::iterator pos;
+   std::initializer_list<counted_type> init;
+   std::initializer_list<counted_type>::iterator pos;
 };
 
 }
