@@ -13,8 +13,8 @@ matrix:
             - gcc-5
             - g++-5
       env:
-        - CC=gcc-5
-        - CXX=g++-5
+        - CC_COMPILER=gcc-5
+        - CXX_COMPILER=g++-5
     - compiler: clang
       addons:
         apt:
@@ -24,12 +24,12 @@ matrix:
           packages:
             - clang-3.7
       env:
-        - CC=clang-3.7
-        - CXX=clang++-3.7
+        - CC_COMPILER=clang-3.7
+        - CXX_COMPILER=clang++-3.7
 
 install:
-  - export CC=$CC
-  - export CXX=$CXX
+  - export CC=$CC_COMPILER
+  - export CXX=$CXX_COMPILER
 
 script:
   - cmake --version
