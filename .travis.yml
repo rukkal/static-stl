@@ -45,7 +45,7 @@ before_script:
 script:
   - cmake --version
   - mkdir build && cd build
-  - cmake -DCMAKE_TOOLCHAIN_FILE=../$TOOLCHAIN_FILE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -G"Unix Makefiles" ..
+  - cmake -DCMAKE_TOOLCHAIN_FILE=../toolchain_files/$TOOLCHAIN_FILE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -G"Unix Makefiles" ..
   - make
   - ./test-sstl
   - ./test-sstl-noexceptions
