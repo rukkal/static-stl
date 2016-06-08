@@ -105,7 +105,7 @@ namespace _detail
       // FIXME: fix with "&& !std::is_final<T>::value" as soon as C++14 support is available
       static const bool value = std::is_class<T>::value;
    };
-};
+}
 
 namespace _detail
 {
@@ -121,7 +121,7 @@ namespace _detail
       static const bool value =
          std::is_same<TPointerClass*, TFirstFunctionParam>::value || std::is_same<TPointerClass&, TFirstFunctionParam>::value;
    };
-};
+}
 
 template<class TResult, class... TParams>
 class function<TResult(TParams...)>
