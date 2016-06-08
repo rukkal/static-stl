@@ -1,5 +1,6 @@
 sudo: required
-dist: precise
+dist: trusty
+
 language: cpp
 
 matrix:
@@ -21,13 +22,18 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.7
+            #- llvm-toolchain-precise-3.7
           packages:
-            - clang-3.7
+            #- clang-3.7
       env:
         - TOOLCHAIN_FILE=toolchain-clang.cmake
         - CC_COMPILER=clang-3.7
         - CXX_COMPILER=clang++-3.7
+
+before_install:
+  - sudo add-apt-repository ppa:adrozdoff/llvm-backport -y
+  - sudo apt-get update -q
+  - sudo apt-get install clang-3.7 -y
 
 install:
   - export CC=$CC_COMPILER
