@@ -13,6 +13,7 @@ matrix:
             - gcc-5
             - g++-5
       env:
+        - TOOLCHAIN_FILE=toolchain-gcc.cmake
         - CC_COMPILER=gcc-5
         - CXX_COMPILER=g++-5
     - compiler: clang
@@ -24,6 +25,7 @@ matrix:
           packages:
             - clang-3.7
       env:
+        - TOOLCHAIN_FILE=toolchain-clang.cmake
         - CC_COMPILER=clang-3.7
         - CXX_COMPILER=clang++-3.7
 
@@ -36,7 +38,7 @@ script:
   - mkdir build_debug
   - mkdir build_release
   - cd build_debug
-  - cmake -DCMAKE_BUILD_TYPE=Debug -G"Unix Makefiles" .. && make && ./test-sstl && ./test-sstl-noexceptions
+  - cmake -DCMAKE_TOOLCHAIN_FILE=../$TOOLCHAIN_FILE -DCMAKE_BUILD_TYPE=Debug -G"Unix Makefiles" .. && make && ./test-sstl && ./test-sstl-noexceptions
   - cd ../build_release
-  - cmake -DCMAKE_BUILD_TYPE=Release -G"Unix Makefiles" .. && make && ./test-sstl && ./test-sstl-noexceptions
+  - cmake -DCMAKE_TOOLCHAIN_FILE=../$TOOLCHAIN_FILE -DCMAKE_BUILD_TYPE=Release -G"Unix Makefiles" .. && make && ./test-sstl && ./test-sstl-noexceptions
 
