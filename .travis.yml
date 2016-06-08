@@ -5,46 +5,48 @@ language: cpp
 
 matrix:
   include:
+
     - compiler: gcc
-      addons:
+      addons: &gcc5
         apt:
           sources:
             - ubuntu-toolchain-r-test
           packages:
             - gcc-5
             - g++-5
-      env:
-        - TOOLCHAIN_FILE=toolchain-gcc.cmake
-        - CC_COMPILER=gcc-5
-        - CXX_COMPILER=g++-5
+      env: COMPILER=g++-5 TOOLCHAIN_FILE=toolchain-gcc.cmake BUILD_TYPE=Debug
+
+    - compiler: gcc
+      addons: *gcc5
+      env: COMPILER=g++-5 TOOLCHAIN_FILE=toolchain-gcc.cmake BUILD_TYPE=Release
+
     - compiler: clang
-      addons:
+      addons: &clang37
         apt:
           sources:
             - ubuntu-toolchain-r-test
             #- llvm-toolchain-precise-3.7
           packages:
             #- clang-3.7
-      env:
-        - TOOLCHAIN_FILE=toolchain-clang.cmake
-        - CC_COMPILER=clang-3.7
-        - CXX_COMPILER=clang++-3.7
+      env: COMPILER=clang++-3.7 TOOLCHAIN_FILE=toolchain-clang.cmake BUILD_TYPE=Debug
 
-before_install:
+    - compiler: clang
+      addons: *clang37
+      env: COMPILER=clang++-3.7 TOOLCHAIN_FILE=toolchain-clang.cmake BUILD_TYPE=Release
+
+install:
   - sudo add-apt-repository ppa:adrozdoff/llvm-backport -y
   - sudo apt-get update -q
   - sudo apt-get install clang-3.7 -y
 
-install:
-  - export CC=$CC_COMPILER
-  - export CXX=$CXX_COMPILER
+before_script:
+  - export CXX=$COMPILER
 
 script:
   - cmake --version
-  - mkdir build_debug
-  - mkdir build_release
-  - cd build_debug
-  - cmake -DCMAKE_TOOLCHAIN_FILE=../$TOOLCHAIN_FILE -DCMAKE_BUILD_TYPE=Debug -G"Unix Makefiles" .. && make && ./test-sstl && ./test-sstl-noexceptions
-  - cd ../build_release
-  - cmake -DCMAKE_TOOLCHAIN_FILE=../$TOOLCHAIN_FILE -DCMAKE_BUILD_TYPE=Release -G"Unix Makefiles" .. && make && ./test-sstl && ./test-sstl-noexceptions
+  - mkdir build && cd build
+  - cmake -DCMAKE_TOOLCHAIN_FILE=../$TOOLCHAIN_FILE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -G"Unix Makefiles" ..
+  - make
+  - ./test-sstl
+  - ./test-sstl-noexceptions
 
