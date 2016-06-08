@@ -14,11 +14,11 @@ matrix:
           packages:
             - gcc-5
             - g++-5
-      env: COMPILER=g++-5 TOOLCHAIN_FILE=toolchain-gcc.cmake BUILD_TYPE=Debug
+      env: COMPILER=g++-5 TOOLCHAIN_FILE=gcc.cmake BUILD_TYPE=Debug
 
     - compiler: gcc
       addons: *gcc5
-      env: COMPILER=g++-5 TOOLCHAIN_FILE=toolchain-gcc.cmake BUILD_TYPE=Release
+      env: COMPILER=g++-5 TOOLCHAIN_FILE=gcc.cmake BUILD_TYPE=Release
 
     - compiler: clang
       addons: &clang37
@@ -28,11 +28,11 @@ matrix:
             #- llvm-toolchain-precise-3.7
           packages:
             #- clang-3.7
-      env: COMPILER=clang++-3.7 TOOLCHAIN_FILE=toolchain-clang.cmake BUILD_TYPE=Debug
+      env: COMPILER=clang++-3.7 TOOLCHAIN_FILE=clang.cmake BUILD_TYPE=Debug
 
     - compiler: clang
       addons: *clang37
-      env: COMPILER=clang++-3.7 TOOLCHAIN_FILE=toolchain-clang.cmake BUILD_TYPE=Release
+      env: COMPILER=clang++-3.7 TOOLCHAIN_FILE=clang.cmake BUILD_TYPE=Release
 
 install:
   - sudo add-apt-repository ppa:adrozdoff/llvm-backport -y
