@@ -1237,7 +1237,7 @@ protected:
 
    pointer _begin_storage() _sstl_noexcept_
    {
-      return static_cast<pointer>(static_cast<void*>(_sstl_member_of_derived_class(this, _buffer).data()));
+      return static_cast<pointer>(static_cast<void*>(_sstl_member_of_derived_class(this, _buffer)));
    }
 
    const_pointer _begin_storage() const _sstl_noexcept_
@@ -1375,7 +1375,7 @@ private:
    pointer _first_pointer{ _base::_begin_storage() };
    pointer _last_pointer{ _base::_begin_storage() + CAPACITY - 1 };
    pointer _end_storage{ _base::_begin_storage() + CAPACITY };
-   std::array<typename _aligned_storage<sizeof(value_type), std::alignment_of<value_type>::value>::type, CAPACITY> _buffer;
+   typename _aligned_storage<sizeof(value_type), std::alignment_of<value_type>::value>::type _buffer[CAPACITY];
 };
 
 template<class T>

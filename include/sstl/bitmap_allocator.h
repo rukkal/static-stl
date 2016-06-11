@@ -90,7 +90,7 @@ private:
 
    bitset_span _bitmap() const
    {
-      return bitset_span(const_cast<void*>(static_cast<const void*>(_sstl_member_of_derived_class(this, _bitmap_data).data())),
+      return bitset_span(const_cast<void*>(static_cast<const void*>(_sstl_member_of_derived_class(this, _bitmap_data))),
                         _sstl_member_of_derived_class(this, _capacity));
    }
 };
@@ -117,14 +117,14 @@ public:
    bitmap_allocator() _sstl_noexcept_
    {
       _assert_hacky_derived_class_access_is_valid<bitmap_allocator<value_type>, bitmap_allocator, _type_for_hacky_derived_class_access>();
-      _bitmap_data.fill(0);
+      std::fill(_bitmap_data, _bitmap_data + std::extent<decltype(_bitmap_data)>::value, 0);
    }
 
 private:
    const size_type _capacity{ CAPACITY };
    size_type _last_allocated_block_idx{ static_cast<size_type>(-1) };
    pointer _pool{ static_cast<pointer>(static_cast<void*>(_pool_data)) };
-   std::array<std::uint8_t, (CAPACITY-1) / 8 + 1> _bitmap_data;
+   std::uint8_t _bitmap_data[(CAPACITY-1) / 8 + 1];
    typename _aligned_storage<sizeof(value_type), std::alignment_of<value_type>::value>::type _pool_data[CAPACITY];
 };
 

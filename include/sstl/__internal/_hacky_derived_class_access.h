@@ -10,11 +10,42 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 #include <type_traits>
 #include <sstl_assert.h>
 
+namespace sstl
+{
+namespace _detail
+{
+   template<class TMember>
+   struct _void_ptr_to_member_type
+   {
+      static TMember& convert(void* ptr)
+      {
+         return *static_cast<TMember*>(ptr);
+      }
+   };
+   
+   //the arrays declared in the dummy types used to do the "hacky derived class access"
+   //are likely to have dummy/invalid sizes. This template specialization converts
+   //all such arrays to pointers, thus avoiding to violate the strict-aliasing rule.
+   //Moreover, using arrays with dummy sizes would probably also trigger UB
+   //because of out-of-bounds accesses.
+   template<class TElement, size_t size>
+   struct _void_ptr_to_member_type<TElement[size]>
+   {
+      static TElement* convert(void* ptr)
+      {
+         return static_cast<TElement*>(ptr);
+      }
+   };
+}
+}
+
 #define _sstl_member_of_derived_class(this_pointer, member_name) \
-   (*static_cast<decltype(std::declval<_type_for_hacky_derived_class_access>().member_name)*>( \
-      static_cast<void*>( \
-         static_cast<char*>(const_cast<void*>(static_cast<const void*>(this_pointer))) \
-         + offsetof(_type_for_hacky_derived_class_access, member_name))))
+   (sstl::_detail::_void_ptr_to_member_type<\
+         decltype(std::declval<_type_for_hacky_derived_class_access>().member_name)\
+      >::convert( \
+         static_cast<void*>( \
+            static_cast<char*>(const_cast<void*>(static_cast<const void*>(this_pointer))) \
+            + offsetof(_type_for_hacky_derived_class_access, member_name))))
 
 template<class TBase, class TDerived, class TDerivedForHackyAccess>
 void _assert_hacky_derived_class_access_is_valid()

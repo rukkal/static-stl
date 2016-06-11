@@ -175,7 +175,7 @@ public:
 
    iterator begin() _sstl_noexcept_
    {
-      return static_cast<iterator>(static_cast<void*>(_sstl_member_of_derived_class(this, _buffer_).data()));
+      return static_cast<iterator>(static_cast<void*>(_sstl_member_of_derived_class(this, _buffer_)));
    }
 
    const_iterator begin() const _sstl_noexcept(noexcept(std::declval<vector>().begin()))
@@ -1032,7 +1032,7 @@ public:
 private:
    size_type _capacity_{ Capacity };
    pointer _end_;
-   std::array<typename _aligned_storage<sizeof(value_type), std::alignment_of<value_type>::value>::type, Capacity> _buffer_;
+   typename _aligned_storage<sizeof(value_type), std::alignment_of<value_type>::value>::type _buffer_[Capacity];
 };
 
 template <class T>
