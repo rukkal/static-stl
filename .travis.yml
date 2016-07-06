@@ -25,19 +25,28 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            #- llvm-toolchain-precise-3.7
+            - llvm-toolchain-precise-3.7
           packages:
-            #- clang-3.7
+            - clang-3.7
       env: COMPILER=clang++-3.7 TOOLCHAIN_FILE=clang.cmake BUILD_TYPE=Debug
 
     - compiler: clang
       addons: *clang37
       env: COMPILER=clang++-3.7 TOOLCHAIN_FILE=clang.cmake BUILD_TYPE=Release
 
-install:
-  - sudo add-apt-repository ppa:adrozdoff/llvm-backport -y
-  - sudo apt-get update -q
-  - sudo apt-get install clang-3.7 -y
+    - compiler: clang
+      addons: &clang38
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.8
+          packages:
+            - clang-3.8
+      env: COMPILER=clang++-3.8 TOOLCHAIN_FILE=clang.cmake BUILD_TYPE=Debug
+
+    - compiler: clang
+      addons: *clang38
+      env: COMPILER=clang++-3.8 TOOLCHAIN_FILE=clang.cmake BUILD_TYPE=Release
 
 before_script:
   - export CXX=$COMPILER
