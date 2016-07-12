@@ -12,4 +12,3 @@ SET(CMAKE_C_FLAGS_MINSIZEREL "-DNDEBUG -Os" CACHE STRING "Minimum size release f
 SET(CMAKE_C_FLAGS_RELWITHDEBINFO "-DNDEBUG -Og -g3" CACHE STRING "Release with debug info flags for C compiler")
 
 SET(CMAKE_EXE_LINKER_FLAGS "" CACHE STRING "General flags for linker")
-
