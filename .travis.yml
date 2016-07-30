@@ -72,11 +72,22 @@ matrix:
       addons: *clang38
       env: cc=clang-3.8 cxx=clang++-3.8 TOOLCHAIN_FILE=clang-ubsan.cmake BUILD_TYPE=Release
 
+install:
+  # Install a recent CMake (unless already installed on OS X)
+  - |
+    if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
+      CMAKE_URL="https://cmake.org/files/v3.6/cmake-3.6.1-Linux-x86_64.tar.gz"
+      mkdir cmake && travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
+      export PATH=${DEPS_DIR}/cmake/bin:${PATH}
+    else
+      if ! brew ls --version cmake &>/dev/null; then brew install cmake; fi
+    fi
+
 before_script: 
   - export CC=$cc
   - export CXX=$cxx
-  - if [[ $TOOLCHAIN_FILE == 'clang-msan.cmake' ]]; then ./libcxx-msan/build.sh ; fi
-  - if [[ $TOOLCHAIN_FILE == 'clang-msan.cmake' ]]; then source ./libcxx-msan/load-environment ; fi
+  - if [[ "$TOOLCHAIN_FILE" == "clang-msan.cmake" ]]; then ./libcxx-msan/build.sh ; fi
+  - if [[ "$TOOLCHAIN_FILE" == "clang-msan.cmake" ]]; then source ./libcxx-msan/load-environment ; fi
 
 script:
   - cmake --version
