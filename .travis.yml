@@ -14,11 +14,11 @@ matrix:
           packages:
             - gcc-5
             - g++-5
-      env: COMPILER=g++-5 TOOLCHAIN_FILE=gcc.cmake BUILD_TYPE=Debug
+      env: cc=gcc-5 cxx=g++-5 TOOLCHAIN_FILE=gcc.cmake BUILD_TYPE=Debug
 
     - compiler: gcc
       addons: *gcc5
-      env: COMPILER=g++-5 TOOLCHAIN_FILE=gcc.cmake BUILD_TYPE=Release
+      env: cc=gcc-5 cxx=g++-5 TOOLCHAIN_FILE=gcc.cmake BUILD_TYPE=Release
 
     - compiler: clang
       addons: &clang37
@@ -28,11 +28,11 @@ matrix:
             - llvm-toolchain-precise-3.7
           packages:
             - clang-3.7
-      env: COMPILER=clang++-3.7 TOOLCHAIN_FILE=clang.cmake BUILD_TYPE=Debug
+      env: cc=clang-3.7 cxx=clang++-3.7 TOOLCHAIN_FILE=clang.cmake BUILD_TYPE=Debug
 
     - compiler: clang
       addons: *clang37
-      env: COMPILER=clang++-3.7 TOOLCHAIN_FILE=clang.cmake BUILD_TYPE=Release
+      env: cc=clang-3.7 cxx=clang++-3.7 TOOLCHAIN_FILE=clang.cmake BUILD_TYPE=Release
 
     - compiler: clang
       addons: &clang38
@@ -42,38 +42,41 @@ matrix:
             - llvm-toolchain-precise-3.8
           packages:
             - clang-3.8
-      env: COMPILER=clang++-3.8 TOOLCHAIN_FILE=clang.cmake BUILD_TYPE=Debug
+      env: cc=clang-3.8 cxx=clang++-3.8 TOOLCHAIN_FILE=clang.cmake BUILD_TYPE=Debug
 
     - compiler: clang
       addons: *clang38
-      env: COMPILER=clang++-3.8 TOOLCHAIN_FILE=clang.cmake BUILD_TYPE=Release
+      env: cc=clang-3.8 cxx=clang++-3.8 TOOLCHAIN_FILE=clang.cmake BUILD_TYPE=Release
 
     - compiler: clang
       addons: *clang38
-      env: COMPILER=clang++-3.8 TOOLCHAIN_FILE=clang-asan.cmake BUILD_TYPE=Debug
+      env: cc=clang-3.8 cxx=clang++-3.8 TOOLCHAIN_FILE=clang-asan.cmake BUILD_TYPE=Debug
 
     - compiler: clang
       addons: *clang38
-      env: COMPILER=clang++-3.8 TOOLCHAIN_FILE=clang-asan.cmake BUILD_TYPE=Release
+      env: cc=clang-3.8 cxx=clang++-3.8 TOOLCHAIN_FILE=clang-asan.cmake BUILD_TYPE=Release
 
     - compiler: clang
       addons: *clang38
-      env: COMPILER=clang++-3.8 TOOLCHAIN_FILE=clang-msan.cmake BUILD_TYPE=Debug
+      env: cc=clang-3.8 cxx=clang++-3.8 TOOLCHAIN_FILE=clang-msan.cmake BUILD_TYPE=Debug
 
     - compiler: clang
       addons: *clang38
-      env: COMPILER=clang++-3.8 TOOLCHAIN_FILE=clang-msan.cmake BUILD_TYPE=Release
+      env: cc=clang-3.8 cxx=clang++-3.8 TOOLCHAIN_FILE=clang-msan.cmake BUILD_TYPE=Release
     
     - compiler: clang
       addons: *clang38
-      env: COMPILER=clang++-3.8 TOOLCHAIN_FILE=clang-ubsan.cmake BUILD_TYPE=Debug
+      env: cc=clang-3.8 cxx=clang++-3.8 TOOLCHAIN_FILE=clang-ubsan.cmake BUILD_TYPE=Debug
 
     - compiler: clang
       addons: *clang38
-      env: COMPILER=clang++-3.8 TOOLCHAIN_FILE=clang-ubsan.cmake BUILD_TYPE=Release
+      env: cc=clang-3.8 cxx=clang++-3.8 TOOLCHAIN_FILE=clang-ubsan.cmake BUILD_TYPE=Release
 
-before_script:
-  - export CXX=$COMPILER
+before_script: 
+  - export CC=$cc
+  - export CXX=$cxx
+  - if [[ $TOOLCHAIN_FILE == 'clang-msan.cmake' ]]; then ./libcxx-msan/build.sh ; fi
+  - if [[ $TOOLCHAIN_FILE == 'clang-msan.cmake' ]]; then source ./libcxx-msan/load-environment ; fi
 
 script:
   - cmake --version
